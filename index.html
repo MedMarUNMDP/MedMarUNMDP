@@ -20,6 +20,10 @@
             margin-bottom: 10px;
         }
 
+        h3 {
+            margin-top: 30px;
+        }
+
         .instrucciones {
             background: #f1f5ff;
             border: 1px solid #d6defa;
@@ -41,6 +45,7 @@
             width: 100%;
             padding: 8px;
             margin-top: 5px;
+            box-sizing: border-box;
         }
 
         button {
@@ -56,23 +61,108 @@
                 background: #2f4ae0;
             }
 
-        #msg {
+        #msg, #authMsg {
             margin-top: 20px;
             font-weight: bold;
         }
 
-        #borrarBox {
-            margin-top: 10px;
-            display: none;
+        /* LOGIN */
+
+        #loginScreen {
+            background: white;
+            border: 1px solid #e2e2e2;
+            border-radius: 8px;
+            padding: 20px;
         }
 
-        #borrarBtn {
-            background: #d9534f;
+        .separador {
+            text-align: center;
+            color: #888;
+            font-size: 13px;
+            margin: 18px 0;
         }
 
-            #borrarBtn:hover {
-                background: #c9302c;
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+            .tabs button {
+                background: #eef1ff;
+                color: #3b5cff;
             }
+
+            .tabs button.tabActiva {
+                background: #3b5cff;
+                color: white;
+            }
+
+        /* APP PRINCIPAL */
+
+        #userBar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #eef1ff;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+            #userBar button {
+                width: auto;
+                margin: 0;
+                padding: 6px 12px;
+                background: #555;
+                font-size: 13px;
+            }
+
+                #userBar button:hover {
+                    background: #333;
+                }
+
+        #cancelarEdicionBtn {
+            background: #888;
+            margin-top: 8px;
+        }
+
+            #cancelarEdicionBtn:hover {
+                background: #666;
+            }
+
+        .solicitudItem {
+            background: white;
+            border: 1px solid #e2e2e2;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-top: 12px;
+        }
+
+        .solicitudAcciones {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+            .solicitudAcciones button {
+                width: auto;
+                padding: 6px 14px;
+                font-size: 13px;
+            }
+
+            .editarBtn {
+                background: #3b5cff;
+            }
+
+            .borrarItemBtn {
+                background: #d9534f;
+            }
+
+                .borrarItemBtn:hover {
+                    background: #c9302c;
+                }
 
         /* DISCLAIMER */
 
@@ -123,135 +213,194 @@
         <h3>Cómo usar la página</h3>
 
         <ul>
-            <li>Seleccioná la <b>materia</b>.</li>
-            <li>Elegí la <b>comisión que tenés actualmente</b>.</li>
-            <li>Elegí la <b>comisión a la que querés cambiarte</b>.</li>
-            <li>Ingresá tu <b>email</b> para que puedan contactarte.</li>
-            <li>Cuando se encuentre un intercambio posible vas a recibir un <b>correo automático</b>.</li>
+            <li>Iniciá sesión con tu cuenta de <b>Google</b>, o con <b>email y contraseña</b>.</li>
+            <li>Seleccioná la <b>materia</b>, la comisión que <b>tenés</b> y la que <b>buscás</b>.</li>
+            <li>Tu solicitud queda asociada a tu cuenta automáticamente, no hace falta tipear tu email.</li>
+            <li>En <b>"Mis solicitudes"</b> podés ver, editar o borrar tus pedidos activos.</li>
             <li>Solo podés registrar <b>una comisión por materia</b>.</li>
+            <li>Cuando se encuentre un intercambio posible vas a recibir un <b>correo automático</b>.</li>
             <li>Las solicitudes se eliminan automáticamente luego de <b>30 días</b>.</li>
         </ul>
 
     </div>
 
-    <form id="form">
+    <!-- ==================== LOGIN ==================== -->
 
-        <label>Materia</label>
+    <div id="loginScreen">
 
-        <select name="materia" required>
+        <div id="g_id_onload"
+             data-client_id="TU_CLIENT_ID_DE_GOOGLE.apps.googleusercontent.com"
+             data-callback="onGoogleLogin">
+        </div>
+        <div class="g_id_signin" data-type="standard" data-width="300"></div>
 
-            <option value="">Seleccionar materia</option>
+        <div class="separador">— o con email y contraseña —</div>
 
-            <optgroup label="1° Año">
-                <option>Concepción y Formación del Ser Humano I</option>
-                <option>Articulación Básico Clínico Comunitaria I</option>
-                <option>Hábitat, Ecología y Salud</option>
-                <option>Psicología Comunitaria, Social e Institucional</option>
-                <option>Promoción de Salud Crítica y Educación para la Salud</option>
-                <option>Concepción y Formación del Ser Humano II</option>
-                <option>Articulación Básico Clínico Comunitaria II</option>
-            </optgroup>
+        <div class="tabs">
+            <button type="button" id="tabLogin" class="tabActiva">Iniciar sesión</button>
+            <button type="button" id="tabRegistro">Crear cuenta</button>
+        </div>
 
-            <optgroup label="2° Año">
-                <option>Nacimiento, Crecimiento y Desarrollo</option>
-                <option>Articulación Básico Clínico Comunitaria III</option>
-                <option>Agentes, Mecanismos de Defensa y Nutrición</option>
-                <option>Prevención e Investigación Acción en Salud</option>
-                <option>Interculturalidad y Salud</option>
-                <option>Desgaste y Envejecimiento</option>
-            </optgroup>
+        <form id="formLogin">
+            <label>Email</label>
+            <input type="email" id="loginEmail" required>
+            <label>Contraseña</label>
+            <input type="password" id="loginPassword" required>
+            <button type="submit">Iniciar sesión</button>
+        </form>
 
-            <optgroup label="3° Año">
-                <option>Articulación Básico Clínico Comunitaria IV</option>
-                <option>Epidemiología Crítica Social y Comunitaria</option>
-                <option>Tamizaje y Ciencias de Diagnóstico</option>
-                <option>Redes y Sistemas de Salud</option>
-                <option>Salud Integral de la Mujer</option>
-            </optgroup>
+        <form id="formRegistro" style="display:none">
+            <label>Email</label>
+            <input type="email" id="regEmail" required>
+            <label>Contraseña (mínimo 8 caracteres)</label>
+            <input type="password" id="regPassword" required minlength="8">
+            <button type="submit">Crear cuenta</button>
+        </form>
 
-            <optgroup label="4° Año">
-                <option>Medicina Interna y Campos Clínicos I</option>
-                <option>Salud Colectiva y Comunitaria</option>
-                <option>Terapéuticas y Farmacología</option>
-                <option>Salud del Trabajador y Medicina del Deporte</option>
-                <option>Salud del Niño, Niña y Adolescente</option>
-                <option>Salud Mental</option>
-            </optgroup>
+        <p id="authMsg"></p>
 
-            <optgroup label="5° Año">
-                <option>Medicina Interna y Campos Clínicos II</option>
-                <option>Medicina General I</option>
-                <option>Programas de Salud</option>
-                <option>Salud del Adulto Mayor</option>
-                <option>Clínica Quirúrgica y Emergentología</option>
-                <option>Bioética y Derechos Humanos</option>
-                <option>Medicina General II y Rehabilitación</option>
-                <option>Medicina Legal y Toxicología</option>
-            </optgroup>
-
-            <optgroup label="Materias Transversales">
-                <option>Tecnologías en Salud</option>
-                <option>Informática en Salud</option>
-                <option>Inglés Aplicado a la Medicina I</option>
-                <option>Inglés Aplicado a la Medicina II</option>
-                <option>Inglés Aplicado a la Medicina III</option>
-                <option>Inglés Aplicado a la Medicina IV</option>
-            </optgroup>
-
-            <optgroup label="Electivas">
-                <option>Historia Argentina y Latinoamericana de la Salud</option>
-                <option>Medicina Social</option>
-                <option>Consumos Problemáticos</option>
-                <option>Ecología</option>
-                <option>Salud Global</option>
-                <option>Cuidados Paliativos</option>
-                <option>Principios de Oncología</option>
-                <option>Discapacidad</option>
-                <option>Anatomía Patológica</option>
-                <option>Diagnóstico por Imágenes</option>
-            </optgroup>
-
-        </select>
-
-        <br><br>
-
-        <label>Comisión que tenés</label>
-        <select id="tengo" name="tengo" required></select>
-
-        <br><br>
-
-        <label>Comisión que buscás</label>
-        <select id="busco" name="busco" required></select>
-
-        <br><br>
-
-        <label>Email</label>
-        <input type="email" name="email" required>
-
-        <br><br>
-
-        <button type="submit">Publicar solicitud</button>
-
-    </form>
-
-    <p id="msg"></p>
-
-    <div id="borrarBox">
-        <button id="borrarBtn">Borrar mi solicitud</button>
     </div>
+
+    <!-- ==================== APP PRINCIPAL ==================== -->
+
+    <div id="app" style="display:none">
+
+        <div id="userBar">
+            <span>Conectado como <b id="userEmail"></b></span>
+            <button type="button" id="logoutBtn">Cerrar sesión</button>
+        </div>
+
+        <form id="form">
+
+            <label>Materia</label>
+
+            <select name="materia" required>
+
+                <option value="">Seleccionar materia</option>
+
+                <optgroup label="1° Año">
+                    <option>Concepción y Formación del Ser Humano I</option>
+                    <option>Articulación Básico Clínico Comunitaria I</option>
+                    <option>Hábitat, Ecología y Salud</option>
+                    <option>Psicología Comunitaria, Social e Institucional</option>
+                    <option>Promoción de Salud Crítica y Educación para la Salud</option>
+                    <option>Concepción y Formación del Ser Humano II</option>
+                    <option>Articulación Básico Clínico Comunitaria II</option>
+                </optgroup>
+
+                <optgroup label="2° Año">
+                    <option>Nacimiento, Crecimiento y Desarrollo</option>
+                    <option>Articulación Básico Clínico Comunitaria III</option>
+                    <option>Agentes, Mecanismos de Defensa y Nutrición</option>
+                    <option>Prevención e Investigación Acción en Salud</option>
+                    <option>Interculturalidad y Salud</option>
+                    <option>Desgaste y Envejecimiento</option>
+                </optgroup>
+
+                <optgroup label="3° Año">
+                    <option>Articulación Básico Clínico Comunitaria IV</option>
+                    <option>Epidemiología Crítica Social y Comunitaria</option>
+                    <option>Tamizaje y Ciencias de Diagnóstico</option>
+                    <option>Redes y Sistemas de Salud</option>
+                    <option>Salud Integral de la Mujer</option>
+                </optgroup>
+
+                <optgroup label="4° Año">
+                    <option>Medicina Interna y Campos Clínicos I</option>
+                    <option>Salud Colectiva y Comunitaria</option>
+                    <option>Terapéuticas y Farmacología</option>
+                    <option>Salud del Trabajador y Medicina del Deporte</option>
+                    <option>Salud del Niño, Niña y Adolescente</option>
+                    <option>Salud Mental</option>
+                </optgroup>
+
+                <optgroup label="5° Año">
+                    <option>Medicina Interna y Campos Clínicos II</option>
+                    <option>Medicina General I</option>
+                    <option>Programas de Salud</option>
+                    <option>Salud del Adulto Mayor</option>
+                    <option>Clínica Quirúrgica y Emergentología</option>
+                    <option>Bioética y Derechos Humanos</option>
+                    <option>Medicina General II y Rehabilitación</option>
+                    <option>Medicina Legal y Toxicología</option>
+                </optgroup>
+
+                <optgroup label="Materias Transversales">
+                    <option>Tecnologías en Salud</option>
+                    <option>Informática en Salud</option>
+                    <option>Inglés Aplicado a la Medicina I</option>
+                    <option>Inglés Aplicado a la Medicina II</option>
+                    <option>Inglés Aplicado a la Medicina III</option>
+                    <option>Inglés Aplicado a la Medicina IV</option>
+                </optgroup>
+
+                <optgroup label="Electivas">
+                    <option>Historia Argentina y Latinoamericana de la Salud</option>
+                    <option>Medicina Social</option>
+                    <option>Consumos Problemáticos</option>
+                    <option>Ecología</option>
+                    <option>Salud Global</option>
+                    <option>Cuidados Paliativos</option>
+                    <option>Principios de Oncología</option>
+                    <option>Discapacidad</option>
+                    <option>Anatomía Patológica</option>
+                    <option>Diagnóstico por Imágenes</option>
+                </optgroup>
+
+            </select>
+
+            <br><br>
+
+            <label>Comisión que tenés</label>
+            <select id="tengo" name="tengo" required></select>
+
+            <br><br>
+
+            <label>Comisión que buscás</label>
+            <select id="busco" name="busco" required></select>
+
+            <br><br>
+
+            <button type="submit" id="submitBtn">Publicar solicitud</button>
+            <button type="button" id="cancelarEdicionBtn" style="display:none">Cancelar edición</button>
+
+        </form>
+
+        <p id="msg"></p>
+
+        <h3>Mis solicitudes</h3>
+        <div id="listaSolicitudes"></div>
+
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <script>
 
-        let filaSolicitud = null
-
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1aM5R_Gygv8F1zQ3Ha_RVdOL_MAlqULzH6ycCfie5WkFSsUqoNfkh0WrJb5aVvXnFiw/exec"
+
+        let sesion = null
+        let idEditando = null
+
+        const loginScreen = document.getElementById("loginScreen")
+        const app = document.getElementById("app")
+
+        const tabLogin = document.getElementById("tabLogin")
+        const tabRegistro = document.getElementById("tabRegistro")
+        const formLogin = document.getElementById("formLogin")
+        const formRegistro = document.getElementById("formRegistro")
+        const authMsg = document.getElementById("authMsg")
+
+        const userEmail = document.getElementById("userEmail")
+        const logoutBtn = document.getElementById("logoutBtn")
 
         const form = document.getElementById("form")
         const tengo = document.getElementById("tengo")
         const busco = document.getElementById("busco")
         const msg = document.getElementById("msg")
-        const borrarBox = document.getElementById("borrarBox")
-        const borrarBtn = document.getElementById("borrarBtn")
+        const submitBtn = document.getElementById("submitBtn")
+        const cancelarEdicionBtn = document.getElementById("cancelarEdicionBtn")
+        const listaSolicitudes = document.getElementById("listaSolicitudes")
 
         for (let i = 1; i <= 40; i++) {
 
@@ -267,60 +416,335 @@
 
         }
 
-        form.addEventListener("submit", async function (e) {
+        // ==================== MENSAJES DE ERROR ====================
+
+        function mensajeError(codigo) {
+
+            const mensajes = {
+                email_invalido: "El email no es válido.",
+                password_corta: "La contraseña debe tener al menos 8 caracteres.",
+                email_ya_registrado: "Ese email ya tiene una cuenta creada.",
+                credenciales_invalidas: "Email o contraseña incorrectos.",
+                token_invalido: "No se pudo verificar tu cuenta de Google.",
+                sesion_invalida: "Tu sesión expiró, iniciá sesión de nuevo.",
+                misma_comision: "No podés buscar la misma comisión que tenés.",
+                no_autorizado: "No podés modificar una solicitud que no es tuya.",
+                no_encontrado: "No se encontró la solicitud.",
+                datos_invalidos: "Los datos ingresados no son válidos."
+            }
+
+            return mensajes[codigo] || "Ocurrió un error inesperado."
+
+        }
+
+        // ==================== SESIÓN LOCAL ====================
+
+        function guardarSesionLocal(s) {
+            localStorage.setItem("sesion", JSON.stringify(s))
+        }
+
+        function borrarSesionLocal() {
+            localStorage.removeItem("sesion")
+        }
+
+        function cargarSesionLocal() {
+            const raw = localStorage.getItem("sesion")
+            return raw ? JSON.parse(raw) : null
+        }
+
+        // ==================== LLAMADAS AL SERVIDOR ====================
+
+        async function llamarSinSesion(accion, params) {
+
+            const formData = new FormData()
+            formData.append("accion", accion)
+
+            for (let k in params) formData.append(k, params[k])
+
+            const resp = await fetch(SCRIPT_URL, { method: "POST", body: formData })
+            return await resp.json()
+
+        }
+
+        async function llamar(accion, params) {
+
+            const formData = new FormData()
+            formData.append("accion", accion)
+            if (sesion) formData.append("token", sesion.token)
+
+            for (let k in params) formData.append(k, params[k])
+
+            const resp = await fetch(SCRIPT_URL, { method: "POST", body: formData })
+            return await resp.json()
+
+        }
+
+        // ==================== LOGIN CON GOOGLE ====================
+
+        async function onGoogleLogin(response) {
+
+            authMsg.innerText = "Ingresando..."
+
+            const r = await llamarSinSesion("googleLogin", { credential: response.credential })
+
+            if (r.ok) {
+
+                sesion = { token: r.token, email: r.email }
+                guardarSesionLocal(sesion)
+                authMsg.innerText = ""
+                mostrarApp()
+
+            } else {
+
+                authMsg.innerText = mensajeError(r.error)
+
+            }
+
+        }
+
+        // ==================== TABS LOGIN / REGISTRO ====================
+
+        tabLogin.addEventListener("click", function () {
+            tabLogin.classList.add("tabActiva")
+            tabRegistro.classList.remove("tabActiva")
+            formLogin.style.display = "block"
+            formRegistro.style.display = "none"
+            authMsg.innerText = ""
+        })
+
+        tabRegistro.addEventListener("click", function () {
+            tabRegistro.classList.add("tabActiva")
+            tabLogin.classList.remove("tabActiva")
+            formRegistro.style.display = "block"
+            formLogin.style.display = "none"
+            authMsg.innerText = ""
+        })
+
+        // ==================== LOGIN / REGISTRO CON CONTRASEÑA ====================
+
+        formLogin.addEventListener("submit", async function (e) {
 
             e.preventDefault()
+            authMsg.innerText = "Ingresando..."
 
-            msg.innerText = ""
-            borrarBox.style.display = "none"
+            const email = document.getElementById("loginEmail").value.trim()
+            const password = document.getElementById("loginPassword").value
 
-            if (tengo.value == busco.value) {
+            const r = await llamarSinSesion("login", { email, password })
 
-                alert("No podés buscar la misma comisión que tenés")
+            if (r.ok) {
+
+                sesion = { token: r.token, email: r.email }
+                guardarSesionLocal(sesion)
+                authMsg.innerText = ""
+                formLogin.reset()
+                mostrarApp()
+
+            } else {
+
+                authMsg.innerText = mensajeError(r.error)
+
+            }
+
+        })
+
+        formRegistro.addEventListener("submit", async function (e) {
+
+            e.preventDefault()
+            authMsg.innerText = "Creando cuenta..."
+
+            const email = document.getElementById("regEmail").value.trim()
+            const password = document.getElementById("regPassword").value
+
+            const r = await llamarSinSesion("registrar", { email, password })
+
+            if (r.ok) {
+
+                sesion = { token: r.token, email: r.email }
+                guardarSesionLocal(sesion)
+                authMsg.innerText = ""
+                formRegistro.reset()
+                mostrarApp()
+
+            } else {
+
+                authMsg.innerText = mensajeError(r.error)
+
+            }
+
+        })
+
+        // ==================== CERRAR SESIÓN ====================
+
+        logoutBtn.addEventListener("click", function () {
+            sesion = null
+            borrarSesionLocal()
+            mostrarLogin()
+        })
+
+        // ==================== MOSTRAR / OCULTAR PANTALLAS ====================
+
+        function mostrarApp() {
+            loginScreen.style.display = "none"
+            app.style.display = "block"
+            userEmail.innerText = sesion.email
+            cargarMisSolicitudes()
+        }
+
+        function mostrarLogin() {
+            app.style.display = "none"
+            loginScreen.style.display = "block"
+        }
+
+        // ==================== MIS SOLICITUDES ====================
+
+        async function cargarMisSolicitudes() {
+
+            const r = await llamar("misSolicitudes", {})
+
+            if (!r.ok) {
+
+                if (r.error === "sesion_invalida") {
+                    sesion = null
+                    borrarSesionLocal()
+                    mostrarLogin()
+                }
+
                 return
 
             }
 
-            msg.innerText = "Publicando solicitud..."
+            renderizarSolicitudes(r.solicitudes)
 
-            const formData = new FormData(form)
+        }
+
+        function renderizarSolicitudes(lista) {
+
+            listaSolicitudes.innerHTML = ""
+
+            if (lista.length === 0) {
+                listaSolicitudes.innerHTML = "<p>No tenés solicitudes activas.</p>"
+                return
+            }
+
+            lista.forEach(function (s) {
+
+                const div = document.createElement("div")
+                div.className = "solicitudItem"
+
+                div.innerHTML =
+                    "<b>" + s.materia + "</b><br>" +
+                    "Tenés: Comisión " + s.tengo + " &rarr; Buscás: Comisión " + s.busco +
+                    "<div class='solicitudAcciones'>" +
+                    "<button type='button' class='editarBtn'>Editar</button>" +
+                    "<button type='button' class='borrarItemBtn'>Borrar</button>" +
+                    "</div>"
+
+                div.querySelector(".editarBtn").addEventListener("click", function () {
+                    iniciarEdicion(s)
+                })
+
+                div.querySelector(".borrarItemBtn").addEventListener("click", function () {
+                    borrarSolicitudItem(s.id)
+                })
+
+                listaSolicitudes.appendChild(div)
+
+            })
+
+        }
+
+        function iniciarEdicion(s) {
+
+            idEditando = s.id
+
+            form.materia.value = s.materia
+            tengo.value = s.tengo
+            busco.value = s.busco
+
+            submitBtn.innerText = "Guardar cambios"
+            cancelarEdicionBtn.style.display = "block"
+
+            window.scrollTo({ top: 0, behavior: "smooth" })
+
+        }
+
+        cancelarEdicionBtn.addEventListener("click", function () {
+            idEditando = null
+            form.reset()
+            submitBtn.innerText = "Publicar solicitud"
+            cancelarEdicionBtn.style.display = "none"
+        })
+
+        async function borrarSolicitudItem(id) {
+
+            if (!confirm("¿Seguro que querés borrar esta solicitud?")) return
+
+            const r = await llamar("borrar", { id })
+
+            if (r.ok) {
+                cargarMisSolicitudes()
+            } else {
+                alert(mensajeError(r.error))
+            }
+
+        }
+
+        // ==================== PUBLICAR / EDITAR SOLICITUD ====================
+
+        form.addEventListener("submit", async function (e) {
+
+            e.preventDefault()
+            msg.innerText = ""
+
+            if (tengo.value === busco.value) {
+                alert("No podés buscar la misma comisión que tenés")
+                return
+            }
+
+            const datos = {
+                materia: form.materia.value,
+                tengo: tengo.value,
+                busco: busco.value
+            }
+
+            const accion = idEditando ? "editar" : "guardar"
+            if (idEditando) datos.id = idEditando
+
+            msg.innerText = idEditando ? "Guardando cambios..." : "Publicando solicitud..."
 
             try {
 
-                const response = await fetch(SCRIPT_URL, {
-                    method: "POST",
-                    body: formData
-                })
+                const r = await llamar(accion, datos)
 
-                const texto = await response.text()
+                if (r.ok) {
 
-                if (texto === "ok") {
-
-                    msg.innerText = "Solicitud publicada correctamente"
+                    msg.innerText = idEditando ? "Solicitud actualizada correctamente." : "Solicitud publicada correctamente."
                     form.reset()
+                    idEditando = null
+                    submitBtn.innerText = "Publicar solicitud"
+                    cancelarEdicionBtn.style.display = "none"
+                    cargarMisSolicitudes()
 
-                }
+                } else if (r.error === "ya_existe") {
 
-                else if (texto.startsWith("ya existe solicitud")) {
+                    msg.innerText = "Ya registraste exactamente esta solicitud (mirá 'Mis solicitudes')."
 
-                    filaSolicitud = texto.split("|")[1]
-                    msg.innerText = "Ya registraste exactamente esta solicitud."
-                    borrarBox.style.display = "block"
+                } else if (r.error === "ya_tenes_otra") {
 
-                }
+                    msg.innerText = "Ya tenés otra comisión registrada para esta materia. Editala o borrala en 'Mis solicitudes'."
 
-                else if (texto.startsWith("ya tenes otra comision registrada")) {
-
-                    filaSolicitud = texto.split("|")[1]
-                    msg.innerText = "Ya registraste otra comisión para esta materia. Si te equivocaste podés borrar tu solicitud anterior."
-                    borrarBox.style.display = "block"
-
-                }
-
-                else {
+                } else if (r.error === "sesion_invalida") {
 
                     msg.innerText = ""
-                    alert("Ocurrió un error inesperado.")
+                    sesion = null
+                    borrarSesionLocal()
+                    mostrarLogin()
+
+                } else {
+
+                    msg.innerText = ""
+                    alert(mensajeError(r.error))
 
                 }
 
@@ -333,44 +757,15 @@
 
         })
 
-        borrarBtn.addEventListener("click", async function () {
+        // ==================== INICIO ====================
 
-            if (!confirm("¿Seguro que querés borrar tu solicitud?")) return
+        sesion = cargarSesionLocal()
 
-            const formData = new FormData()
-            formData.append("accion", "borrar")
-            formData.append("fila", filaSolicitud)
-
-            msg.innerText = "Borrando solicitud..."
-
-            try {
-
-                const response = await fetch(SCRIPT_URL, {
-                    method: "POST",
-                    body: formData
-                })
-
-                const texto = await response.text()
-
-                if (texto === "borrado") {
-
-                    msg.innerText = "Solicitud eliminada correctamente."
-                    borrarBox.style.display = "none"
-                    form.reset()
-
-                } else {
-
-                    alert("No se encontró la solicitud.")
-
-                }
-
-            } catch {
-
-                alert("Error al borrar la solicitud.")
-
-            }
-
-        })
+        if (sesion) {
+            mostrarApp()
+        } else {
+            mostrarLogin()
+        }
 
     </script>
 
