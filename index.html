@@ -1,375 +1,551 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Intercambio de Comisiones Medicina UNMDP</title>
+    <title>Intercambio de Comisiones · Medicina UNMDP</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
 
-        body {
-            font-family: Arial;
-            max-width: 600px;
-            margin: auto;
-            padding: 20px;
-            background: #fafafa;
+        :root {
+            --teal-950: #0F332F;
+            --teal-900: #123A38;
+            --teal-700: #245954;
+            --teal-100: #E4EEEC;
+            --teal-50:  #F5F7F6;
+            --gold-500: #CE9F42;
+            --gold-600: #B4872F;
+            --ink: #16221F;
+            --ink-soft: #57655F;
+            --line: #D8E1DE;
+            --red-600: #A3402E;
+            --red-700: #8A3526;
         }
 
-        h2 {
-            margin-bottom: 10px;
-        }
-
-        h3 {
-            margin-top: 30px;
-        }
-
-        .instrucciones {
-            background: #f1f5ff;
-            border: 1px solid #d6defa;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 25px;
-        }
-
-            .instrucciones h3 {
-                margin-top: 0;
-            }
-
-            .instrucciones ul {
-                padding-left: 18px;
-                margin-bottom: 0;
-            }
-
-        select, input, button {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
+        * {
             box-sizing: border-box;
         }
 
-        button {
-            cursor: pointer;
-            background: #3b5cff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
+        body {
+            font-family: "Public Sans", Arial, sans-serif;
+            color: var(--ink);
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 0 0 60px;
+            background: var(--teal-50);
         }
 
-            button:hover {
-                background: #2f4ae0;
+        h1, h2, h3 {
+            font-family: "Fraunces", Georgia, serif;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        p {
+            line-height: 1.5;
+        }
+
+        a {
+            color: var(--teal-700);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none !important;
+            }
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--gold-600);
+            outline-offset: 2px;
+        }
+
+        /* ---------- HERO ---------- */
+
+        .hero {
+            background: var(--teal-900);
+            color: var(--teal-50);
+            padding: 32px 24px 28px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+            .hero svg {
+                flex-shrink: 0;
+                margin-top: 4px;
+                color: var(--gold-500);
+            }
+
+            .hero h1 {
+                font-size: 1.55rem;
+                line-height: 1.25;
+            }
+
+            .hero p {
+                margin: 6px 0 0;
+                font-size: 0.92rem;
+                color: #C9D9D6;
+                max-width: 42ch;
+            }
+
+        /* ---------- CONTENEDOR GENERAL ---------- */
+
+        .contenido {
+            padding: 26px 24px 0;
+        }
+
+        /* ---------- INSTRUCCIONES ---------- */
+
+        .pasos {
+            list-style: none;
+            margin: 14px 0 0;
+            padding: 0;
+        }
+
+            .pasos li {
+                display: flex;
+                gap: 12px;
+                padding: 10px 0;
+                border-bottom: 1px solid var(--line);
+                font-size: 0.93rem;
+            }
+
+            .pasos li:last-child {
+                border-bottom: none;
+            }
+
+            .paso-numero {
+                flex-shrink: 0;
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                background: var(--teal-100);
+                color: var(--teal-900);
+                font-family: "Fraunces", serif;
+                font-weight: 600;
+                font-size: 0.85rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+        /* ---------- CAMPOS DE FORMULARIO ---------- */
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--ink-soft);
+            margin-top: 14px;
+        }
+
+        select, input {
+            width: 100%;
+            margin-top: 6px;
+            padding: 10px 12px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--ink);
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+        }
+
+            select:focus, input:focus {
+                border-color: var(--teal-700);
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(36, 89, 84, 0.15);
+            }
+
+        button {
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            padding: 11px 16px;
+            transition: background 0.15s ease;
+        }
+
+        .btn-primario {
+            width: 100%;
+            margin-top: 18px;
+            background: var(--gold-500);
+            color: var(--teal-950);
+        }
+
+            .btn-primario:hover {
+                background: var(--gold-600);
+            }
+
+        .btn-secundario {
+            width: 100%;
+            margin-top: 8px;
+            background: transparent;
+            color: var(--ink-soft);
+            border: 1px solid var(--line);
+        }
+
+            .btn-secundario:hover {
+                background: var(--teal-100);
             }
 
         #msg, #authMsg {
-            margin-top: 20px;
-            font-weight: bold;
+            margin-top: 14px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--teal-700);
+            min-height: 1.2em;
         }
 
-        /* LOGIN */
+        /* ---------- LOGIN ---------- */
 
         #loginScreen {
             background: white;
-            border: 1px solid #e2e2e2;
-            border-radius: 8px;
-            padding: 20px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 24px;
         }
 
         .separador {
             text-align: center;
-            color: #888;
-            font-size: 13px;
+            color: var(--ink-soft);
+            font-size: 0.85rem;
             margin: 18px 0;
         }
 
         .tabs {
             display: flex;
-            gap: 8px;
-            margin-bottom: 10px;
+            gap: 6px;
+            background: var(--teal-100);
+            padding: 4px;
+            border-radius: 8px;
         }
 
             .tabs button {
-                background: #eef1ff;
-                color: #3b5cff;
+                flex: 1;
+                background: transparent;
+                color: var(--teal-900);
+                padding: 8px;
+                border-radius: 6px;
             }
 
             .tabs button.tabActiva {
-                background: #3b5cff;
-                color: white;
+                background: white;
+                box-shadow: 0 1px 2px rgba(15, 51, 47, 0.12);
             }
 
-        /* APP PRINCIPAL */
+        /* ---------- APP PRINCIPAL ---------- */
 
         #userBar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #eef1ff;
+            background: var(--teal-100);
             border-radius: 8px;
-            padding: 10px 15px;
-            margin-bottom: 20px;
-            font-size: 14px;
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            color: var(--teal-900);
         }
 
             #userBar button {
                 width: auto;
-                margin: 0;
                 padding: 6px 12px;
-                background: #555;
-                font-size: 13px;
+                font-size: 0.82rem;
+                font-weight: 500;
+                background: white;
+                color: var(--ink-soft);
+                border: 1px solid var(--line);
             }
 
                 #userBar button:hover {
-                    background: #333;
+                    background: var(--teal-50);
                 }
 
-        #cancelarEdicionBtn {
-            background: #888;
-            margin-top: 8px;
+        .seccion-titulo {
+            font-size: 1.15rem;
+            margin-top: 34px;
+            margin-bottom: 4px;
         }
 
-            #cancelarEdicionBtn:hover {
-                background: #666;
-            }
+        #cancelarEdicionBtn {
+            background: transparent;
+            color: var(--ink-soft);
+            border: 1px solid var(--line);
+        }
+
+        /* ---------- LISTA DE SOLICITUDES ---------- */
+
+        #listaSolicitudes {
+            margin-top: 12px;
+            border-top: 1px solid var(--line);
+        }
 
         .solicitudItem {
-            background: white;
-            border: 1px solid #e2e2e2;
-            border-radius: 8px;
-            padding: 12px 15px;
-            margin-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--line);
         }
+
+            .solicitudItem .info b {
+                font-size: 0.95rem;
+            }
+
+            .solicitudItem .info .cambio {
+                display: block;
+                margin-top: 3px;
+                font-size: 0.85rem;
+                color: var(--ink-soft);
+            }
 
         .solicitudAcciones {
             display: flex;
-            gap: 8px;
-            margin-top: 10px;
+            gap: 6px;
+            flex-shrink: 0;
         }
 
             .solicitudAcciones button {
                 width: auto;
-                padding: 6px 14px;
-                font-size: 13px;
+                padding: 6px 12px;
+                font-size: 0.8rem;
             }
 
             .editarBtn {
-                background: #3b5cff;
+                background: var(--teal-100);
+                color: var(--teal-900);
             }
 
+                .editarBtn:hover {
+                    background: #D2E4E1;
+                }
+
             .borrarItemBtn {
-                background: #d9534f;
+                background: var(--red-600);
+                color: white;
             }
 
                 .borrarItemBtn:hover {
-                    background: #c9302c;
+                    background: var(--red-700);
                 }
 
-        /* DISCLAIMER */
+        .vacio {
+            padding: 20px 0;
+            color: var(--ink-soft);
+            font-size: 0.9rem;
+        }
+
+        /* ---------- DISCLAIMER ---------- */
 
         #disclaimer {
-            position: fixed;
-            bottom: 12px;
-            left: 12px;
-            max-width: 280px;
-            font-size: 11px;
-            color: #555;
+            margin: 40px 24px 0;
+            font-size: 0.78rem;
+            color: var(--ink-soft);
             background: white;
-            padding: 12px;
+            padding: 16px;
             border-radius: 8px;
-            border: 1px solid #e2e2e2;
-            line-height: 1.45;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid var(--line);
+            line-height: 1.5;
         }
 
             #disclaimer a {
-                color: #3b5cff;
-                text-decoration: none;
+                color: var(--teal-700);
             }
 
-                #disclaimer a:hover {
-                    text-decoration: underline;
-                }
+        @media (max-width: 480px) {
 
-        /* VERSION MOBILE */
+            .hero {
+                padding: 26px 18px 22px;
+            }
 
-        @media (max-width:700px) {
+            .contenido {
+                padding: 22px 18px 0;
+            }
 
             #disclaimer {
-                position: static;
-                margin-top: 40px;
-                max-width: 100%;
-                font-size: 12px;
+                margin: 32px 18px 0;
             }
+
         }
+
     </style>
 </head>
 
 <body>
 
-    <h2>Intercambio de Comisiones Medicina UNMDP</h2>
+    <div class="hero">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M4 8H17M13 4L17 8L13 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M20 16H7M11 12L7 16L11 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+            <h1>Intercambio de Comisiones</h1>
+            <p>Una herramienta para estudiantes de Medicina de la UNMDP que quieren cambiar de comisión sin tener que preguntar curso por curso.</p>
+        </div>
+    </div>
 
-    <div class="instrucciones">
+    <div class="contenido">
 
-        <h3>Cómo usar la página</h3>
-
-        <ul>
-            <li>Iniciá sesión con tu cuenta de <b>Google</b>, o con <b>email y contraseña</b>.</li>
-            <li>Seleccioná la <b>materia</b>, la comisión que <b>tenés</b> y la que <b>buscás</b>.</li>
-            <li>Tu solicitud queda asociada a tu cuenta automáticamente, no hace falta tipear tu email.</li>
-            <li>En <b>"Mis solicitudes"</b> podés ver, editar o borrar tus pedidos activos.</li>
-            <li>Solo podés registrar <b>una comisión por materia</b>.</li>
-            <li>Cuando se encuentre un intercambio posible vas a recibir un <b>correo automático</b>.</li>
-            <li>Las solicitudes se eliminan automáticamente luego de <b>30 días</b>.</li>
+        <ul class="pasos">
+            <li><span class="paso-numero">1</span><span>Iniciá sesión con tu cuenta de Google, o con email y contraseña.</span></li>
+            <li><span class="paso-numero">2</span><span>Elegí la materia, la comisión que tenés y la que buscás.</span></li>
+            <li><span class="paso-numero">3</span><span>Publicá tu solicitud. Podés editarla o borrarla después en "Mis solicitudes".</span></li>
+            <li><span class="paso-numero">4</span><span>Si aparece un cruce posible, recibís un correo automático. Las solicitudes vencen a los 30 días.</span></li>
         </ul>
 
-    </div>
+        <!-- ==================== LOGIN ==================== -->
 
-    <!-- ==================== LOGIN ==================== -->
+        <div id="loginScreen" style="margin-top: 26px;">
 
-    <div id="loginScreen">
+            <div id="g_id_onload"
+                 data-client_id="432682206153-1bdapq5rniu1jlftt6c6poj2ha06llto.apps.googleusercontent.com"
+                 data-callback="onGoogleLogin">
+            </div>
+            <div class="g_id_signin" data-type="standard" data-width="300"></div>
 
-        <div id="g_id_onload"
-             data-client_id="432682206153-1bdapq5rniu1jlftt6c6poj2ha06llto.apps.googleusercontent.com"
-             data-callback="onGoogleLogin">
-        </div>
-        <div class="g_id_signin" data-type="standard" data-width="300"></div>
+            <div class="separador">o con email y contraseña</div>
 
-        <div class="separador">— o con email y contraseña —</div>
+            <div class="tabs">
+                <button type="button" id="tabLogin" class="tabActiva">Iniciar sesión</button>
+                <button type="button" id="tabRegistro">Crear cuenta</button>
+            </div>
 
-        <div class="tabs">
-            <button type="button" id="tabLogin" class="tabActiva">Iniciar sesión</button>
-            <button type="button" id="tabRegistro">Crear cuenta</button>
-        </div>
+            <form id="formLogin">
+                <label>Email</label>
+                <input type="email" id="loginEmail" required>
+                <label>Contraseña</label>
+                <input type="password" id="loginPassword" required>
+                <button type="submit" class="btn-primario">Iniciar sesión</button>
+            </form>
 
-        <form id="formLogin">
-            <label>Email</label>
-            <input type="email" id="loginEmail" required>
-            <label>Contraseña</label>
-            <input type="password" id="loginPassword" required>
-            <button type="submit">Iniciar sesión</button>
-        </form>
+            <form id="formRegistro" style="display:none">
+                <label>Email</label>
+                <input type="email" id="regEmail" required>
+                <label>Contraseña (mínimo 8 caracteres)</label>
+                <input type="password" id="regPassword" required minlength="8">
+                <button type="submit" class="btn-primario">Crear cuenta</button>
+            </form>
 
-        <form id="formRegistro" style="display:none">
-            <label>Email</label>
-            <input type="email" id="regEmail" required>
-            <label>Contraseña (mínimo 8 caracteres)</label>
-            <input type="password" id="regPassword" required minlength="8">
-            <button type="submit">Crear cuenta</button>
-        </form>
+            <p id="authMsg"></p>
 
-        <p id="authMsg"></p>
-
-    </div>
-
-    <!-- ==================== APP PRINCIPAL ==================== -->
-
-    <div id="app" style="display:none">
-
-        <div id="userBar">
-            <span>Conectado como <b id="userEmail"></b></span>
-            <button type="button" id="logoutBtn">Cerrar sesión</button>
         </div>
 
-        <form id="form">
+        <!-- ==================== APP PRINCIPAL ==================== -->
 
-            <label>Materia</label>
+        <div id="app" style="display:none">
 
-            <select name="materia" required>
+            <div id="userBar">
+                <span>Conectado como <b id="userEmail"></b></span>
+                <button type="button" id="logoutBtn">Cerrar sesión</button>
+            </div>
 
-                <option value="">Seleccionar materia</option>
+            <h2 class="seccion-titulo">Publicar una solicitud</h2>
 
-                <optgroup label="1° Año">
-                    <option>Concepción y Formación del Ser Humano I</option>
-                    <option>Articulación Básico Clínico Comunitaria I</option>
-                    <option>Hábitat, Ecología y Salud</option>
-                    <option>Psicología Comunitaria, Social e Institucional</option>
-                    <option>Promoción de Salud Crítica y Educación para la Salud</option>
-                    <option>Concepción y Formación del Ser Humano II</option>
-                    <option>Articulación Básico Clínico Comunitaria II</option>
-                </optgroup>
+            <form id="form">
 
-                <optgroup label="2° Año">
-                    <option>Nacimiento, Crecimiento y Desarrollo</option>
-                    <option>Articulación Básico Clínico Comunitaria III</option>
-                    <option>Agentes, Mecanismos de Defensa y Nutrición</option>
-                    <option>Prevención e Investigación Acción en Salud</option>
-                    <option>Interculturalidad y Salud</option>
-                    <option>Desgaste y Envejecimiento</option>
-                </optgroup>
+                <label>Materia</label>
 
-                <optgroup label="3° Año">
-                    <option>Articulación Básico Clínico Comunitaria IV</option>
-                    <option>Epidemiología Crítica Social y Comunitaria</option>
-                    <option>Tamizaje y Ciencias de Diagnóstico</option>
-                    <option>Redes y Sistemas de Salud</option>
-                    <option>Salud Integral de la Mujer</option>
-                </optgroup>
+                <select name="materia" required>
 
-                <optgroup label="4° Año">
-                    <option>Medicina Interna y Campos Clínicos I</option>
-                    <option>Salud Colectiva y Comunitaria</option>
-                    <option>Terapéuticas y Farmacología</option>
-                    <option>Salud del Trabajador y Medicina del Deporte</option>
-                    <option>Salud del Niño, Niña y Adolescente</option>
-                    <option>Salud Mental</option>
-                </optgroup>
+                    <option value="">Seleccionar materia</option>
 
-                <optgroup label="5° Año">
-                    <option>Medicina Interna y Campos Clínicos II</option>
-                    <option>Medicina General I</option>
-                    <option>Programas de Salud</option>
-                    <option>Salud del Adulto Mayor</option>
-                    <option>Clínica Quirúrgica y Emergentología</option>
-                    <option>Bioética y Derechos Humanos</option>
-                    <option>Medicina General II y Rehabilitación</option>
-                    <option>Medicina Legal y Toxicología</option>
-                </optgroup>
+                    <optgroup label="1° Año">
+                        <option>Concepción y Formación del Ser Humano I</option>
+                        <option>Articulación Básico Clínico Comunitaria I</option>
+                        <option>Hábitat, Ecología y Salud</option>
+                        <option>Psicología Comunitaria, Social e Institucional</option>
+                        <option>Promoción de Salud Crítica y Educación para la Salud</option>
+                        <option>Concepción y Formación del Ser Humano II</option>
+                        <option>Articulación Básico Clínico Comunitaria II</option>
+                    </optgroup>
 
-                <optgroup label="Materias Transversales">
-                    <option>Tecnologías en Salud</option>
-                    <option>Informática en Salud</option>
-                    <option>Inglés Aplicado a la Medicina I</option>
-                    <option>Inglés Aplicado a la Medicina II</option>
-                    <option>Inglés Aplicado a la Medicina III</option>
-                    <option>Inglés Aplicado a la Medicina IV</option>
-                </optgroup>
+                    <optgroup label="2° Año">
+                        <option>Nacimiento, Crecimiento y Desarrollo</option>
+                        <option>Articulación Básico Clínico Comunitaria III</option>
+                        <option>Agentes, Mecanismos de Defensa y Nutrición</option>
+                        <option>Prevención e Investigación Acción en Salud</option>
+                        <option>Interculturalidad y Salud</option>
+                        <option>Desgaste y Envejecimiento</option>
+                    </optgroup>
 
-                <optgroup label="Electivas">
-                    <option>Historia Argentina y Latinoamericana de la Salud</option>
-                    <option>Medicina Social</option>
-                    <option>Consumos Problemáticos</option>
-                    <option>Ecología</option>
-                    <option>Salud Global</option>
-                    <option>Cuidados Paliativos</option>
-                    <option>Principios de Oncología</option>
-                    <option>Discapacidad</option>
-                    <option>Anatomía Patológica</option>
-                    <option>Diagnóstico por Imágenes</option>
-                </optgroup>
+                    <optgroup label="3° Año">
+                        <option>Articulación Básico Clínico Comunitaria IV</option>
+                        <option>Epidemiología Crítica Social y Comunitaria</option>
+                        <option>Tamizaje y Ciencias de Diagnóstico</option>
+                        <option>Redes y Sistemas de Salud</option>
+                        <option>Salud Integral de la Mujer</option>
+                    </optgroup>
 
-            </select>
+                    <optgroup label="4° Año">
+                        <option>Medicina Interna y Campos Clínicos I</option>
+                        <option>Salud Colectiva y Comunitaria</option>
+                        <option>Terapéuticas y Farmacología</option>
+                        <option>Salud del Trabajador y Medicina del Deporte</option>
+                        <option>Salud del Niño, Niña y Adolescente</option>
+                        <option>Salud Mental</option>
+                    </optgroup>
 
-            <br><br>
+                    <optgroup label="5° Año">
+                        <option>Medicina Interna y Campos Clínicos II</option>
+                        <option>Medicina General I</option>
+                        <option>Programas de Salud</option>
+                        <option>Salud del Adulto Mayor</option>
+                        <option>Clínica Quirúrgica y Emergentología</option>
+                        <option>Bioética y Derechos Humanos</option>
+                        <option>Medicina General II y Rehabilitación</option>
+                        <option>Medicina Legal y Toxicología</option>
+                    </optgroup>
 
-            <label>Comisión que tenés</label>
-            <select id="tengo" name="tengo" required></select>
+                    <optgroup label="Materias Transversales">
+                        <option>Tecnologías en Salud</option>
+                        <option>Informática en Salud</option>
+                        <option>Inglés Aplicado a la Medicina I</option>
+                        <option>Inglés Aplicado a la Medicina II</option>
+                        <option>Inglés Aplicado a la Medicina III</option>
+                        <option>Inglés Aplicado a la Medicina IV</option>
+                    </optgroup>
 
-            <br><br>
+                    <optgroup label="Electivas">
+                        <option>Historia Argentina y Latinoamericana de la Salud</option>
+                        <option>Medicina Social</option>
+                        <option>Consumos Problemáticos</option>
+                        <option>Ecología</option>
+                        <option>Salud Global</option>
+                        <option>Cuidados Paliativos</option>
+                        <option>Principios de Oncología</option>
+                        <option>Discapacidad</option>
+                        <option>Anatomía Patológica</option>
+                        <option>Diagnóstico por Imágenes</option>
+                    </optgroup>
 
-            <label>Comisión que buscás</label>
-            <select id="busco" name="busco" required></select>
+                </select>
 
-            <br><br>
+                <label>Comisión que tenés</label>
+                <select id="tengo" name="tengo" required></select>
 
-            <button type="submit" id="submitBtn">Publicar solicitud</button>
-            <button type="button" id="cancelarEdicionBtn" style="display:none">Cancelar edición</button>
+                <label>Comisión que buscás</label>
+                <select id="busco" name="busco" required></select>
 
-        </form>
+                <button type="submit" id="submitBtn" class="btn-primario">Publicar solicitud</button>
+                <button type="button" id="cancelarEdicionBtn" class="btn-secundario" style="display:none">Cancelar edición</button>
 
-        <p id="msg"></p>
+            </form>
 
-        <h3>Mis solicitudes</h3>
-        <div id="listaSolicitudes"></div>
+            <p id="msg"></p>
+
+            <h2 class="seccion-titulo">Mis solicitudes</h2>
+            <div id="listaSolicitudes"></div>
+
+        </div>
 
     </div>
 
@@ -430,7 +606,8 @@
                 misma_comision: "No podés buscar la misma comisión que tenés.",
                 no_autorizado: "No podés modificar una solicitud que no es tuya.",
                 no_encontrado: "No se encontró la solicitud.",
-                datos_invalidos: "Los datos ingresados no son válidos."
+                datos_invalidos: "Los datos ingresados no son válidos.",
+                conexion: "No se pudo conectar con el servidor. Probá de nuevo en un momento."
             }
 
             return mensajes[codigo] || "Ocurrió un error inesperado."
@@ -454,29 +631,41 @@
 
         // ==================== LLAMADAS AL SERVIDOR ====================
 
-        async function llamarSinSesion(accion, params) {
+        // Todas las llamadas pasan por acá: si el servidor no devuelve JSON
+        // válido (por ejemplo, porque quedó una versión vieja del script
+        // desplegada), se detecta y se informa en vez de quedar colgado.
+        async function llamarServidor(accion, params, incluirToken) {
 
             const formData = new FormData()
             formData.append("accion", accion)
+            if (incluirToken && sesion) formData.append("token", sesion.token)
 
             for (let k in params) formData.append(k, params[k])
 
-            const resp = await fetch(SCRIPT_URL, { method: "POST", body: formData })
-            return await resp.json()
+            let resp
+
+            try {
+                resp = await fetch(SCRIPT_URL, { method: "POST", body: formData })
+            } catch (err) {
+                console.error("Error de red al llamar a", accion, err)
+                return { ok: false, error: "conexion" }
+            }
+
+            try {
+                return await resp.json()
+            } catch (err) {
+                console.error("Respuesta no es JSON válido para", accion, "- revisá que el Apps Script esté desplegado con el código actualizado.", err)
+                return { ok: false, error: "conexion" }
+            }
 
         }
 
-        async function llamar(accion, params) {
+        function llamarSinSesion(accion, params) {
+            return llamarServidor(accion, params, false)
+        }
 
-            const formData = new FormData()
-            formData.append("accion", accion)
-            if (sesion) formData.append("token", sesion.token)
-
-            for (let k in params) formData.append(k, params[k])
-
-            const resp = await fetch(SCRIPT_URL, { method: "POST", body: formData })
-            return await resp.json()
-
+        function llamar(accion, params) {
+            return llamarServidor(accion, params, true)
         }
 
         // ==================== LOGIN CON GOOGLE ====================
@@ -623,7 +812,7 @@
             listaSolicitudes.innerHTML = ""
 
             if (lista.length === 0) {
-                listaSolicitudes.innerHTML = "<p>No tenés solicitudes activas.</p>"
+                listaSolicitudes.innerHTML = "<p class='vacio'>Todavía no publicaste ninguna solicitud.</p>"
                 return
             }
 
@@ -633,8 +822,10 @@
                 div.className = "solicitudItem"
 
                 div.innerHTML =
-                    "<b>" + s.materia + "</b><br>" +
-                    "Tenés: Comisión " + s.tengo + " &rarr; Buscás: Comisión " + s.busco +
+                    "<div class='info'>" +
+                    "<b>" + s.materia + "</b>" +
+                    "<span class='cambio'>Tenés comisión " + s.tengo + " · buscás comisión " + s.busco + "</span>" +
+                    "</div>" +
                     "<div class='solicitudAcciones'>" +
                     "<button type='button' class='editarBtn'>Editar</button>" +
                     "<button type='button' class='borrarItemBtn'>Borrar</button>" +
@@ -713,45 +904,36 @@
 
             msg.innerText = idEditando ? "Guardando cambios..." : "Publicando solicitud..."
 
-            try {
+            const r = await llamar(accion, datos)
 
-                const r = await llamar(accion, datos)
+            if (r.ok) {
 
-                if (r.ok) {
+                msg.innerText = idEditando ? "Solicitud actualizada correctamente." : "Solicitud publicada correctamente."
+                form.reset()
+                idEditando = null
+                submitBtn.innerText = "Publicar solicitud"
+                cancelarEdicionBtn.style.display = "none"
+                cargarMisSolicitudes()
 
-                    msg.innerText = idEditando ? "Solicitud actualizada correctamente." : "Solicitud publicada correctamente."
-                    form.reset()
-                    idEditando = null
-                    submitBtn.innerText = "Publicar solicitud"
-                    cancelarEdicionBtn.style.display = "none"
-                    cargarMisSolicitudes()
+            } else if (r.error === "ya_existe") {
 
-                } else if (r.error === "ya_existe") {
+                msg.innerText = "Ya registraste exactamente esta solicitud (mirá 'Mis solicitudes')."
 
-                    msg.innerText = "Ya registraste exactamente esta solicitud (mirá 'Mis solicitudes')."
+            } else if (r.error === "ya_tenes_otra") {
 
-                } else if (r.error === "ya_tenes_otra") {
+                msg.innerText = "Ya tenés otra comisión registrada para esta materia. Editala o borrala en 'Mis solicitudes'."
 
-                    msg.innerText = "Ya tenés otra comisión registrada para esta materia. Editala o borrala en 'Mis solicitudes'."
-
-                } else if (r.error === "sesion_invalida") {
-
-                    msg.innerText = ""
-                    sesion = null
-                    borrarSesionLocal()
-                    mostrarLogin()
-
-                } else {
-
-                    msg.innerText = ""
-                    alert(mensajeError(r.error))
-
-                }
-
-            } catch {
+            } else if (r.error === "sesion_invalida") {
 
                 msg.innerText = ""
-                alert("No se pudo conectar con el servidor.")
+                sesion = null
+                borrarSesionLocal()
+                mostrarLogin()
+
+            } else {
+
+                msg.innerText = ""
+                alert(mensajeError(r.error))
 
             }
 
