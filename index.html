@@ -393,6 +393,22 @@
                     font-weight: 500;
                 }
 
+            .escribirTodos {
+                display: inline-block;
+                margin-top: 10px;
+                font-size: 0.82rem;
+                font-weight: 600;
+                color: var(--teal-700);
+                text-decoration: none;
+                border: 1px solid var(--line);
+                border-radius: 6px;
+                padding: 5px 10px;
+            }
+
+                .escribirTodos:hover {
+                    background: var(--teal-100);
+                }
+
         /* ---------- DISCLAIMER ---------- */
 
         #disclaimer {
@@ -835,12 +851,47 @@
             userEmail.innerText = sesion.email
             cargarMisSolicitudes()
             cargarMisIntercambios()
+            iniciarActualizacionPeriodica()
         }
 
         function mostrarLogin() {
             app.style.display = "none"
             loginScreen.style.display = "block"
+            detenerActualizacionPeriodica()
         }
+
+        // Refresco silencioso en segundo plano: así, si otra persona completa
+        // un intercambio con vos, tu lista se actualiza sola sin recargar la página.
+        let intervaloActualizacion = null
+
+        function iniciarActualizacionPeriodica() {
+
+            detenerActualizacionPeriodica()
+
+            intervaloActualizacion = setInterval(function () {
+                cargarMisSolicitudes()
+                cargarMisIntercambios()
+            }, 25000)
+
+        }
+
+        function detenerActualizacionPeriodica() {
+
+            if (intervaloActualizacion) {
+                clearInterval(intervaloActualizacion)
+                intervaloActualizacion = null
+            }
+
+        }
+
+        document.addEventListener("visibilitychange", function () {
+
+            if (document.visibilityState === "visible" && sesion) {
+                cargarMisSolicitudes()
+                cargarMisIntercambios()
+            }
+
+        })
 
         // ==================== MIS SOLICITUDES ====================
 
@@ -930,10 +981,14 @@
 
                 const fecha = x.fecha ? new Date(x.fecha).toLocaleDateString("es-AR") : ""
 
+                const otros = (x.participantes || [])
+                    .map(function (p) { return p.email })
+                    .filter(function (email) { return email !== sesion.email })
+
                 const personas = (x.participantes || []).map(function (p) {
 
                     const esVos = p.email === sesion.email
-                    const nombre = esVos ? "Vos" : p.email
+                    const nombre = esVos ? "Vos" : "<a href='mailto:" + p.email + "'>" + p.email + "</a>"
 
                     return "<div class='personaIntercambio" + (esVos ? " esVos" : "") + "'>" +
                         "<b>" + nombre + "</b> — tenía comisión " + p.tengo + ", buscaba comisión " + p.busco +
@@ -941,9 +996,20 @@
 
                 }).join("")
 
+                let botonTodos = ""
+
+                if (otros.length > 0) {
+
+                    const asunto = encodeURIComponent("Intercambio de comisión - " + x.materia)
+                    const mailtoTodos = "mailto:" + otros.join(",") + "?subject=" + asunto
+
+                    botonTodos = "<a class='escribirTodos' href='" + mailtoTodos + "'>Escribirles a todos</a>"
+
+                }
+
                 div.innerHTML =
                     "<div class='intercambioHeader'><b>" + x.materia + "</b><span class='fechaIntercambio'>" + fecha + "</span></div>" +
-                    personas
+                    personas + botonTodos
 
                 listaIntercambios.appendChild(div)
 
