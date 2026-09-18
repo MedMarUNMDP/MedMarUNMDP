@@ -353,6 +353,46 @@
             font-size: 0.9rem;
         }
 
+        /* ---------- INTERCAMBIOS COMPLETADOS ---------- */
+
+        #listaIntercambios {
+            margin-top: 12px;
+            border-top: 1px solid var(--line);
+        }
+
+        .intercambioItem {
+            padding: 14px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+            .intercambioHeader {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                gap: 10px;
+            }
+
+                .intercambioHeader b {
+                    font-size: 0.95rem;
+                }
+
+            .fechaIntercambio {
+                font-size: 0.78rem;
+                color: var(--ink-soft);
+                flex-shrink: 0;
+            }
+
+            .personaIntercambio {
+                font-size: 0.85rem;
+                color: var(--ink-soft);
+                margin-top: 5px;
+            }
+
+                .personaIntercambio.esVos {
+                    color: var(--teal-900);
+                    font-weight: 500;
+                }
+
         /* ---------- DISCLAIMER ---------- */
 
         #disclaimer {
@@ -557,6 +597,9 @@
             <h2 class="seccion-titulo">Mis solicitudes</h2>
             <div id="listaSolicitudes"></div>
 
+            <h2 class="seccion-titulo">Intercambios completados</h2>
+            <div id="listaIntercambios"></div>
+
         </div>
 
     </div>
@@ -589,6 +632,7 @@
         const submitBtn = document.getElementById("submitBtn")
         const cancelarEdicionBtn = document.getElementById("cancelarEdicionBtn")
         const listaSolicitudes = document.getElementById("listaSolicitudes")
+        const listaIntercambios = document.getElementById("listaIntercambios")
 
         for (let i = 1; i <= 40; i++) {
 
@@ -790,6 +834,7 @@
             app.style.display = "block"
             userEmail.innerText = sesion.email
             cargarMisSolicitudes()
+            cargarMisIntercambios()
         }
 
         function mostrarLogin() {
@@ -857,6 +902,55 @@
 
         }
 
+        // ==================== INTERCAMBIOS COMPLETADOS ====================
+
+        async function cargarMisIntercambios() {
+
+            const r = await llamar("misIntercambios", {})
+
+            if (!r.ok) return
+
+            renderizarIntercambios(r.intercambios)
+
+        }
+
+        function renderizarIntercambios(lista) {
+
+            listaIntercambios.innerHTML = ""
+
+            if (lista.length === 0) {
+                listaIntercambios.innerHTML = "<p class='vacio'>Todavía no se completó ningún intercambio para tu cuenta.</p>"
+                return
+            }
+
+            lista.forEach(function (x) {
+
+                const div = document.createElement("div")
+                div.className = "intercambioItem"
+
+                const fecha = x.fecha ? new Date(x.fecha).toLocaleDateString("es-AR") : ""
+
+                const personas = (x.participantes || []).map(function (p) {
+
+                    const esVos = p.email === sesion.email
+                    const nombre = esVos ? "Vos" : p.email
+
+                    return "<div class='personaIntercambio" + (esVos ? " esVos" : "") + "'>" +
+                        "<b>" + nombre + "</b> — tenía comisión " + p.tengo + ", buscaba comisión " + p.busco +
+                        "</div>"
+
+                }).join("")
+
+                div.innerHTML =
+                    "<div class='intercambioHeader'><b>" + x.materia + "</b><span class='fechaIntercambio'>" + fecha + "</span></div>" +
+                    personas
+
+                listaIntercambios.appendChild(div)
+
+            })
+
+        }
+
         function iniciarEdicion(s) {
 
             idEditando = s.id
@@ -889,6 +983,7 @@
                 cargarMisSolicitudes()
             } else {
                 alert(mensajeError(r.error))
+                if (r.error === "no_encontrado") cargarMisSolicitudes()
             }
 
         }
@@ -920,12 +1015,18 @@
 
             if (r.ok) {
 
-                msg.innerText = idEditando ? "Solicitud actualizada correctamente." : "Solicitud publicada correctamente."
+                if (r.emparejado) {
+                    msg.innerText = "¡Encontramos un intercambio para vos! Revisá 'Intercambios completados' o tu correo."
+                } else {
+                    msg.innerText = idEditando ? "Solicitud actualizada correctamente." : "Solicitud publicada correctamente."
+                }
+
                 form.reset()
                 idEditando = null
                 submitBtn.innerText = "Publicar solicitud"
                 cancelarEdicionBtn.style.display = "none"
                 cargarMisSolicitudes()
+                cargarMisIntercambios()
 
             } else if (r.error === "ya_existe") {
 
@@ -941,6 +1042,17 @@
                 sesion = null
                 borrarSesionLocal()
                 mostrarLogin()
+
+            } else if (r.error === "no_encontrado") {
+
+                msg.innerText = ""
+                alert("Esa solicitud ya no existe (puede que ya se haya encontrado un intercambio). Se actualizó la lista.")
+                idEditando = null
+                form.reset()
+                submitBtn.innerText = "Publicar solicitud"
+                cancelarEdicionBtn.style.display = "none"
+                cargarMisSolicitudes()
+                cargarMisIntercambios()
 
             } else {
 
@@ -972,7 +1084,7 @@
 
         El uso del sistema y la coordinación de intercambios es responsabilidad exclusiva de los usuarios.<br><br>
 
-        Proyecto independiente creado por <b>Simón</b>.<br>
+        Proyecto independiente creado por <b>Simón Moreno</b>.<br>
         No afiliado oficialmente a la Facultad de Ciencias de la Salud (UNMDP).<br><br>
 
         <a href="mailto:simonacademico01@gmail.com">Reportar error o bug</a>
