@@ -34,10 +34,14 @@
         body {
             font-family: "Public Sans", Arial, sans-serif;
             color: var(--ink);
+            margin: 0;
+            background: var(--teal-50);
+        }
+
+        .pagina {
             max-width: 640px;
             margin: 0 auto;
             padding: 0 0 60px;
-            background: var(--teal-50);
         }
 
         h1, h2, h3 {
@@ -69,6 +73,11 @@
 
         .hero {
             background: var(--teal-900);
+        }
+
+        .hero-inner {
+            max-width: 640px;
+            margin: 0 auto;
             color: var(--teal-50);
             padding: 32px 24px 28px;
             display: flex;
@@ -76,18 +85,18 @@
             gap: 14px;
         }
 
-            .hero svg {
+            .hero-inner svg {
                 flex-shrink: 0;
                 margin-top: 4px;
                 color: var(--gold-500);
             }
 
-            .hero h1 {
+            .hero-inner h1 {
                 font-size: 1.55rem;
                 line-height: 1.25;
             }
 
-            .hero p {
+            .hero-inner p {
                 margin: 6px 0 0;
                 font-size: 0.92rem;
                 color: #C9D9D6;
@@ -363,7 +372,7 @@
 
         @media (max-width: 480px) {
 
-            .hero {
+            .hero-inner {
                 padding: 26px 18px 22px;
             }
 
@@ -383,16 +392,19 @@
 <body>
 
     <div class="hero">
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M4 8H17M13 4L17 8L13 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M20 16H7M11 12L7 16L11 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <div>
-            <h1>Intercambio de Comisiones</h1>
-            <p>Una herramienta para estudiantes de Medicina de la UNMDP que quieren cambiar de comisión sin tener que preguntar curso por curso.</p>
+        <div class="hero-inner">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M4 8H17M13 4L17 8L13 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M20 16H7M11 12L7 16L11 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div>
+                <h1>Intercambio de Comisiones</h1>
+                <p>Una herramienta para estudiantes de Medicina de la UNMDP que quieren cambiar de comisión sin tener que preguntar curso por curso.</p>
+            </div>
         </div>
     </div>
 
+    <div class="pagina">
     <div class="contenido">
 
         <ul class="pasos">
@@ -553,7 +565,7 @@
 
     <script>
 
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4zruF4YhK7eDkcrh_qB1_1WwyV35KKXsMHLNPtWvIB5XLSHD9EmgN84cNGg9K4DducQ/exec"
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1aM5R_Gygv8F1zQ3Ha_RVdOL_MAlqULzH6ycCfie5WkFSsUqoNfkh0WrJb5aVvXnFiw/exec"
 
         let sesion = null
         let idEditando = null
@@ -964,6 +976,8 @@
         No afiliado oficialmente a la Facultad de Ciencias de la Salud (UNMDP).<br><br>
 
         <a href="mailto:simonacademico01@gmail.com">Reportar error o bug</a>
+
+    </div>
 
     </div>
 
