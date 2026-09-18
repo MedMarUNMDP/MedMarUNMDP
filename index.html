@@ -284,6 +284,23 @@
             margin-bottom: 4px;
         }
 
+        #seccionFormulario {
+            padding: 14px;
+            margin: 0 -14px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+            #seccionFormulario.editando {
+                background: var(--teal-100);
+                border-color: var(--teal-700);
+            }
+
+            #seccionFormulario.editando #tituloFormulario {
+                color: var(--teal-700);
+            }
+
         #cancelarEdicionBtn {
             background: transparent;
             color: var(--ink-soft);
@@ -516,7 +533,9 @@
                 <button type="button" id="logoutBtn">Cerrar sesión</button>
             </div>
 
-            <h2 class="seccion-titulo">Publicar una solicitud</h2>
+            <div id="seccionFormulario">
+
+            <h2 class="seccion-titulo" id="tituloFormulario">Publicar una solicitud</h2>
 
             <form id="form">
 
@@ -610,6 +629,8 @@
 
             <p id="msg"></p>
 
+            </div>
+
             <h2 class="seccion-titulo">Mis solicitudes</h2>
             <div id="listaSolicitudes"></div>
 
@@ -647,6 +668,8 @@
         const msg = document.getElementById("msg")
         const submitBtn = document.getElementById("submitBtn")
         const cancelarEdicionBtn = document.getElementById("cancelarEdicionBtn")
+        const seccionFormulario = document.getElementById("seccionFormulario")
+        const tituloFormulario = document.getElementById("tituloFormulario")
         const listaSolicitudes = document.getElementById("listaSolicitudes")
         const listaIntercambios = document.getElementById("listaIntercambios")
 
@@ -1027,17 +1050,23 @@
 
             submitBtn.innerText = "Guardar cambios"
             cancelarEdicionBtn.style.display = "block"
+            tituloFormulario.innerText = "Editar solicitud"
+            seccionFormulario.classList.add("editando")
 
-            window.scrollTo({ top: 0, behavior: "smooth" })
+            seccionFormulario.scrollIntoView({ behavior: "smooth", block: "start" })
 
         }
 
-        cancelarEdicionBtn.addEventListener("click", function () {
+        function salirModoEdicion() {
             idEditando = null
             form.reset()
             submitBtn.innerText = "Publicar solicitud"
             cancelarEdicionBtn.style.display = "none"
-        })
+            tituloFormulario.innerText = "Publicar una solicitud"
+            seccionFormulario.classList.remove("editando")
+        }
+
+        cancelarEdicionBtn.addEventListener("click", salirModoEdicion)
 
         async function borrarSolicitudItem(id) {
 
@@ -1087,10 +1116,7 @@
                     msg.innerText = idEditando ? "Solicitud actualizada correctamente." : "Solicitud publicada correctamente."
                 }
 
-                form.reset()
-                idEditando = null
-                submitBtn.innerText = "Publicar solicitud"
-                cancelarEdicionBtn.style.display = "none"
+                salirModoEdicion()
                 cargarMisSolicitudes()
                 cargarMisIntercambios()
 
@@ -1113,10 +1139,7 @@
 
                 msg.innerText = ""
                 alert("Esa solicitud ya no existe (puede que ya se haya encontrado un intercambio). Se actualizó la lista.")
-                idEditando = null
-                form.reset()
-                submitBtn.innerText = "Publicar solicitud"
-                cancelarEdicionBtn.style.display = "none"
+                salirModoEdicion()
                 cargarMisSolicitudes()
                 cargarMisIntercambios()
 
