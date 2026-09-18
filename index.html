@@ -697,7 +697,7 @@
 
             } else {
 
-                authMsg.innerText = mensajeError(r.error)
+                authMsg.innerText = mensajeError(r.error) + (r.debug ? " — " + r.debug : "")
 
             }
 
