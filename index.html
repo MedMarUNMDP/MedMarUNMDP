@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Intercambio de Comisiones · Medicina UNMDP</title>
+    <title>MedMarUNMDP · Intercambio de Comisiones</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1388,6 +1388,17 @@
 
         }
 
+    
+        .hiloOptimista, .solicitudOptimista, .respuestaOptimista {
+            opacity: 0.72;
+            position: relative;
+        }
+
+        .estadoOptimista {
+            font-size: 0.78rem;
+            color: var(--ink-soft);
+        }
+
     </style>
 </head>
 
@@ -1401,7 +1412,7 @@
                 <path d="M21 9v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
             </svg>
             <div>
-                <h1>Simomed</h1>
+                <h1>MedMarUNMDP</h1>
                 <p>Una plataforma hecha por y para estudiantes de Medicina de la UNMDP: para ayudarse con las comisiones, compartir lo que saben y no cursar tan solos.</p>
             </div>
         </div>
@@ -1799,10 +1810,15 @@
 
     <script>
 
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4zruF4YhK7eDkcrh_qB1_1WwyV35KKXsMHLNPtWvIB5XLSHD9EmgN84cNGg9K4DducQ/exec"
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw7Pik_6HpPESKSewOvriPa4hOdOwxpoHrpCLfqr1sWwAYSXI1WJGx4Q0A4VMDJ5GTr/exec"
 
         let sesion = null
         let idEditando = null
+let foroCargado = false
+const foroCacheCliente = new Map()
+let solicitudesUI = []
+let respuestasUI = []
+let intercambiosUI = []
 
         const loginScreen = document.getElementById("loginScreen")
         const app = document.getElementById("app")
@@ -2211,6 +2227,8 @@
                 no_encontrado: "No se encontró la solicitud.",
                 datos_invalidos: "Los datos ingresados no son válidos.",
                 conexion: "No se pudo conectar con el servidor. Probá de nuevo en un momento.",
+                servidor_ocupado: "Hay otra operación en curso. Probá de nuevo en unos segundos.",
+                servidor: "El servidor devolvió un error. Revisá la implementación de Apps Script.",
                 titulo_invalido: "El título no puede estar vacío ni superar los 140 caracteres.",
                 contenido_invalido: "El contenido no puede estar vacío ni superar los 5000 caracteres.",
                 link_invalido: "El enlace no tiene un formato HTTPS válido.",
@@ -2245,30 +2263,51 @@
         // Todas las llamadas pasan por acá: si el servidor no devuelve JSON
         // válido (por ejemplo, porque quedó una versión vieja del script
         // desplegada), se detecta y se informa en vez de quedar colgado.
+        const llamadasEnCurso = new Map()
+
         async function llamarServidor(accion, params, incluirToken) {
 
-            const formData = new FormData()
-            formData.append("accion", accion)
-            if (incluirToken && sesion) formData.append("token", sesion.token)
+            const dedupeKey = incluirToken && sesion && (accion === "bootstrap" || accion === "foroBootstrap" || accion === "listarEtiquetas")
+                ? accion + "|" + JSON.stringify(params) + "|" + sesion.email
+                : null
 
-            for (let k in params) formData.append(k, params[k])
+            if (dedupeKey && llamadasEnCurso.has(dedupeKey)) return llamadasEnCurso.get(dedupeKey)
 
-            let resp
+            const tarea = (async function () {
+                const formData = new FormData()
+                formData.append("accion", accion)
+                if (incluirToken && sesion) formData.append("token", sesion.token)
+                for (let k in params) formData.append(k, params[k])
 
-            try {
-                resp = await fetch(SCRIPT_URL, { method: "POST", body: formData })
-            } catch (err) {
-                console.error("Error de red al llamar a", accion, err)
-                return { ok: false, error: "conexion" }
+                let resp
+                const controller = new AbortController()
+                const timer = setTimeout(function () { controller.abort() }, 20000)
+
+                try {
+                    resp = await fetch(SCRIPT_URL, { method: "POST", body: formData, signal: controller.signal, cache: "no-store" })
+                } catch (err) {
+                    console.error("Error de red al llamar a", accion, err)
+                    return { ok: false, error: err.name === "AbortError" ? "conexion" : "conexion" }
+                } finally {
+                    clearTimeout(timer)
+                }
+
+                try {
+                    const data = await resp.json()
+                    console.debug("[MedMarUNMDP]", accion, Math.round(performance.now() - inicioRequest) + "ms")
+                    if (data && data.ok === false && data.error === "servidor") console.error("Error del servidor en", accion, data)
+                    return data
+                } catch (err) {
+                    console.error("Respuesta no es JSON válido para", accion, err)
+                    return { ok: false, error: "conexion" }
+                }
+            })()
+
+            if (dedupeKey) {
+                llamadasEnCurso.set(dedupeKey, tarea)
+                try { return await tarea } finally { llamadasEnCurso.delete(dedupeKey) }
             }
-
-            try {
-                return await resp.json()
-            } catch (err) {
-                console.error("Respuesta no es JSON válido para", accion, "- revisá que el Apps Script esté desplegado con el código actualizado.", err)
-                return { ok: false, error: "conexion" }
-            }
-
+            return tarea
         }
 
         function llamarSinSesion(accion, params) {
@@ -2277,6 +2316,95 @@
 
         function llamar(accion, params) {
             return llamarServidor(accion, params, true)
+        }
+
+async function cargarBootstrap() {
+            const cacheKey = 'medmar:perfil:' + sesion.email.toLowerCase()
+            try {
+                const local = JSON.parse(localStorage.getItem(cacheKey) || 'null')
+                if (local && local.data) {
+                    aplicarBootstrap(local.data)
+                }
+            } catch (_) {}
+
+            const r = await llamar('bootstrap', {})
+            if (!r.ok) {
+                if (r.error === 'sesion_invalida') {
+                    sesion = null
+                    borrarSesionLocal()
+                    mostrarLogin()
+                }
+                return
+            }
+            aplicarBootstrap(r.data)
+            try { localStorage.setItem(cacheKey, JSON.stringify({ data: r.data, ts: Date.now() })) } catch (_) {}
+        }
+
+        function aplicarBootstrap(data) {
+            if (!data) return
+            if (data.perfil) {
+                inputPseudonimo.value = data.perfil.pseudonimo || ''
+                fotoActual = data.perfil.foto || ''
+                emailConfig.innerText = sesion.email
+                actualizarAvataresEnPantalla(data.perfil.pseudonimo || 'Vos')
+            }
+            solicitudesUI = Array.isArray(data.solicitudes) ? data.solicitudes.slice() : []
+            intercambiosUI = Array.isArray(data.intercambios) ? data.intercambios.slice() : []
+            renderizarSolicitudes(solicitudesUI)
+            renderizarIntercambios(intercambiosUI)
+            esModeradorActual = !!(data.rol && data.rol.esModerador)
+            esAdminActual = !!(data.rol && data.rol.esAdmin)
+            btnIrModeracion.style.display = esModeradorActual ? 'inline-block' : 'none'
+        }
+
+        async function cargarForoBootstrap() {
+            const key = etiquetaFiltroActual || '_todos'
+            const cached = foroCacheCliente.get(key)
+            if (cached) {
+                renderizarEtiquetasCliente(cached.etiquetas || [])
+                renderizarHilos(cached.hilos || [], true)
+                paginaHilosActual = (cached.hilos || []).length
+                btnCargarMas.style.display = cached.hayMas ? 'block' : 'none'
+            }
+            const r = await llamar('foroBootstrap', { etiqueta: etiquetaFiltroActual })
+            if (!r.ok) {
+                if (!cached) {
+                    listaHilos.innerHTML = "<p class='vacio'>" + escapeHtml(mensajeError(r.error)) + "</p>"
+                    btnCargarMas.style.display = 'none'
+                }
+                if (r.error === 'sesion_invalida') {
+                    sesion = null
+                    borrarSesionLocal()
+                    mostrarLogin()
+                }
+                return
+            }
+            esModeradorActual = !!r.esModerador
+            btnIrModeracion.style.display = esModeradorActual ? 'inline-block' : 'none'
+            const data = r.data || {}
+            const item = { etiquetas: data.etiquetas || [], hilos: data.hilos || [], hayMas: !!data.hayMas }
+            foroCacheCliente.set(key, item)
+            renderizarEtiquetasCliente(item.etiquetas)
+            renderizarHilos(item.hilos, true)
+            paginaHilosActual = item.hilos.length
+            btnCargarMas.style.display = item.hayMas ? 'block' : 'none'
+            foroCargado = true
+        }
+
+        function renderizarEtiquetasCliente(etiquetas) {
+            listaEtiquetasDisponibles.innerHTML = ''
+            mapaEtiquetasDisponibles = new Map()
+            etiquetas.forEach(function (etiqueta) {
+                mapaEtiquetasDisponibles.set(normalizarEtiqueta(etiqueta), etiqueta)
+                const option = document.createElement('option')
+                option.value = etiqueta
+                listaEtiquetasDisponibles.appendChild(option)
+            })
+            if (ayudaFiltroEtiqueta) {
+                ayudaFiltroEtiqueta.textContent = etiquetas.length
+                    ? 'Elegí una de las etiquetas existentes para filtrar.'
+                    : 'Todavía no hay etiquetas publicadas.'
+            }
         }
 
         // ==================== LOGIN CON GOOGLE ====================
@@ -2418,7 +2546,7 @@
             if (r.ok) {
                 alert("Gracias, un moderador va a revisarlo.")
             } else {
-                alert(mensajeError(r.error))
+                alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : "") )
             }
 
         }
@@ -2438,7 +2566,7 @@
                     abrirHilo(hiloAbiertoId)
                 }
             } else {
-                alert(mensajeError(r.error))
+                alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : "") )
             }
 
         }
@@ -2506,34 +2634,8 @@
 
         async function cargarEtiquetasDisponibles() {
             const r = await llamar("listarEtiquetas", {})
-
-            if (!r.ok) {
-                listaEtiquetasDisponibles.innerHTML = ""
-                mapaEtiquetasDisponibles = new Map()
-
-                if (ayudaFiltroEtiqueta) {
-                    ayudaFiltroEtiqueta.textContent = "No se pudieron cargar las etiquetas disponibles."
-                }
-
-                return
-            }
-
-            listaEtiquetasDisponibles.innerHTML = ""
-            mapaEtiquetasDisponibles = new Map()
-
-            ;(r.etiquetas || []).forEach(function (etiqueta) {
-                mapaEtiquetasDisponibles.set(normalizarEtiqueta(etiqueta), etiqueta)
-
-                const option = document.createElement("option")
-                option.value = etiqueta
-                listaEtiquetasDisponibles.appendChild(option)
-            })
-
-            if (ayudaFiltroEtiqueta) {
-                ayudaFiltroEtiqueta.textContent = r.etiquetas.length
-                    ? "Elegí una de las etiquetas existentes para filtrar."
-                    : "Todavía no hay etiquetas publicadas."
-            }
+            if (!r.ok) return
+            renderizarEtiquetasCliente(r.etiquetas || [])
         }
 
         function aplicarFiltroEtiqueta() {
@@ -2562,31 +2664,45 @@
         }
 
         async function cargarHilos(reiniciar) {
-
+            const key = etiquetaFiltroActual || '_todos'
             if (reiniciar) {
                 paginaHilosActual = 0
-                listaHilos.innerHTML = ""
+                const cached = foroCacheCliente.get(key)
+                if (cached) {
+                    renderizarHilos(cached.hilos || [], true)
+                    paginaHilosActual = (cached.hilos || []).length
+                    btnCargarMas.style.display = cached.hayMas ? "block" : "none"
+                } else {
+                    listaHilos.innerHTML = ""
+                    btnCargarMas.style.display = "none"
+                }
             }
 
-            const r = await llamar("listarHilos", { etiqueta: etiquetaFiltroActual, desde: paginaHilosActual })
-
+            const r = await llamar("listarHilos", { etiqueta: etiquetaFiltroActual, desde: reiniciar ? 0 : paginaHilosActual })
             if (!r.ok) {
-
+                if (!foroCacheCliente.has(key)) {
+                    listaHilos.innerHTML = "<p class='vacio'>" + escapeHtml(mensajeError(r.error)) + "</p>"
+                    btnCargarMas.style.display = "none"
+                }
                 if (r.error === "sesion_invalida") {
                     sesion = null
                     borrarSesionLocal()
                     mostrarLogin()
                 }
-
                 return
-
             }
 
-            renderizarHilos(r.hilos, reiniciar)
-
-            paginaHilosActual += r.hilos.length
+            if (reiniciar) {
+                const item = { hilos: r.hilos || [], hayMas: !!r.hayMas, etiquetas: foroCacheCliente.get(key)?.etiquetas || [] }
+                foroCacheCliente.set(key, item)
+                renderizarHilos(item.hilos, true)
+                paginaHilosActual = item.hilos.length
+            } else {
+                renderizarHilos(r.hilos || [], false)
+                paginaHilosActual += (r.hilos || []).length
+            }
             btnCargarMas.style.display = r.hayMas ? "block" : "none"
-
+            foroCargado = true
         }
 
         function detectarTipoLink(link) {
@@ -2675,7 +2791,10 @@
                         "</a>"
                 }
 
-                const embed = "https://www.youtube.com/embed/" + encodeURIComponent(info.id) + "?rel=0"
+                let embed = "https://www.youtube.com/embed/" + encodeURIComponent(info.id) + "?rel=0"
+                if (location.protocol === "http:" || location.protocol === "https:") {
+                    embed += "&origin=" + encodeURIComponent(location.origin)
+                }
 
                 return "<div class='linkPreview'>" +
                     "<iframe class='linkPreviewEmbed' src='" + escapeAttr(embed) + "' title='Vista previa de YouTube' loading='lazy' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share' allowfullscreen referrerpolicy='strict-origin-when-cross-origin'></iframe>" +
@@ -2725,7 +2844,8 @@
             hilos.forEach(function (h) {
 
                 const div = document.createElement("div")
-                div.className = "hiloItem"
+                div.className = "hiloItem" + (h._optimista ? " hiloOptimista" : "")
+                if (h._optimista) div.dataset.tempHilo = h.id
                 div.tabIndex = 0
                 div.setAttribute("role", "button")
 
@@ -2747,13 +2867,14 @@
                     "</div>"
 
                 div.addEventListener("click", function () {
+                    if (h._optimista) return
                     abrirHilo(h.id)
                 })
 
                 div.addEventListener("keydown", function (e) {
                     if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault()
-                        abrirHilo(h.id)
+                        if (!h._optimista) abrirHilo(h.id)
                     }
                 })
 
@@ -2844,38 +2965,62 @@
         formHilo.addEventListener("submit", async function (e) {
 
             e.preventDefault()
-            msgHilo.innerText = "Publicando..."
+            const titulo = inputTitulo.value.trim()
+            const contenido = inputContenido.value.trim()
+            const etiquetasTexto = inputEtiquetas.value.trim()
+            const link = inputLink.value.trim()
+            const anonimo = inputAnonimoHilo.checked
+            const tags = etiquetasTexto.split(",").map(function (x) { return x.trim() }).filter(Boolean).slice(0, 5)
+            const tempId = "tmp-" + Date.now() + "-" + Math.random().toString(36).slice(2)
+
+            const hOptimista = {
+                id: tempId,
+                autor: anonimo ? "Anónimo" : (inputPseudonimo.value || "Vos"),
+                autorFoto: anonimo ? "" : fotoActual,
+                titulo: titulo,
+                resumen: contenido.length > 180 ? contenido.slice(0, 180) + "…" : contenido,
+                etiquetas: tags,
+                link: enlaceSeguroLocal(link) ? link : "",
+                fecha: new Date().toISOString(),
+                respuestas: 0,
+                _optimista: true
+            }
+
+            msgHilo.innerText = "Publicando…"
+            cerrarModal(modalCompose)
+            renderizarHilos([hOptimista], false)
+            const tempEl = [...listaHilos.querySelectorAll("[data-temp-hilo]")].find(function (x) { return x.dataset.tempHilo === tempId })
+            if (tempEl) tempEl.classList.add("hiloOptimista")
 
             const r = await llamar("crearHilo", {
-                titulo: inputTitulo.value.trim(),
-                contenido: inputContenido.value.trim(),
-                etiquetas: inputEtiquetas.value.trim(),
-                link: inputLink.value.trim(),
-                anonimo: inputAnonimoHilo.checked ? "1" : "0"
+                titulo: titulo,
+                contenido: contenido,
+                etiquetas: etiquetasTexto,
+                link: link,
+                anonimo: anonimo ? "1" : "0"
             })
 
             if (r.ok) {
-
                 msgHilo.innerText = ""
                 formHilo.reset()
                 inputContenido.style.height = ""
                 contadorContenido.textContent = "0 / 5000"
-                cerrarModal(modalCompose)
+                foroCacheCliente.delete(etiquetaFiltroActual || "_todos")
                 cargarEtiquetasDisponibles()
                 cargarHilos(true)
+                return
+            }
 
-            } else if (r.error === "sesion_invalida") {
+            const temp = [...listaHilos.querySelectorAll("[data-temp-hilo]")].find(function (x) { return x.dataset.tempHilo === tempId })
+            if (temp) temp.remove()
+            msgHilo.innerText = ""
 
-                msgHilo.innerText = ""
+            if (r.error === "sesion_invalida") {
                 sesion = null
                 borrarSesionLocal()
                 mostrarLogin()
-
             } else {
-
-                msgHilo.innerText = ""
-                alert(mensajeError(r.error))
-
+                alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : ""))
             }
 
         })
@@ -2941,25 +3086,19 @@
         }
 
         function renderizarRespuestas(respuestas) {
-
+            respuestasUI = Array.isArray(respuestas) ? respuestas.slice() : []
             listaRespuestas.innerHTML = ""
-
-            if (respuestas.length === 0) {
+            if (respuestasUI.length === 0) {
                 listaRespuestas.innerHTML = "<p class='vacio'>Todavía no hay respuestas.</p>"
                 return
             }
-
-            respuestas.forEach(function (r) {
-
+            respuestasUI.forEach(function (r) {
                 const div = document.createElement("div")
-                div.className = "respuestaItem"
-
-                let acciones = "<button type='button' class='accionDenunciar' data-tipo='respuesta' data-id='" + r.id + "'>Denunciar</button>"
-
-                if (r.esPropio || esModeradorActual) {
+                div.className = "respuestaItem" + (r._optimista ? " respuestaOptimista" : "")
+                let acciones = r._optimista ? "" : "<button type='button' class='accionDenunciar' data-tipo='respuesta' data-id='" + r.id + "'>Denunciar</button>"
+                if (!r._optimista && (r.esPropio || esModeradorActual)) {
                     acciones += "<button type='button' class='accionBorrar' data-tipo='respuesta' data-id='" + r.id + "'>Borrar</button>"
                 }
-
                 div.innerHTML =
                     "<div class='respuestaCabecera'>" +
                     avatarHtml(r.autor, r.autorFoto, "avatarChico") +
@@ -2968,13 +3107,10 @@
                     "<span class='hiloFecha'>" + formatearFecha(r.fecha) + "</span>" +
                     "</div>" +
                     "<div class='cuerpoHilo'>" + escapeHtml(r.contenido) + "</div>" +
-                    "<div class='hiloAcciones'>" + acciones + "</div>"
-
+                    (acciones ? "<div class='hiloAcciones'>" + acciones + "</div>" : "")
                 listaRespuestas.appendChild(div)
                 activarAccionesPublicacion(div)
-
             })
-
         }
 
         btnVolverHilos.addEventListener("click", function () {
@@ -2984,43 +3120,50 @@
         formRespuesta.addEventListener("submit", async function (e) {
 
             e.preventDefault()
-
             if (!hiloAbiertoId) return
 
-            msgRespuesta.innerText = "Enviando..."
+            const contenido = inputRespuesta.value.trim()
+            if (!contenido) return
+            const tempId = "tmp-resp-" + Date.now() + "-" + Math.random().toString(36).slice(2)
+            const optimistic = {
+                id: tempId,
+                autor: inputAnonimoRespuesta.checked ? "Anónimo" : (inputPseudonimo.value || "Vos"),
+                autorFoto: inputAnonimoRespuesta.checked ? "" : fotoActual,
+                esPropio: true,
+                contenido: contenido,
+                fecha: new Date().toISOString(),
+                _optimista: true
+            }
+
+            respuestasUI.push(optimistic)
+            renderizarRespuestas(respuestasUI)
+            inputRespuesta.value = ""
+            inputRespuesta.style.height = ""
+            msgRespuesta.innerText = ""
 
             const r = await llamar("crearRespuesta", {
                 hiloId: hiloAbiertoId,
-                contenido: inputRespuesta.value.trim(),
+                contenido: contenido,
                 anonimo: inputAnonimoRespuesta.checked ? "1" : "0"
             })
 
             if (r.ok) {
-
-                msgRespuesta.innerText = ""
-                formRespuesta.reset()
-                inputRespuesta.style.height = ""
                 abrirHilo(hiloAbiertoId)
+                return
+            }
 
-            } else if (r.error === "sesion_invalida") {
-
-                msgRespuesta.innerText = ""
+            respuestasUI = respuestasUI.filter(function (x) { return x.id !== tempId })
+            renderizarRespuestas(respuestasUI)
+            if (r.error === "sesion_invalida") {
                 sesion = null
                 borrarSesionLocal()
                 mostrarLogin()
-
             } else if (r.error === "no_encontrado") {
-
-                msgRespuesta.innerText = ""
                 alert("Ese hilo ya no existe.")
                 mostrarListaHilos()
                 cargarHilos(true)
-
             } else {
-
-                msgRespuesta.innerText = ""
-                alert(mensajeError(r.error))
-
+                alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : ""))
             }
 
         })
@@ -3075,11 +3218,7 @@
             btnIrInicio.style.display = nombre === "inicio" ? "none" : "flex"
 
             if (nombre === "foro") {
-                cargarEtiquetasDisponibles()
-
-                if (listaHilos.children.length === 0) {
-                    cargarHilos(true)
-                }
+                cargarForoBootstrap()
             }
 
             if (nombre === "moderacion") {
@@ -3169,7 +3308,7 @@
             if (r.ok) {
                 cargarDenuncias()
             } else {
-                alert(mensajeError(r.error))
+                alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : "") )
             }
 
         }
@@ -3211,7 +3350,7 @@
                     if (r.ok) {
                         cargarModeradores()
                     } else {
-                        alert(mensajeError(r.error))
+                        alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : "") )
                     }
 
                 })
@@ -3235,7 +3374,7 @@
                 cargarModeradores()
             } else {
                 msgModerador.innerText = ""
-                alert(mensajeError(r.error))
+                alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : "") )
             }
 
         })
@@ -3255,10 +3394,7 @@
             app.style.display = "block"
             userEmail.innerText = sesion.email
             mostrarSeccion("inicio")
-            cargarPerfil()
-            cargarMisSolicitudes()
-            cargarMisIntercambios()
-            cargarRolModerador()
+            cargarBootstrap()
             iniciarActualizacionPeriodica()
         }
 
@@ -3273,14 +3409,14 @@
         let intervaloActualizacion = null
 
         function iniciarActualizacionPeriodica() {
-
             detenerActualizacionPeriodica()
-
             intervaloActualizacion = setInterval(function () {
-                cargarMisSolicitudes()
-                cargarMisIntercambios()
-            }, 25000)
-
+                if (!sesion || document.visibilityState !== "visible") return
+                if (seccionActual === "intercambios") {
+                    cargarMisSolicitudes()
+                    cargarMisIntercambios()
+                }
+            }, 60000)
         }
 
         function detenerActualizacionPeriodica() {
@@ -3294,7 +3430,7 @@
 
         document.addEventListener("visibilitychange", function () {
 
-            if (document.visibilityState === "visible" && sesion) {
+            if (document.visibilityState === "visible" && sesion && seccionActual === "intercambios") {
                 cargarMisSolicitudes()
                 cargarMisIntercambios()
             }
@@ -3323,38 +3459,39 @@
                 actualizarAvataresEnPantalla(r.pseudonimo || "Vos")
                 msgPerfil.innerText = ""
             } else {
-                msgPerfil.innerText = mensajeError(r.error)
+                msgPerfil.innerText = mensajeError(r.error) + (r.detalle ? " — " + r.detalle : "")
             }
 
         }
 
         formPerfil.addEventListener("submit", async function (e) {
-
             e.preventDefault()
+            const anterior = inputPseudonimo.value
+            const nuevo = inputPseudonimo.value.trim()
+            if (!nuevo) return
+            msgPerfil.innerText = "Guardando…"
+            actualizarAvataresEnPantalla(nuevo)
+            try { localStorage.setItem("medmar:perfil:optimista:" + sesion.email.toLowerCase(), JSON.stringify({ pseudonimo: nuevo, foto: fotoActual })) } catch (_) {}
 
-            msgPerfil.innerText = "Guardando..."
-
-            const r = await llamar("actualizarPseudonimo", { pseudonimo: inputPseudonimo.value.trim() })
-
+            const r = await llamar("actualizarPseudonimo", { pseudonimo: nuevo })
             if (r.ok) {
-
                 inputPseudonimo.value = r.pseudonimo
                 msgPerfil.innerText = "Pseudónimo actualizado."
-                actualizarAvataresEnPantalla(r.pseudonimo)
-
+                try {
+                    const key = 'medmar:perfil:' + sesion.email.toLowerCase()
+                    const cached = JSON.parse(localStorage.getItem(key) || 'null') || { data: {} }
+                    cached.data.perfil = cached.data.perfil || {}
+                    cached.data.perfil.pseudonimo = r.pseudonimo
+                    cached.data.perfil.foto = fotoActual
+                    localStorage.setItem(key, JSON.stringify(cached))
+                    localStorage.removeItem("medmar:perfil:optimista:" + sesion.email.toLowerCase())
+                } catch (_) {}
             } else {
-
+                inputPseudonimo.value = anterior
+                actualizarAvataresEnPantalla(anterior)
                 msgPerfil.innerText = ""
-
-                const mensajesPerfil = {
-                    pseudonimo_invalido: "Tiene que tener entre 3 y 24 caracteres (letras, números, espacios, guiones).",
-                    pseudonimo_en_uso: "Ese pseudónimo ya lo está usando otra persona."
-                }
-
-                alert(mensajesPerfil[r.error] || mensajeError(r.error))
-
+                alert(mensajeError(r.error))
             }
-
         })
 
         // --- foto de perfil: se recorta a cuadrado y se comprime en el navegador
@@ -3390,7 +3527,7 @@
                     msgFoto.innerText = "Foto actualizada."
                 } else {
                     msgFoto.innerText = ""
-                    alert(mensajeError(r.error))
+                    alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : "") )
                 }
 
             } catch (err) {
@@ -3451,78 +3588,55 @@
         // ==================== MIS SOLICITUDES ====================
 
         async function cargarMisSolicitudes() {
-
             const r = await llamar("misSolicitudes", {})
-
             if (!r.ok) {
-
                 if (r.error === "sesion_invalida") {
                     sesion = null
                     borrarSesionLocal()
                     mostrarLogin()
                 }
-
                 return
-
             }
-
             if (idEditando && !r.solicitudes.some(function (s) { return s.id === idEditando })) {
                 salirModoEdicion()
-                msg.innerText = "Esa solicitud ya no está disponible (puede que se haya borrado o ya se haya resuelto). Se canceló la edición."
+                msg.innerText = "Esa solicitud ya no está disponible. Se canceló la edición."
             }
-
-            renderizarSolicitudes(r.solicitudes)
-
+            solicitudesUI = r.solicitudes || []
+            renderizarSolicitudes(solicitudesUI)
         }
 
         function renderizarSolicitudes(lista) {
-
+            solicitudesUI = Array.isArray(lista) ? lista.slice() : []
             listaSolicitudes.innerHTML = ""
-
-            if (lista.length === 0) {
+            if (solicitudesUI.length === 0) {
                 listaSolicitudes.innerHTML = "<p class='vacio'>Todavía no publicaste ninguna solicitud.</p>"
                 return
             }
-
-            lista.forEach(function (s) {
-
+            solicitudesUI.forEach(function (s) {
                 const div = document.createElement("div")
-                div.className = "solicitudItem"
-
+                div.className = "solicitudItem" + (s._optimista ? " solicitudOptimista" : "")
                 div.innerHTML =
                     "<div class='info'>" +
-                    "<b>" + s.materia + "</b>" +
-                    "<span class='cambio'>Tenés comisión " + s.tengo + " · buscás comisión " + s.busco + "</span>" +
+                    "<b>" + escapeHtml(s.materia) + "</b>" +
+                    "<span class='cambio'>Tenés comisión " + escapeHtml(String(s.tengo)) + " · buscás comisión " + escapeHtml(String(s.busco)) + "</span>" +
                     "</div>" +
-                    "<div class='solicitudAcciones'>" +
-                    "<button type='button' class='editarBtn'>Editar</button>" +
-                    "<button type='button' class='borrarItemBtn'>Borrar</button>" +
-                    "</div>"
-
-                div.querySelector(".editarBtn").addEventListener("click", function () {
-                    iniciarEdicion(s)
-                })
-
-                div.querySelector(".borrarItemBtn").addEventListener("click", function () {
-                    borrarSolicitudItem(s.id)
-                })
-
+                    (s._optimista ? "<div class='solicitudAcciones'><span class='estadoOptimista'>Guardando…</span></div>" :
+                    "<div class='solicitudAcciones'><button type='button' class='editarBtn'>Editar</button><button type='button' class='borrarItemBtn'>Borrar</button></div>")
+                if (!s._optimista) {
+                    div.querySelector(".editarBtn").addEventListener("click", function () { iniciarEdicion(s) })
+                    div.querySelector(".borrarItemBtn").addEventListener("click", function () { borrarSolicitudItem(s.id) })
+                }
                 listaSolicitudes.appendChild(div)
-
             })
-
         }
 
         // ==================== INTERCAMBIOS COMPLETADOS ====================
 
         async function cargarMisIntercambios() {
-
             const r = await llamar("misIntercambios", {})
-
             if (!r.ok) return
-
-            renderizarIntercambios(r.intercambios)
-
+            intercambiosUI = r.intercambios || []
+            renderizarIntercambios(intercambiosUI)
         }
 
         function renderizarIntercambios(lista) {
@@ -3607,88 +3721,82 @@
 
         cancelarEdicionBtn.addEventListener("click", salirModoEdicion)
 
-        async function borrarSolicitudItem(id) {
+        async function cacheUserListsInvalidarCliente() {
+            try { localStorage.removeItem("medmar:perfil:" + sesion.email.toLowerCase()) } catch (_) {}
+        }
 
+        async function borrarSolicitudItem(id) {
             if (!confirm("¿Seguro que querés borrar esta solicitud?")) return
+            const anterior = solicitudesUI.slice()
+            solicitudesUI = solicitudesUI.filter(function (s) { return s.id !== id })
+            renderizarSolicitudes(solicitudesUI)
 
             const r = await llamar("borrar", { id })
-
             if (r.ok) {
-                cargarMisSolicitudes()
-            } else {
-                alert(mensajeError(r.error))
-                if (r.error === "no_encontrado") cargarMisSolicitudes()
+                cacheUserListsInvalidarCliente()
+                return
             }
-
+            solicitudesUI = anterior
+            renderizarSolicitudes(solicitudesUI)
+            alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : ""))
+            if (r.error === "no_encontrado") cargarMisSolicitudes()
         }
 
         // ==================== PUBLICAR / EDITAR SOLICITUD ====================
 
         form.addEventListener("submit", async function (e) {
-
             e.preventDefault()
             msg.innerText = ""
-
             if (tengo.value === busco.value) {
                 alert("No podés buscar la misma comisión que tenés")
                 return
             }
-
-            const datos = {
-                materia: form.materia.value,
-                tengo: tengo.value,
-                busco: busco.value
-            }
-
+            const datos = { materia: form.materia.value, tengo: tengo.value, busco: busco.value }
             const accion = idEditando ? "editar" : "guardar"
             if (idEditando) datos.id = idEditando
 
-            msg.innerText = idEditando ? "Guardando cambios..." : "Publicando solicitud..."
-
-            const r = await llamar(accion, datos)
-
-            if (r.ok) {
-
-                if (r.emparejado) {
-                    msg.innerText = "¡Encontramos un intercambio para vos! Revisá 'Intercambios completados' o tu correo."
+            if (idEditando) {
+                const anterior = solicitudesUI.slice()
+                const nuevo = { id: idEditando, materia: datos.materia, tengo: Number(datos.tengo), busco: Number(datos.busco), fecha: new Date().toISOString(), _optimista: true }
+                solicitudesUI = solicitudesUI.map(function (s) { return s.id === idEditando ? nuevo : s })
+                renderizarSolicitudes(solicitudesUI)
+                msg.innerText = "Guardando…"
+                const r = await llamar(accion, datos)
+                if (r.ok) {
+                    msg.innerText = r.emparejado ? "¡Encontramos un intercambio para vos! Revisá 'Intercambios completados' o tu correo." : "Solicitud actualizada correctamente."
+                    salirModoEdicion()
+                    cargarMisSolicitudes()
+                    cargarMisIntercambios()
                 } else {
-                    msg.innerText = idEditando ? "Solicitud actualizada correctamente." : "Solicitud publicada correctamente."
+                    solicitudesUI = anterior
+                    renderizarSolicitudes(solicitudesUI)
+                    msg.innerText = ""
+                    alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : ""))
                 }
-
-                salirModoEdicion()
-                cargarMisSolicitudes()
-                cargarMisIntercambios()
-
-            } else if (r.error === "ya_existe") {
-
-                msg.innerText = "Ya registraste exactamente esta solicitud (mirá 'Mis solicitudes')."
-
-            } else if (r.error === "ya_tenes_otra") {
-
-                msg.innerText = "Ya tenés otra comisión registrada para esta materia. Editala o borrala en 'Mis solicitudes'."
-
-            } else if (r.error === "sesion_invalida") {
-
-                msg.innerText = ""
-                sesion = null
-                borrarSesionLocal()
-                mostrarLogin()
-
-            } else if (r.error === "no_encontrado") {
-
-                msg.innerText = ""
-                alert("Esa solicitud ya no existe (puede que ya se haya encontrado un intercambio). Se actualizó la lista.")
-                salirModoEdicion()
-                cargarMisSolicitudes()
-                cargarMisIntercambios()
-
-            } else {
-
-                msg.innerText = ""
-                alert(mensajeError(r.error))
-
+                return
             }
 
+            const optimista = { id: "tmp-sol-" + Date.now(), materia: datos.materia, tengo: Number(datos.tengo), busco: Number(datos.busco), fecha: new Date().toISOString(), _optimista: true }
+            solicitudesUI.push(optimista)
+            renderizarSolicitudes(solicitudesUI)
+            msg.innerText = ""
+            const r = await llamar("guardar", datos)
+            if (r.ok) {
+                msg.innerText = r.emparejado ? "¡Encontramos un intercambio para vos! Revisá 'Intercambios completados' o tu correo." : "Solicitud publicada correctamente."
+                salirModoEdicion()
+                cargarMisSolicitudes()
+                cargarMisIntercambios()
+            } else {
+                solicitudesUI = solicitudesUI.filter(function (s) { return s.id !== optimista.id })
+                renderizarSolicitudes(solicitudesUI)
+                if (r.error === "sesion_invalida") {
+                    sesion = null
+                    borrarSesionLocal()
+                    mostrarLogin()
+                } else {
+                    alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : ""))
+                }
+            }
         })
 
         // ==================== INICIO ====================
