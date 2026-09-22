@@ -956,6 +956,73 @@
                 background: var(--gold-600);
             }
 
+
+        /* ---------- LIKES ---------- */
+        .hiloLikeBar {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 7px;
+        }
+
+        .likeButton {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            width: auto;
+            margin: 0;
+            padding: 4px 8px;
+            background: transparent;
+            border: none;
+            color: var(--ink-soft);
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+
+        .likeButton:hover {
+            background: #F8E8E7;
+            color: #C74343;
+        }
+
+        .likeButton .corazonLike {
+            display: inline-block;
+            line-height: 1;
+            font-size: 1.08rem;
+            transition: transform 0.15s ease;
+        }
+
+        .likeButton.activo {
+            color: #C74343;
+        }
+
+        .likeButton.pulsando .corazonLike {
+            animation: likePop 0.23s cubic-bezier(.2,.9,.3,1.4);
+        }
+
+        @keyframes likePop {
+            0% { transform: scale(1); }
+            45% { transform: scale(1.34); }
+            100% { transform: scale(1); }
+        }
+
+        /* ---------- NAVEGACIÓN Y FORO ---------- */
+        #vistaForo {
+            margin-top: -10px;
+        }
+
+        .navTarget {
+            scroll-margin-top: 10px;
+        }
+
+        .pieSoloInicio {
+            display: none;
+        }
+
+        .pieSoloInicio.visible {
+            display: block;
+        }
+
         @media (max-width: 480px) {
             .linkPreviewThumb {
                 width: 92px;
@@ -1818,6 +1885,7 @@ let foroCargado = false
 const foroCacheCliente = new Map()
 let solicitudesUI = []
 let respuestasUI = []
+let hiloActualUI = null
 let intercambiosUI = []
 
         const loginScreen = document.getElementById("loginScreen")
@@ -1906,6 +1974,7 @@ let intercambiosUI = []
         const btnAbrirCompose = document.getElementById("btnAbrirCompose")
         const btnCerrarCompose = document.getElementById("btnCerrarCompose")
         const modalCompose = document.getElementById("modalCompose")
+        const pieInicio = document.getElementById("pieInicio")
 
         let fotoActual = ""
         let seccionActual = "inicio"
@@ -2233,6 +2302,7 @@ let intercambiosUI = []
                 contenido_invalido: "El contenido no puede estar vacío ni superar los 5000 caracteres.",
                 link_invalido: "El enlace no tiene un formato HTTPS válido.",
                 link_no_permitido: "Ese sitio no está permitido. Solo aceptamos dominios seguros de YouTube, Google, UNMDP, sitios académicos autorizados, Spotify y Steam.",
+                servidor_ocupado: "El servidor está ocupado en este momento. Probá de nuevo.",
                 pseudonimo_invalido: "El pseudónimo debe tener entre 3 y 24 caracteres.",
                 pseudonimo_en_uso: "Ese pseudónimo ya lo está usando otra persona.",
                 ya_es_moderador: "Esa persona ya es moderadora.",
@@ -2509,11 +2579,15 @@ async function cargarBootstrap() {
             foroLista.style.display = "block"
             foroDetalle.style.display = "none"
             hiloAbiertoId = null
+            hiloActualUI = null
+            respuestasUI = []
+            requestAnimationFrame(function () { foroLista.scrollIntoView({ behavior: "smooth", block: "start" }) })
         }
 
         function mostrarDetalleHilo() {
             foroLista.style.display = "none"
             foroDetalle.style.display = "block"
+            requestAnimationFrame(function () { foroDetalle.scrollIntoView({ behavior: "smooth", block: "start" }) })
         }
 
         function formatearFecha(fecha) {
@@ -2833,6 +2907,92 @@ async function cargarBootstrap() {
                 "</a>"
         }
 
+        function likeButtonHtml(tipo, id, likes, meGusta) {
+            const activo = meGusta ? " activo" : ""
+            const corazon = meGusta ? "♥" : "♡"
+            const etiqueta = meGusta ? "Quitar like" : "Dar like"
+            return "<button type='button' class='likeButton" + activo + "' data-like-tipo='" + escapeAttr(tipo) + "' data-like-id='" + escapeAttr(id) + "' aria-label='" + etiqueta + "'>" +
+                "<span class='corazonLike'>" + corazon + "</span>" +
+                "<span class='likeCount'>" + Number(likes || 0) + "</span>" +
+                "</button>"
+        }
+
+        function activarBotonLike(contenedor) {
+            const btn = contenedor.querySelector('.likeButton')
+            if (!btn) return
+            btn.addEventListener('click', function (e) {
+                e.preventDefault()
+                e.stopPropagation()
+                toggleLikeUI(btn.dataset.likeTipo, btn.dataset.likeId, btn)
+            })
+        }
+
+        function actualizarLikeEnCachesCliente(tipo, id, liked, likes) {
+            if (tipo === 'hilo') {
+                foroCacheCliente.forEach(function (cache) {
+                    if (!cache || !Array.isArray(cache.hilos)) return
+                    cache.hilos.forEach(function (h) {
+                        if (String(h.id) === String(id)) {
+                            h.meGusta = liked
+                            h.likes = likes
+                        }
+                    })
+                })
+            }
+        }
+
+        async function toggleLikeUI(tipo, id, btn) {
+            if (!sesion) return
+            const root = btn.closest('.hiloItem, #detalleHiloContenido, .respuestaItem') || btn.parentElement
+            const wasLiked = btn.classList.contains('activo')
+            const countEl = btn.querySelector('.likeCount')
+            const heartEl = btn.querySelector('.corazonLike')
+            const oldLikes = Number(countEl ? countEl.textContent : 0)
+            const optimisticLiked = !wasLiked
+            const optimisticLikes = Math.max(0, oldLikes + (optimisticLiked ? 1 : -1))
+
+            btn.classList.toggle('activo', optimisticLiked)
+            btn.setAttribute('aria-label', optimisticLiked ? 'Quitar like' : 'Dar like')
+            if (heartEl) heartEl.textContent = optimisticLiked ? '♥' : '♡'
+            if (countEl) countEl.textContent = optimisticLikes
+            if (optimisticLiked) {
+                btn.classList.remove('pulsando')
+                void btn.offsetWidth
+                btn.classList.add('pulsando')
+            }
+
+            if (tipo === 'respuesta') {
+                const item = respuestasUI.find(function (r) { return String(r.id) === String(id) })
+                if (item) { item.meGusta = optimisticLiked; item.likes = optimisticLikes }
+            }
+
+            const r = await llamar('toggleLike', { tipo: tipo, id: id })
+            if (r.ok) {
+                btn.classList.toggle('activo', !!r.liked)
+                btn.setAttribute('aria-label', r.liked ? 'Quitar like' : 'Dar like')
+                if (heartEl) heartEl.textContent = r.liked ? '♥' : '♡'
+                if (countEl) countEl.textContent = Number(r.likes || 0)
+                if (tipo === 'respuesta') {
+                    const item = respuestasUI.find(function (x) { return String(x.id) === String(id) })
+                    if (item) { item.meGusta = !!r.liked; item.likes = Number(r.likes || 0) }
+                } else {
+                    if (hiloActualUI && String(hiloActualUI.id) === String(id)) {
+                        hiloActualUI.meGusta = !!r.liked
+                        hiloActualUI.likes = Number(r.likes || 0)
+                    }
+                    actualizarLikeEnCachesCliente(tipo, id, !!r.liked, Number(r.likes || 0))
+                }
+                return
+            }
+
+            // Rollback optimistic state.
+            btn.classList.toggle('activo', wasLiked)
+            btn.setAttribute('aria-label', wasLiked ? 'Quitar like' : 'Dar like')
+            if (heartEl) heartEl.textContent = wasLiked ? '♥' : '♡'
+            if (countEl) countEl.textContent = oldLikes
+            alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : ""))
+        }
+
         function renderizarHilos(hilos, reiniciar) {
 
             if (reiniciar) listaHilos.innerHTML = ""
@@ -2865,7 +3025,8 @@ async function cargarBootstrap() {
                     "<span class='puntoSeparador'>·</span>" +
                     "<span class='hiloFecha'>" + formatearFecha(h.fecha) + "</span>" +
                     "<span class='hiloRespuestasCount'>💬 " + h.respuestas + "</span>" +
-                    "</div>"
+                    "</div>" +
+                    "<div class='hiloLikeBar'>" + likeButtonHtml('hilo', h.id, h.likes, h.meGusta) + "</div>"
 
                 div.addEventListener("click", function () {
                     if (h._optimista) return
@@ -2891,6 +3052,7 @@ async function cargarBootstrap() {
 
                 const linkEl = div.querySelector(".linkPreview")
                 if (linkEl) linkEl.addEventListener("click", function (e) { e.stopPropagation() })
+                activarBotonLike(div)
 
                 listaHilos.appendChild(div)
 
@@ -3049,7 +3211,8 @@ async function cargarBootstrap() {
 
             }
 
-            renderizarDetalleHilo(r.hilo)
+            hiloActualUI = Object.assign({}, r.hilo)
+            renderizarDetalleHilo(hiloActualUI)
             renderizarRespuestas(r.respuestas)
 
         }
@@ -3077,13 +3240,41 @@ async function cargarBootstrap() {
                 "</div>" +
                 "<div class='cuerpoHilo'>" + escapeHtml(h.contenido) + "</div>" +
                 renderizarLinkPreview(h.link) +
+                "<div class='hiloLikeBar'>" + likeButtonHtml('hilo', h.id, h.likes, h.meGusta) + "</div>" +
                 "<div class='hiloAcciones'>" + acciones + "</div>"
 
             activarAccionesPublicacion(detalleHiloContenido)
+            activarBotonLike(detalleHiloContenido)
 
             const linkEl = detalleHiloContenido.querySelector(".linkPreview")
             if (linkEl) linkEl.addEventListener("click", function (e) { e.stopPropagation() })
 
+        }
+
+        function crearElementoRespuesta(r) {
+            const div = document.createElement("div")
+            div.className = "respuestaItem" + (r._optimista ? " respuestaOptimista" : "")
+            div.dataset.respuestaId = r.id
+
+            let acciones = r._optimista ? "" : "<button type='button' class='accionDenunciar' data-tipo='respuesta' data-id='" + escapeAttr(r.id) + "'>Denunciar</button>"
+            if (!r._optimista && (r.esPropio || esModeradorActual)) {
+                acciones += "<button type='button' class='accionBorrar' data-tipo='respuesta' data-id='" + escapeAttr(r.id) + "'>Borrar</button>"
+            }
+
+            div.innerHTML =
+                "<div class='respuestaCabecera'>" +
+                avatarHtml(r.autor, r.autorFoto, "avatarChico") +
+                "<span class='hiloAutor'>" + escapeHtml(r.autor) + "</span>" +
+                "<span class='puntoSeparador'>·</span>" +
+                "<span class='hiloFecha'>" + formatearFecha(r.fecha) + "</span>" +
+                "</div>" +
+                "<div class='cuerpoHilo'>" + escapeHtml(r.contenido) + "</div>" +
+                "<div class='hiloLikeBar'>" + likeButtonHtml('respuesta', r.id, r.likes, r.meGusta) + "</div>" +
+                (acciones ? "<div class='hiloAcciones'>" + acciones + "</div>" : "")
+
+            activarBotonLike(div)
+            activarAccionesPublicacion(div)
+            return div
         }
 
         function renderizarRespuestas(respuestas) {
@@ -3094,23 +3285,7 @@ async function cargarBootstrap() {
                 return
             }
             respuestasUI.forEach(function (r) {
-                const div = document.createElement("div")
-                div.className = "respuestaItem" + (r._optimista ? " respuestaOptimista" : "")
-                let acciones = r._optimista ? "" : "<button type='button' class='accionDenunciar' data-tipo='respuesta' data-id='" + r.id + "'>Denunciar</button>"
-                if (!r._optimista && (r.esPropio || esModeradorActual)) {
-                    acciones += "<button type='button' class='accionBorrar' data-tipo='respuesta' data-id='" + r.id + "'>Borrar</button>"
-                }
-                div.innerHTML =
-                    "<div class='respuestaCabecera'>" +
-                    avatarHtml(r.autor, r.autorFoto, "avatarChico") +
-                    "<span class='hiloAutor'>" + escapeHtml(r.autor) + "</span>" +
-                    "<span class='puntoSeparador'>·</span>" +
-                    "<span class='hiloFecha'>" + formatearFecha(r.fecha) + "</span>" +
-                    "</div>" +
-                    "<div class='cuerpoHilo'>" + escapeHtml(r.contenido) + "</div>" +
-                    (acciones ? "<div class='hiloAcciones'>" + acciones + "</div>" : "")
-                listaRespuestas.appendChild(div)
-                activarAccionesPublicacion(div)
+                listaRespuestas.appendChild(crearElementoRespuesta(r))
             })
         }
 
@@ -3149,7 +3324,22 @@ async function cargarBootstrap() {
             })
 
             if (r.ok) {
-                abrirHilo(hiloAbiertoId)
+                const indice = respuestasUI.findIndex(function (x) { return x.id === tempId })
+                const respuestaFinal = r.respuesta || {
+                    id: r.id,
+                    autor: optimistic.autor,
+                    autorFoto: optimistic.autorFoto,
+                    esPropio: true,
+                    contenido: contenido,
+                    fecha: optimistic.fecha,
+                    likes: 0,
+                    meGusta: false
+                }
+                if (indice !== -1) respuestasUI[indice] = respuestaFinal
+                const tempEl = listaRespuestas.querySelector("[data-respuesta-id='" + CSS.escape(tempId) + "']")
+                if (tempEl) tempEl.replaceWith(crearElementoRespuesta(respuestaFinal))
+                msgRespuesta.innerText = ""
+                if (hiloActualUI) hiloActualUI.respuestas = Number(hiloActualUI.respuestas || 0) + 1
                 return
             }
 
@@ -3189,24 +3379,25 @@ async function cargarBootstrap() {
             const btn = e.target.closest(".tarjetaInicio")
             if (!btn) return
 
-            mostrarSeccion(btn.dataset.vista)
+            mostrarSeccion(btn.dataset.vista, "down")
 
         })
 
         btnIrInicio.addEventListener("click", function () {
-            mostrarSeccion("inicio")
+            mostrarSeccion("inicio", "up")
         })
 
         btnIrModeracion.addEventListener("click", function () {
-            mostrarSeccion("moderacion")
+            mostrarSeccion("moderacion", "down")
         })
 
         btnVolverForoDesdeModeracion.addEventListener("click", function () {
-            mostrarSeccion("foro")
+            mostrarSeccion("foro", "up")
         })
 
-        function mostrarSeccion(nombre) {
+        function mostrarSeccion(nombre, modoNavegacion) {
 
+            const anterior = seccionActual
             seccionActual = nombre
 
             vistaInicio.style.display = nombre === "inicio" ? "block" : "none"
@@ -3217,23 +3408,34 @@ async function cargarBootstrap() {
             vistaModeracion.style.display = nombre === "moderacion" ? "block" : "none"
 
             btnIrInicio.style.display = nombre === "inicio" ? "none" : "flex"
+            if (pieInicio) pieInicio.classList.toggle("visible", nombre === "inicio")
 
             if (nombre === "foro") {
                 cargarForoBootstrap()
             }
 
             if (nombre === "moderacion") {
-
                 cargarDenuncias()
-
                 if (esAdminActual) {
                     seccionModeradores.style.display = "block"
                     cargarModeradores()
                 }
-
             }
 
-            window.scrollTo({ top: 0, behavior: "smooth" })
+            requestAnimationFrame(function () {
+                if (modoNavegacion === "up" || nombre === "inicio") {
+                    window.scrollTo({ top: 0, behavior: "smooth" })
+                    return
+                }
+
+                const destino = nombre === "foro" ? vistaForo :
+                    nombre === "intercambios" ? vistaIntercambios :
+                    nombre === "juegos" ? vistaJuegos :
+                    nombre === "configuracion" ? vistaConfiguracion :
+                    vistaModeracion
+
+                if (destino) destino.scrollIntoView({ behavior: "smooth", block: "start" })
+            })
 
         }
 
@@ -3812,6 +4014,8 @@ async function cargarBootstrap() {
 
     </script>
 
+    <div id="pieInicio" class="pieSoloInicio">
+
     <div id="disclaimer">
 
         <b>Aviso</b><br>
@@ -3843,7 +4047,7 @@ async function cargarBootstrap() {
         </div>
     </div>
 
-    </div>
+    </div><!-- /pieInicio -->
 
 </body>
 </html>
