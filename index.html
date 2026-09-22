@@ -154,7 +154,7 @@
             margin-top: 14px;
         }
 
-        select, input {
+        select, input, textarea {
             width: 100%;
             margin-top: 6px;
             padding: 10px 12px;
@@ -164,9 +164,10 @@
             background: white;
             border: 1px solid var(--line);
             border-radius: 6px;
+            resize: vertical;
         }
 
-            select:focus, input:focus {
+            select:focus, input:focus, textarea:focus {
                 border-color: var(--teal-700);
                 outline: none;
                 box-shadow: 0 0 0 3px rgba(36, 89, 84, 0.15);
@@ -301,6 +302,37 @@
                 color: var(--teal-700);
             }
 
+        .ayudaPerfil {
+                margin: 4px 0 0;
+                font-size: 0.85rem;
+                color: var(--ink-soft);
+            }
+
+            #formPerfil {
+                display: flex;
+                gap: 8px;
+                margin-top: 10px;
+                align-items: flex-start;
+            }
+
+                #formPerfil input {
+                    margin-top: 0;
+                }
+
+                #formPerfil button {
+                    width: auto;
+                    white-space: nowrap;
+                    margin-top: 0;
+                }
+
+            #msgPerfil {
+                margin-top: 8px;
+                font-size: 0.85rem;
+                font-weight: 500;
+                color: var(--teal-700);
+                min-height: 1.2em;
+            }
+
         #cancelarEdicionBtn {
             background: transparent;
             color: var(--ink-soft);
@@ -426,6 +458,846 @@
                     background: var(--teal-100);
                 }
 
+        /* ---------- SELECTOR PERSONALIZADO ---------- */
+
+        .selectPersonalizado {
+            position: relative;
+            margin-top: 6px;
+        }
+
+        .selectorTrigger {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 14px;
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: var(--ink);
+            cursor: pointer;
+            text-align: left;
+        }
+
+            .selectorTrigger .placeholder {
+                color: var(--ink-soft);
+            }
+
+            .selectorTrigger svg {
+                flex-shrink: 0;
+                margin-left: 8px;
+                transition: transform 0.15s ease;
+                color: var(--ink-soft);
+            }
+
+        .selectPersonalizado.abierto .selectorTrigger {
+            border-color: var(--teal-700);
+            box-shadow: 0 0 0 3px rgba(36, 89, 84, 0.15);
+        }
+
+            .selectPersonalizado.abierto .selectorTrigger svg {
+                transform: rotate(180deg);
+            }
+
+        .selectorPanel {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            z-index: 40;
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            box-shadow: 0 10px 28px rgba(15, 51, 47, 0.18);
+            max-height: 280px;
+            overflow-y: auto;
+            opacity: 0;
+            transform: translateY(-6px) scale(0.98);
+            pointer-events: none;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+        }
+
+        .selectPersonalizado.abierto .selectorPanel {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .selectorBusqueda {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 8px;
+            border-bottom: 1px solid var(--line);
+        }
+
+            .selectorBusqueda input {
+                margin-top: 0;
+            }
+
+        .selectorGrupo {
+            padding: 10px 14px 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            color: var(--ink-soft);
+            text-transform: uppercase;
+        }
+
+        .selectorOpcion {
+            padding: 10px 14px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+            .selectorOpcion:hover {
+                background: var(--teal-50);
+            }
+
+            .selectorOpcion.seleccionada {
+                color: var(--teal-700);
+                font-weight: 600;
+                background: var(--teal-100);
+            }
+
+        /* ---------- AVATARES ---------- */
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: var(--teal-100);
+        }
+
+        .avatarInicial {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--teal-900);
+        }
+
+        .avatarChico {
+            width: 24px;
+            height: 24px;
+            font-size: 0.7rem;
+        }
+
+        .avatarGrande {
+            width: 84px;
+            height: 84px;
+            font-size: 1.9rem;
+        }
+
+        /* ---------- MODAL (composición / configuración) ---------- */
+
+        .modalFondo {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 51, 47, 0.45);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+            .modalFondo.abierto {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+        .modalCaja {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            max-height: 88vh;
+            overflow-y: auto;
+            border-radius: 16px 16px 0 0;
+            padding: 20px 22px 26px;
+            transform: translateY(24px);
+            transition: transform 0.22s cubic-bezier(.2,.8,.3,1);
+        }
+
+            .modalFondo.abierto .modalCaja {
+                transform: translateY(0);
+            }
+
+        @media (min-width: 640px) {
+
+            .modalFondo {
+                align-items: center;
+            }
+
+            .modalCaja {
+                border-radius: 16px;
+                transform: translateY(12px) scale(0.98);
+            }
+
+        }
+
+        .modalEncabezado {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+            .modalEncabezado h2 {
+                font-size: 1.15rem;
+            }
+
+        .modalCerrar {
+            width: auto;
+            background: none;
+            border: none;
+            padding: 4px 6px;
+            font-size: 1.4rem;
+            line-height: 1;
+            color: var(--ink-soft);
+        }
+
+            .modalCerrar:hover {
+                color: var(--ink);
+            }
+
+        @media (prefers-reduced-motion: reduce) {
+            .modalFondo, .modalCaja, .selectorPanel, .selectorTrigger svg {
+                transition: none;
+            }
+        }
+
+        /* ---------- BARRA SUPERIOR / INICIO ---------- */
+
+        #userBar {
+            padding: 8px 14px;
+        }
+
+        .btnVolverInicio {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: none !important;
+            border: none !important;
+            padding: 4px 2px !important;
+            font-weight: 700 !important;
+            color: var(--teal-900) !important;
+            font-family: "Fraunces", serif;
+        }
+
+            .btnVolverInicio svg {
+                flex-shrink: 0;
+            }
+
+        #saludoInicio {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 6px;
+        }
+
+            #saludoInicio p {
+                margin: 0;
+                font-size: 0.88rem;
+                color: var(--ink-soft);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+        .menuInicio {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .tarjetaInicio {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 18px 15px;
+            text-align: left;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        }
+
+            .tarjetaInicio:hover, .tarjetaInicio:focus-visible {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 24px rgba(15, 51, 47, 0.14);
+                border-color: var(--teal-700);
+            }
+
+            .tarjetaInicio:active {
+                transform: translateY(-1px);
+            }
+
+        .iconoInicio {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: var(--teal-100);
+            color: var(--teal-700);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+            .iconoInicio.dorado {
+                background: #F2E6C9;
+                color: var(--gold-600);
+            }
+
+        .tituloInicio {
+            font-family: "Fraunces", serif;
+            font-weight: 600;
+            font-size: 0.98rem;
+            color: var(--ink);
+            line-height: 1.25;
+        }
+
+        .descInicio {
+            font-size: 0.8rem;
+            color: var(--ink-soft);
+            line-height: 1.4;
+            margin-top: -4px;
+        }
+
+        .filaAvatar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        #inputArchivoFoto {
+            display: none;
+        }
+
+        /* ---------- FORO / MODERACIÓN ---------- */
+
+        .foroCabecera {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .foroCabeceraAcciones {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .linkModeracion {
+            width: auto;
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--gold-600);
+            text-decoration: underline;
+            white-space: nowrap;
+        }
+
+            .linkModeracion:hover {
+                color: var(--gold-500);
+            }
+
+        .btnPublicarForo {
+            width: auto;
+            margin-top: 0;
+            white-space: nowrap;
+        }
+
+        .notaForo {
+            margin: 10px 0 0;
+            padding: 10px 12px;
+            background: var(--teal-50);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            font-size: 0.82rem;
+            color: var(--ink-soft);
+            line-height: 1.45;
+        }
+
+        .labelCheckbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 400;
+            color: var(--ink);
+            font-size: 0.9rem;
+            margin-top: 14px;
+        }
+
+            .labelCheckbox input {
+                width: auto;
+                margin-top: 0;
+            }
+
+        .avatarMediano {
+            width: 48px;
+            height: 48px;
+            font-size: 1.1rem;
+        }
+
+        /* ---------- COMPOSE ESTILO X ---------- */
+
+        .composeCabecera {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+            .composeCabecera .hiloAutor {
+                font-size: 0.9rem;
+                font-weight: 600;
+                color: var(--ink);
+            }
+
+        .inputTitulo {
+            border: none;
+            border-bottom: 2px solid var(--line);
+            border-radius: 0;
+            padding: 10px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: "Fraunces", serif;
+            margin-top: 16px;
+        }
+
+            .inputTitulo:focus {
+                outline: none;
+                box-shadow: none;
+                border-bottom-color: var(--teal-700);
+            }
+
+        .textareaCompose {
+            border: none;
+            border-radius: 0;
+            padding: 10px 0;
+            font-size: 1.02rem;
+            font-family: inherit;
+            line-height: 1.55;
+            resize: none;
+            overflow: hidden;
+            min-height: 84px;
+            margin-top: 2px;
+        }
+
+            .textareaCompose:focus {
+                outline: none;
+                box-shadow: none;
+            }
+
+        .textareaRespuesta {
+            min-height: 50px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .composeExtra {
+            display: flex;
+            gap: 10px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+
+            .composeExtra input {
+                font-size: 0.85rem;
+                padding: 9px 12px;
+                margin-top: 0;
+                flex: 1 1 200px;
+            }
+
+        .composePie {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 16px;
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid var(--line);
+        }
+
+        .contadorCompose {
+            font-size: 0.78rem;
+            color: var(--ink-soft);
+            margin-right: auto;
+        }
+
+        .btnPublicarCompose {
+            width: auto;
+            padding: 10px 24px;
+            border-radius: 999px;
+            background: var(--gold-500);
+            color: var(--teal-950);
+            font-weight: 700;
+        }
+
+            .btnPublicarCompose:hover {
+                background: var(--gold-600);
+            }
+
+        @media (max-width: 480px) {
+            .linkPreviewThumb {
+                width: 92px;
+                min-width: 92px;
+                height: 64px;
+            }
+
+            .composeExtra {
+                flex-direction: column;
+            }
+        }
+
+        #filtroEtiqueta {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+            #filtroEtiqueta input {
+                flex: 1;
+                margin-top: 0;
+                min-width: 140px;
+            }
+
+            #filtroEtiqueta button {
+                width: auto;
+                margin-top: 0;
+                white-space: nowrap;
+            }
+
+        #listaHilos, #listaRespuestas, #listaDenuncias, #listaModeradores {
+            margin-top: 8px;
+        }
+
+        .hiloItem {
+            padding: 16px 14px;
+            margin: 0 -14px;
+            border-bottom: 1px solid var(--line);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+
+            .hiloItem:hover, .hiloItem:focus-visible {
+                background: var(--teal-50);
+                outline: none;
+            }
+
+        .respuestaItem {
+            padding: 14px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .hiloTitulo {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin: 6px 0 0;
+            line-height: 1.35;
+        }
+
+        .hiloResumen, .cuerpoHilo {
+            margin: 6px 0 0;
+            font-size: 0.88rem;
+            color: var(--ink-soft);
+            line-height: 1.5;
+        }
+
+        .cuerpoHilo {
+            color: var(--ink);
+            white-space: pre-wrap;
+        }
+
+        .etiquetas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .etiquetaChip {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--teal-700);
+            background: var(--teal-100);
+            border-radius: 999px;
+            padding: 3px 10px;
+            border: none;
+            width: auto;
+            margin: 0;
+            cursor: pointer;
+        }
+
+            .etiquetaChip:hover {
+                background: #D2E4E1;
+            }
+
+        .ayudaFiltroEtiqueta {
+            margin: 6px 0 0;
+            font-size: 0.78rem;
+            color: var(--ink-soft);
+        }
+
+        .ayudaLink {
+            flex: 0 0 100%;
+            margin: 0;
+            font-size: 0.76rem;
+            color: var(--ink-soft);
+            line-height: 1.4;
+        }
+
+        .linkPreview {
+            display: block;
+            margin-top: 10px;
+            padding: 0;
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+            color: var(--teal-900);
+            text-decoration: none;
+            max-width: 100%;
+        }
+
+            .linkPreview:hover {
+                background: var(--teal-50);
+            }
+
+        .linkPreviewBody {
+            display: flex;
+            align-items: stretch;
+            min-height: 64px;
+        }
+
+        .linkPreviewThumb {
+            width: 116px;
+            min-width: 116px;
+            height: 72px;
+            object-fit: cover;
+            background: var(--teal-100);
+        }
+
+        .linkPreviewInfo {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 3px;
+            padding: 10px 12px;
+            min-width: 0;
+        }
+
+        .linkPreviewTitle {
+            font-size: 0.84rem;
+            font-weight: 700;
+            line-height: 1.25;
+            color: var(--ink);
+        }
+
+        .linkPreviewHost {
+            font-size: 0.75rem;
+            color: var(--ink-soft);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .linkPreviewPlay {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 0;
+            padding: 8px 12px;
+            border-top: 1px solid var(--line);
+            font-size: 0.74rem;
+            font-weight: 700;
+            color: var(--teal-700);
+        }
+
+        .linkPreviewEmbed {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border: 0;
+            background: #000;
+        }
+
+        .linkPreviewEmbed.spotify {
+            aspect-ratio: auto;
+            height: 152px;
+            background: white;
+        }
+
+        .linkPreviewCompact .linkPreviewPlay {
+            display: none;
+        }
+
+        .hiloPie {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            font-size: 0.8rem;
+            color: var(--ink-soft);
+        }
+
+            .hiloPie .hiloAutor {
+                font-weight: 600;
+                color: var(--ink);
+            }
+
+            .hiloPie .puntoSeparador {
+                opacity: 0.5;
+            }
+
+            .hiloPie .hiloRespuestasCount {
+                margin-left: auto;
+                white-space: nowrap;
+            }
+
+        .respuestaCabecera {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+            .respuestaCabecera .hiloAutor {
+                font-weight: 600;
+                color: var(--ink);
+            }
+
+            .respuestaCabecera .puntoSeparador {
+                opacity: 0.5;
+                font-size: 0.8rem;
+                color: var(--ink-soft);
+            }
+
+            .respuestaCabecera .hiloFecha {
+                font-size: 0.78rem;
+                color: var(--ink-soft);
+            }
+
+        .hiloAcciones {
+            display: flex;
+            gap: 14px;
+            margin-top: 10px;
+        }
+
+            .hiloAcciones button {
+                width: auto;
+                margin-top: 0;
+                background: none;
+                border: none;
+                padding: 0;
+                font-size: 0.78rem;
+                font-weight: 500;
+                color: var(--ink-soft);
+                text-decoration: underline;
+            }
+
+                .hiloAcciones button:hover {
+                    color: var(--teal-700);
+                }
+
+                .hiloAcciones button.accionBorrar:hover {
+                    color: var(--red-600);
+                }
+
+        #detalleHiloContenido {
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--line);
+        }
+
+            #detalleHiloContenido h3 {
+                font-size: 1.15rem;
+                margin-top: 10px;
+            }
+
+        .denunciaItem {
+            border-left: 3px solid var(--gold-500);
+            padding-left: 12px;
+            padding-top: 14px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--line);
+        }
+
+            .denunciaItem .contenidoDenunciado {
+                font-size: 0.88rem;
+                margin-top: 4px;
+                color: var(--ink);
+            }
+
+            .denunciaItem .autorReal {
+                font-size: 0.78rem;
+                color: var(--ink-soft);
+                margin-top: 4px;
+            }
+
+        .denunciaAcciones {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+            .denunciaAcciones button {
+                width: auto;
+                margin-top: 0;
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+
+            .btnDescartar {
+                background: var(--teal-100);
+                color: var(--teal-900);
+            }
+
+            .btnEliminarPublicacion {
+                background: var(--red-600);
+                color: white;
+            }
+
+                .btnEliminarPublicacion:hover {
+                    background: var(--red-700);
+                }
+
+        .moderadorItem {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+            .moderadorItem button {
+                width: auto;
+                margin-top: 0;
+                padding: 5px 10px;
+                font-size: 0.78rem;
+                background: var(--red-600);
+                color: white;
+            }
+
         /* ---------- FIRMA ---------- */
 
         #firma {
@@ -506,6 +1378,14 @@
                 margin: 16px 18px 0;
             }
 
+            #formPerfil {
+                flex-direction: column;
+            }
+
+                #formPerfil button {
+                    width: 100%;
+                }
+
         }
 
     </style>
@@ -515,26 +1395,20 @@
 
     <div class="hero">
         <div class="hero-inner">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M4 8H17M13 4L17 8L13 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M20 16H7M11 12L7 16L11 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M12 4 2 9l10 5 10-5-10-5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M21 9v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
             </svg>
             <div>
-                <h1>Intercambio de Comisiones</h1>
-                <p>Una herramienta para estudiantes de Medicina de la UNMDP que quieren cambiar de comisión sin tener que preguntar curso por curso.</p>
+                <h1>Simomed</h1>
+                <p>Una plataforma hecha por y para estudiantes de Medicina de la UNMDP: para ayudarse con las comisiones, compartir lo que saben y no cursar tan solos.</p>
             </div>
         </div>
     </div>
 
     <div class="pagina">
     <div class="contenido">
-
-        <ul class="pasos">
-            <li><span class="paso-numero">1</span><span>Iniciá sesión con tu cuenta de Google, o con email y contraseña.</span></li>
-            <li><span class="paso-numero">2</span><span>Elegí la materia, la comisión que tenés y la que buscás.</span></li>
-            <li><span class="paso-numero">3</span><span>Publicá tu solicitud. Podés editarla o borrarla después en "Mis solicitudes".</span></li>
-            <li><span class="paso-numero">4</span><span>Si aparece un cruce posible, recibís un correo automático. Las solicitudes vencen a los 30 días.</span></li>
-        </ul>
 
         <!-- ==================== LOGIN ==================== -->
 
@@ -578,9 +1452,68 @@
         <div id="app" style="display:none">
 
             <div id="userBar">
-                <span>Conectado como <b id="userEmail"></b></span>
-                <button type="button" id="logoutBtn">Cerrar sesión</button>
+                <button type="button" id="btnIrInicio" class="btnVolverInicio">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5 8 12l7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Inicio
+                </button>
             </div>
+
+            <!-- ==================== INICIO ==================== -->
+
+            <div id="vistaInicio">
+
+                <div id="saludoInicio">
+                    <span id="avatarUserBar"></span>
+                    <p>Conectado como <b id="userEmail"></b></p>
+                </div>
+
+                <div class="menuInicio">
+
+                    <button type="button" class="tarjetaInicio" data-vista="intercambios">
+                        <span class="iconoInicio">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8H17M13 4L17 8L13 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 16H7M11 12L7 16L11 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </span>
+                        <span class="tituloInicio">Intercambio de comisiones</span>
+                        <span class="descInicio">Encontrá con quién cambiar tu comisión</span>
+                    </button>
+
+                    <button type="button" class="tarjetaInicio" data-vista="foro">
+                        <span class="iconoInicio dorado">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-8l-4 3v-3H7a2 2 0 0 1-2-2V6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>
+                        </span>
+                        <span class="tituloInicio">Foro</span>
+                        <span class="descInicio">Compartí, preguntá y enterate de todo</span>
+                    </button>
+
+                    <button type="button" class="tarjetaInicio" data-vista="juegos">
+                        <span class="iconoInicio">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 9h10a4 4 0 0 1 4 4v2a2.5 2.5 0 0 1-4.5 1.5L15 15H9l-1.5 1.5A2.5 2.5 0 0 1 3 15v-2a4 4 0 0 1 4-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 11v2M7 12h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="16" cy="11.5" r="0.8" fill="currentColor"/><circle cx="17.5" cy="13" r="0.8" fill="currentColor"/></svg>
+                        </span>
+                        <span class="tituloInicio">Juegos</span>
+                        <span class="descInicio">Jugá y subí al ranking</span>
+                    </button>
+
+                    <button type="button" class="tarjetaInicio" data-vista="configuracion">
+                        <span class="iconoInicio dorado">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2M12 19v2M4.2 6.2l1.4 1.4M18.4 16.4l1.4 1.4M3 12h2M19 12h2M4.2 17.8l1.4-1.4M18.4 7.6l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                        </span>
+                        <span class="tituloInicio">Perfil</span>
+                        <span class="descInicio">Pseudónimo, foto y más</span>
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div id="vistaIntercambios" style="display:none">
+
+            <h2 class="seccion-titulo" style="margin-top:0">Intercambio de comisiones</h2>
+
+            <ul class="pasos">
+                <li><span class="paso-numero">1</span><span>Elegí la materia, la comisión que tenés y la que buscás.</span></li>
+                <li><span class="paso-numero">2</span><span>Publicá tu solicitud. Podés editarla o borrarla después en "Mis solicitudes".</span></li>
+                <li><span class="paso-numero">3</span><span>Si aparece un cruce posible, recibís un correo automático. Las solicitudes vencen a los 30 días.</span></li>
+            </ul>
 
             <div id="seccionFormulario">
 
@@ -686,8 +1619,180 @@
             <h2 class="seccion-titulo">Intercambios completados</h2>
             <div id="listaIntercambios"></div>
 
+            </div>
+
+            <!-- ==================== FORO ==================== -->
+
+            <div id="vistaForo" style="display:none">
+
+                <div id="foroLista">
+
+                    <div class="foroCabecera">
+                        <h2 class="seccion-titulo" style="margin-top:0">Foro</h2>
+                        <div class="foroCabeceraAcciones">
+                            <button type="button" id="btnIrModeracion" class="linkModeracion" style="display:none">🛡️ Moderación</button>
+                            <button type="button" id="btnAbrirCompose" class="btn-primario btnPublicarForo">✏️ Publicar</button>
+                        </div>
+                    </div>
+
+                    <p class="notaForo">Usalo para compartir apuntes, resúmenes y dudas entre compañeros — y también para el chimento sano. Evitá publicar contenido sensible (datos personales, información de pacientes, etc.).</p>
+
+                    <div id="filtroEtiqueta">
+                        <input type="text" id="inputFiltroEtiqueta" list="listaEtiquetasDisponibles"
+                               placeholder="Buscar una etiqueta existente..." autocomplete="off">
+                        <datalist id="listaEtiquetasDisponibles"></datalist>
+                        <button type="button" id="btnFiltrar" class="btn-secundario">Filtrar</button>
+                        <button type="button" id="btnQuitarFiltro" class="btn-secundario" style="display:none">Quitar filtro</button>
+                    </div>
+                    <p id="ayudaFiltroEtiqueta" class="ayudaFiltroEtiqueta">Solo podés filtrar por etiquetas que ya existen en el foro.</p>
+
+                    <div id="listaHilos"></div>
+
+                    <button type="button" id="btnCargarMas" class="btn-secundario" style="display:none">Cargar más</button>
+
+                </div>
+
+                <div id="foroDetalle" style="display:none">
+
+                    <button type="button" id="btnVolverHilos" class="btn-secundario">← Volver a los hilos</button>
+
+                    <div id="detalleHiloContenido"></div>
+
+                    <h2 class="seccion-titulo">Respuestas</h2>
+
+                    <div id="listaRespuestas"></div>
+
+                    <form id="formRespuesta">
+                        <textarea id="inputRespuesta" class="textareaCompose textareaRespuesta" placeholder="Escribí tu respuesta..." maxlength="5000" rows="2" required></textarea>
+                        <label class="labelCheckbox">
+                            <input type="checkbox" id="inputAnonimoRespuesta">
+                            Responder de forma anónima
+                        </label>
+                        <button type="submit" class="btn-primario">Responder</button>
+                    </form>
+
+                    <p id="msgRespuesta"></p>
+
+                </div>
+
+            </div>
+
+            <!-- ==================== MODERACIÓN ==================== -->
+
+            <div id="vistaModeracion" style="display:none">
+
+                <button type="button" id="btnVolverForoDesdeModeracion" class="btn-secundario">← Volver al foro</button>
+
+                <h2 class="seccion-titulo">Denuncias pendientes</h2>
+                <div id="listaDenuncias"></div>
+
+                <div id="seccionModeradores" style="display:none">
+
+                    <h2 class="seccion-titulo">Moderadores</h2>
+
+                    <form id="formModerador">
+                        <input type="email" id="inputNuevoModerador" placeholder="email@ejemplo.com" required>
+                        <button type="submit" class="btn-secundario">Agregar moderador</button>
+                    </form>
+
+                    <p id="msgModerador"></p>
+
+                    <div id="listaModeradores"></div>
+
+                </div>
+
+            </div>
+
+            <!-- ==================== JUEGOS ==================== -->
+
+            <div id="vistaJuegos" style="display:none">
+
+                <h2 class="seccion-titulo" style="margin-top:0">Juegos</h2>
+                <p class="vacio">Estamos preparando esta sección. Acá vas a poder jugar y, debajo de cada juego, ver el ranking de los mejores puntajes con el pseudónimo de cada uno. 🎮</p>
+
+            </div>
+
+            <!-- ==================== MI CUENTA ==================== -->
+
+            <div id="vistaConfiguracion" style="display:none">
+
+                <h2 class="seccion-titulo" style="margin-top:0">Perfil</h2>
+
+                <p class="ayudaPerfil">Conectado como <b id="emailConfig"></b></p>
+
+                <h3 class="seccion-titulo">Foto de perfil</h3>
+
+                <div class="filaAvatar">
+                    <span id="avatarConfigPreview"></span>
+                    <div>
+                        <button type="button" id="btnCambiarFoto" class="btn-secundario">Cambiar foto</button>
+                        <input type="file" id="inputArchivoFoto" accept="image/*">
+                    </div>
+                </div>
+
+                <p id="msgFoto"></p>
+
+                <h3 class="seccion-titulo">Tu pseudónimo</h3>
+                <p class="ayudaPerfil">Así te van a ver otros estudiantes en el foro y en los juegos.</p>
+
+                <form id="formPerfil">
+                    <input type="text" id="inputPseudonimo" maxlength="24" required>
+                    <button type="submit" class="btn-secundario">Guardar pseudónimo</button>
+                </form>
+
+                <p id="msgPerfil"></p>
+
+                <h3 class="seccion-titulo">Sesión</h3>
+                <button type="button" id="logoutBtn" class="btn-secundario">Cerrar sesión</button>
+
+            </div>
+
         </div>
 
+    </div>
+
+    <!-- ==================== MODAL: PUBLICAR EN EL FORO ==================== -->
+
+    <div id="modalCompose" class="modalFondo">
+        <div class="modalCaja">
+
+            <div class="modalEncabezado">
+                <h2>Publicar en el foro</h2>
+                <button type="button" class="modalCerrar" id="btnCerrarCompose" aria-label="Cerrar">×</button>
+            </div>
+
+            <form id="formHilo">
+
+                <div class="composeCabecera">
+                    <span id="avatarCompose"></span>
+                    <span id="nombreCompose" class="hiloAutor"></span>
+                </div>
+
+                <input type="text" id="inputTitulo" class="inputTitulo" placeholder="Título" maxlength="140" required>
+
+                <textarea id="inputContenido" class="textareaCompose" placeholder="¿Qué querés compartir?" maxlength="5000" rows="3" required></textarea>
+
+                <div class="composeExtra">
+                    <input type="text" id="inputEtiquetas" placeholder="Etiquetas (ej: virología, chisme)">
+                    <input type="url" id="inputLink" placeholder="Link seguro (opcional)">
+                    <p class="ayudaLink">Solo HTTPS de YouTube, Google, UNMDP, sitios académicos autorizados, Spotify o Steam.</p>
+                </div>
+
+                <label class="labelCheckbox">
+                    <input type="checkbox" id="inputAnonimoHilo">
+                    Publicar de forma anónima
+                </label>
+
+                <div class="composePie">
+                    <span id="contadorContenido" class="contadorCompose">0 / 5000</span>
+                    <button type="submit" class="btnPublicarCompose">Publicar</button>
+                </div>
+
+            </form>
+
+            <p id="msgHilo"></p>
+
+        </div>
     </div>
 
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -721,6 +1826,79 @@
         const tituloFormulario = document.getElementById("tituloFormulario")
         const listaSolicitudes = document.getElementById("listaSolicitudes")
         const listaIntercambios = document.getElementById("listaIntercambios")
+        const formPerfil = document.getElementById("formPerfil")
+        const inputPseudonimo = document.getElementById("inputPseudonimo")
+        const msgPerfil = document.getElementById("msgPerfil")
+
+        // --- navegación por secciones ---
+        const btnIrInicio = document.getElementById("btnIrInicio")
+        const menuInicio = document.querySelector(".menuInicio")
+        const vistaInicio = document.getElementById("vistaInicio")
+        const vistaIntercambios = document.getElementById("vistaIntercambios")
+        const vistaForo = document.getElementById("vistaForo")
+        const vistaJuegos = document.getElementById("vistaJuegos")
+        const vistaConfiguracion = document.getElementById("vistaConfiguracion")
+        const vistaModeracion = document.getElementById("vistaModeracion")
+        const btnIrModeracion = document.getElementById("btnIrModeracion")
+        const btnVolverForoDesdeModeracion = document.getElementById("btnVolverForoDesdeModeracion")
+
+        const foroLista = document.getElementById("foroLista")
+        const foroDetalle = document.getElementById("foroDetalle")
+
+        const formHilo = document.getElementById("formHilo")
+        const inputTitulo = document.getElementById("inputTitulo")
+        const inputContenido = document.getElementById("inputContenido")
+        const inputEtiquetas = document.getElementById("inputEtiquetas")
+        const inputLink = document.getElementById("inputLink")
+        const inputAnonimoHilo = document.getElementById("inputAnonimoHilo")
+        const msgHilo = document.getElementById("msgHilo")
+        const avatarCompose = document.getElementById("avatarCompose")
+        const nombreCompose = document.getElementById("nombreCompose")
+        const contadorContenido = document.getElementById("contadorContenido")
+
+        const inputFiltroEtiqueta = document.getElementById("inputFiltroEtiqueta")
+        const listaEtiquetasDisponibles = document.getElementById("listaEtiquetasDisponibles")
+        const ayudaFiltroEtiqueta = document.getElementById("ayudaFiltroEtiqueta")
+        const btnFiltrar = document.getElementById("btnFiltrar")
+        const btnQuitarFiltro = document.getElementById("btnQuitarFiltro")
+        const listaHilos = document.getElementById("listaHilos")
+        const btnCargarMas = document.getElementById("btnCargarMas")
+
+        const btnVolverHilos = document.getElementById("btnVolverHilos")
+        const detalleHiloContenido = document.getElementById("detalleHiloContenido")
+        const listaRespuestas = document.getElementById("listaRespuestas")
+        const formRespuesta = document.getElementById("formRespuesta")
+        const inputRespuesta = document.getElementById("inputRespuesta")
+        const inputAnonimoRespuesta = document.getElementById("inputAnonimoRespuesta")
+        const msgRespuesta = document.getElementById("msgRespuesta")
+
+        const listaDenuncias = document.getElementById("listaDenuncias")
+        const seccionModeradores = document.getElementById("seccionModeradores")
+        const formModerador = document.getElementById("formModerador")
+        const inputNuevoModerador = document.getElementById("inputNuevoModerador")
+        const msgModerador = document.getElementById("msgModerador")
+        const listaModeradores = document.getElementById("listaModeradores")
+
+        // --- avatares y configuración de cuenta ---
+        const emailConfig = document.getElementById("emailConfig")
+        const avatarUserBar = document.getElementById("avatarUserBar")
+        const avatarConfigPreview = document.getElementById("avatarConfigPreview")
+        const btnCambiarFoto = document.getElementById("btnCambiarFoto")
+        const inputArchivoFoto = document.getElementById("inputArchivoFoto")
+        const msgFoto = document.getElementById("msgFoto")
+
+        const btnAbrirCompose = document.getElementById("btnAbrirCompose")
+        const btnCerrarCompose = document.getElementById("btnCerrarCompose")
+        const modalCompose = document.getElementById("modalCompose")
+
+        let fotoActual = ""
+        let seccionActual = "inicio"
+
+        let etiquetaFiltroActual = ""
+        let paginaHilosActual = 0
+        let hiloAbiertoId = null
+        let esModeradorActual = false
+        let esAdminActual = false
 
         for (let i = 1; i <= 40; i++) {
 
@@ -736,7 +1914,288 @@
 
         }
 
+        // ==================== SELECTOR PERSONALIZADO ====================
+        // Reemplaza visualmente un <select> nativo por un menú desplegable propio,
+        // más prolijo en celular. El <select> original queda oculto pero sigue
+        // existiendo y sigue siendo la fuente de verdad (form.materia.value, etc.)
+        // así el resto del código no necesita cambiar.
+
+        function extraerOpciones(select) {
+
+            const grupos = []
+            let grupoSuelto = null
+
+            Array.from(select.children).forEach(function (nodo) {
+
+                if (nodo.tagName === "OPTGROUP") {
+
+                    const items = Array.from(nodo.children)
+                        .filter(function (op) { return op.value })
+                        .map(function (op) { return { valor: op.value, texto: op.textContent } })
+
+                    grupos.push({ nombre: nodo.label, items })
+
+                } else if (nodo.tagName === "OPTION") {
+
+                    if (!nodo.value) return
+
+                    if (!grupoSuelto) {
+                        grupoSuelto = { nombre: null, items: [] }
+                        grupos.push(grupoSuelto)
+                    }
+
+                    grupoSuelto.items.push({ valor: nodo.value, texto: nodo.textContent })
+
+                }
+
+            })
+
+            return grupos
+
+        }
+
+        function mejorarSelect(select, config) {
+
+            config = config || {}
+
+            const placeholderOption = select.querySelector("option[value='']")
+            const placeholder = placeholderOption ? placeholderOption.textContent : (config.placeholder || "Seleccionar")
+            const grupos = extraerOpciones(select)
+
+            select.style.display = "none"
+
+            const wrapper = document.createElement("div")
+            wrapper.className = "selectPersonalizado"
+
+            const trigger = document.createElement("button")
+            trigger.type = "button"
+            trigger.className = "selectorTrigger"
+            trigger.setAttribute("aria-haspopup", "listbox")
+
+            const panel = document.createElement("div")
+            panel.className = "selectorPanel"
+            panel.setAttribute("role", "listbox")
+
+            let inputBusqueda = null
+
+            if (config.conBusqueda) {
+
+                const contBusqueda = document.createElement("div")
+                contBusqueda.className = "selectorBusqueda"
+
+                inputBusqueda = document.createElement("input")
+                inputBusqueda.type = "text"
+                inputBusqueda.placeholder = "Buscar materia..."
+
+                contBusqueda.appendChild(inputBusqueda)
+                panel.appendChild(contBusqueda)
+
+            }
+
+            const contenedorOpciones = document.createElement("div")
+            panel.appendChild(contenedorOpciones)
+
+            function iconoChevron() {
+                const span = document.createElement("span")
+                span.style.display = "inline-flex"
+                span.innerHTML = "<svg width='16' height='16' viewBox='0 0 24 24' fill='none'><path d='M6 9l6 6 6-6' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>"
+                return span.firstChild
+            }
+
+            function actualizarTrigger() {
+
+                let actual = null
+
+                grupos.forEach(function (g) {
+                    g.items.forEach(function (op) {
+                        if (op.valor === select.value) actual = op
+                    })
+                })
+
+                trigger.innerHTML = ""
+
+                if (actual) {
+                    trigger.appendChild(document.createTextNode(actual.texto))
+                } else {
+                    const span = document.createElement("span")
+                    span.className = "placeholder"
+                    span.textContent = placeholder
+                    trigger.appendChild(span)
+                }
+
+                trigger.appendChild(iconoChevron())
+
+            }
+
+            function renderOpciones(filtro) {
+
+                contenedorOpciones.innerHTML = ""
+                const filtroNorm = (filtro || "").trim().toLowerCase()
+                let hayResultados = false
+
+                grupos.forEach(function (grupo) {
+
+                    const itemsFiltrados = grupo.items.filter(function (op) {
+                        return !filtroNorm || op.texto.toLowerCase().includes(filtroNorm)
+                    })
+
+                    if (itemsFiltrados.length === 0) return
+
+                    hayResultados = true
+
+                    if (grupo.nombre) {
+                        const h = document.createElement("div")
+                        h.className = "selectorGrupo"
+                        h.textContent = grupo.nombre
+                        contenedorOpciones.appendChild(h)
+                    }
+
+                    itemsFiltrados.forEach(function (op) {
+
+                        const div = document.createElement("div")
+                        div.className = "selectorOpcion" + (op.valor === select.value ? " seleccionada" : "")
+                        div.textContent = op.texto
+                        div.setAttribute("role", "option")
+
+                        div.addEventListener("click", function () {
+                            select.value = op.valor
+                            select.dispatchEvent(new Event("change"))
+                            actualizarTrigger()
+                            cerrarPanel()
+                        })
+
+                        contenedorOpciones.appendChild(div)
+
+                    })
+
+                })
+
+                if (!hayResultados) {
+                    const vacio = document.createElement("div")
+                    vacio.className = "selectorOpcion"
+                    vacio.style.color = "var(--ink-soft)"
+                    vacio.textContent = "Sin resultados"
+                    contenedorOpciones.appendChild(vacio)
+                }
+
+            }
+
+            function abrirPanel() {
+
+                wrapper.classList.add("abierto")
+                renderOpciones("")
+
+                if (inputBusqueda) {
+                    inputBusqueda.value = ""
+                    setTimeout(function () { inputBusqueda.focus() }, 50)
+                }
+
+                document.addEventListener("click", manejarClickAfuera)
+
+            }
+
+            function cerrarPanel() {
+                wrapper.classList.remove("abierto")
+                document.removeEventListener("click", manejarClickAfuera)
+            }
+
+            function manejarClickAfuera(e) {
+                if (!wrapper.contains(e.target)) cerrarPanel()
+            }
+
+            trigger.addEventListener("click", function () {
+                if (wrapper.classList.contains("abierto")) {
+                    cerrarPanel()
+                } else {
+                    abrirPanel()
+                }
+            })
+
+            if (inputBusqueda) {
+
+                inputBusqueda.addEventListener("input", function () {
+                    renderOpciones(inputBusqueda.value)
+                })
+
+                inputBusqueda.addEventListener("click", function (e) {
+                    e.stopPropagation()
+                })
+
+            }
+
+            wrapper.appendChild(trigger)
+            wrapper.appendChild(panel)
+            select.insertAdjacentElement("afterend", wrapper)
+
+            actualizarTrigger()
+
+            // Permite que el resto del código avise a este selector que refleje
+            // un cambio hecho directamente sobre select.value (ver iniciarEdicion, etc.)
+            select.refrescarSelector = actualizarTrigger
+
+        }
+
+        mejorarSelect(form.materia, { conBusqueda: true, placeholder: "Seleccionar materia" })
+        mejorarSelect(tengo, { placeholder: "Seleccionar comisión" })
+        mejorarSelect(busco, { placeholder: "Seleccionar comisión" })
+
+        function refrescarSelectoresFormulario() {
+            if (form.materia.refrescarSelector) form.materia.refrescarSelector()
+            if (tengo.refrescarSelector) tengo.refrescarSelector()
+            if (busco.refrescarSelector) busco.refrescarSelector()
+        }
+
         // ==================== MENSAJES DE ERROR ====================
+
+        // Escapa texto de usuarios antes de insertarlo con innerHTML (evita HTML/JS injection)
+        function escapeHtml(str) {
+            const div = document.createElement("div")
+            div.textContent = str == null ? "" : String(str)
+            return div.innerHTML
+        }
+
+        // Igual que escapeHtml pero además escapa comillas, para usar dentro de atributos (href="...")
+        function escapeAttr(str) {
+            return escapeHtml(str).replace(/"/g, "&quot;")
+        }
+
+        // Devuelve el HTML de un avatar: la foto si tiene, si no un círculo con la inicial
+        function avatarHtml(nombre, foto, claseExtra) {
+
+            const clase = "avatar" + (claseExtra ? " " + claseExtra : "")
+
+            if (foto) {
+                return "<img class='" + clase + "' src='" + escapeAttr(foto) + "' alt='' loading='lazy'>"
+            }
+
+            const inicial = (nombre || "?").trim().charAt(0).toUpperCase() || "?"
+            return "<span class='" + clase + " avatarInicial'>" + escapeHtml(inicial) + "</span>"
+
+        }
+
+        // ==================== MODALES ====================
+
+        function abrirModal(modal) {
+            modal.classList.add("abierto")
+            document.addEventListener("keydown", cerrarModalConEscape)
+        }
+
+        function cerrarModal(modal) {
+            modal.classList.remove("abierto")
+            document.removeEventListener("keydown", cerrarModalConEscape)
+        }
+
+        function cerrarModalConEscape(e) {
+            if (e.key === "Escape") {
+                document.querySelectorAll(".modalFondo.abierto").forEach(cerrarModal)
+            }
+        }
+
+        document.querySelectorAll(".modalFondo").forEach(function (fondo) {
+            fondo.addEventListener("click", function (e) {
+                if (e.target === fondo) cerrarModal(fondo)
+            })
+        })
 
         function mensajeError(codigo) {
 
@@ -751,7 +2210,15 @@
                 no_autorizado: "No podés modificar una solicitud que no es tuya.",
                 no_encontrado: "No se encontró la solicitud.",
                 datos_invalidos: "Los datos ingresados no son válidos.",
-                conexion: "No se pudo conectar con el servidor. Probá de nuevo en un momento."
+                conexion: "No se pudo conectar con el servidor. Probá de nuevo en un momento.",
+                titulo_invalido: "El título no puede estar vacío ni superar los 140 caracteres.",
+                contenido_invalido: "El contenido no puede estar vacío ni superar los 5000 caracteres.",
+                link_invalido: "El enlace no tiene un formato HTTPS válido.",
+                link_no_permitido: "Ese sitio no está permitido. Solo aceptamos dominios seguros de YouTube, Google, UNMDP, sitios académicos autorizados, Spotify y Steam.",
+                pseudonimo_invalido: "El pseudónimo debe tener entre 3 y 24 caracteres.",
+                pseudonimo_en_uso: "Ese pseudónimo ya lo está usando otra persona.",
+                ya_es_moderador: "Esa persona ya es moderadora.",
+                imagen_muy_grande: "La imagen es muy pesada. Probá con otra o recortala un poco."
             }
 
             return mensajes[codigo] || "Ocurrió un error inesperado."
@@ -907,6 +2374,872 @@
 
         })
 
+        // ==================== FORO ====================
+
+        function mostrarListaHilos() {
+            foroLista.style.display = "block"
+            foroDetalle.style.display = "none"
+            hiloAbiertoId = null
+        }
+
+        function mostrarDetalleHilo() {
+            foroLista.style.display = "none"
+            foroDetalle.style.display = "block"
+        }
+
+        function formatearFecha(fecha) {
+            if (!fecha) return ""
+            return new Date(fecha).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" })
+        }
+
+        function activarAccionesPublicacion(contenedor) {
+
+            contenedor.querySelectorAll(".accionDenunciar").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    denunciarPublicacion(btn.dataset.tipo, btn.dataset.id)
+                })
+            })
+
+            contenedor.querySelectorAll(".accionBorrar").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    borrarPublicacion(btn.dataset.tipo, btn.dataset.id)
+                })
+            })
+
+        }
+
+        async function denunciarPublicacion(tipo, id) {
+
+            const motivoRaw = prompt("¿Por qué querés denunciar esto? (opcional, podés dejarlo vacío)")
+            if (motivoRaw === null) return
+
+            const r = await llamar("denunciar", { tipo, id, motivo: motivoRaw })
+
+            if (r.ok) {
+                alert("Gracias, un moderador va a revisarlo.")
+            } else {
+                alert(mensajeError(r.error))
+            }
+
+        }
+
+        async function borrarPublicacion(tipo, id) {
+
+            if (!confirm("¿Seguro que querés borrar esto?")) return
+
+            const accion = tipo === "hilo" ? "borrarHilo" : "borrarRespuesta"
+            const r = await llamar(accion, { id })
+
+            if (r.ok) {
+                if (tipo === "hilo") {
+                    mostrarListaHilos()
+                    cargarHilos(true)
+                } else {
+                    abrirHilo(hiloAbiertoId)
+                }
+            } else {
+                alert(mensajeError(r.error))
+            }
+
+        }
+
+        const DOMINIOS_LINK_PERMITIDOS = [
+            "youtube.com",
+            "youtu.be",
+            "youtube-nocookie.com",
+            "docs.google.com",
+            "drive.google.com",
+            "forms.google.com",
+            "sheets.google.com",
+            "slides.google.com",
+            "classroom.google.com",
+            "sites.google.com",
+            "scholar.google.com",
+            "unmdp.edu.ar",
+            "doi.org",
+            "pubmed.ncbi.nlm.nih.gov",
+            "pmc.ncbi.nlm.nih.gov",
+            "scielo.org",
+            "sciencedirect.com",
+            "springer.com",
+            "link.springer.com",
+            "nature.com",
+            "wiley.com",
+            "bmj.com",
+            "jamanetwork.com",
+            "plos.org",
+            "frontiersin.org",
+            "cochranelibrary.com",
+            "thelancet.com",
+            "arxiv.org",
+            "biorxiv.org",
+            "medrxiv.org",
+            "acs.org",
+            "ieeexplore.ieee.org",
+            "open.spotify.com",
+            "spotify.com",
+            "steampowered.com",
+            "steamcommunity.com"
+        ]
+
+        let mapaEtiquetasDisponibles = new Map()
+
+        function hostPermitidoLocal(hostname) {
+            const host = (hostname || "").toLowerCase().replace(/\.$/, "")
+            return DOMINIOS_LINK_PERMITIDOS.some(function (dominio) {
+                return host === dominio || host.endsWith("." + dominio)
+            })
+        }
+
+        function enlaceSeguroLocal(link) {
+            try {
+                const u = new URL(link)
+                return u.protocol === "https:" && !u.username && !u.password && hostPermitidoLocal(u.hostname)
+            } catch (err) {
+                return false
+            }
+        }
+
+        function normalizarEtiqueta(texto) {
+            return (texto || "").trim().toLowerCase()
+        }
+
+        async function cargarEtiquetasDisponibles() {
+            const r = await llamar("listarEtiquetas", {})
+
+            if (!r.ok) {
+                listaEtiquetasDisponibles.innerHTML = ""
+                mapaEtiquetasDisponibles = new Map()
+
+                if (ayudaFiltroEtiqueta) {
+                    ayudaFiltroEtiqueta.textContent = "No se pudieron cargar las etiquetas disponibles."
+                }
+
+                return
+            }
+
+            listaEtiquetasDisponibles.innerHTML = ""
+            mapaEtiquetasDisponibles = new Map()
+
+            ;(r.etiquetas || []).forEach(function (etiqueta) {
+                mapaEtiquetasDisponibles.set(normalizarEtiqueta(etiqueta), etiqueta)
+
+                const option = document.createElement("option")
+                option.value = etiqueta
+                listaEtiquetasDisponibles.appendChild(option)
+            })
+
+            if (ayudaFiltroEtiqueta) {
+                ayudaFiltroEtiqueta.textContent = r.etiquetas.length
+                    ? "Elegí una de las etiquetas existentes para filtrar."
+                    : "Todavía no hay etiquetas publicadas."
+            }
+        }
+
+        function aplicarFiltroEtiqueta() {
+            const texto = inputFiltroEtiqueta.value.trim()
+            const normalizada = normalizarEtiqueta(texto)
+
+            if (!normalizada) {
+                etiquetaFiltroActual = ""
+                btnQuitarFiltro.style.display = "none"
+                cargarHilos(true)
+                return true
+            }
+
+            const etiquetaReal = mapaEtiquetasDisponibles.get(normalizada)
+
+            if (!etiquetaReal) {
+                alert("Esa etiqueta todavía no existe. Elegí una de las etiquetas sugeridas.")
+                return false
+            }
+
+            etiquetaFiltroActual = normalizarEtiqueta(etiquetaReal)
+            inputFiltroEtiqueta.value = etiquetaReal
+            btnQuitarFiltro.style.display = "inline-block"
+            cargarHilos(true)
+            return true
+        }
+
+        async function cargarHilos(reiniciar) {
+
+            if (reiniciar) {
+                paginaHilosActual = 0
+                listaHilos.innerHTML = ""
+            }
+
+            const r = await llamar("listarHilos", { etiqueta: etiquetaFiltroActual, desde: paginaHilosActual })
+
+            if (!r.ok) {
+
+                if (r.error === "sesion_invalida") {
+                    sesion = null
+                    borrarSesionLocal()
+                    mostrarLogin()
+                }
+
+                return
+
+            }
+
+            renderizarHilos(r.hilos, reiniciar)
+
+            paginaHilosActual += r.hilos.length
+            btnCargarMas.style.display = r.hayMas ? "block" : "none"
+
+        }
+
+        function detectarTipoLink(link) {
+            try {
+                const u = new URL(link)
+                const host = u.hostname.replace(/^www\./, "").toLowerCase()
+                const path = u.pathname
+
+                if (host === "youtu.be" || host === "youtube.com" || host === "youtube-nocookie.com") {
+                    let id = ""
+
+                    if (host === "youtu.be") {
+                        id = path.split("/").filter(Boolean)[0] || ""
+                    } else {
+                        const matchWatch = u.searchParams.get("v")
+                        const matchPath = path.match(/^\/(?:shorts|embed|live)\/([^/?#]+)/i)
+                        id = matchWatch || (matchPath ? matchPath[1] : "")
+                    }
+
+                    return { tipo: "youtube", id: id }
+                }
+
+                if (host === "open.spotify.com" || host === "spotify.com") {
+                    const segmentos = path.split("/").filter(Boolean)
+                    const tiposSpotify = ["track", "album", "playlist", "episode", "show"]
+                    const indiceTipo = segmentos.findIndex(function (s) { return tiposSpotify.includes(s) })
+
+                    if (indiceTipo !== -1 && segmentos[indiceTipo + 1]) {
+                        return {
+                            tipo: "spotify",
+                            subtipo: segmentos[indiceTipo],
+                            id: segmentos[indiceTipo + 1]
+                        }
+                    }
+
+                    return { tipo: "spotify", subtipo: "", id: "" }
+                }
+
+                if (host === "docs.google.com" || host === "drive.google.com" || host === "forms.google.com" ||
+                    host === "sheets.google.com" || host === "slides.google.com" || host === "classroom.google.com" ||
+                    host === "sites.google.com" || host === "scholar.google.com") {
+                    return { tipo: "google" }
+                }
+
+                if (host === "unmdp.edu.ar" || host.endsWith(".unmdp.edu.ar")) {
+                    return { tipo: "unmdp" }
+                }
+
+                if (host === "steampowered.com" || host.endsWith(".steampowered.com") ||
+                    host === "steamcommunity.com" || host.endsWith(".steamcommunity.com")) {
+                    return { tipo: "steam" }
+                }
+
+                return { tipo: "academico" }
+            } catch (err) {
+                return { tipo: "otro" }
+            }
+        }
+
+        function renderizarLinkPreview(link, compacto) {
+            if (!link || !enlaceSeguroLocal(link)) return ""
+
+            let u
+
+            try {
+                u = new URL(link)
+            } catch (err) {
+                return ""
+            }
+
+            const host = u.hostname.replace(/^www\./, "")
+            const info = detectarTipoLink(link)
+
+            if (info.tipo === "youtube" && info.id) {
+                const thumb = "https://i.ytimg.com/vi/" + encodeURIComponent(info.id) + "/hqdefault.jpg"
+
+                if (compacto) {
+                    return "<a href='" + escapeAttr(link) + "' target='_blank' rel='noopener noreferrer' class='linkPreview linkPreviewCompact'>" +
+                        "<div class='linkPreviewBody'>" +
+                        "<img class='linkPreviewThumb' src='" + escapeAttr(thumb) + "' alt='Vista previa de YouTube' loading='lazy'>" +
+                        "<div class='linkPreviewInfo'>" +
+                        "<span class='linkPreviewTitle'>Video de YouTube</span>" +
+                        "<span class='linkPreviewHost'>" + escapeHtml(host) + "</span>" +
+                        "</div>" +
+                        "</div>" +
+                        "</a>"
+                }
+
+                const embed = "https://www.youtube.com/embed/" + encodeURIComponent(info.id) + "?rel=0"
+
+                return "<div class='linkPreview'>" +
+                    "<iframe class='linkPreviewEmbed' src='" + escapeAttr(embed) + "' title='Vista previa de YouTube' loading='lazy' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share' allowfullscreen referrerpolicy='strict-origin-when-cross-origin'></iframe>" +
+                    "<a href='" + escapeAttr(link) + "' target='_blank' rel='noopener noreferrer' class='linkPreviewPlay'>Abrir en YouTube ↗</a>" +
+                    "</div>"
+            }
+
+            if (info.tipo === "spotify" && info.subtipo && info.id && !compacto) {
+                const embed = "https://open.spotify.com/embed/" + encodeURIComponent(info.subtipo) + "/" + encodeURIComponent(info.id)
+
+                return "<div class='linkPreview'>" +
+                    "<iframe class='linkPreviewEmbed spotify' src='" + escapeAttr(embed) + "' title='Vista previa de Spotify' loading='lazy' allow='autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture' referrerpolicy='strict-origin-when-cross-origin'></iframe>" +
+                    "<a href='" + escapeAttr(link) + "' target='_blank' rel='noopener noreferrer' class='linkPreviewPlay'>Abrir en Spotify ↗</a>" +
+                    "</div>"
+            }
+
+            const subtitulo = info.tipo === "google"
+                ? "Contenido de Google"
+                : info.tipo === "unmdp"
+                    ? "Contenido de la UNMDP"
+                    : info.tipo === "steam"
+                        ? "Contenido de Steam"
+                        : info.tipo === "spotify"
+                            ? "Contenido de Spotify"
+                            : "Recurso académico"
+
+            return "<a href='" + escapeAttr(link) + "' target='_blank' rel='noopener noreferrer' class='linkPreview'>" +
+                "<div class='linkPreviewBody'>" +
+                "<div class='linkPreviewInfo'>" +
+                "<span class='linkPreviewTitle'>" + escapeHtml(subtitulo) + "</span>" +
+                "<span class='linkPreviewHost'>" + escapeHtml(host) + "</span>" +
+                "</div>" +
+                "</div>" +
+                "<span class='linkPreviewPlay'>Abrir enlace ↗</span>" +
+                "</a>"
+        }
+
+        function renderizarHilos(hilos, reiniciar) {
+
+            if (reiniciar) listaHilos.innerHTML = ""
+
+            if (reiniciar && hilos.length === 0) {
+                listaHilos.innerHTML = "<p class='vacio'>Todavía no hay hilos" + (etiquetaFiltroActual ? " con esa etiqueta." : ".") + "</p>"
+                return
+            }
+
+            hilos.forEach(function (h) {
+
+                const div = document.createElement("div")
+                div.className = "hiloItem"
+                div.tabIndex = 0
+                div.setAttribute("role", "button")
+
+                const chips = (h.etiquetas || []).map(function (t) {
+                    return "<button type='button' class='etiquetaChip' data-etiqueta=\"" + escapeAttr(t) + "\">" + escapeHtml(t) + "</button>"
+                }).join("")
+
+                div.innerHTML =
+                    (chips ? "<div class='etiquetas'>" + chips + "</div>" : "") +
+                    "<h3 class='hiloTitulo'>" + escapeHtml(h.titulo) + "</h3>" +
+                    (h.resumen ? "<p class='hiloResumen'>" + escapeHtml(h.resumen) + "</p>" : "") +
+                    renderizarLinkPreview(h.link, true) +
+                    "<div class='hiloPie'>" +
+                    avatarHtml(h.autor, h.autorFoto, "avatarChico") +
+                    "<span class='hiloAutor'>" + escapeHtml(h.autor) + "</span>" +
+                    "<span class='puntoSeparador'>·</span>" +
+                    "<span class='hiloFecha'>" + formatearFecha(h.fecha) + "</span>" +
+                    "<span class='hiloRespuestasCount'>💬 " + h.respuestas + "</span>" +
+                    "</div>"
+
+                div.addEventListener("click", function () {
+                    abrirHilo(h.id)
+                })
+
+                div.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault()
+                        abrirHilo(h.id)
+                    }
+                })
+
+                div.querySelectorAll(".etiquetaChip").forEach(function (chip) {
+                    chip.addEventListener("click", function (e) {
+                        e.stopPropagation()
+                        etiquetaFiltroActual = chip.dataset.etiqueta.toLowerCase()
+                        inputFiltroEtiqueta.value = chip.dataset.etiqueta
+                        btnQuitarFiltro.style.display = "inline-block"
+                        cargarHilos(true)
+                    })
+                })
+
+                const linkEl = div.querySelector(".linkPreview")
+                if (linkEl) linkEl.addEventListener("click", function (e) { e.stopPropagation() })
+
+                listaHilos.appendChild(div)
+
+            })
+
+        }
+
+        btnCargarMas.addEventListener("click", function () {
+            cargarHilos(false)
+        })
+
+        inputFiltroEtiqueta.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault()
+                aplicarFiltroEtiqueta()
+            }
+        })
+
+        btnFiltrar.addEventListener("click", function () {
+            aplicarFiltroEtiqueta()
+        })
+
+        btnQuitarFiltro.addEventListener("click", function () {
+            etiquetaFiltroActual = ""
+            inputFiltroEtiqueta.value = ""
+            btnQuitarFiltro.style.display = "none"
+            cargarHilos(true)
+        })
+
+        function autoAjustarTextarea(el) {
+            el.style.height = "auto"
+            el.style.height = el.scrollHeight + "px"
+        }
+
+        function actualizarComposeCabecera() {
+
+            if (inputAnonimoHilo.checked) {
+                avatarCompose.innerHTML = avatarHtml("Anónimo", "", "avatarChico")
+                nombreCompose.textContent = "Anónimo"
+            } else {
+                avatarCompose.innerHTML = avatarHtml(inputPseudonimo.value || "Vos", fotoActual, "avatarChico")
+                nombreCompose.textContent = inputPseudonimo.value || "Vos"
+            }
+
+        }
+
+        inputAnonimoHilo.addEventListener("change", actualizarComposeCabecera)
+
+        inputContenido.addEventListener("input", function () {
+            autoAjustarTextarea(inputContenido)
+            contadorContenido.textContent = inputContenido.value.length + " / 5000"
+        })
+
+        inputRespuesta.addEventListener("input", function () {
+            autoAjustarTextarea(inputRespuesta)
+        })
+
+        btnAbrirCompose.addEventListener("click", function () {
+
+            abrirModal(modalCompose)
+            actualizarComposeCabecera()
+            inputContenido.style.height = ""
+            contadorContenido.textContent = inputContenido.value.length + " / 5000"
+
+            setTimeout(function () { inputTitulo.focus() }, 200)
+
+        })
+
+        btnCerrarCompose.addEventListener("click", function () {
+            cerrarModal(modalCompose)
+        })
+
+        formHilo.addEventListener("submit", async function (e) {
+
+            e.preventDefault()
+            msgHilo.innerText = "Publicando..."
+
+            const r = await llamar("crearHilo", {
+                titulo: inputTitulo.value.trim(),
+                contenido: inputContenido.value.trim(),
+                etiquetas: inputEtiquetas.value.trim(),
+                link: inputLink.value.trim(),
+                anonimo: inputAnonimoHilo.checked ? "1" : "0"
+            })
+
+            if (r.ok) {
+
+                msgHilo.innerText = ""
+                formHilo.reset()
+                inputContenido.style.height = ""
+                contadorContenido.textContent = "0 / 5000"
+                cerrarModal(modalCompose)
+                cargarEtiquetasDisponibles()
+                cargarHilos(true)
+
+            } else if (r.error === "sesion_invalida") {
+
+                msgHilo.innerText = ""
+                sesion = null
+                borrarSesionLocal()
+                mostrarLogin()
+
+            } else {
+
+                msgHilo.innerText = ""
+                alert(mensajeError(r.error))
+
+            }
+
+        })
+
+        async function abrirHilo(id) {
+
+            hiloAbiertoId = id
+            mostrarDetalleHilo()
+            detalleHiloContenido.innerHTML = "<p class='vacio'>Cargando...</p>"
+            listaRespuestas.innerHTML = ""
+
+            const r = await llamar("verHilo", { id })
+
+            if (!r.ok) {
+
+                if (r.error === "sesion_invalida") {
+                    sesion = null
+                    borrarSesionLocal()
+                    mostrarLogin()
+                    return
+                }
+
+                detalleHiloContenido.innerHTML = "<p class='vacio'>" + mensajeError(r.error) + "</p>"
+                return
+
+            }
+
+            renderizarDetalleHilo(r.hilo)
+            renderizarRespuestas(r.respuestas)
+
+        }
+
+        function renderizarDetalleHilo(h) {
+
+            const chips = (h.etiquetas || []).map(function (t) {
+                return "<span class='etiquetaChip'>" + escapeHtml(t) + "</span>"
+            }).join("")
+
+            let acciones = "<button type='button' class='accionDenunciar' data-tipo='hilo' data-id='" + h.id + "'>Denunciar</button>"
+
+            if (h.esPropio || esModeradorActual) {
+                acciones += "<button type='button' class='accionBorrar' data-tipo='hilo' data-id='" + h.id + "'>Borrar</button>"
+            }
+
+            detalleHiloContenido.innerHTML =
+                (chips ? "<div class='etiquetas'>" + chips + "</div>" : "") +
+                "<h3>" + escapeHtml(h.titulo) + "</h3>" +
+                "<div class='hiloPie'>" +
+                avatarHtml(h.autor, h.autorFoto, "avatarChico") +
+                "<span class='hiloAutor'>" + escapeHtml(h.autor) + "</span>" +
+                "<span class='puntoSeparador'>·</span>" +
+                "<span class='hiloFecha'>" + formatearFecha(h.fecha) + "</span>" +
+                "</div>" +
+                "<div class='cuerpoHilo'>" + escapeHtml(h.contenido) + "</div>" +
+                renderizarLinkPreview(h.link) +
+                "<div class='hiloAcciones'>" + acciones + "</div>"
+
+            activarAccionesPublicacion(detalleHiloContenido)
+
+            const linkEl = detalleHiloContenido.querySelector(".linkPreview")
+            if (linkEl) linkEl.addEventListener("click", function (e) { e.stopPropagation() })
+
+        }
+
+        function renderizarRespuestas(respuestas) {
+
+            listaRespuestas.innerHTML = ""
+
+            if (respuestas.length === 0) {
+                listaRespuestas.innerHTML = "<p class='vacio'>Todavía no hay respuestas.</p>"
+                return
+            }
+
+            respuestas.forEach(function (r) {
+
+                const div = document.createElement("div")
+                div.className = "respuestaItem"
+
+                let acciones = "<button type='button' class='accionDenunciar' data-tipo='respuesta' data-id='" + r.id + "'>Denunciar</button>"
+
+                if (r.esPropio || esModeradorActual) {
+                    acciones += "<button type='button' class='accionBorrar' data-tipo='respuesta' data-id='" + r.id + "'>Borrar</button>"
+                }
+
+                div.innerHTML =
+                    "<div class='respuestaCabecera'>" +
+                    avatarHtml(r.autor, r.autorFoto, "avatarChico") +
+                    "<span class='hiloAutor'>" + escapeHtml(r.autor) + "</span>" +
+                    "<span class='puntoSeparador'>·</span>" +
+                    "<span class='hiloFecha'>" + formatearFecha(r.fecha) + "</span>" +
+                    "</div>" +
+                    "<div class='cuerpoHilo'>" + escapeHtml(r.contenido) + "</div>" +
+                    "<div class='hiloAcciones'>" + acciones + "</div>"
+
+                listaRespuestas.appendChild(div)
+                activarAccionesPublicacion(div)
+
+            })
+
+        }
+
+        btnVolverHilos.addEventListener("click", function () {
+            mostrarListaHilos()
+        })
+
+        formRespuesta.addEventListener("submit", async function (e) {
+
+            e.preventDefault()
+
+            if (!hiloAbiertoId) return
+
+            msgRespuesta.innerText = "Enviando..."
+
+            const r = await llamar("crearRespuesta", {
+                hiloId: hiloAbiertoId,
+                contenido: inputRespuesta.value.trim(),
+                anonimo: inputAnonimoRespuesta.checked ? "1" : "0"
+            })
+
+            if (r.ok) {
+
+                msgRespuesta.innerText = ""
+                formRespuesta.reset()
+                inputRespuesta.style.height = ""
+                abrirHilo(hiloAbiertoId)
+
+            } else if (r.error === "sesion_invalida") {
+
+                msgRespuesta.innerText = ""
+                sesion = null
+                borrarSesionLocal()
+                mostrarLogin()
+
+            } else if (r.error === "no_encontrado") {
+
+                msgRespuesta.innerText = ""
+                alert("Ese hilo ya no existe.")
+                mostrarListaHilos()
+                cargarHilos(true)
+
+            } else {
+
+                msgRespuesta.innerText = ""
+                alert(mensajeError(r.error))
+
+            }
+
+        })
+
+        // ==================== MODERACIÓN ====================
+
+        async function cargarRolModerador() {
+
+            const r = await llamar("soyModerador", {})
+
+            if (!r.ok) return
+
+            esModeradorActual = r.esModerador
+            esAdminActual = r.esAdmin
+
+            btnIrModeracion.style.display = esModeradorActual ? "inline-block" : "none"
+
+        }
+
+        menuInicio.addEventListener("click", function (e) {
+
+            const btn = e.target.closest(".tarjetaInicio")
+            if (!btn) return
+
+            mostrarSeccion(btn.dataset.vista)
+
+        })
+
+        btnIrInicio.addEventListener("click", function () {
+            mostrarSeccion("inicio")
+        })
+
+        btnIrModeracion.addEventListener("click", function () {
+            mostrarSeccion("moderacion")
+        })
+
+        btnVolverForoDesdeModeracion.addEventListener("click", function () {
+            mostrarSeccion("foro")
+        })
+
+        function mostrarSeccion(nombre) {
+
+            seccionActual = nombre
+
+            vistaInicio.style.display = nombre === "inicio" ? "block" : "none"
+            vistaIntercambios.style.display = nombre === "intercambios" ? "block" : "none"
+            vistaForo.style.display = nombre === "foro" ? "block" : "none"
+            vistaJuegos.style.display = nombre === "juegos" ? "block" : "none"
+            vistaConfiguracion.style.display = nombre === "configuracion" ? "block" : "none"
+            vistaModeracion.style.display = nombre === "moderacion" ? "block" : "none"
+
+            btnIrInicio.style.display = nombre === "inicio" ? "none" : "flex"
+
+            if (nombre === "foro") {
+                cargarEtiquetasDisponibles()
+
+                if (listaHilos.children.length === 0) {
+                    cargarHilos(true)
+                }
+            }
+
+            if (nombre === "moderacion") {
+
+                cargarDenuncias()
+
+                if (esAdminActual) {
+                    seccionModeradores.style.display = "block"
+                    cargarModeradores()
+                }
+
+            }
+
+            window.scrollTo({ top: 0, behavior: "smooth" })
+
+        }
+
+        async function cargarDenuncias() {
+
+            const r = await llamar("listarDenuncias", {})
+
+            if (!r.ok) {
+                listaDenuncias.innerHTML = "<p class='vacio'>" + mensajeError(r.error) + "</p>"
+                return
+            }
+
+            renderizarDenuncias(r.denuncias)
+
+        }
+
+        function renderizarDenuncias(denuncias) {
+
+            listaDenuncias.innerHTML = ""
+
+            if (denuncias.length === 0) {
+                listaDenuncias.innerHTML = "<p class='vacio'>No hay denuncias pendientes.</p>"
+                return
+            }
+
+            denuncias.forEach(function (d) {
+
+                const div = document.createElement("div")
+                div.className = "denunciaItem"
+
+                const contenidoTexto = d.publicacion.existe
+                    ? (d.publicacion.titulo ? "<b>" + escapeHtml(d.publicacion.titulo) + "</b> — " : "") + escapeHtml(d.publicacion.contenido)
+                    : "(la publicación ya no existe)"
+
+                const autorHtml = d.publicacion.existe
+                    ? "<div class='autorReal'>Autor real: " + escapeHtml(d.publicacion.autorReal) + "</div>"
+                    : ""
+
+                div.innerHTML =
+                    "<div class='hiloMeta'>Denuncia sobre un " + escapeHtml(d.tipo) + " · " + formatearFecha(d.fecha) + "</div>" +
+                    (d.motivo ? "<div class='hiloMeta'>Motivo: " + escapeHtml(d.motivo) + "</div>" : "") +
+                    "<div class='contenidoDenunciado'>" + contenidoTexto + "</div>" +
+                    autorHtml +
+                    "<div class='denunciaAcciones'>" +
+                    "<button type='button' class='btnDescartar'>Descartar</button>" +
+                    (d.publicacion.existe ? "<button type='button' class='btnEliminarPublicacion'>Eliminar publicación</button>" : "") +
+                    "</div>"
+
+                div.querySelector(".btnDescartar").addEventListener("click", function () {
+                    resolverDenunciaClick(d.id, "descartar")
+                })
+
+                const btnEliminar = div.querySelector(".btnEliminarPublicacion")
+
+                if (btnEliminar) {
+                    btnEliminar.addEventListener("click", function () {
+                        resolverDenunciaClick(d.id, "eliminar")
+                    })
+                }
+
+                listaDenuncias.appendChild(div)
+
+            })
+
+        }
+
+        async function resolverDenunciaClick(id, accion) {
+
+            if (accion === "eliminar" && !confirm("¿Seguro que querés eliminar esta publicación?")) return
+
+            const r = await llamar("resolverDenuncia", { id, accion })
+
+            if (r.ok) {
+                cargarDenuncias()
+            } else {
+                alert(mensajeError(r.error))
+            }
+
+        }
+
+        async function cargarModeradores() {
+
+            const r = await llamar("listarModeradores", {})
+
+            if (!r.ok) return
+
+            renderizarModeradores(r.moderadores)
+
+        }
+
+        function renderizarModeradores(moderadores) {
+
+            listaModeradores.innerHTML = ""
+
+            if (moderadores.length === 0) {
+                listaModeradores.innerHTML = "<p class='vacio'>Todavía no asignaste moderadores.</p>"
+                return
+            }
+
+            moderadores.forEach(function (m) {
+
+                const div = document.createElement("div")
+                div.className = "moderadorItem"
+
+                div.innerHTML =
+                    "<span>" + escapeHtml(m.email) + "</span>" +
+                    "<button type='button'>Quitar</button>"
+
+                div.querySelector("button").addEventListener("click", async function () {
+
+                    if (!confirm("¿Sacar a " + m.email + " como moderador?")) return
+
+                    const r = await llamar("quitarModerador", { email: m.email })
+
+                    if (r.ok) {
+                        cargarModeradores()
+                    } else {
+                        alert(mensajeError(r.error))
+                    }
+
+                })
+
+                listaModeradores.appendChild(div)
+
+            })
+
+        }
+
+        formModerador.addEventListener("submit", async function (e) {
+
+            e.preventDefault()
+            msgModerador.innerText = "Agregando..."
+
+            const r = await llamar("asignarModerador", { email: inputNuevoModerador.value.trim() })
+
+            if (r.ok) {
+                msgModerador.innerText = "Moderador agregado."
+                formModerador.reset()
+                cargarModeradores()
+            } else {
+                msgModerador.innerText = ""
+                alert(mensajeError(r.error))
+            }
+
+        })
+
         // ==================== CERRAR SESIÓN ====================
 
         logoutBtn.addEventListener("click", function () {
@@ -921,8 +3254,11 @@
             loginScreen.style.display = "none"
             app.style.display = "block"
             userEmail.innerText = sesion.email
+            mostrarSeccion("inicio")
+            cargarPerfil()
             cargarMisSolicitudes()
             cargarMisIntercambios()
+            cargarRolModerador()
             iniciarActualizacionPeriodica()
         }
 
@@ -964,6 +3300,153 @@
             }
 
         })
+
+        // ==================== PERFIL / PSEUDÓNIMO / FOTO ====================
+
+        function actualizarAvataresEnPantalla(nombre) {
+
+            avatarUserBar.innerHTML = avatarHtml(nombre, fotoActual, "avatarMediano")
+            avatarConfigPreview.innerHTML = avatarHtml(nombre, fotoActual, "avatarGrande")
+
+            if (typeof actualizarComposeCabecera === "function") actualizarComposeCabecera()
+
+        }
+
+        async function cargarPerfil() {
+
+            const r = await llamar("miPerfil", {})
+
+            if (r.ok) {
+                inputPseudonimo.value = r.pseudonimo || ""
+                fotoActual = r.foto || ""
+                emailConfig.innerText = sesion.email
+                actualizarAvataresEnPantalla(r.pseudonimo || "Vos")
+                msgPerfil.innerText = ""
+            } else {
+                msgPerfil.innerText = mensajeError(r.error)
+            }
+
+        }
+
+        formPerfil.addEventListener("submit", async function (e) {
+
+            e.preventDefault()
+
+            msgPerfil.innerText = "Guardando..."
+
+            const r = await llamar("actualizarPseudonimo", { pseudonimo: inputPseudonimo.value.trim() })
+
+            if (r.ok) {
+
+                inputPseudonimo.value = r.pseudonimo
+                msgPerfil.innerText = "Pseudónimo actualizado."
+                actualizarAvataresEnPantalla(r.pseudonimo)
+
+            } else {
+
+                msgPerfil.innerText = ""
+
+                const mensajesPerfil = {
+                    pseudonimo_invalido: "Tiene que tener entre 3 y 24 caracteres (letras, números, espacios, guiones).",
+                    pseudonimo_en_uso: "Ese pseudónimo ya lo está usando otra persona."
+                }
+
+                alert(mensajesPerfil[r.error] || mensajeError(r.error))
+
+            }
+
+        })
+
+        // --- foto de perfil: se recorta a cuadrado y se comprime en el navegador
+        // antes de mandarla, así el archivo que viaja siempre es chico ---
+
+        btnCambiarFoto.addEventListener("click", function () {
+            inputArchivoFoto.click()
+        })
+
+        inputArchivoFoto.addEventListener("change", async function () {
+
+            const archivo = inputArchivoFoto.files[0]
+            if (!archivo) return
+
+            if (!archivo.type.startsWith("image/")) {
+                alert("Elegí un archivo de imagen.")
+                return
+            }
+
+            msgFoto.innerText = "Preparando imagen..."
+
+            try {
+
+                const base64 = await recortarYComprimirImagen(archivo, 256)
+
+                msgFoto.innerText = "Subiendo..."
+
+                const r = await llamar("actualizarFoto", { imagen: base64, mimeType: "image/jpeg" })
+
+                if (r.ok) {
+                    fotoActual = r.foto
+                    actualizarAvataresEnPantalla(inputPseudonimo.value)
+                    msgFoto.innerText = "Foto actualizada."
+                } else {
+                    msgFoto.innerText = ""
+                    alert(mensajeError(r.error))
+                }
+
+            } catch (err) {
+
+                msgFoto.innerText = ""
+                alert("No se pudo procesar la imagen. Probá con otra.")
+
+            }
+
+            inputArchivoFoto.value = ""
+
+        })
+
+        // Dibuja la imagen recortada al centro en un cuadrado y la devuelve
+        // comprimida como JPEG en base64 (sin el prefijo data:...)
+        function recortarYComprimirImagen(archivo, tamano) {
+
+            return new Promise(function (resolve, reject) {
+
+                const lector = new FileReader()
+
+                lector.onerror = function () { reject(new Error("no se pudo leer el archivo")) }
+
+                lector.onload = function () {
+
+                    const img = new Image()
+
+                    img.onerror = function () { reject(new Error("no se pudo cargar la imagen")) }
+
+                    img.onload = function () {
+
+                        const lado = Math.min(img.width, img.height)
+                        const origenX = (img.width - lado) / 2
+                        const origenY = (img.height - lado) / 2
+
+                        const canvas = document.createElement("canvas")
+                        canvas.width = tamano
+                        canvas.height = tamano
+
+                        const ctx = canvas.getContext("2d")
+                        ctx.drawImage(img, origenX, origenY, lado, lado, 0, 0, tamano, tamano)
+
+                        const dataUrl = canvas.toDataURL("image/jpeg", 0.82)
+                        resolve(dataUrl.split(",")[1])
+
+                    }
+
+                    img.src = lector.result
+
+                }
+
+                lector.readAsDataURL(archivo)
+
+            })
+
+        }
 
         // ==================== MIS SOLICITUDES ====================
 
@@ -1101,6 +3584,7 @@
             form.materia.value = s.materia
             tengo.value = s.tengo
             busco.value = s.busco
+            refrescarSelectoresFormulario()
 
             submitBtn.innerText = "Guardar cambios"
             cancelarEdicionBtn.style.display = "block"
@@ -1114,6 +3598,7 @@
         function salirModoEdicion() {
             idEditando = null
             form.reset()
+            refrescarSelectoresFormulario()
             submitBtn.innerText = "Publicar solicitud"
             cancelarEdicionBtn.style.display = "none"
             tituloFormulario.innerText = "Publicar una solicitud"
@@ -1218,21 +3703,6 @@
 
     </script>
 
-    <div id="firma">
-        <img src="data:image/webp;base64,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" alt="Foto de Simón, el creador de la página, con anteojos de sol">
-        <div>
-            <p>Hecho por tu amigo y vecino el Saimon</p>
-            <a class="linkInstagram" href="https://www.instagram.com/_simonellimon?stkn=MTQyd3c0cjg5dmdkOA==" target="_blank" rel="noopener">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/>
-                    <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/>
-                    <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/>
-                </svg>
-                @_simonellimon
-            </a>
-        </div>
-    </div>
-
     <div id="disclaimer">
 
         <b>Aviso</b><br>
@@ -1247,6 +3717,21 @@
 
         <a href="mailto:simonacademico01@gmail.com">Reportar error o bug</a>
 
+    </div>
+
+    <div id="firma">
+        <img src="data:image/webp;base64,UklGRkgZAABXRUJQVlA4IDwZAACQeACdASrwAP4APlEijkSjoiEV+kWwOAUEsrd57zmfpWH9+8zqvLH5F8P/X3UbqfsB8WbqSecKmprSy5g/yPDnzy/V5WDv3ka/N/zh+8/NTnB3l36v/MPJ3/5/gyMmb/l5Sx/pf9j/S+lr9B/z//r9wz9aP959xR2cIP/krlwln/5K5cIqeozXAtYbmi4Qf/JXKJHfr/sNa9Xk8qG0OcG4MDNbSap9ar5Lb4b7AQFa8yE7dOSkXVfPT/YbuX8nA9D+MQFWNn4AM+V20aA0WCLvklv6pm9JCjyMR28HlIjq9SVy3VbTqT781JpQTltWVkf0tC7uxBklfkvSuhTVpscfsPhdnWGsLovSJkegpwYHn7PLCmqKaWGlWHlv58qw4koFEzbmRNhoWMJNzDWegDhKYtPJJ35RN8dF80gl+42yKagKtyZJb3bVZJ3jcyKSduZh1MwOutrENNphFBUMWyLjPLq4heTb8f4YXRywx8nGEddHlM2yp3mGmVCH3gsn+e6nsvGyQ8ggLNPgTrPOxHBqkjhBp3LTHk2UzmlrPxp7EoqiKTeS1dfAqw2uIwLvnqq1S3b11ZnNl8dqu0rN6vwxYDxwCdv3R3AmL6Pm5rA0eFSlgf6Med1jgqChTje5c1HnuMfjBKA3Va19E0P4ImeQN8TY41nNdJylYg7WKcxGYM8zFs5Sl35hta1tCAyiRn/ufd3UZ3RM265DRBUm/6kcHDslqqc8bYkP8RcGsPVeouOwum1unJRPaNs1/4EYDvPtzaNa6dpYDbbnu5Pp3bX4KrFydLrJyvLnDDCNKqqE7W4zRQUW+YJQic1Fd/5LBgV+rLVAv08gH2qw///7H0sK/eenIrjVlONJRtFgqZx45b61dbof0xSnyDrMPBQeMotuWpceuhHCKZ6ppOIv0yZRlilEKZZtRp3iALpzzedGdqbb59e40PPrCFhV/FUHLgdzTvi1IYZMF0Rx6TR9vsane57G2LH2CHSbnA1MAV+FZSvCKCGX2ApMeVFxKHTx2AwYtcZ6TWzX8Z0DyOd//OVqKH5pVJlqZmpVCgplv+xLmXrGWHbprd+p8aDx++OqWTxC8jbuP8z7qtlDDnHSRjcB6kSFQuIio6LKCzjRGPnjJbvT1ZyHQF++I+eLiOY6+bUC38JJWqL2I2TGHwPClR5D2oMGNKr9nu/4+Zj61LzKlHt8dSnTZcj6HtIVxptCS1MyK8AnwErbn29+iV/nvmXOyRugO/RJaIsjeMD/vgyE99nIQf22p9H1hvJx78dHo0dKMP8gBpGOHJO0F1gYAP7/YKrgVfAyAAAAAC6pSf7Wkj+ykjQlKg0PjI/xTtbm/7/UumuZwV81XEuCqP9vzvec3bUgSrCyCZkWyIU0U+gaof3/mODT/r9wQShMhJAGs7iIImfacyEojA2lrZEVlRSm53K9FT8A4hUlGwQAKv+Gf6PP59bwNbvfeNKvlwO6GHNFnj6x7R2Trf2fz+nWpvbDaEGO2gU0WsYDJ6zvhrayg4skzoAiNOkuwP/YgDvWquoXJHj957/fO86EM//IWe0ntIrYGC13Xkgj1S379amAxEQRNmK1VZI+yW1xcmqCqEiiV+cpo6SS6gPQJe4FzeDenVdVNqLWDKrolnaE9wYw1KdsB94qdp6pT5YNDsefAQ6uYTZHDkUbb/GPzz0UD4d7rc9Bd2sOQ74mmjk9M7HwRZna/hjqEmeHFCy1+HQCr+g6mutdAfIUbhBaLYko+TQlOm99DbVwf83cpmJoRWllp0PbVIAIKomySvjXUhdaWhf7fhsJ0jZTihIGsORLfo0+QAHzcC9LHlYJA+IVZd1ePS41wZa1dq3o8OgL+tmgG44cxCA8hJXcl+Bk7CFWP78TTAin4r4lVb2DfMelEJbuCIj4HzZTPD6kbklSf/qTPYVDOgBawEhQ7REJL7xGAwRJPPVh7KziV7AuBsbOQ5ZJWZ0xpqbvMdn2zWn1fz1JceyiCNJ2Q6XhF1QZF0InrvVoaF39h+Udyt6vgmLQxKl4R2vvLlCeIo8CAZ9vcit+DiG302rINMcP62/86z7oAiXyWqZlhy71PT2vlMsc15BSBpCWdol1unWOuRRysFZPmEVgxbSNSC67FmZ+0Madn2RcndybiE0h2l72sITktxFmVqI5XbN2XSMiL9DNjENY8uq6kVY3LAC51kX67e9skhoxPiZrpKgkO2DGwIPZrr3Ue5gDxcroOFQrnwYrYimiu/4HcKDZVvkHzWQ3H9xzeu4w4iL/zV47eSUn3JxYhdjF0r8JhAYiG6MQxcx3jDuM8pK3gbL/roWzfrsVxHai3MYQbYLtB9nGsD/t8Bc3NtiX94bVSWsAPh62Jf5LL1qOXU7J0DIx7/engIvXC7yngMy0gkLZ9oGfDiJNFIBusiSN6T6Sk1P9Y+z0wh8/XYwpzbc2FKU0PfQa+c+oOuVv44CByV8hYwLL5i2+xSKevR8rqAjUcMFwkMqgqul6Wmm4Q7WRjHvhegQPPIVKZVPPXKNk9JRY+aevVBuL46NXRZMeFTascaAcRWwhH2whSMFeZgQY/M6vVM6K6+vAb+m2eivL7IidoyxahF5Oiwmphzyhrdxc/hDyRZDbHgOUUnb/FoDu67nskALHAJyXqKJ896tECIrsfaLtzms8kGnT05AtVIY/FEyHCVmzr77BxMIQsTRy81cFgw2tt9YTjrp890i8Iu+6hptoPzE/1WQXxHZpjuMMipossAftnQiVgHmpBNrIKUJo7swyQEoGOl2wWXXYzttrzScvjP1IWMnZjVlWSzAEfWBo8XDunZOdyhSywo1qJDRNyxOKbMBXjQHLdgp2sUz1DBcxuYerG6nTh5uLBBxpGGVBqpbz+kVO17Ab0bf+fqvTy97mCYje/TKoONSW++oTYPLrH9XASPqp5eQqVLSXs8Ryg6GurFfZe7XsvMzQbUoNN2cSYH+Z6srJhNTq90UlKoX8cI6BT7m1+c9mYvVsBHrEDkrW2updEvzS/+TbsXtN9Xd3Jl3voGa6GrrzKkhq4m6uK/Gm8XkN4izPiIOYtKOmsvLwtUg1EDXnf0gBccL/E2Fy7j5fjEY2BllcOCBDI6h+9tXuNY42QkcSNir+zaM3PXWZ9rQYorNSImq8DDAIpfU47YGnZ5Rxp5LGpxFuC2Kij9wUfu4rVa4q/w2ztmHg1kizMmwYN3/lY5JrFyZ21ieSOESEP21AugvMcmFMkBcfrWAalXqZo3s4AcACwsB9VBZ35UChmC39QCYnZhNOvj9i7P0+RH34gWXAzK27f8tsZulEj8z5tR6plyYhCmaUaB5/0CPfg0u2FGbbO02bKYl8yLODw0pvD5P8nnuBPCDyiQ0fBWsUQiuc2D7Sg/vcNFDYBLfXdux37dcIky8LNE3JLTvPm5npPemUl5kWUOA4qPI9AXdn0Ubs6dHYlXa3BKNqgTg1r6JYqeRXaOhE4njUi553NmX6dOBmswv8Yg0xEULVnkFD7bckNf7E8ATw/AZHYrU5j8MEM3C5+lx8R9QOqH8NcwaSgBfRyGnlxodTxCWBvKktdsgoPiz//x5Tqj//UVAt/Io6J/Mjgp/yXUM2d156D/FdP/iVasMixirNOonyR8C1tO/BNg8qOWGZ3XqxVx4gCrGEK0I/bF5uPS0aFbrKBm9Zab1TbvUrbfnAFfrqC5o43+WUhataoVFpuN+6BP+0h6TVYLhwLie1Lxu/Ed2GbjEMA8TZxvZA30gKHqv67tcdUt/iERw+Id3iIF2FqSxy50WwF16iB+UTxnCxZTacaHKh4zfKe3kx7AD1xDTqbE3WfHRTdtoWRPtU30ExJnLCDPS0gCAI+qhTeiRjDTdZx8fuhNr6TGJBq3cikDW/6z3phmr7Sogvn8FQpz7Yv8Lo+2VWPACnlrrgk8eoMY2dzaC0/5A7LELsYlcGTvBPiqIUwxgBZZOZmXXWI3rknfwmbSGwL/VMLs+eYloRKlEalgyhRbbzcPR++5zY0VdG2pHRDwHUTEzDBVjHKj8Y0aFrfCv/EwrEv68EfQy7qLDT9j3kL/UWpwVW7r36ip1Dly7Iim1+XUmUlybkBeR34EhScM7phN2V8IM4HGJZUlJScrT//pqmuzlDD1ZWqn7AwGqKTPlt/cUfDt2LoozVPMFenXs4yqQEmeFHwn4Lcl6GNnsTkbysPX+cag5PR6ocbP+cpJg9WXbXMJVBRm/SSU7qh97QVXI0SbZTf8H2a8NRh7EtclhZtjQhAwKoIRpCw0u9c06Xhf+OIltrG3eFizulb1y+MHjKOJ1IrsA8rAfn4MlBYRPcbhWWZKeqf2i5ytbcbx2RwwfYcxBdHqR8qG2IUuZy3YFTmq2Popq//kysYrxpOlPb3OT6fS+1JJaBA6lGaS5iY6L0SMmF0xcha3qDyeG0nboqXKkfQ9BWoiuEVveI9p8zMrGHgKiJWdD6vjnia0a8Rt3jkn6DFEDTOlot9fboVC96A+c+3o5lfUrHMXTaSADD1ZgINOPE2v0+9HjPKuL95bR7ipqc/ZscO4NPmegeqnyXUTKZ0MmQ+O+pIXAFdd49ANNd9rqsee8JWwuLFWIlbHPXS25KFfJY1Hj2kpVoFVML0Tk7B+ncixd5zxoN0KrelGr6YpKcd6afWJylQRoNqNYVIMLV5oLvZU3z/TgzZo2jUjxCDALVrg3ximiydVDVfBtGtN6MwP8cOy7ob024XtW4cuO/LFW1uK5Jj8aEKLRmxA027yY6vCt7y55MCaLixkZlpvQNJQbXubWt0pHPrU/f6mHYZ9VE7hrl3RlCO4sEnYXakFiHtPeXZyiRJifiq3bgqQRn/nC9RGriAAlFcKS3BaYvauX8QAREe7YYMXQWwxFlSDZwaYodSKU9z7es+qgBEYLDHr9/RAdlXtZowanuuqyn1JGL+fzEPE4zObB4b9RMWHL1DD/9Pxd8hJnIAe89aXqtnzXgIWlnz9PbdpZjnfzvcl+5+yF5x2zBkrgCJv3AH429gq2uWxjy2f8Xnt8S/ieVe5bPeT27713KR2BZYz8SuIsmXsWbTGrlnEAwrmtRar0b+/qRENoP9hfHzR0Cks5uGJlXf8XdgugXmR1XUnu29IO/TV2ZOwnPPfqAAR/7DZv+oQ8pDR8lm3UHfRDnfw40iiLju244lEMbtzANhBgdyLt9BC4PYlBcXWDQgCEY28z3KwTs9ihXdOI5+3f4dHCT+eP9x9dfC/n9gQwjHs/t2h4Y1RmmxNsVMveHCHnWGdcw1YWN9Dk1wbpby8KGtjx24yURktQgSjwUlL6+K9g45oWIfpQOcKlThn1a0QhYEjbFIoFatEuDPW5t/nfk6R1g52GN0+7p3HzH/Gtq6q3851S4hh9vOfHxoLIT2bvxOWZezJziQMXzGSjeVIjuOMlXuRwPLi+rcyVDSi/OeHJqAF9Ef7yj5cL+RuUqBgX9j43WpjlZx18fFs7/kZKWd5cilvxpvw7K/x18K/b79eR9rwwruRWEVcKnou44f6zsxF7PEgsL0wWZMLoWEY41YmPYFy9vQQq323mm8qxT13COpdsodKB/L1RQf7rLAD13yKVT69o87SxYzC1/xut34BlwG15X5Huki6kVVl5S6DQF1lXqz4iQe9afxcUUWiL6a3qBOHSs4PXk9NTv8SY0N3od31gHvFrY0OBPH8U1ct4uDd/hqlJ6laSidRJgZqijpmfnlnstep5PA/pt1d9PSdfa8FUCDu6XU4Cj0qfaCHZRr/NngM+ZnUjz8QWrwnulmtUGOXvvZQUY99171lQ1fCdAq1EtiAdQRu32paUx6MAeCKRCQXnTpgcroeAojopUmoBln4giU9lsnA60X5LZpNXO6pBTP2waa1+jM29Zu+31WX8pANavm0zO/s/PDypuVJQtNWQmsPpkkMh20K/hzLF7VdMLrSGVrUECMJrQjuIMo8+VDqZ4OaLTmqqPaTlykshpSXU7VqStROgr5I38axpqqL/pBbqwxKlHRud4F5SpqRBdt7/ynIHHn73TobeRpN7PieRsFMIBp4pVX2KuP+lPRTKwDRG20cFKabnneN/pfXSYc6/b90U3xL1Pzv7FF1avkbXdVC0Uyw2C3ei5VegE3w2mZmA501ACK1K1uVfEWQ0KA0HRmERXu7cl+i61n3QHwcLKVDPg/lRdkEws4DiudAt0RM3pDIV1SMYQmPNK4FPDcu5us3CbTBB+HqXnocCtO0X26BicJ5a7JubzC8TWkTVXRSvKbL2tTItv0BDO3eRLiEEygFSiXBpUkaIud4MbRxLQl1lDQep729Upy0JPqNnmPiR0ckNP8IRchqid3kH1ZWUcCZNYBSr8cyipzc8zawEESRGfwsA3SMEaOdSZIIQK37QO1EFaNFqZoTz5uHdbxM7W67494NkW3T6M6GdSgaN3lfRWrL2BNHv5rY2xxwVq/ejVwQlSR23zyIkShveq0xBsID93cKlouGlryuSkA1J7UzOPfPkcYAjs1sRgxdxU/4u2blejEKySo8qWov48WneDES40gvk5stTdp5A/RAap78TLHVTpUAbUN6GpPzZUEtdxQhp3u9ei0MxJGYbJXsD4zh+a62BO8cDen19dB7L5b2lkAgK9YmLeQMn6dDDTaHrtLKsszogRJg/lo/s2qnwTFXp/Rx4E7bZYMqACY41TptsgvFoidr0mIzqApqLKzYvXTGRs9whhze8XU2AiPxD9IIWqi81EXAh1qXkqAcV7OLZ1ecF3Mlzpev9uwqZNjpnUWSz7EVJqkJ+QFNZdz9dHSQIw9eE+O3S4uDkOsMIIdTXKrS6r+H0WzqtmnQcwgFug7eqRju0CKh+tzioMWg+//9zNhnWyQ5P1rYIL9aNnfy+9NUWe4pNXzcM1l/tRK2m/Qzfl4sF0EUuarIQLGvHRBJaXTJqPDYdJo3x6KoEmXqvR6UtsB0DFg9jwaMLfb10IuMQWFFLllwHszBdlXgQH/0zHbnGkXtkjWpqc5DOtdMkDDE4SZmxXhsy4k+mcY2mwuqbWKJenstrOzvPGBd96imUJaW/SBOE+DWLh58fy9Ye2eHgqE1RyEXOIr4dWpaQNdl/x4etZeFNiUxqniXwXFMaW+HnBoUdoPz4MEYzgyIm7BaoYtgNLXI5yX3teIaYarHdwfQXeZ5MkNF9dXBaCeTfbt+PBDkzrS7bKvjzOu1bJ5QH5cOKOiBh2JTWELi4oGaCHNbCmQVbkDliH4Muy5aeiRkXe/pDf5mwMPbUqgSnI+FFj5EqBaJ3cuF3BxxmxZr2/XjD7YDF0MHy8rYRML83sN/0C3wIffK6p8xbq798RMHT1EHj2kymZIJB4Qnqs4Jw5RxxUMboXwk/UzwMDJfG2z09lmrwzhhkm1jDBSmuZ5QbhQFynFaTXBkETIOJ3iaFgjudQrSeaABc8XE18mmKrFpJdxtG1Sl9J5MOCnxpxDliynDTy3XqG/NnMB4va/YDvhJIJoSENaYYTdFHJVs5uiw8/iPHaFuf3stKL22JLdOl50SMVS5g5/G2mucTSvh8PcHOan9621m2qPd6rE0SwtEzh2qrbhnnL1duRRfe1SHGV36PMH3f9zg1SiRGji83uf581oa2gmkG68pZjMRWLblng+hGTmILyg2Af5ebaO1MFlTfT9i8x0tIKlRdMg3rCKlLRwKfPd0eF3cAJ5AVIr+DevnuSvOGKlod4WHJyRN6JfiaaO7a5M7OXyp5hNJIlA5s9UOZNvYGc7l1CMhi/RwxZ09eYemPdqm8KrNJvPPw9od2G5QYWzy/qHTP6oc4rurflT9q6Yovy96t5QesF61uGy4hfbmD/zmvi97cWI0hvUxEtMRFcR6dthOQLUfM89fJH7hEi5YO+xMN4qV1/tvXMwFGVeOHFjoC5i/y+ewCo5f89Ku71HSBeooEnxSol8K0kn4YKVF9EDjmUcpksTkq1kCQLHc64IZZq4CAy/7hI+b/2tf0SSYHcfqTwMJsPAPOK9SP8Xt4jeTg1i4gMxJ1XeYstciMez5g1o+GcIPUVTEpaBozBCf+5C//KA7B5u/rh4FPHsgxh5LPS+f3T7NOfHWpzYbyNuGwGcU6TkKjVlaumuVoyKcgAC0gCvRXLQIbNc3WanPiw0Solc/GqfITMl202DdJbhoT12tkO6OeXOytOyEIgIim5LOVrRAsAg50nau4B5Ji8dsZZMb1/ZeapOeC7u7WZPZa/D4pH4EtvrmaYdVo8i6zfCPhqTSaX5TnJBdm5HsaMUsCSpQHwVrq4jVk/eo6N0qUrOEIMh/MY03jibmgqlqo7yPyzxqN8i6zeq778ycpXLGuj112u4y78vL6zbmhnw2YC8JD06sWn4yTEc/zP2hKYa4wf0jDN5/He2/isx8LDbNPx1+viN2bMsZ1dEVnQxQNgzlvUMM22mIukGSImHAu5w0I5YTjxmj32U8mT+a+1z/OYsf/OXp8rN80rtIaqt6nFUwPDy/rVSp3C0pNEzx7poi1BgRzv5iFaitS3ogL31ciXjA49NXNkxzuQFDODJ8o3GbHanXskSSysXMAbOaxoiXjsbqXzpLLF2zG/wvjJYCmMnXylAUxk7cdPK/6auTbCFRP4f7MoSXIykJOyoK9FtwAA" alt="Foto de Simón, el creador de la página, con anteojos de sol">
+        <div>
+            <p>Hecho por tu amigo y vecino el Saimon</p>
+            <a class="linkInstagram" href="https://www.instagram.com/_simonellimon?stkn=MTQyd3c0cjg5dmdkOA==" target="_blank" rel="noopener">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/>
+                    <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/>
+                    <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/>
+                </svg>
+                @_simonellimon
+            </a>
+        </div>
     </div>
 
     </div>
