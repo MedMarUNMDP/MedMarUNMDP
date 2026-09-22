@@ -1460,6 +1460,14 @@
         }
 
     
+        .notaPrivacidadIntercambio {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid var(--line);
+            font-size: 0.76rem;
+            color: var(--ink-soft);
+        }
+
         .hiloOptimista, .solicitudOptimista, .respuestaOptimista {
             opacity: 0.72;
             position: relative;
@@ -2344,6 +2352,7 @@ let intercambiosUI = []
                 link_invalido: "El enlace no tiene un formato HTTPS válido.",
                 link_no_permitido: "Ese sitio no está permitido. Solo aceptamos dominios seguros de YouTube, Google, UNMDP, sitios académicos autorizados, Spotify y Steam.",
                 servidor_ocupado: "El servidor está ocupado en este momento. Probá de nuevo.",
+                rate_limit: "Hiciste demasiadas solicitudes en poco tiempo. Esperá un momento y probá de nuevo.",
                 pseudonimo_invalido: "El pseudónimo debe tener entre 3 y 24 caracteres.",
                 pseudonimo_en_uso: "Ese pseudónimo ya lo está usando otra persona.",
                 ya_es_moderador: "Esa persona ya es moderadora.",
@@ -3907,35 +3916,19 @@ async function cargarBootstrap() {
 
                 const fecha = x.fecha ? new Date(x.fecha).toLocaleDateString("es-AR") : ""
 
-                const otros = (x.participantes || [])
-                    .map(function (p) { return p.email })
-                    .filter(function (email) { return email !== sesion.email })
-
                 const personas = (x.participantes || []).map(function (p) {
-
-                    const esVos = p.email === sesion.email
-                    const nombre = esVos ? "Vos" : "<a href='mailto:" + p.email + "'>" + p.email + "</a>"
-
-                    return "<div class='personaIntercambio" + (esVos ? " esVos" : "") + "'>" +
-                        "<b>" + nombre + "</b> — tenía comisión " + p.tengo + ", buscaba comisión " + p.busco +
+                    const nombre = p.esVos ? "Vos" : (p.pseudonimo || "Estudiante")
+                    const clase = p.esVos ? " personaIntercambio esVos" : " personaIntercambio"
+                    return "<div class='" + clase.trim() + "'>" +
+                        "<b>" + escapeHtml(nombre) + "</b> — tenía comisión " + escapeHtml(String(p.tengo || "")) +
+                        ", buscaba comisión " + escapeHtml(String(p.busco || "")) +
                         "</div>"
-
                 }).join("")
 
-                let botonTodos = ""
-
-                if (otros.length > 0) {
-
-                    const asunto = encodeURIComponent("Intercambio de comisión - " + x.materia)
-                    const mailtoTodos = "mailto:" + otros.join(",") + "?subject=" + asunto
-
-                    botonTodos = "<a class='escribirTodos' href='" + mailtoTodos + "'>Escribirles a todos</a>"
-
-                }
-
                 div.innerHTML =
-                    "<div class='intercambioHeader'><b>" + x.materia + "</b><span class='fechaIntercambio'>" + fecha + "</span></div>" +
-                    personas + botonTodos
+                    "<div class='intercambioHeader'><b>" + escapeHtml(x.materia) + "</b><span class='fechaIntercambio'>" + fecha + "</span></div>" +
+                    personas +
+                    "<div class='notaPrivacidadIntercambio'>Los correos de los demás participantes se mantienen privados.</div>"
 
                 listaIntercambios.appendChild(div)
 
