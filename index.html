@@ -2274,6 +2274,7 @@ let intercambiosUI = []
             if (dedupeKey && llamadasEnCurso.has(dedupeKey)) return llamadasEnCurso.get(dedupeKey)
 
             const tarea = (async function () {
+                const inicioRequest = performance.now()
                 const formData = new FormData()
                 formData.append("accion", accion)
                 if (incluirToken && sesion) formData.append("token", sesion.token)
