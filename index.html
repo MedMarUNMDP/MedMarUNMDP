@@ -2287,6 +2287,13 @@ let chatEnvioEnCurso = false
         let fotoActual = ""
         let seccionActual = "inicio"
 
+        // ==================== HISTORIAL DE NAVEGACIÓN ====================
+        // El botón físico "Atrás" del celular navega dentro de la SPA.
+        // Cada vista/overlay importante tiene un estado propio en history.
+        const HISTORIAL_MEDMAR = "medmar-nav-v1"
+        let historialMedmarInicializado = false
+        let aplicandoEstadoHistorial = false
+
         let etiquetaFiltroActual = ""
         let paginaHilosActual = 0
         let hiloAbiertoId = null
@@ -2566,6 +2573,136 @@ let chatEnvioEnCurso = false
 
         }
 
+        // ==================== HISTORIAL DE NAVEGACIÓN ====================
+
+        function crearEstadoNavegacion(vista, overlay, id) {
+            const estado = {
+                medmar: HISTORIAL_MEDMAR,
+                vista: vista || "inicio",
+                overlay: overlay || null
+            }
+            if (id) estado.id = id
+            return estado
+        }
+
+        function esEstadoMedmar(estado) {
+            return !!estado && estado.medmar === HISTORIAL_MEDMAR
+        }
+
+        function navegarHistorial(estado, reemplazar) {
+            if (!historialMedmarInicializado || aplicandoEstadoHistorial) return
+            if (reemplazar) {
+                history.replaceState(estado, "", location.href)
+            } else {
+                history.pushState(estado, "", location.href)
+            }
+        }
+
+        function estadoActualSeguro() {
+            return esEstadoMedmar(history.state) ? history.state : null
+        }
+
+        function volverHistorialOverlay(overlayEsperado, fallback) {
+            const estado = estadoActualSeguro()
+            if (estado && estado.overlay === overlayEsperado) {
+                history.back()
+                return
+            }
+            if (typeof fallback === "function") fallback()
+        }
+
+        async function aplicarEstadoHistorial(estado) {
+            if (!sesion) {
+                mostrarLogin()
+                return
+            }
+
+            const estadoNormalizado = esEstadoMedmar(estado)
+                ? estado
+                : crearEstadoNavegacion("inicio", null)
+
+            aplicandoEstadoHistorial = true
+            try {
+                if (estadoNormalizado.overlay === "compose") {
+                    mostrarSeccion(estadoNormalizado.vista || "foro", null, false)
+                    if (!modalCompose.classList.contains("abierto")) {
+                        abrirModal(modalCompose)
+                        actualizarComposeCabecera()
+                    }
+                    return
+                }
+
+                if (estadoNormalizado.overlay === "hilo") {
+                    mostrarSeccion("foro", null, false)
+                    if (hiloAbiertoId !== estadoNormalizado.id) {
+                        await abrirHilo(estadoNormalizado.id, false)
+                    } else {
+                        mostrarDetalleHilo()
+                    }
+                    return
+                }
+
+                if (estadoNormalizado.overlay === "chat") {
+                    mostrarSeccion("intercambios", null, false)
+                    if (chatAbiertoId !== estadoNormalizado.id) {
+                        await abrirChat(estadoNormalizado.id, false)
+                    }
+                    return
+                }
+
+                cerrarModal(modalCompose)
+                if (hiloAbiertoId) mostrarListaHilos(false)
+                if (chatAbiertoId) cerrarChat(false)
+                mostrarSeccion(estadoNormalizado.vista || "inicio", null, false)
+            } finally {
+                aplicandoEstadoHistorial = false
+            }
+        }
+
+        function manejarPopState(evento) {
+            if (!historialMedmarInicializado) return
+
+            // Si el navegador salió hacia una entrada externa, dejamos que
+            // el navegador continúe su navegación normal.
+            if (!esEstadoMedmar(evento.state)) return
+
+            const estado = evento.state
+
+            // Entrada centinela: el primer "Atrás" desde Inicio se consume
+            // dentro de la app. Luego reemplazamos el centinela por Inicio,
+            // de modo que un segundo "Atrás" sí pueda salir de la página.
+            if (estado.guard) {
+                const inicio = crearEstadoNavegacion("inicio", null)
+                history.replaceState(inicio, "", location.href)
+                aplicarEstadoHistorial(inicio)
+                return
+            }
+
+            aplicarEstadoHistorial(estado)
+        }
+
+        function inicializarHistorialMedmar() {
+            if (historialMedmarInicializado) return
+
+            historialMedmarInicializado = true
+            const actual = history.state
+
+            if (esEstadoMedmar(actual)) {
+                window.addEventListener("popstate", manejarPopState)
+                return
+            }
+
+            const inicio = crearEstadoNavegacion("inicio", null)
+            history.replaceState(inicio, "", location.href)
+            history.pushState(Object.assign({}, inicio, { guard: true }), "", location.href)
+            window.addEventListener("popstate", manejarPopState)
+        }
+
+        function resetearHistorialPorLogout() {
+            if (!historialMedmarInicializado) return
+            history.replaceState({ medmarAuth: "login" }, "", location.href)
+        }
+
         // ==================== MODALES ====================
 
         function abrirModal(modal) {
@@ -2586,7 +2723,12 @@ let chatEnvioEnCurso = false
 
         document.querySelectorAll(".modalFondo").forEach(function (fondo) {
             fondo.addEventListener("click", function (e) {
-                if (e.target === fondo) cerrarModal(fondo)
+                if (e.target !== fondo) return
+                if (fondo === modalCompose) {
+                    volverHistorialOverlay("compose", function () { cerrarModal(fondo) })
+                } else {
+                    cerrarModal(fondo)
+                }
             })
         })
 
@@ -2971,7 +3113,10 @@ async function cargarBootstrap() {
 
         // ==================== FORO ====================
 
-        function mostrarListaHilos() {
+        function mostrarListaHilos(actualizarHistorial) {
+            if (actualizarHistorial === true) {
+                navegarHistorial(crearEstadoNavegacion("foro", null), false)
+            }
             foroLista.style.display = "block"
             foroDetalle.style.display = "none"
             hiloAbiertoId = null
@@ -3031,7 +3176,8 @@ async function cargarBootstrap() {
 
             if (r.ok) {
                 if (tipo === "hilo") {
-                    mostrarListaHilos()
+                    navegarHistorial(crearEstadoNavegacion("foro", null), true)
+                    mostrarListaHilos(false)
                     cargarHilos(true)
                 } else {
                     abrirHilo(hiloAbiertoId)
@@ -3508,6 +3654,7 @@ async function cargarBootstrap() {
 
         btnAbrirCompose.addEventListener("click", function () {
 
+            navegarHistorial(crearEstadoNavegacion("foro", "compose"), false)
             abrirModal(modalCompose)
             actualizarComposeCabecera()
             inputContenido.style.height = ""
@@ -3518,7 +3665,9 @@ async function cargarBootstrap() {
         })
 
         btnCerrarCompose.addEventListener("click", function () {
-            cerrarModal(modalCompose)
+            volverHistorialOverlay("compose", function () {
+                cerrarModal(modalCompose)
+            })
         })
 
         formHilo.addEventListener("submit", async function (e) {
@@ -3546,6 +3695,9 @@ async function cargarBootstrap() {
             }
 
             msgHilo.innerText = "Publicando…"
+            if (estadoActualSeguro() && estadoActualSeguro().overlay === "compose") {
+                navegarHistorial(crearEstadoNavegacion("foro", null), true)
+            }
             cerrarModal(modalCompose)
             renderizarHilos([hOptimista], false)
             const tempEl = [...listaHilos.querySelectorAll("[data-temp-hilo]")].find(function (x) { return x.dataset.tempHilo === tempId })
@@ -3584,7 +3736,11 @@ async function cargarBootstrap() {
 
         })
 
-        async function abrirHilo(id) {
+        async function abrirHilo(id, actualizarHistorial) {
+
+            if (actualizarHistorial !== false) {
+                navegarHistorial(crearEstadoNavegacion("foro", "hilo", id), false)
+            }
 
             hiloAbiertoId = id
             mostrarDetalleHilo()
@@ -3686,7 +3842,7 @@ async function cargarBootstrap() {
         }
 
         btnVolverHilos.addEventListener("click", function () {
-            mostrarListaHilos()
+            volverHistorialOverlay("hilo", function () { mostrarListaHilos(false) })
         })
 
         formRespuesta.addEventListener("submit", async function (e) {
@@ -3791,7 +3947,14 @@ async function cargarBootstrap() {
             mostrarSeccion("foro", "up")
         })
 
-        function mostrarSeccion(nombre, modoNavegacion) {
+        function mostrarSeccion(nombre, modoNavegacion, actualizarHistorial) {
+
+            if (actualizarHistorial !== false && historialMedmarInicializado && !aplicandoEstadoHistorial) {
+                const actual = estadoActualSeguro()
+                if (!actual || actual.vista !== nombre || actual.overlay) {
+                    navegarHistorial(crearEstadoNavegacion(nombre, null), false)
+                }
+            }
 
             const anterior = seccionActual
             seccionActual = nombre
@@ -3985,16 +4148,28 @@ async function cargarBootstrap() {
         logoutBtn.addEventListener("click", function () {
             sesion = null
             borrarSesionLocal()
+            resetearHistorialPorLogout()
             mostrarLogin()
         })
 
         // ==================== MOSTRAR / OCULTAR PANTALLAS ====================
 
-        function mostrarApp() {
+        async function mostrarApp() {
             loginScreen.style.display = "none"
             app.style.display = "block"
             userEmail.innerText = sesion.email
-            mostrarSeccion("inicio")
+            inicializarHistorialMedmar()
+
+            const estado = esEstadoMedmar(history.state) && !history.state.guard
+                ? history.state
+                : crearEstadoNavegacion("inicio", null)
+
+            if (esEstadoMedmar(history.state) && !history.state.guard) {
+                await aplicarEstadoHistorial(estado)
+            } else {
+                mostrarSeccion("inicio", null, false)
+            }
+
             cargarBootstrap()
             iniciarActualizacionPeriodica()
         }
@@ -4009,6 +4184,7 @@ async function cargarBootstrap() {
             app.style.display = "none"
             loginScreen.style.display = "block"
             seccionActual = "inicio"
+            resetearHistorialPorLogout()
             actualizarVisibilidadPie()
             detenerActualizacionPeriodica()
         }
@@ -4340,7 +4516,7 @@ async function cargarBootstrap() {
             if (!r.ok) {
                 if (!silencioso) msgChat.innerText = mensajeError(r.error)
                 if (r.error === 'chat_expirado' || r.error === 'chat_no_encontrado') {
-                    cerrarChat()
+                    cerrarChat(false)
                     cargarMisIntercambios()
                 }
                 return
@@ -4355,8 +4531,11 @@ async function cargarBootstrap() {
             msgChat.innerText = ''
         }
 
-        async function abrirChat(conversacionId) {
+        async function abrirChat(conversacionId, actualizarHistorial) {
             if (!conversacionId) return
+            if (actualizarHistorial !== false) {
+                navegarHistorial(crearEstadoNavegacion("intercambios", "chat", conversacionId), false)
+            }
             chatAbiertoId = conversacionId
             mensajesChatUI = []
             listaIntercambios.style.display = 'none'
@@ -4378,7 +4557,11 @@ async function cargarBootstrap() {
             }
         }
 
-        function cerrarChat() {
+        function cerrarChat(actualizarHistorial) {
+            if (actualizarHistorial !== false && estadoActualSeguro() && estadoActualSeguro().overlay === "chat") {
+                history.back()
+                return
+            }
             detenerChatPolling()
             chatAbiertoId = null
             mensajesChatUI = []
@@ -4389,7 +4572,9 @@ async function cargarBootstrap() {
             msgChat.innerText = ''
         }
 
-        btnCerrarChat.addEventListener('click', cerrarChat)
+        btnCerrarChat.addEventListener('click', function () {
+            cerrarChat(true)
+        })
 
         const btnEnviarChat = formChat.querySelector('button[type="submit"]')
 
@@ -4432,7 +4617,7 @@ async function cargarBootstrap() {
                     borrarSesionLocal()
                     mostrarLogin()
                 }
-                if (r.error === 'chat_expirado' || r.error === 'chat_no_encontrado') cerrarChat()
+                if (r.error === 'chat_expirado' || r.error === 'chat_no_encontrado') cerrarChat(false)
                 return
             }
 
