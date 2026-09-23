@@ -2163,11 +2163,24 @@
         let idEditando = null
 let foroCargado = false
 const foroCacheCliente = new Map()
+const chatCacheCliente = new Map()
+const hiloCacheCliente = new Map()
+const ACCIONES_LECTURA_DEDUPE = new Set([
+    "bootstrap", "foroBootstrap", "listarEtiquetas", "listarHilos", "verHilo",
+    "misSolicitudes", "misIntercambios", "miPerfil", "obtenerChat", "listarDenuncias",
+    "listarModeradores", "soyModerador"
+])
+const FRESCURA_FORO_CLIENTE_MS = 20000
+const FRESCURA_USUARIO_CLIENTE_MS = 20000
 let solicitudesUI = []
 let respuestasUI = []
 let hiloActualUI = null
 let intercambiosUI = []
+let ultimaActualizacionUsuario = 0
+let datosUsuarioRefreshEnCurso = null
 let chatAbiertoId = null
+let chatCantidadServidor = 0
+let chatDatosServidorCargados = false
 let chatPollingTimer = null
 let mensajesChatUI = []
 let chatEnvioEnCurso = false
@@ -2795,8 +2808,8 @@ let chatEnvioEnCurso = false
 
         async function llamarServidor(accion, params, incluirToken) {
 
-            const dedupeKey = incluirToken && sesion && (accion === "bootstrap" || accion === "foroBootstrap" || accion === "listarEtiquetas")
-                ? accion + "|" + JSON.stringify(params) + "|" + sesion.email
+            const dedupeKey = incluirToken && sesion && ACCIONES_LECTURA_DEDUPE.has(accion)
+                ? accion + "|" + JSON.stringify(params || {}) + "|" + sesion.email
                 : null
 
             if (dedupeKey && llamadasEnCurso.has(dedupeKey)) return llamadasEnCurso.get(dedupeKey)
@@ -2853,6 +2866,7 @@ async function cargarBootstrap() {
                 const local = JSON.parse(localStorage.getItem(cacheKey) || 'null')
                 if (local && local.data) {
                     aplicarBootstrap(local.data)
+                    if (local.ts && Date.now() - Number(local.ts) < FRESCURA_USUARIO_CLIENTE_MS) return
                 }
             } catch (_) {}
 
@@ -2879,6 +2893,7 @@ async function cargarBootstrap() {
             }
             solicitudesUI = Array.isArray(data.solicitudes) ? data.solicitudes.slice() : []
             intercambiosUI = Array.isArray(data.intercambios) ? data.intercambios.slice() : []
+            ultimaActualizacionUsuario = Date.now()
             renderizarSolicitudes(solicitudesUI)
             renderizarIntercambios(intercambiosUI)
             esModeradorActual = !!(data.rol && data.rol.esModerador)
@@ -2897,12 +2912,19 @@ async function cargarBootstrap() {
         async function cargarForoBootstrap() {
             const key = etiquetaFiltroActual || '_todos'
             const cached = foroCacheCliente.get(key)
+            const age = cached && cached.actualizadoEn ? Date.now() - cached.actualizadoEn : Infinity
+
             if (cached) {
                 renderizarEtiquetasCliente(cached.etiquetas || [])
                 renderizarHilos(cached.hilos || [], true)
                 paginaHilosActual = (cached.hilos || []).length
                 btnCargarMas.style.display = cached.hayMas ? 'block' : 'none'
+                if (age < FRESCURA_FORO_CLIENTE_MS) {
+                    foroCargado = true
+                    return
+                }
             }
+
             const r = await llamar('foroBootstrap', { etiqueta: etiquetaFiltroActual })
             if (!r.ok) {
                 if (!cached) {
@@ -2919,7 +2941,7 @@ async function cargarBootstrap() {
             esModeradorActual = !!r.esModerador
             btnIrModeracion.style.display = esModeradorActual ? 'inline-block' : 'none'
             const data = r.data || {}
-            const item = { etiquetas: data.etiquetas || [], hilos: data.hilos || [], hayMas: !!data.hayMas }
+            const item = { etiquetas: data.etiquetas || [], hilos: data.hilos || [], hayMas: !!data.hayMas, actualizadoEn: Date.now() }
             foroCacheCliente.set(key, item)
             renderizarEtiquetasCliente(item.etiquetas)
             renderizarHilos(item.hilos, true)
@@ -3178,6 +3200,7 @@ async function cargarBootstrap() {
                 if (tipo === "hilo") {
                     navegarHistorial(crearEstadoNavegacion("foro", null), true)
                     mostrarListaHilos(false)
+                    foroCacheCliente.delete(etiquetaFiltroActual || "_todos")
                     cargarHilos(true)
                 } else {
                     abrirHilo(hiloAbiertoId)
@@ -3250,6 +3273,11 @@ async function cargarBootstrap() {
         }
 
         async function cargarEtiquetasDisponibles() {
+            const cache = foroCacheCliente.get('_todos')
+            if (cache && cache.actualizadoEn && Date.now() - cache.actualizadoEn < FRESCURA_FORO_CLIENTE_MS && Array.isArray(cache.etiquetas)) {
+                renderizarEtiquetasCliente(cache.etiquetas)
+                return
+            }
             const r = await llamar("listarEtiquetas", {})
             if (!r.ok) return
             renderizarEtiquetasCliente(r.etiquetas || [])
@@ -3289,6 +3317,10 @@ async function cargarBootstrap() {
                     renderizarHilos(cached.hilos || [], true)
                     paginaHilosActual = (cached.hilos || []).length
                     btnCargarMas.style.display = cached.hayMas ? "block" : "none"
+                    if (cached.actualizadoEn && Date.now() - cached.actualizadoEn < FRESCURA_FORO_CLIENTE_MS) {
+                        foroCargado = true
+                        return
+                    }
                 } else {
                     listaHilos.innerHTML = ""
                     btnCargarMas.style.display = "none"
@@ -3310,7 +3342,7 @@ async function cargarBootstrap() {
             }
 
             if (reiniciar) {
-                const item = { hilos: r.hilos || [], hayMas: !!r.hayMas, etiquetas: foroCacheCliente.get(key)?.etiquetas || [] }
+                const item = { hilos: r.hilos || [], hayMas: !!r.hayMas, etiquetas: foroCacheCliente.get(key)?.etiquetas || [], actualizadoEn: Date.now() }
                 foroCacheCliente.set(key, item)
                 renderizarHilos(item.hilos, true)
                 paginaHilosActual = item.hilos.length
@@ -3521,6 +3553,12 @@ async function cargarBootstrap() {
                     if (hiloActualUI && String(hiloActualUI.id) === String(id)) {
                         hiloActualUI.meGusta = !!r.liked
                         hiloActualUI.likes = Number(r.likes || 0)
+                    }
+                    const cacheHiloLike = hiloCacheCliente.get(String(id))
+                    if (cacheHiloLike && cacheHiloLike.data && cacheHiloLike.data.hilo) {
+                        cacheHiloLike.data.hilo.meGusta = !!r.liked
+                        cacheHiloLike.data.hilo.likes = Number(r.likes || 0)
+                        cacheHiloLike.actualizadoEn = Date.now()
                     }
                     actualizarLikeEnCachesCliente(tipo, id, !!r.liked, Number(r.likes || 0))
                 }
@@ -3744,8 +3782,23 @@ async function cargarBootstrap() {
 
             hiloAbiertoId = id
             mostrarDetalleHilo()
-            detalleHiloContenido.innerHTML = "<p class='vacio'>Cargando...</p>"
-            listaRespuestas.innerHTML = ""
+
+            const cache = hiloCacheCliente.get(String(id))
+            const cacheFresco = cache && cache.actualizadoEn && Date.now() - cache.actualizadoEn < 20000
+            if (cache && cache.data) {
+                hiloActualUI = Object.assign({}, cache.data.hilo)
+                renderizarDetalleHilo(hiloActualUI)
+                renderizarRespuestas(cache.data.respuestas || [])
+                if (cacheFresco) {
+                    llamar("verHilo", { id }).then(function(r) {
+                        if (r.ok) hiloCacheCliente.set(String(id), { data: { hilo: r.hilo, respuestas: r.respuestas }, actualizadoEn: Date.now() })
+                    })
+                    return
+                }
+            } else {
+                detalleHiloContenido.innerHTML = "<p class='vacio'>Cargando...</p>"
+                listaRespuestas.innerHTML = ""
+            }
 
             const r = await llamar("verHilo", { id })
 
@@ -3766,6 +3819,7 @@ async function cargarBootstrap() {
             hiloActualUI = Object.assign({}, r.hilo)
             renderizarDetalleHilo(hiloActualUI)
             renderizarRespuestas(r.respuestas)
+            hiloCacheCliente.set(String(id), { data: { hilo: r.hilo, respuestas: r.respuestas }, actualizadoEn: Date.now() })
 
         }
 
@@ -3892,6 +3946,13 @@ async function cargarBootstrap() {
                 if (tempEl) tempEl.replaceWith(crearElementoRespuesta(respuestaFinal))
                 msgRespuesta.innerText = ""
                 if (hiloActualUI) hiloActualUI.respuestas = Number(hiloActualUI.respuestas || 0) + 1
+                const cacheHiloRespuesta = hiloCacheCliente.get(String(hiloAbiertoId))
+                if (cacheHiloRespuesta && cacheHiloRespuesta.data) {
+                    cacheHiloRespuesta.data.hilo = Object.assign({}, cacheHiloRespuesta.data.hilo, { respuestas: hiloActualUI ? hiloActualUI.respuestas : cacheHiloRespuesta.data.hilo.respuestas })
+                    cacheHiloRespuesta.data.respuestas = respuestasUI.filter(function(x) { return !x._optimista })
+                    cacheHiloRespuesta.actualizadoEn = Date.now()
+                }
+                foroCacheCliente.delete(etiquetaFiltroActual || "_todos")
                 return
             }
 
@@ -4198,10 +4259,26 @@ async function cargarBootstrap() {
             intervaloActualizacion = setInterval(function () {
                 if (!sesion || document.visibilityState !== "visible") return
                 if (seccionActual === "intercambios") {
-                    cargarMisSolicitudes()
-                    cargarMisIntercambios()
+                    refrescarDatosUsuario(false)
                 }
             }, 60000)
+        }
+
+        async function refrescarDatosUsuario(forzar) {
+            if (!sesion) return
+            if (!forzar && Date.now() - ultimaActualizacionUsuario < FRESCURA_USUARIO_CLIENTE_MS) return
+            if (datosUsuarioRefreshEnCurso) return datosUsuarioRefreshEnCurso
+
+            datosUsuarioRefreshEnCurso = Promise.all([
+                cargarMisSolicitudes(),
+                cargarMisIntercambios()
+            ]).then(function() {
+                ultimaActualizacionUsuario = Date.now()
+            }).finally(function() {
+                datosUsuarioRefreshEnCurso = null
+            })
+
+            return datosUsuarioRefreshEnCurso
         }
 
         function detenerActualizacionPeriodica() {
@@ -4216,8 +4293,7 @@ async function cargarBootstrap() {
         document.addEventListener("visibilitychange", function () {
 
             if (document.visibilityState === "visible" && sesion && seccionActual === "intercambios") {
-                cargarMisSolicitudes()
-                cargarMisIntercambios()
+                refrescarDatosUsuario(false)
             }
 
         })
@@ -4512,22 +4588,35 @@ async function cargarBootstrap() {
 
         async function cargarChatActual(silencioso) {
             if (!chatAbiertoId || chatEnvioEnCurso) return
-            const r = await llamar('obtenerChat', { conversacionId: chatAbiertoId })
+            const r = await llamar('obtenerChat', {
+                conversacionId: chatAbiertoId,
+                cantidadMensajes: chatDatosServidorCargados ? Math.max(0, chatCantidadServidor) : -1
+            })
             if (!r.ok) {
                 if (!silencioso) msgChat.innerText = mensajeError(r.error)
                 if (r.error === 'chat_expirado' || r.error === 'chat_no_encontrado') {
                     cerrarChat(false)
-                    cargarMisIntercambios()
+                    refrescarDatosUsuario(true)
+                }
+                return
+            }
+
+            if (r.sinCambios) {
+                if (r.chat && r.chat.ultimaActividad) {
+                    chatEstado.textContent = 'Última actividad: ' + new Date(r.chat.ultimaActividad).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })
                 }
                 return
             }
 
             const chat = r.chat
+            chatCantidadServidor = Number(chat.cantidadMensajes || 0)
+            chatDatosServidorCargados = true
             chatTitulo.textContent = chat.materia || 'Chat de intercambio'
             chatParticipantes.textContent = (chat.participantes || []).map(function(p) { return p.esVos ? 'Vos' : (p.pseudonimo || 'Estudiante') }).join(' · ')
             chatEstado.textContent = chat.ultimaActividad ? 'Última actividad: ' + new Date(chat.ultimaActividad).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : ''
             mensajesChatUI = Array.isArray(chat.mensajes) ? chat.mensajes.slice() : []
             renderizarMensajesChat(mensajesChatUI)
+            chatCacheCliente.set(String(chatAbiertoId), { chat: Object.assign({}, chat, { mensajes: mensajesChatUI.slice() }), actualizadoEn: Date.now() })
             msgChat.innerText = ''
         }
 
@@ -4538,14 +4627,31 @@ async function cargarBootstrap() {
             }
             chatAbiertoId = conversacionId
             mensajesChatUI = []
+            chatCantidadServidor = 0
+            chatDatosServidorCargados = false
             listaIntercambios.style.display = 'none'
             panelChat.style.display = 'block'
-            msgChat.innerText = 'Cargando chat…'
+
+            const cache = chatCacheCliente.get(String(conversacionId))
+            if (cache && cache.chat) {
+                chatCantidadServidor = Number(cache.chat.cantidadMensajes || 0)
+                chatDatosServidorCargados = true
+                const chat = cache.chat
+                chatTitulo.textContent = chat.materia || 'Chat de intercambio'
+                chatParticipantes.textContent = (chat.participantes || []).map(function(p) { return p.esVos ? 'Vos' : (p.pseudonimo || 'Estudiante') }).join(' · ')
+                chatEstado.textContent = chat.ultimaActividad ? 'Última actividad: ' + new Date(chat.ultimaActividad).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : ''
+                mensajesChatUI = Array.isArray(chat.mensajes) ? chat.mensajes.slice() : []
+                renderizarMensajesChat(mensajesChatUI)
+                msgChat.innerText = ''
+            } else {
+                msgChat.innerText = 'Cargando chat…'
+            }
+
             await cargarChatActual(false)
             detenerChatPolling()
             chatPollingTimer = setInterval(function() {
                 if (document.visibilityState === 'visible' && chatAbiertoId && seccionActual === 'intercambios' && !chatEnvioEnCurso) cargarChatActual(true)
-            }, 12000)
+            }, 10000)
             panelChat.scrollIntoView({ behavior: 'smooth', block: 'start' })
             inputMensajeChat.focus()
         }
@@ -4622,8 +4728,17 @@ async function cargarBootstrap() {
             }
 
             mensajesChatUI = mensajesChatUI.map(function(m) { return m.id === temporal.id ? r.mensaje : m })
+            chatCantidadServidor = Number(r.cantidadMensajes || (chatCantidadServidor + 1))
+            chatDatosServidorCargados = true
             renderizarMensajesChat(mensajesChatUI)
             chatEstado.textContent = 'Última actividad: ahora'
+            const cacheChatActual = chatCacheCliente.get(String(chatIdEnviado))
+            if (cacheChatActual && cacheChatActual.chat) {
+                cacheChatActual.chat.mensajes = mensajesChatUI.slice()
+                cacheChatActual.chat.cantidadMensajes = chatCantidadServidor
+                cacheChatActual.chat.ultimaActividad = new Date()
+                cacheChatActual.actualizadoEn = Date.now()
+            }
             msgChat.innerText = ''
             inputMensajeChat.focus()
         })
@@ -4671,6 +4786,8 @@ async function cargarBootstrap() {
             const r = await llamar("borrar", { id })
             if (r.ok) {
                 cacheUserListsInvalidarCliente()
+                ultimaActualizacionUsuario = 0
+                refrescarDatosUsuario(true)
                 return
             }
             solicitudesUI = anterior
@@ -4724,8 +4841,8 @@ async function cargarBootstrap() {
                     if (r.ok) {
                         msg.innerText = r.emparejado ? "¡Encontramos un intercambio para vos! Revisá 'Intercambios completados' y abrí el chat privado." : "Solicitud actualizada correctamente."
                         salirModoEdicion()
-                        cargarMisSolicitudes()
-                        cargarMisIntercambios()
+                        ultimaActualizacionUsuario = 0
+                        refrescarDatosUsuario(true)
                     } else {
                         solicitudesUI = anterior
                         renderizarSolicitudes(solicitudesUI)
@@ -4743,8 +4860,8 @@ async function cargarBootstrap() {
                 if (r.ok) {
                     msg.innerText = r.emparejado ? "¡Encontramos un intercambio para vos! Revisá 'Intercambios completados' y abrí el chat privado." : "Solicitud publicada correctamente."
                     salirModoEdicion()
-                    cargarMisSolicitudes()
-                    cargarMisIntercambios()
+                    ultimaActualizacionUsuario = 0
+                    refrescarDatosUsuario(true)
                 } else {
                     solicitudesUI = solicitudesUI.filter(function (s) { return s.id !== optimista.id })
                     renderizarSolicitudes(solicitudesUI)
