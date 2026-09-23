@@ -1671,7 +1671,7 @@
         <div id="loginScreen" style="margin-top: 26px;">
 
             <div id="g_id_onload"
-                 data-client_id="432682206153-1bdapq5rniu1jlftt6c6poj2ha06llto.apps.googleusercontent.com"
+                 data-client_id="138435500611-24k1250agodu41cud0ohjdlqgjmt7278.apps.googleusercontent.com"
                  data-callback="onGoogleLogin">
             </div>
             <div class="g_id_signin" data-type="standard" data-width="300"></div>
@@ -2087,7 +2087,7 @@
         Proyecto independiente creado por <b>Simón Moreno</b>.<br>
         No afiliado oficialmente a la Facultad de Ciencias de la Salud (UNMDP).<br><br>
 
-        <a href="mailto:MedMarUNMDP@gmail.com">Reportar error o bug</a>
+        <a href="mailto:MedMarUNMDP@gmail.com">Contactar a MedMarUNMDP</a>
 
     </div>
 
@@ -2169,6 +2169,8 @@ let hiloActualUI = null
 let intercambiosUI = []
 let chatAbiertoId = null
 let chatPollingTimer = null
+let mensajesChatUI = []
+let chatEnvioEnCurso = false
 
         const loginScreen = document.getElementById("loginScreen")
         const app = document.getElementById("app")
@@ -4320,6 +4322,12 @@ async function cargarBootstrap() {
                 burbuja.appendChild(autor)
                 burbuja.appendChild(texto)
                 burbuja.appendChild(fecha)
+                if (mensaje._pendiente) {
+                    const estado = document.createElement('div')
+                    estado.className = 'fechaMensajeChat'
+                    estado.textContent = 'Enviando…'
+                    burbuja.appendChild(estado)
+                }
                 fila.appendChild(burbuja)
                 listaMensajesChat.appendChild(fila)
             })
@@ -4327,7 +4335,7 @@ async function cargarBootstrap() {
         }
 
         async function cargarChatActual(silencioso) {
-            if (!chatAbiertoId) return
+            if (!chatAbiertoId || chatEnvioEnCurso) return
             const r = await llamar('obtenerChat', { conversacionId: chatAbiertoId })
             if (!r.ok) {
                 if (!silencioso) msgChat.innerText = mensajeError(r.error)
@@ -4342,20 +4350,22 @@ async function cargarBootstrap() {
             chatTitulo.textContent = chat.materia || 'Chat de intercambio'
             chatParticipantes.textContent = (chat.participantes || []).map(function(p) { return p.esVos ? 'Vos' : (p.pseudonimo || 'Estudiante') }).join(' · ')
             chatEstado.textContent = chat.ultimaActividad ? 'Última actividad: ' + new Date(chat.ultimaActividad).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : ''
-            renderizarMensajesChat(chat.mensajes || [])
+            mensajesChatUI = Array.isArray(chat.mensajes) ? chat.mensajes.slice() : []
+            renderizarMensajesChat(mensajesChatUI)
             msgChat.innerText = ''
         }
 
         async function abrirChat(conversacionId) {
             if (!conversacionId) return
             chatAbiertoId = conversacionId
+            mensajesChatUI = []
             listaIntercambios.style.display = 'none'
             panelChat.style.display = 'block'
             msgChat.innerText = 'Cargando chat…'
             await cargarChatActual(false)
             detenerChatPolling()
             chatPollingTimer = setInterval(function() {
-                if (document.visibilityState === 'visible' && chatAbiertoId && seccionActual === 'intercambios') cargarChatActual(true)
+                if (document.visibilityState === 'visible' && chatAbiertoId && seccionActual === 'intercambios' && !chatEnvioEnCurso) cargarChatActual(true)
             }, 12000)
             panelChat.scrollIntoView({ behavior: 'smooth', block: 'start' })
             inputMensajeChat.focus()
@@ -4371,6 +4381,8 @@ async function cargarBootstrap() {
         function cerrarChat() {
             detenerChatPolling()
             chatAbiertoId = null
+            mensajesChatUI = []
+            chatEnvioEnCurso = false
             panelChat.style.display = 'none'
             listaIntercambios.style.display = 'block'
             inputMensajeChat.value = ''
@@ -4379,17 +4391,41 @@ async function cargarBootstrap() {
 
         btnCerrarChat.addEventListener('click', cerrarChat)
 
+        const btnEnviarChat = formChat.querySelector('button[type="submit"]')
+
         formChat.addEventListener('submit', async function(e) {
             e.preventDefault()
-            if (!chatAbiertoId) return
+            if (!chatAbiertoId || chatEnvioEnCurso) return
             const texto = inputMensajeChat.value.trim()
             if (!texto) return
-            msgChat.innerText = 'Enviando…'
+
+            const chatIdEnviado = chatAbiertoId
             const anterior = inputMensajeChat.value
+            const temporal = {
+                id: 'temp-' + Date.now(),
+                pseudonimo: 'Vos',
+                esVos: true,
+                texto: texto,
+                fecha: new Date(),
+                _pendiente: true
+            }
+
+            chatEnvioEnCurso = true
+            if (btnEnviarChat) btnEnviarChat.disabled = true
+            msgChat.innerText = ''
             inputMensajeChat.value = ''
-            const r = await llamar('enviarMensaje', { conversacionId: chatAbiertoId, texto: texto })
+            mensajesChatUI.push(temporal)
+            renderizarMensajesChat(mensajesChatUI)
+
+            const r = await llamar('enviarMensaje', { conversacionId: chatIdEnviado, texto: texto })
+
+            chatEnvioEnCurso = false
+            if (btnEnviarChat) btnEnviarChat.disabled = false
+
             if (!r.ok) {
+                mensajesChatUI = mensajesChatUI.filter(function(m) { return m.id !== temporal.id })
                 inputMensajeChat.value = anterior
+                renderizarMensajesChat(mensajesChatUI)
                 msgChat.innerText = mensajeError(r.error)
                 if (r.error === 'sesion_invalida') {
                     sesion = null
@@ -4399,8 +4435,11 @@ async function cargarBootstrap() {
                 if (r.error === 'chat_expirado' || r.error === 'chat_no_encontrado') cerrarChat()
                 return
             }
+
+            mensajesChatUI = mensajesChatUI.map(function(m) { return m.id === temporal.id ? r.mensaje : m })
+            renderizarMensajesChat(mensajesChatUI)
+            chatEstado.textContent = 'Última actividad: ahora'
             msgChat.innerText = ''
-            await cargarChatActual(true)
             inputMensajeChat.focus()
         })
 
