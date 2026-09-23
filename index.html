@@ -2157,6 +2157,7 @@
 
     <script>
 
+        const FRONTEND_VERSION = "MedMarUNMDP-frontend-2026-09-23-v86"
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwMZCzEIAQtLrUEwmqZPR5U5uU9DiQCinGx0aWPS1Igx3dcb6mkImZxOhob5718B6z7/exec"
 
         let sesion = null
@@ -3311,44 +3312,51 @@ async function cargarBootstrap() {
 
         async function cargarHilos(reiniciar) {
             const key = etiquetaFiltroActual || '_todos'
+
+            // No vaciamos la lista al comenzar una petición. Así un retraso o
+            // fallo de red nunca transforma una interfaz válida en una pantalla vacía.
+            // Cuando hay caché, se muestra de inmediato mientras llega la actualización.
             if (reiniciar) {
                 paginaHilosActual = 0
                 const cached = foroCacheCliente.get(key)
                 if (cached) {
                     renderizarHilos(cached.hilos || [], true)
                     paginaHilosActual = (cached.hilos || []).length
-                    btnCargarMas.style.display = cached.hayMas ? "block" : "none"
-                    if (cached.actualizadoEn && Date.now() - cached.actualizadoEn < FRESCURA_FORO_CLIENTE_MS) {
-                        foroCargado = true
-                        return
-                    }
-                } else {
-                    listaHilos.innerHTML = ""
-                    btnCargarMas.style.display = "none"
+                    btnCargarMas.style.display = cached.hayMas ? 'block' : 'none'
+                    foroCargado = true
                 }
+                listaHilos.style.opacity = '0.72'
+                listaHilos.setAttribute('aria-busy', 'true')
             }
 
             const r = await llamar("listarHilos", { etiqueta: etiquetaFiltroActual, desde: reiniciar ? 0 : paginaHilosActual })
+
             if (!r.ok) {
-                // Una publicación o un cambio de vista puede ya estar visible
-                // aunque la actualización posterior de la lista falle. Nunca
-                // reemplazamos una UI válida por "no se puede conectar".
-                const hayContenidoVisible = !!listaHilos.querySelector(".hiloItem")
-                if (!foroCacheCliente.has(key) && !hayContenidoVisible) {
+                listaHilos.style.opacity = ''
+                listaHilos.removeAttribute('aria-busy')
+
+                if (!foroCacheCliente.has(key) && !listaHilos.querySelector('.hiloItem')) {
                     listaHilos.innerHTML = "<p class='vacio'>" + escapeHtml(mensajeError(r.error)) + "</p>"
-                    btnCargarMas.style.display = "none"
+                    btnCargarMas.style.display = 'none'
                 }
+
                 if (r.error === "sesion_invalida") {
                     sesion = null
                     borrarSesionLocal()
                     mostrarLogin()
                 }
+
                 console.warn("No se pudo actualizar el foro; se conserva la vista actual.", r)
-                return
+                return false
             }
 
             if (reiniciar) {
-                const item = { hilos: r.hilos || [], hayMas: !!r.hayMas, etiquetas: foroCacheCliente.get(key)?.etiquetas || [], actualizadoEn: Date.now() }
+                const item = {
+                    hilos: r.hilos || [],
+                    hayMas: !!r.hayMas,
+                    etiquetas: foroCacheCliente.get(key)?.etiquetas || [],
+                    actualizadoEn: Date.now()
+                }
                 foroCacheCliente.set(key, item)
                 renderizarHilos(item.hilos, true)
                 paginaHilosActual = item.hilos.length
@@ -3356,65 +3364,40 @@ async function cargarBootstrap() {
                 renderizarHilos(r.hilos || [], false)
                 paginaHilosActual += (r.hilos || []).length
             }
+
             btnCargarMas.style.display = r.hayMas ? "block" : "none"
             foroCargado = true
+            listaHilos.style.opacity = ''
+            listaHilos.removeAttribute('aria-busy')
+            return true
         }
 
-        function detectarTipoLink(link) {
-            try {
-                const u = new URL(link)
-                const host = u.hostname.replace(/^www\./, "").toLowerCase()
-                const path = u.pathname
-
-                if (host === "youtu.be" || host === "youtube.com" || host === "youtube-nocookie.com") {
-                    let id = ""
-
-                    if (host === "youtu.be") {
-                        id = path.split("/").filter(Boolean)[0] || ""
-                    } else {
-                        const matchWatch = u.searchParams.get("v")
-                        const matchPath = path.match(/^\/(?:shorts|embed|live)\/([^/?#]+)/i)
-                        id = matchWatch || (matchPath ? matchPath[1] : "")
-                    }
-
-                    return { tipo: "youtube", id: id }
-                }
-
-                if (host === "open.spotify.com" || host === "spotify.com") {
-                    const segmentos = path.split("/").filter(Boolean)
-                    const tiposSpotify = ["track", "album", "playlist", "episode", "show"]
-                    const indiceTipo = segmentos.findIndex(function (s) { return tiposSpotify.includes(s) })
-
-                    if (indiceTipo !== -1 && segmentos[indiceTipo + 1]) {
-                        return {
-                            tipo: "spotify",
-                            subtipo: segmentos[indiceTipo],
-                            id: segmentos[indiceTipo + 1]
-                        }
-                    }
-
-                    return { tipo: "spotify", subtipo: "", id: "" }
-                }
-
-                if (host === "docs.google.com" || host === "drive.google.com" || host === "forms.google.com" ||
-                    host === "sheets.google.com" || host === "slides.google.com" || host === "classroom.google.com" ||
-                    host === "sites.google.com" || host === "scholar.google.com") {
-                    return { tipo: "google" }
-                }
-
-                if (host === "unmdp.edu.ar" || host.endsWith(".unmdp.edu.ar")) {
-                    return { tipo: "unmdp" }
-                }
-
-                if (host === "steampowered.com" || host.endsWith(".steampowered.com") ||
-                    host === "steamcommunity.com" || host.endsWith(".steamcommunity.com")) {
-                    return { tipo: "steam" }
-                }
-
-                return { tipo: "academico" }
-            } catch (err) {
-                return { tipo: "otro" }
+        // Actualización silenciosa: nunca limpia ni sustituye la interfaz antes
+        // de recibir una respuesta válida del servidor.
+        async function sincronizarHilosEnSegundoPlano() {
+            const key = etiquetaFiltroActual || '_todos'
+            const r = await llamar("listarHilos", { etiqueta: etiquetaFiltroActual, desde: 0 })
+            if (!r.ok) {
+                console.warn("No se pudo sincronizar el foro en segundo plano; se conserva la vista.", r)
+                return false
             }
+
+            const item = {
+                hilos: r.hilos || [],
+                hayMas: !!r.hayMas,
+                etiquetas: foroCacheCliente.get(key)?.etiquetas || [],
+                actualizadoEn: Date.now()
+            }
+            foroCacheCliente.set(key, item)
+
+            // Solo renderizamos si seguimos viendo el mismo filtro.
+            if (key === (etiquetaFiltroActual || '_todos')) {
+                renderizarHilos(item.hilos, true)
+                paginaHilosActual = item.hilos.length
+                btnCargarMas.style.display = r.hayMas ? "block" : "none"
+            }
+
+            return true
         }
 
         function renderizarLinkPreview(link, compacto) {
@@ -3765,13 +3748,14 @@ async function cargarBootstrap() {
                 // servidor. Reemplazamos el elemento optimista por uno real,
                 // reconstruyéndolo con los listeners normales de un hilo.
                 const temp = [...listaHilos.querySelectorAll("[data-temp-hilo]")].find(function (x) { return x.dataset.tempHilo === tempId })
-                if (temp && r.id) {
-                    const hReal = Object.assign({}, hOptimista, {
-                        id: String(r.id),
-                        likes: 0,
-                        meGusta: false,
-                        _optimista: false
-                    })
+                const hReal = Object.assign({}, hOptimista, {
+                    id: String(r.id || tempId),
+                    likes: 0,
+                    meGusta: false,
+                    _optimista: false
+                })
+
+                if (temp) {
                     temp.remove()
                     const cantidadAntes = listaHilos.children.length
                     renderizarHilos([hReal], false)
@@ -3779,11 +3763,23 @@ async function cargarBootstrap() {
                     if (nuevo) listaHilos.insertBefore(nuevo, listaHilos.firstChild)
                 }
 
-                // Forzamos una actualización de fondo. Si falla, cargarHilos
-                // conserva la publicación ya confirmada en pantalla.
-                foroCacheCliente.delete(etiquetaFiltroActual || "_todos")
-                cargarEtiquetasDisponibles()
-                cargarHilos(true)
+                // La publicación ya está confirmada. La dejamos visible sin
+                // reconstruir la lista mientras esperamos otra petición.
+                const keyForo = etiquetaFiltroActual || "_todos"
+                const cacheActual = foroCacheCliente.get(keyForo)
+                if (cacheActual && Array.isArray(cacheActual.hilos)) {
+                    cacheActual.hilos = [hReal, ...cacheActual.hilos.filter(function (h) {
+                        return String(h.id) !== String(hReal.id)
+                    })]
+                    cacheActual.actualizadoEn = Date.now()
+                    foroCacheCliente.set(keyForo, cacheActual)
+                }
+
+                // La sincronización queda en segundo plano; si falla, no toca la UI.
+                setTimeout(function () {
+                    sincronizarHilosEnSegundoPlano()
+                    cargarEtiquetasDisponibles()
+                }, 250)
                 return
             }
 
