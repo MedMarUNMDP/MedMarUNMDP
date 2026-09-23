@@ -2182,6 +2182,7 @@ let chatAbiertoId = null
 let chatCantidadServidor = 0
 let chatDatosServidorCargados = false
 let chatPollingTimer = null
+let chatPollingEnCurso = false
 let mensajesChatUI = []
 let chatEnvioEnCurso = false
 
@@ -3329,7 +3330,11 @@ async function cargarBootstrap() {
 
             const r = await llamar("listarHilos", { etiqueta: etiquetaFiltroActual, desde: reiniciar ? 0 : paginaHilosActual })
             if (!r.ok) {
-                if (!foroCacheCliente.has(key)) {
+                // Una publicación o un cambio de vista puede ya estar visible
+                // aunque la actualización posterior de la lista falle. Nunca
+                // reemplazamos una UI válida por "no se puede conectar".
+                const hayContenidoVisible = !!listaHilos.querySelector(".hiloItem")
+                if (!foroCacheCliente.has(key) && !hayContenidoVisible) {
                     listaHilos.innerHTML = "<p class='vacio'>" + escapeHtml(mensajeError(r.error)) + "</p>"
                     btnCargarMas.style.display = "none"
                 }
@@ -3338,6 +3343,7 @@ async function cargarBootstrap() {
                     borrarSesionLocal()
                     mostrarLogin()
                 }
+                console.warn("No se pudo actualizar el foro; se conserva la vista actual.", r)
                 return
             }
 
@@ -3754,6 +3760,27 @@ async function cargarBootstrap() {
                 formHilo.reset()
                 inputContenido.style.height = ""
                 contadorContenido.textContent = "0 / 5000"
+
+                // Confirmación local inmediata: la publicación ya existe en
+                // servidor. Reemplazamos el elemento optimista por uno real,
+                // reconstruyéndolo con los listeners normales de un hilo.
+                const temp = [...listaHilos.querySelectorAll("[data-temp-hilo]")].find(function (x) { return x.dataset.tempHilo === tempId })
+                if (temp && r.id) {
+                    const hReal = Object.assign({}, hOptimista, {
+                        id: String(r.id),
+                        likes: 0,
+                        meGusta: false,
+                        _optimista: false
+                    })
+                    temp.remove()
+                    const cantidadAntes = listaHilos.children.length
+                    renderizarHilos([hReal], false)
+                    const nuevo = listaHilos.children[cantidadAntes]
+                    if (nuevo) listaHilos.insertBefore(nuevo, listaHilos.firstChild)
+                }
+
+                // Forzamos una actualización de fondo. Si falla, cargarHilos
+                // conserva la publicación ya confirmada en pantalla.
                 foroCacheCliente.delete(etiquetaFiltroActual || "_todos")
                 cargarEtiquetasDisponibles()
                 cargarHilos(true)
@@ -4648,19 +4675,42 @@ async function cargarBootstrap() {
             }
 
             await cargarChatActual(false)
-            detenerChatPolling()
-            chatPollingTimer = setInterval(function() {
-                if (document.visibilityState === 'visible' && chatAbiertoId && seccionActual === 'intercambios' && !chatEnvioEnCurso) cargarChatActual(true)
-            }, 10000)
+            iniciarChatPolling()
             panelChat.scrollIntoView({ behavior: 'smooth', block: 'start' })
             inputMensajeChat.focus()
         }
 
+        function iniciarChatPolling() {
+            detenerChatPolling()
+
+            const programar = function() {
+                if (!chatAbiertoId || seccionActual !== 'intercambios') return
+                chatPollingTimer = setTimeout(async function() {
+                    chatPollingTimer = null
+                    if (document.visibilityState !== 'visible' || !chatAbiertoId || seccionActual !== 'intercambios') return
+                    if (chatPollingEnCurso || chatEnvioEnCurso) {
+                        programar()
+                        return
+                    }
+                    chatPollingEnCurso = true
+                    try {
+                        await cargarChatActual(true)
+                    } finally {
+                        chatPollingEnCurso = false
+                        programar()
+                    }
+                }, 5000)
+            }
+
+            programar()
+        }
+
         function detenerChatPolling() {
             if (chatPollingTimer) {
-                clearInterval(chatPollingTimer)
+                clearTimeout(chatPollingTimer)
                 chatPollingTimer = null
             }
+            chatPollingEnCurso = false
         }
 
         function cerrarChat(actualizarHistorial) {
@@ -4741,6 +4791,16 @@ async function cargarBootstrap() {
             }
             msgChat.innerText = ''
             inputMensajeChat.focus()
+            // El remitente ya ve su mensaje al instante. Damos además una
+            // oportunidad inmediata al otro lado de sincronizarse, sin crear
+            // polling paralelo ni esperar hasta el próximo ciclo.
+            if (chatAbiertoId === chatIdEnviado) {
+                setTimeout(function() {
+                    if (chatAbiertoId === chatIdEnviado && !chatEnvioEnCurso && !chatPollingEnCurso) {
+                        cargarChatActual(true)
+                    }
+                }, 350)
+            }
         })
 
         function iniciarEdicion(s) {
