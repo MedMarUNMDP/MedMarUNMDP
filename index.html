@@ -4496,58 +4496,83 @@ async function cargarBootstrap() {
 
         // ==================== PUBLICAR / EDITAR SOLICITUD ====================
 
+        let publicacionEnCurso = false
+
+        function bloquearPublicacion(texto) {
+            publicacionEnCurso = true
+            submitBtn.disabled = true
+            submitBtn.setAttribute("aria-busy", "true")
+            submitBtn.innerText = texto || "Publicando…"
+        }
+
+        function desbloquearPublicacion() {
+            publicacionEnCurso = false
+            submitBtn.disabled = false
+            submitBtn.removeAttribute("aria-busy")
+            submitBtn.innerText = idEditando ? "Guardar cambios" : "Publicar solicitud"
+        }
+
         form.addEventListener("submit", async function (e) {
             e.preventDefault()
+            if (publicacionEnCurso) return
+
             msg.innerText = ""
             if (tengo.value === busco.value) {
                 alert("No podés buscar la misma comisión que tenés")
                 return
             }
+
             const datos = { materia: form.materia.value, tengo: tengo.value, busco: busco.value }
             const accion = idEditando ? "editar" : "guardar"
             if (idEditando) datos.id = idEditando
 
-            if (idEditando) {
-                const anterior = solicitudesUI.slice()
-                const nuevo = { id: idEditando, materia: datos.materia, tengo: Number(datos.tengo), busco: Number(datos.busco), fecha: new Date().toISOString(), _optimista: true }
-                solicitudesUI = solicitudesUI.map(function (s) { return s.id === idEditando ? nuevo : s })
+            bloquearPublicacion(idEditando ? "Guardando…" : "Publicando…")
+
+            try {
+                if (idEditando) {
+                    const anterior = solicitudesUI.slice()
+                    const nuevo = { id: idEditando, materia: datos.materia, tengo: Number(datos.tengo), busco: Number(datos.busco), fecha: new Date().toISOString(), _optimista: true }
+                    solicitudesUI = solicitudesUI.map(function (s) { return s.id === idEditando ? nuevo : s })
+                    renderizarSolicitudes(solicitudesUI)
+
+                    const r = await llamar(accion, datos)
+                    if (r.ok) {
+                        msg.innerText = r.emparejado ? "¡Encontramos un intercambio para vos! Revisá 'Intercambios completados' y abrí el chat privado." : "Solicitud actualizada correctamente."
+                        salirModoEdicion()
+                        cargarMisSolicitudes()
+                        cargarMisIntercambios()
+                    } else {
+                        solicitudesUI = anterior
+                        renderizarSolicitudes(solicitudesUI)
+                        msg.innerText = ""
+                        alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : ""))
+                    }
+                    return
+                }
+
+                const optimista = { id: "tmp-sol-" + Date.now(), materia: datos.materia, tengo: Number(datos.tengo), busco: Number(datos.busco), fecha: new Date().toISOString(), _optimista: true }
+                solicitudesUI.push(optimista)
                 renderizarSolicitudes(solicitudesUI)
-                msg.innerText = "Guardando…"
-                const r = await llamar(accion, datos)
+
+                const r = await llamar("guardar", datos)
                 if (r.ok) {
-                    msg.innerText = r.emparejado ? "¡Encontramos un intercambio para vos! Revisá 'Intercambios completados' y abrí el chat privado." : "Solicitud actualizada correctamente."
+                    msg.innerText = r.emparejado ? "¡Encontramos un intercambio para vos! Revisá 'Intercambios completados' y abrí el chat privado." : "Solicitud publicada correctamente."
                     salirModoEdicion()
                     cargarMisSolicitudes()
                     cargarMisIntercambios()
                 } else {
-                    solicitudesUI = anterior
+                    solicitudesUI = solicitudesUI.filter(function (s) { return s.id !== optimista.id })
                     renderizarSolicitudes(solicitudesUI)
-                    msg.innerText = ""
-                    alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : ""))
+                    if (r.error === "sesion_invalida") {
+                        sesion = null
+                        borrarSesionLocal()
+                        mostrarLogin()
+                    } else {
+                        alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : ""))
+                    }
                 }
-                return
-            }
-
-            const optimista = { id: "tmp-sol-" + Date.now(), materia: datos.materia, tengo: Number(datos.tengo), busco: Number(datos.busco), fecha: new Date().toISOString(), _optimista: true }
-            solicitudesUI.push(optimista)
-            renderizarSolicitudes(solicitudesUI)
-            msg.innerText = ""
-            const r = await llamar("guardar", datos)
-            if (r.ok) {
-                msg.innerText = r.emparejado ? "¡Encontramos un intercambio para vos! Revisá 'Intercambios completados' y abrí el chat privado." : "Solicitud publicada correctamente."
-                salirModoEdicion()
-                cargarMisSolicitudes()
-                cargarMisIntercambios()
-            } else {
-                solicitudesUI = solicitudesUI.filter(function (s) { return s.id !== optimista.id })
-                renderizarSolicitudes(solicitudesUI)
-                if (r.error === "sesion_invalida") {
-                    sesion = null
-                    borrarSesionLocal()
-                    mostrarLogin()
-                } else {
-                    alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : ""))
-                }
+            } finally {
+                desbloquearPublicacion()
             }
         })
 
