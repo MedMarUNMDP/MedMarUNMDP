@@ -2157,7 +2157,7 @@
 
     <script>
 
-        const FRONTEND_VERSION = "MedMarUNMDP-frontend-2026-09-23-v86"
+        const FRONTEND_VERSION = "MedMarUNMDP-frontend-2026-09-23-v87"
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwMZCzEIAQtLrUEwmqZPR5U5uU9DiQCinGx0aWPS1Igx3dcb6mkImZxOhob5718B6z7/exec"
 
         let sesion = null
@@ -2186,6 +2186,8 @@ let chatPollingTimer = null
 let chatPollingEnCurso = false
 let mensajesChatUI = []
 let chatEnvioEnCurso = false
+let hiloPublicacionEnCurso = false
+const hilosPendientesConfirmacion = new Map()
 
         const loginScreen = document.getElementById("loginScreen")
         const app = document.getElementById("app")
@@ -2768,6 +2770,7 @@ let chatEnvioEnCurso = false
                 no_encontrado: "No se encontró la solicitud.",
                 datos_invalidos: "Los datos ingresados no son válidos.",
                 conexion: "No se pudo conectar con el servidor. Probá de nuevo en un momento.",
+                mensaje_en_verificacion: "La operación quedó en verificación. No la reenvíes; MedMar está confirmando si se guardó.",
                 servidor_ocupado: "Hay otra operación en curso. Probá de nuevo en unos segundos.",
                 servidor: "El servidor devolvió un error. Revisá la implementación de Apps Script.",
                 titulo_invalido: "El título no puede estar vacío ni superar los 140 caracteres.",
@@ -2825,7 +2828,9 @@ let chatEnvioEnCurso = false
 
                 let resp
                 const controller = new AbortController()
-                const timer = setTimeout(function () { controller.abort() }, 20000)
+                const esMutacion = !ACCIONES_LECTURA_DEDUPE.has(accion)
+                const timeoutMs = esMutacion ? 45000 : 15000
+                const timer = setTimeout(function () { controller.abort() }, timeoutMs)
 
                 try {
                     resp = await fetch(SCRIPT_URL, { method: "POST", body: formData, signal: controller.signal, cache: "no-store" })
@@ -2860,6 +2865,31 @@ let chatEnvioEnCurso = false
 
         function llamar(accion, params) {
             return llamarServidor(accion, params, true)
+        }
+
+        function esErrorAmbiguo(accion, resultado) {
+            if (!resultado || resultado.ok) return false
+            return resultado.error === "conexion" || resultado.error === "servidor" || resultado.error === "servidor_ocupado"
+        }
+
+        function esperar(ms) {
+            return new Promise(function(resolve) { setTimeout(resolve, ms) })
+        }
+
+        async function llamarMutacionResiliente(accion, params, intentos) {
+            const maxIntentos = Math.max(1, intentos || 3)
+            let ultimo = { ok: false, error: "conexion" }
+            for (let i = 0; i < maxIntentos; i++) {
+                if (i > 0) await esperar(i === 1 ? 1200 : 3000)
+                ultimo = await llamar(accion, params)
+                if (ultimo.ok) return ultimo
+                if (!esErrorAmbiguo(accion, ultimo)) return ultimo
+            }
+            return ultimo
+        }
+
+        function esErrorDefinitivo(resultado) {
+            return !!resultado && !resultado.ok && !esErrorAmbiguo("", resultado)
         }
 
 async function cargarBootstrap() {
@@ -3310,6 +3340,33 @@ async function cargarBootstrap() {
             return true
         }
 
+        function hiloCoincideConPendiente(h, pendiente) {
+            if (!h || !pendiente) return false
+            if (String(h.titulo || '') !== String(pendiente.titulo || '')) return false
+            if (String(h.autor || '') !== String(pendiente.autor || '')) return false
+            const resumenA = String(h.resumen || '').slice(0, 180)
+            const resumenB = String(pendiente.resumen || '').slice(0, 180)
+            if (resumenA !== resumenB) return false
+            const tA = new Date(h.fecha || 0).getTime()
+            const tB = new Date(pendiente.fecha || 0).getTime()
+            return tA && tB && Math.abs(tA - tB) < 10 * 60 * 1000
+        }
+
+        function combinarHilosConPendientes(hilos, key) {
+            const salida = Array.isArray(hilos) ? hilos.slice() : []
+            hilosPendientesConfirmacion.forEach(function(pendiente, tempId) {
+                const coincide = salida.some(function(h) { return hiloCoincideConPendiente(h, pendiente) })
+                if (coincide) {
+                    hilosPendientesConfirmacion.delete(tempId)
+                    return
+                }
+                if (key === '_todos' || (pendiente.etiquetas || []).some(function(t) { return String(t).toLowerCase() === key })) {
+                    salida.unshift(pendiente)
+                }
+            })
+            return salida
+        }
+
         async function cargarHilos(reiniciar) {
             const key = etiquetaFiltroActual || '_todos'
 
@@ -3351,8 +3408,9 @@ async function cargarBootstrap() {
             }
 
             if (reiniciar) {
+                const hilosConfirmados = combinarHilosConPendientes(r.hilos || [], key)
                 const item = {
-                    hilos: r.hilos || [],
+                    hilos: hilosConfirmados,
                     hayMas: !!r.hayMas,
                     etiquetas: foroCacheCliente.get(key)?.etiquetas || [],
                     actualizadoEn: Date.now()
@@ -3361,7 +3419,8 @@ async function cargarBootstrap() {
                 renderizarHilos(item.hilos, true)
                 paginaHilosActual = item.hilos.length
             } else {
-                renderizarHilos(r.hilos || [], false)
+                const nuevosHilos = combinarHilosConPendientes(r.hilos || [], key)
+                renderizarHilos(nuevosHilos, false)
                 paginaHilosActual += (r.hilos || []).length
             }
 
@@ -3382,8 +3441,9 @@ async function cargarBootstrap() {
                 return false
             }
 
+            const hilosConfirmados = combinarHilosConPendientes(r.hilos || [], key)
             const item = {
-                hilos: r.hilos || [],
+                hilos: hilosConfirmados,
                 hayMas: !!r.hayMas,
                 etiquetas: foroCacheCliente.get(key)?.etiquetas || [],
                 actualizadoEn: Date.now()
@@ -3588,6 +3648,7 @@ async function cargarBootstrap() {
                     "<h3 class='hiloTitulo'>" + escapeHtml(h.titulo) + "</h3>" +
                     (h.resumen ? "<p class='hiloResumen'>" + escapeHtml(h.resumen) + "</p>" : "") +
                     renderizarLinkPreview(h.link, true) +
+                    (h._optimista ? "<div class='estadoOptimista'>" + escapeHtml(h._estadoOptimista === "pendiente" ? "Confirmando publicación… No la vuelvas a publicar." : "Publicando…") + "</div>" : "") +
                     "<div class='hiloPie'>" +
                     avatarHtml(h.autor, h.autorFoto, "avatarChico") +
                     "<span class='hiloAutor'>" + escapeHtml(h.autor) + "</span>" +
@@ -3700,6 +3761,8 @@ async function cargarBootstrap() {
         formHilo.addEventListener("submit", async function (e) {
 
             e.preventDefault()
+            if (hiloPublicacionEnCurso) return
+
             const titulo = inputTitulo.value.trim()
             const contenido = inputContenido.value.trim()
             const etiquetasTexto = inputEtiquetas.value.trim()
@@ -3707,6 +3770,7 @@ async function cargarBootstrap() {
             const anonimo = inputAnonimoHilo.checked
             const tags = etiquetasTexto.split(",").map(function (x) { return x.trim() }).filter(Boolean).slice(0, 5)
             const tempId = "tmp-" + Date.now() + "-" + Math.random().toString(36).slice(2)
+            const operacionId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ("op-" + Date.now() + "-" + Math.random().toString(36).slice(2))
 
             const hOptimista = {
                 id: tempId,
@@ -3718,10 +3782,17 @@ async function cargarBootstrap() {
                 link: enlaceSeguroLocal(link) ? link : "",
                 fecha: new Date().toISOString(),
                 respuestas: 0,
-                _optimista: true
+                _optimista: true,
+                _estadoOptimista: "confirmando"
             }
 
+            hiloPublicacionEnCurso = true
+            if (btnAbrirCompose) btnAbrirCompose.disabled = true
+            const btnSubmitHilo = formHilo.querySelector("button[type='submit']")
+            if (btnSubmitHilo) btnSubmitHilo.disabled = true
             msgHilo.innerText = "Publicando…"
+            hilosPendientesConfirmacion.set(tempId, hOptimista)
+
             if (estadoActualSeguro() && estadoActualSeguro().overlay === "compose") {
                 navegarHistorial(crearEstadoNavegacion("foro", null), true)
             }
@@ -3730,29 +3801,32 @@ async function cargarBootstrap() {
             const tempEl = [...listaHilos.querySelectorAll("[data-temp-hilo]")].find(function (x) { return x.dataset.tempHilo === tempId })
             if (tempEl) tempEl.classList.add("hiloOptimista")
 
-            const r = await llamar("crearHilo", {
+            const r = await llamarMutacionResiliente("crearHilo", {
                 titulo: titulo,
                 contenido: contenido,
                 etiquetas: etiquetasTexto,
                 link: link,
-                anonimo: anonimo ? "1" : "0"
-            })
+                anonimo: anonimo ? "1" : "0",
+                operacionId: operacionId
+            }, 3)
 
             if (r.ok) {
+                hiloPublicacionEnCurso = false
+                if (btnAbrirCompose) btnAbrirCompose.disabled = false
+                if (btnSubmitHilo) btnSubmitHilo.disabled = false
+                hilosPendientesConfirmacion.delete(tempId)
                 msgHilo.innerText = ""
                 formHilo.reset()
                 inputContenido.style.height = ""
                 contadorContenido.textContent = "0 / 5000"
 
-                // Confirmación local inmediata: la publicación ya existe en
-                // servidor. Reemplazamos el elemento optimista por uno real,
-                // reconstruyéndolo con los listeners normales de un hilo.
                 const temp = [...listaHilos.querySelectorAll("[data-temp-hilo]")].find(function (x) { return x.dataset.tempHilo === tempId })
                 const hReal = Object.assign({}, hOptimista, {
                     id: String(r.id || tempId),
                     likes: 0,
                     meGusta: false,
-                    _optimista: false
+                    _optimista: false,
+                    _estadoOptimista: ""
                 })
 
                 if (temp) {
@@ -3763,8 +3837,6 @@ async function cargarBootstrap() {
                     if (nuevo) listaHilos.insertBefore(nuevo, listaHilos.firstChild)
                 }
 
-                // La publicación ya está confirmada. La dejamos visible sin
-                // reconstruir la lista mientras esperamos otra petición.
                 const keyForo = etiquetaFiltroActual || "_todos"
                 const cacheActual = foroCacheCliente.get(keyForo)
                 if (cacheActual && Array.isArray(cacheActual.hilos)) {
@@ -3775,14 +3847,56 @@ async function cargarBootstrap() {
                     foroCacheCliente.set(keyForo, cacheActual)
                 }
 
-                // La sincronización queda en segundo plano; si falla, no toca la UI.
-                setTimeout(function () {
+                setTimeout(function() {
                     sincronizarHilosEnSegundoPlano()
                     cargarEtiquetasDisponibles()
                 }, 250)
                 return
             }
 
+            if (esErrorAmbiguo("crearHilo", r)) {
+                hOptimista._estadoOptimista = "pendiente"
+                hilosPendientesConfirmacion.set(tempId, hOptimista)
+                const temp = [...listaHilos.querySelectorAll("[data-temp-hilo]")].find(function (x) { return x.dataset.tempHilo === tempId })
+                if (temp) {
+                    const estado = temp.querySelector(".estadoOptimista")
+                    if (estado) estado.textContent = "Confirmando publicación… No la vuelvas a publicar."
+                }
+                msgHilo.innerText = "La publicación quedó en verificación. No la vuelvas a publicar."
+                // Reintento de fondo con la misma operación: el backend es idempotente.
+                setTimeout(async function() {
+                    const rr = await llamarMutacionResiliente("crearHilo", {
+                        titulo: titulo,
+                        contenido: contenido,
+                        etiquetas: etiquetasTexto,
+                        link: link,
+                        anonimo: anonimo ? "1" : "0",
+                        operacionId: operacionId
+                    }, 2)
+                    if (rr.ok) {
+                        hilosPendientesConfirmacion.delete(tempId)
+                        hiloPublicacionEnCurso = false
+                        if (btnAbrirCompose) btnAbrirCompose.disabled = false
+                        if (btnSubmitHilo) btnSubmitHilo.disabled = false
+                        const temp2 = [...listaHilos.querySelectorAll("[data-temp-hilo]")].find(function (x) { return x.dataset.tempHilo === tempId })
+                        if (temp2) {
+                            temp2.remove()
+                            const hReal2 = Object.assign({}, hOptimista, { id: String(rr.id || tempId), _optimista: false, _estadoOptimista: "", likes: 0, meGusta: false })
+                            const cantidadAntes2 = listaHilos.children.length
+                            renderizarHilos([hReal2], false)
+                            const nuevo2 = listaHilos.children[cantidadAntes2]
+                            if (nuevo2) listaHilos.insertBefore(nuevo2, listaHilos.firstChild)
+                        }
+                        msgHilo.innerText = ""
+                    }
+                }, 15000)
+                return
+            }
+
+            hiloPublicacionEnCurso = false
+            if (btnAbrirCompose) btnAbrirCompose.disabled = false
+            if (btnSubmitHilo) btnSubmitHilo.disabled = false
+            hilosPendientesConfirmacion.delete(tempId)
             const temp = [...listaHilos.querySelectorAll("[data-temp-hilo]")].find(function (x) { return x.dataset.tempHilo === tempId })
             if (temp) temp.remove()
             msgHilo.innerText = ""
@@ -3796,6 +3910,26 @@ async function cargarBootstrap() {
             }
 
         })
+
+        function combinarRespuestasConPendientes(respuestasServidor) {
+            const servidor = Array.isArray(respuestasServidor) ? respuestasServidor.slice() : []
+            const pendientes = respuestasUI.filter(function(r) { return r && r._optimista && r._operacionId })
+
+            pendientes.forEach(function(pendiente) {
+                const encontrado = servidor.some(function(r) {
+                    if (!r || !r.esPropio) return false
+                    if (pendiente._operacionId && r.operacionId) return String(r.operacionId) === String(pendiente._operacionId)
+                    if (String(r.contenido || '') !== String(pendiente.contenido || '')) return false
+                    const a = new Date(r.fecha || 0).getTime()
+                    const b = new Date(pendiente.fecha || 0).getTime()
+                    return a && b && Math.abs(a - b) < 10 * 60 * 1000
+                })
+                if (!encontrado) servidor.push(pendiente)
+            })
+
+            servidor.sort(function(a, b) { return new Date(a.fecha || 0) - new Date(b.fecha || 0) })
+            return servidor
+        }
 
         async function abrirHilo(id, actualizarHistorial) {
 
@@ -3811,7 +3945,8 @@ async function cargarBootstrap() {
             if (cache && cache.data) {
                 hiloActualUI = Object.assign({}, cache.data.hilo)
                 renderizarDetalleHilo(hiloActualUI)
-                renderizarRespuestas(cache.data.respuestas || [])
+                respuestasUI = combinarRespuestasConPendientes(cache.data.respuestas || [])
+                renderizarRespuestas(respuestasUI)
                 if (cacheFresco) {
                     llamar("verHilo", { id }).then(function(r) {
                         if (r.ok) hiloCacheCliente.set(String(id), { data: { hilo: r.hilo, respuestas: r.respuestas }, actualizadoEn: Date.now() })
@@ -3929,15 +4064,19 @@ async function cargarBootstrap() {
 
             const contenido = inputRespuesta.value.trim()
             if (!contenido) return
+            const anonimoRespuesta = inputAnonimoRespuesta.checked
+            const operacionId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ("op-" + Date.now() + "-" + Math.random().toString(36).slice(2))
             const tempId = "tmp-resp-" + Date.now() + "-" + Math.random().toString(36).slice(2)
             const optimistic = {
                 id: tempId,
-                autor: inputAnonimoRespuesta.checked ? "Anónimo" : (inputPseudonimo.value || "Vos"),
-                autorFoto: inputAnonimoRespuesta.checked ? "" : fotoActual,
+                autor: anonimoRespuesta ? "Anónimo" : (inputPseudonimo.value || "Vos"),
+                autorFoto: anonimoRespuesta ? "" : fotoActual,
                 esPropio: true,
                 contenido: contenido,
                 fecha: new Date().toISOString(),
-                _optimista: true
+                _optimista: true,
+                _operacionId: operacionId,
+                _pendienteConfirmacion: false
             }
 
             respuestasUI.push(optimistic)
@@ -3946,11 +4085,12 @@ async function cargarBootstrap() {
             inputRespuesta.style.height = ""
             msgRespuesta.innerText = ""
 
-            const r = await llamar("crearRespuesta", {
+            const r = await llamarMutacionResiliente("crearRespuesta", {
                 hiloId: hiloAbiertoId,
                 contenido: contenido,
-                anonimo: inputAnonimoRespuesta.checked ? "1" : "0"
-            })
+                anonimo: anonimoRespuesta ? "1" : "0",
+                operacionId: operacionId
+            }, 3)
 
             if (r.ok) {
                 const indice = respuestasUI.findIndex(function (x) { return x.id === tempId })
@@ -3979,8 +4119,37 @@ async function cargarBootstrap() {
                 return
             }
 
+            if (esErrorAmbiguo("crearRespuesta", r)) {
+                const indicePendiente = respuestasUI.findIndex(function(x) { return x.id === tempId })
+                if (indicePendiente !== -1) respuestasUI[indicePendiente]._pendienteConfirmacion = true
+                renderizarRespuestas(respuestasUI)
+                msgRespuesta.innerText = mensajeError("mensaje_en_verificacion")
+                // No restauramos el texto: el servidor puede haberlo guardado.
+                // El próximo verHilo reconciliará la respuesta gracias al contenido.
+                setTimeout(async function() {
+                    const rr = await llamarMutacionResiliente("crearRespuesta", {
+                        hiloId: hiloAbiertoId,
+                        contenido: contenido,
+                        anonimo: anonimoRespuesta ? "1" : "0",
+                        operacionId: operacionId
+                    }, 2)
+                    if (rr.ok) {
+                        const indice = respuestasUI.findIndex(function(x) { return x.id === tempId })
+                        const final = rr.respuesta || { id: rr.id, autor: optimistic.autor, autorFoto: optimistic.autorFoto, esPropio: true, contenido: contenido, fecha: optimistic.fecha, likes: 0, meGusta: false }
+                        if (indice !== -1) respuestasUI[indice] = final
+                        const el = listaRespuestas.querySelector("[data-respuesta-id='" + CSS.escape(tempId) + "']")
+                        if (el) el.replaceWith(crearElementoRespuesta(final))
+                        msgRespuesta.innerText = ""
+                    } else {
+                        if (hiloAbiertoId) abrirHilo(hiloAbiertoId, false)
+                    }
+                }, 15000)
+                return
+            }
+
             respuestasUI = respuestasUI.filter(function (x) { return x.id !== tempId })
             renderizarRespuestas(respuestasUI)
+            inputRespuesta.value = contenido
             if (r.error === "sesion_invalida") {
                 sesion = null
                 borrarSesionLocal()
@@ -4600,7 +4769,7 @@ async function cargarBootstrap() {
                 if (mensaje._pendiente) {
                     const estado = document.createElement('div')
                     estado.className = 'fechaMensajeChat'
-                    estado.textContent = 'Enviando…'
+                    estado.textContent = mensaje._pendienteConfirmacion ? 'Confirmando envío… No lo reenvíes.' : 'Enviando…'
                     burbuja.appendChild(estado)
                 }
                 fila.appendChild(burbuja)
@@ -4637,7 +4806,33 @@ async function cargarBootstrap() {
             chatTitulo.textContent = chat.materia || 'Chat de intercambio'
             chatParticipantes.textContent = (chat.participantes || []).map(function(p) { return p.esVos ? 'Vos' : (p.pseudonimo || 'Estudiante') }).join(' · ')
             chatEstado.textContent = chat.ultimaActividad ? 'Última actividad: ' + new Date(chat.ultimaActividad).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : ''
-            mensajesChatUI = Array.isArray(chat.mensajes) ? chat.mensajes.slice() : []
+            const mensajesServidor = Array.isArray(chat.mensajes) ? chat.mensajes.slice() : []
+            const pendientes = mensajesChatUI.filter(function(m) { return m && m._pendiente })
+            const reconciliados = mensajesServidor.slice()
+            pendientes.forEach(function(pendiente) {
+                const encontrado = reconciliados.some(function(m) {
+                    if (!m || !m.esVos) return false
+                    if (pendiente._operacionId && m.operacionId) return String(m.operacionId) === String(pendiente._operacionId)
+                    if (String(m.texto || '') !== String(pendiente.texto || '')) return false
+                    const a = new Date(m.fecha || 0).getTime()
+                    const b = new Date(pendiente.fecha || 0).getTime()
+                    return a && b && Math.abs(a - b) < 10 * 60 * 1000
+                })
+                if (!encontrado) reconciliados.push(pendiente)
+            })
+            reconciliados.sort(function(a, b) { return new Date(a.fecha || 0) - new Date(b.fecha || 0) })
+            mensajesChatUI = reconciliados
+            if (pendientes.length && pendientes.every(function(p) {
+                return reconciliados.some(function(m) {
+                    if (m._pendiente || !m.esVos) return false
+                    if (p._operacionId && m.operacionId) return String(m.operacionId) === String(p._operacionId)
+                    return String(m.texto || '') === String(p.texto || '')
+                })
+            })) {
+                chatEnvioEnCurso = false
+                if (btnEnviarChat) btnEnviarChat.disabled = false
+                msgChat.innerText = ''
+            }
             renderizarMensajesChat(mensajesChatUI)
             chatCacheCliente.set(String(chatAbiertoId), { chat: Object.assign({}, chat, { mensajes: mensajesChatUI.slice() }), actualizadoEn: Date.now() })
             msgChat.innerText = ''
@@ -4754,16 +4949,48 @@ async function cargarBootstrap() {
             mensajesChatUI.push(temporal)
             renderizarMensajesChat(mensajesChatUI)
 
-            const r = await llamar('enviarMensaje', { conversacionId: chatIdEnviado, texto: texto })
-
-            chatEnvioEnCurso = false
-            if (btnEnviarChat) btnEnviarChat.disabled = false
+            const operacionId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ('op-' + Date.now() + '-' + Math.random().toString(36).slice(2))
+            temporal._operacionId = operacionId
+            const r = await llamarMutacionResiliente('enviarMensaje', { conversacionId: chatIdEnviado, texto: texto, operacionId: operacionId }, 3)
 
             if (!r.ok) {
+                if (esErrorAmbiguo('enviarMensaje', r)) {
+                    temporal._pendiente = true
+                    renderizarMensajesChat(mensajesChatUI)
+                    msgChat.innerText = mensajeError('mensaje_en_verificacion')
+                    // Dejamos el mensaje en pantalla y NO restauramos el campo: el servidor
+                    // puede haberlo guardado. El polling lo reconciliará.
+                    chatEnvioEnCurso = false
+                    if (btnEnviarChat) btnEnviarChat.disabled = true
+                    setTimeout(async function() {
+                        if (chatAbiertoId !== chatIdEnviado) return
+                        const rr = await llamarMutacionResiliente('enviarMensaje', { conversacionId: chatIdEnviado, texto: texto, operacionId: operacionId }, 2)
+                        if (rr.ok) {
+                            const idx = mensajesChatUI.findIndex(function(m) { return m.id === temporal.id })
+                            if (idx !== -1) {
+                                mensajesChatUI[idx] = rr.mensaje
+                                chatCantidadServidor = Number(rr.cantidadMensajes || (chatCantidadServidor + 1))
+                                chatDatosServidorCargados = true
+                                if (btnEnviarChat) btnEnviarChat.disabled = false
+                                msgChat.innerText = ''
+                                renderizarMensajesChat(mensajesChatUI)
+                            }
+                        } else if (rr.error && !esErrorAmbiguo('enviarMensaje', rr)) {
+                            mensajesChatUI = mensajesChatUI.filter(function(m) { return m.id !== temporal.id })
+                            renderizarMensajesChat(mensajesChatUI)
+                            if (btnEnviarChat) btnEnviarChat.disabled = false
+                            msgChat.innerText = mensajeError(rr.error)
+                        }
+                    }, 15000)
+                    return
+                }
+
                 mensajesChatUI = mensajesChatUI.filter(function(m) { return m.id !== temporal.id })
                 inputMensajeChat.value = anterior
                 renderizarMensajesChat(mensajesChatUI)
                 msgChat.innerText = mensajeError(r.error)
+                chatEnvioEnCurso = false
+                if (btnEnviarChat) btnEnviarChat.disabled = false
                 if (r.error === 'sesion_invalida') {
                     sesion = null
                     borrarSesionLocal()
@@ -4772,6 +4999,9 @@ async function cargarBootstrap() {
                 if (r.error === 'chat_expirado' || r.error === 'chat_no_encontrado') cerrarChat(false)
                 return
             }
+
+            chatEnvioEnCurso = false
+            if (btnEnviarChat) btnEnviarChat.disabled = false
 
             mensajesChatUI = mensajesChatUI.map(function(m) { return m.id === temporal.id ? r.mensaje : m })
             chatCantidadServidor = Number(r.cantidadMensajes || (chatCantidadServidor + 1))
