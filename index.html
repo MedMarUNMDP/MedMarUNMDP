@@ -1670,11 +1670,7 @@
 
         <div id="loginScreen" style="margin-top: 26px;">
 
-            <div id="g_id_onload"
-                 data-client_id="138435500611-24k1250agodu41cud0ohjdlqgjmt7278.apps.googleusercontent.com"
-                 data-callback="onGoogleLogin">
-            </div>
-            <div class="g_id_signin" data-type="standard" data-width="300"></div>
+            <button type="button" id="btnGoogleLogin" class="btn-secundario btnGoogleLogin">Continuar con Google</button>
 
             <div class="separador">o con email y contraseña</div>
 
@@ -1697,21 +1693,19 @@
 
             <div id="panelRecuperarPassword" class="panelAuth" style="display:none">
                 <h3>Recuperar contraseña</h3>
-                <p class="ayudaPerfil">Te enviaremos un código temporal. No enviamos contraseñas por correo.</p>
+                <p class="ayudaPerfil">Te enviaremos un enlace seguro para elegir una nueva contraseña. No enviamos contraseñas por correo.</p>
                 <form id="formRecuperarPassword">
                     <label>Email de tu cuenta</label>
                     <input type="email" id="resetEmail" required autocomplete="email">
-                    <button type="submit" class="btn-secundario">Enviar código</button>
+                    <button type="submit" class="btn-secundario">Enviar enlace</button>
                 </form>
                 <div id="pasoCodigoReset" style="display:none">
-                    <label>Código de recuperación</label>
-                    <input type="text" id="resetCodigo" maxlength="10" minlength="10" autocomplete="one-time-code" inputmode="text">
                     <label>Nueva contraseña</label>
                     <div class="campoPassword">
                         <input type="password" id="resetNuevaPassword" minlength="8" autocomplete="new-password">
                         <button type="button" class="btnMostrarPassword" data-target="resetNuevaPassword" aria-label="Mostrar nueva contraseña">👁</button>
                     </div>
-                    <button type="button" id="btnRestablecerPassword" class="btn-primario">Cambiar contraseña</button>
+                    <button type="button" id="btnRestablecerPassword" class="btn-primario">Guardar nueva contraseña</button>
                 </div>
                 <button type="button" id="btnVolverLoginDesdeReset" class="btn-secundario">Volver al inicio de sesión</button>
                 <p id="msgReset"></p>
@@ -2153,12 +2147,20 @@
         </div>
     </div>
 
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
 
-        const FRONTEND_VERSION = "MedMarUNMDP-frontend-2026-09-23-v87"
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwMZCzEIAQtLrUEwmqZPR5U5uU9DiQCinGx0aWPS1Igx3dcb6mkImZxOhob5718B6z7/exec"
+        const FRONTEND_VERSION = "MedMarUNMDP-frontend-2026-09-24-supabase-v1.2"
+        // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
+        // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
+        // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
+        const SUPABASE_URL = "https://ekfwdrsehhmrqxxlefyx.supabase.co"
+        const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ZZQREdrsOfFn8vIOaO3S0w_S7NKP9KS"
+        const SUPABASE_FUNCTION_NAME = "api"
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+            auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+        })
 
         let sesion = null
         let idEditando = null
@@ -2184,6 +2186,7 @@ let chatCantidadServidor = 0
 let chatDatosServidorCargados = false
 let chatPollingTimer = null
 let chatPollingEnCurso = false
+let chatRealtimeChannel = null
 let mensajesChatUI = []
 let chatEnvioEnCurso = false
 let hiloPublicacionEnCurso = false
@@ -2194,6 +2197,7 @@ const hilosPendientesConfirmacion = new Map()
 
         const tabLogin = document.getElementById("tabLogin")
         const tabRegistro = document.getElementById("tabRegistro")
+        const btnGoogleLogin = document.getElementById("btnGoogleLogin")
         const formLogin = document.getElementById("formLogin")
         const formRegistro = document.getElementById("formRegistro")
         const authMsg = document.getElementById("authMsg")
@@ -2792,27 +2796,23 @@ const hilosPendientesConfirmacion = new Map()
         // ==================== SESIÓN LOCAL ====================
 
         function guardarSesionLocal(s) {
-            localStorage.setItem("sesion", JSON.stringify(s))
+            // Supabase Auth mantiene la sesión de forma persistente.
+            sesion = s || null
         }
 
         function borrarSesionLocal() {
-            localStorage.removeItem("sesion")
+            sesion = null
         }
 
         function cargarSesionLocal() {
-            const raw = localStorage.getItem("sesion")
-            return raw ? JSON.parse(raw) : null
+            return null
         }
 
         // ==================== LLAMADAS AL SERVIDOR ====================
 
-        // Todas las llamadas pasan por acá: si el servidor no devuelve JSON
-        // válido (por ejemplo, porque quedó una versión vieja del script
-        // desplegada), se detecta y se informa en vez de quedar colgado.
         const llamadasEnCurso = new Map()
 
         async function llamarServidor(accion, params, incluirToken) {
-
             const dedupeKey = incluirToken && sesion && ACCIONES_LECTURA_DEDUPE.has(accion)
                 ? accion + "|" + JSON.stringify(params || {}) + "|" + sesion.email
                 : null
@@ -2821,34 +2821,20 @@ const hilosPendientesConfirmacion = new Map()
 
             const tarea = (async function () {
                 const inicioRequest = performance.now()
-                const formData = new FormData()
-                formData.append("accion", accion)
-                if (incluirToken && sesion) formData.append("token", sesion.token)
-                for (let k in params) formData.append(k, params[k])
-
-                let resp
-                const controller = new AbortController()
-                const esMutacion = !ACCIONES_LECTURA_DEDUPE.has(accion)
-                const timeoutMs = esMutacion ? 45000 : 15000
-                const timer = setTimeout(function () { controller.abort() }, timeoutMs)
+                const body = Object.assign({ accion: accion }, params || {})
 
                 try {
-                    resp = await fetch(SCRIPT_URL, { method: "POST", body: formData, signal: controller.signal, cache: "no-store" })
-                } catch (err) {
-                    console.error("Error de red al llamar a", accion, err)
-                    return { ok: false, error: err.name === "AbortError" ? "conexion" : "conexion" }
-                } finally {
-                    clearTimeout(timer)
-                }
-
-                try {
-                    const data = await resp.json()
+                    const resultado = await supabaseClient.functions.invoke(SUPABASE_FUNCTION_NAME, { body: body })
+                    if (resultado.error) {
+                        console.error("[MedMarUNMDP] Edge Function", accion, resultado.error)
+                        return { ok: false, error: "conexion", ambiguo: true, detalle: resultado.error.message || String(resultado.error) }
+                    }
+                    const data = resultado.data || { ok: false, error: "servidor", ambiguo: true }
                     console.debug("[MedMarUNMDP]", accion, Math.round(performance.now() - inicioRequest) + "ms")
-                    if (data && data.ok === false && data.error === "servidor") console.error("Error del servidor en", accion, data)
                     return data
                 } catch (err) {
-                    console.error("Respuesta no es JSON válido para", accion, err)
-                    return { ok: false, error: "conexion" }
+                    console.error("[MedMarUNMDP] Error de red", accion, err)
+                    return { ok: false, error: "conexion", ambiguo: true, detalle: err && err.message ? err.message : String(err) }
                 }
             })()
 
@@ -2869,7 +2855,7 @@ const hilosPendientesConfirmacion = new Map()
 
         function esErrorAmbiguo(accion, resultado) {
             if (!resultado || resultado.ok) return false
-            return resultado.error === "conexion" || resultado.error === "servidor" || resultado.error === "servidor_ocupado"
+            return resultado.ambiguo === true || ["conexion", "servidor", "servidor_ocupado"].includes(resultado.error)
         }
 
         function esperar(ms) {
@@ -2878,9 +2864,9 @@ const hilosPendientesConfirmacion = new Map()
 
         async function llamarMutacionResiliente(accion, params, intentos) {
             const maxIntentos = Math.max(1, intentos || 3)
-            let ultimo = { ok: false, error: "conexion" }
+            let ultimo = { ok: false, error: "conexion", ambiguo: true }
             for (let i = 0; i < maxIntentos; i++) {
-                if (i > 0) await esperar(i === 1 ? 1200 : 3000)
+                if (i > 0) await esperar(i === 1 ? 1000 : 2500)
                 ultimo = await llamar(accion, params)
                 if (ultimo.ok) return ultimo
                 if (!esErrorAmbiguo(accion, ultimo)) return ultimo
@@ -2930,14 +2916,8 @@ async function cargarBootstrap() {
             renderizarIntercambios(intercambiosUI)
             esModeradorActual = !!(data.rol && data.rol.esModerador)
             esAdminActual = !!(data.rol && data.rol.esAdmin)
-            const metodoCuenta = data.cuenta && data.cuenta.metodo ? data.cuenta.metodo : 'google'
-            if (metodoCuenta === 'password') {
-                ayudaSeguridadCuenta.textContent = 'Tu cuenta usa email y contraseña. Podés cambiarla desde acá.'
-                formCambiarPassword.style.display = 'block'
-            } else {
-                ayudaSeguridadCuenta.textContent = 'Esta cuenta ingresa mediante Google y no tiene una contraseña local de MedMarUNMDP.'
-                formCambiarPassword.style.display = 'none'
-            }
+            ayudaSeguridadCuenta.textContent = 'Podés definir o cambiar una contraseña para tu cuenta desde acá.'
+            formCambiarPassword.style.display = 'block'
             btnIrModeracion.style.display = esModeradorActual ? 'inline-block' : 'none'
         }
 
@@ -2998,7 +2978,7 @@ async function cargarBootstrap() {
             }
         }
 
-        // ==================== CONTRASEÑAS ====================
+        // ==================== CONTRASEÑAS / AUTENTICACIÓN SUPABASE ====================
 
         document.querySelectorAll('.btnMostrarPassword').forEach(function(btn) {
             btn.addEventListener('click', function() {
@@ -3011,12 +2991,34 @@ async function cargarBootstrap() {
             })
         })
 
-        // ==================== RECUPERACIÓN DE CONTRASEÑA ====================
+        function sincronizarSesionSupabase(authSession) {
+            if (!authSession || !authSession.user) {
+                sesion = null
+                return null
+            }
+            sesion = {
+                token: authSession.access_token,
+                email: String(authSession.user.email || '').toLowerCase(),
+                userId: authSession.user.id,
+                authSession: authSession
+            }
+            return sesion
+        }
 
+        async function mostrarLoginSupabase() {
+            sesion = null
+            mostrarLogin()
+            formLogin.style.display = 'block'
+            formRegistro.style.display = 'none'
+            panelRecuperarPassword.style.display = 'none'
+        }
+
+        // Recuperación por enlace seguro de Supabase Auth.
         btnOlvidePassword.addEventListener('click', function() {
             formLogin.style.display = 'none'
             panelRecuperarPassword.style.display = 'block'
             resetEmail.value = document.getElementById('loginEmail').value.trim()
+            pasoCodigoReset.style.display = 'none'
             msgReset.innerText = ''
         })
 
@@ -3031,75 +3033,58 @@ async function cargarBootstrap() {
 
         formRecuperarPassword.addEventListener('submit', async function(e) {
             e.preventDefault()
-            msgReset.innerText = 'Enviando código…'
-            const r = await llamarSinSesion('recuperarPassword', { email: resetEmail.value.trim() })
-            if (!r.ok) {
-                msgReset.innerText = mensajeError(r.error)
+            const email = resetEmail.value.trim()
+            msgReset.innerText = 'Enviando enlace…'
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin + window.location.pathname
+            })
+            if (error) {
+                msgReset.innerText = 'No se pudo enviar el enlace. Probá de nuevo en un momento.'
+                console.error(error)
                 return
             }
-            msgReset.innerText = r.mensaje || 'Si existe una cuenta con ese email, vas a recibir un código de recuperación.'
-            pasoCodigoReset.style.display = 'block'
-            resetCodigo.focus()
+            msgReset.innerText = 'Si la cuenta existe, vas a recibir un enlace para cambiar la contraseña.'
         })
 
         btnRestablecerPassword.addEventListener('click', async function() {
-            const email = resetEmail.value.trim()
-            const codigo = resetCodigo.value.trim().toUpperCase()
             const nuevaPassword = resetNuevaPassword.value
-            if (!/^[A-Z0-9]{10}$/.test(codigo)) {
-                msgReset.innerText = mensajeError('codigo_recuperacion_invalido')
-                return
-            }
             if (nuevaPassword.length < 8) {
                 msgReset.innerText = mensajeError('password_corta')
                 return
             }
-            msgReset.innerText = 'Cambiando contraseña…'
-            const r = await llamarSinSesion('restablecerPassword', { email, codigo, nuevaPassword })
-            if (!r.ok) {
-                msgReset.innerText = mensajeError(r.error)
+            msgReset.innerText = 'Guardando contraseña…'
+            const { error } = await supabaseClient.auth.updateUser({ password: nuevaPassword })
+            if (error) {
+                msgReset.innerText = 'No se pudo cambiar la contraseña. Volvé a abrir el enlace de recuperación.'
+                console.error(error)
                 return
             }
-            sesion = { token: r.token, email: r.email }
-            guardarSesionLocal(sesion)
-            panelRecuperarPassword.style.display = 'none'
-            resetCodigo.value = ''
+            msgReset.innerText = 'Contraseña actualizada correctamente.'
             resetNuevaPassword.value = ''
-            formRecuperarPassword.reset()
             pasoCodigoReset.style.display = 'none'
-            mostrarApp()
+            formLogin.style.display = 'block'
+            panelRecuperarPassword.style.display = 'none'
         })
 
-        // ==================== LOGIN CON GOOGLE ====================
-
-        async function onGoogleLogin(response) {
-
-            authMsg.innerText = "Ingresando..."
-
-            const r = await llamarSinSesion("googleLogin", { credential: response.credential })
-
-            if (r.ok) {
-
-                sesion = { token: r.token, email: r.email }
-                guardarSesionLocal(sesion)
-                authMsg.innerText = ""
-                mostrarApp()
-
-            } else {
-
-                authMsg.innerText = mensajeError(r.error) + (r.debug ? " — " + r.debug : "")
-
+        // Google OAuth: Supabase maneja el redirect, callback y sesión.
+        btnGoogleLogin.addEventListener('click', async function() {
+            authMsg.innerText = 'Ingresando con Google…'
+            const { error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.origin + window.location.pathname }
+            })
+            if (error) {
+                authMsg.innerText = 'No se pudo iniciar sesión con Google.'
+                console.error(error)
             }
-
-        }
-
-        // ==================== TABS LOGIN / REGISTRO ====================
+        })
 
         tabLogin.addEventListener("click", function () {
             tabLogin.classList.add("tabActiva")
             tabRegistro.classList.remove("tabActiva")
             formLogin.style.display = "block"
             formRegistro.style.display = "none"
+            panelRecuperarPassword.style.display = "none"
             authMsg.innerText = ""
         })
 
@@ -3108,64 +3093,90 @@ async function cargarBootstrap() {
             tabLogin.classList.remove("tabActiva")
             formRegistro.style.display = "block"
             formLogin.style.display = "none"
+            panelRecuperarPassword.style.display = "none"
             authMsg.innerText = ""
         })
 
-        // ==================== LOGIN / REGISTRO CON CONTRASEÑA ====================
+        async function iniciarSesionConSupabase(email, password) {
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password })
+            return { data, error }
+        }
 
         formLogin.addEventListener("submit", async function (e) {
-
             e.preventDefault()
             authMsg.innerText = "Ingresando..."
-
             const email = document.getElementById("loginEmail").value.trim()
             const password = document.getElementById("loginPassword").value
 
-            const r = await llamarSinSesion("login", { email, password })
-
-            if (r.ok) {
-
-                sesion = { token: r.token, email: r.email }
-                guardarSesionLocal(sesion)
-                authMsg.innerText = ""
-                formLogin.reset()
-                mostrarApp()
-
-            } else {
-
-                authMsg.innerText = mensajeError(r.error)
-
+            // Primero usamos Supabase Auth normal. Solo si falla, intentamos una
+            // vez la comprobación del hash legacy para migrar silenciosamente las
+            // cuentas que todavía no hicieron su primer login después del corte.
+            let login = await iniciarSesionConSupabase(email, password)
+            if (login.error) {
+                const legacy = await llamarSinSesion('legacyLogin', { email, password })
+                if (legacy && legacy.ok && legacy.handled) {
+                    login = await iniciarSesionConSupabase(email, password)
+                } else if (legacy && legacy.ok === false && legacy.error === 'credenciales_invalidas') {
+                    authMsg.innerText = 'Email o contraseña incorrectos.'
+                    return
+                }
             }
 
+            if (login.error || !login.data?.session) {
+                const message = login.error?.message || ''
+                authMsg.innerText = /confirm|verified/i.test(message)
+                    ? 'Tenés que confirmar tu correo antes de iniciar sesión.'
+                    : 'Email o contraseña incorrectos.'
+                return
+            }
+
+            sincronizarSesionSupabase(login.data.session)
+            formLogin.reset()
+            authMsg.innerText = ''
+            mostrarApp()
         })
 
         formRegistro.addEventListener("submit", async function (e) {
-
             e.preventDefault()
             authMsg.innerText = "Creando cuenta..."
-
             const email = document.getElementById("regEmail").value.trim()
             const password = document.getElementById("regPassword").value
-
-            const r = await llamarSinSesion("registrar", { email, password })
-
-            if (r.ok) {
-
-                sesion = { token: r.token, email: r.email }
-                guardarSesionLocal(sesion)
-                authMsg.innerText = ""
-                formRegistro.reset()
-                mostrarApp()
-
-            } else {
-
-                authMsg.innerText = mensajeError(r.error)
-
+            if (password.length < 8) { authMsg.innerText = mensajeError('password_corta'); return }
+            const { data, error } = await supabaseClient.auth.signUp({ email, password })
+            if (error) {
+                authMsg.innerText = 'No se pudo crear la cuenta. Revisá los datos e intentá nuevamente.'
+                console.error(error)
+                return
             }
+            formRegistro.reset()
+            if (data.session) {
+                sincronizarSesionSupabase(data.session)
+                authMsg.innerText = ''
+                mostrarApp()
+            } else {
+                authMsg.innerText = 'Cuenta creada. Revisá tu email para confirmar la cuenta.'
+            }
+        })
 
+        // Rehidrata la sesión y atiende el callback de recuperación.
+        supabaseClient.auth.onAuthStateChange(function(event, authSession) {
+            sincronizarSesionSupabase(authSession)
+            if (event === 'PASSWORD_RECOVERY') {
+                mostrarLogin()
+                formLogin.style.display = 'none'
+                formRegistro.style.display = 'none'
+                panelRecuperarPassword.style.display = 'block'
+                pasoCodigoReset.style.display = 'block'
+                msgReset.innerText = 'Elegí tu nueva contraseña.'
+                return
+            }
+            if (event === 'SIGNED_OUT') {
+                mostrarLoginSupabase()
+            }
         })
 
         // ==================== FORO ====================
+
 
         function mostrarListaHilos(actualizarHistorial) {
             if (actualizarHistorial === true) {
@@ -4398,9 +4409,8 @@ async function cargarBootstrap() {
 
         // ==================== CERRAR SESIÓN ====================
 
-        logoutBtn.addEventListener("click", function () {
-            sesion = null
-            borrarSesionLocal()
+        logoutBtn.addEventListener("click", async function () {
+            await supabaseClient.auth.signOut()
             resetearHistorialPorLogout()
             mostrarLogin()
         })
@@ -4873,26 +4883,45 @@ async function cargarBootstrap() {
 
         function iniciarChatPolling() {
             detenerChatPolling()
+            if (!chatAbiertoId) return
 
+            const idChat = chatAbiertoId
+            chatRealtimeChannel = supabaseClient
+                .channel('chat-' + idChat)
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'mensajes',
+                    filter: 'conversacion_id=eq.' + idChat
+                }, function(payload) {
+                    // El propio remitente ya ve su mensaje mediante optimistic UI.
+                    // Solo pedimos datos nuevos cuando llega un mensaje de otro usuario.
+                    if (!sesion || String(payload.new?.remitente_id || '') === String(sesion.userId || '')) return
+                    if (chatAbiertoId !== idChat) return
+                    if (chatPollingEnCurso || chatEnvioEnCurso) return
+                    chatPollingEnCurso = true
+                    cargarChatActual(true).finally(function() { chatPollingEnCurso = false })
+                })
+                .subscribe(function(status) {
+                    console.debug('[MedMarUNMDP] Realtime chat', idChat, status)
+                })
+
+            // Fallback muy lento: si Realtime se cae, seguimos reconciliando cada 30 s.
             const programar = function() {
-                if (!chatAbiertoId || seccionActual !== 'intercambios') return
+                if (!chatAbiertoId || chatAbiertoId !== idChat || seccionActual !== 'intercambios') return
                 chatPollingTimer = setTimeout(async function() {
                     chatPollingTimer = null
-                    if (document.visibilityState !== 'visible' || !chatAbiertoId || seccionActual !== 'intercambios') return
-                    if (chatPollingEnCurso || chatEnvioEnCurso) {
+                    if (!chatAbiertoId || chatAbiertoId !== idChat || document.visibilityState !== 'visible') {
                         programar()
                         return
                     }
-                    chatPollingEnCurso = true
-                    try {
-                        await cargarChatActual(true)
-                    } finally {
-                        chatPollingEnCurso = false
-                        programar()
+                    if (!chatPollingEnCurso && !chatEnvioEnCurso) {
+                        chatPollingEnCurso = true
+                        try { await cargarChatActual(true) } finally { chatPollingEnCurso = false }
                     }
-                }, 5000)
+                    programar()
+                }, 30000)
             }
-
             programar()
         }
 
@@ -4902,6 +4931,10 @@ async function cargarBootstrap() {
                 chatPollingTimer = null
             }
             chatPollingEnCurso = false
+            if (chatRealtimeChannel) {
+                supabaseClient.removeChannel(chatRealtimeChannel)
+                chatRealtimeChannel = null
+            }
         }
 
         function cerrarChat(actualizarHistorial) {
@@ -5111,6 +5144,7 @@ async function cargarBootstrap() {
             }
 
             const datos = { materia: form.materia.value, tengo: tengo.value, busco: busco.value }
+            if (!idEditando) datos.operacionId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ('op-' + Date.now() + '-' + Math.random().toString(36).slice(2))
             const accion = idEditando ? "editar" : "guardar"
             if (idEditando) datos.id = idEditando
 
@@ -5166,35 +5200,40 @@ async function cargarBootstrap() {
 
         formCambiarPassword.addEventListener('submit', async function(e) {
             e.preventDefault()
-            msgPasswordPerfil.innerText = 'Cambiando contraseña…'
-            const r = await llamar('cambiarPassword', {
-                passwordActual: passwordActualPerfil.value,
-                nuevaPassword: nuevaPasswordPerfil.value
-            })
-            if (!r.ok) {
-                msgPasswordPerfil.innerText = mensajeError(r.error)
-                if (r.error === 'sesion_invalida') {
-                    sesion = null
-                    borrarSesionLocal()
-                    mostrarLogin()
-                }
+            const nueva = nuevaPasswordPerfil.value
+            if (nueva.length < 8) {
+                msgPasswordPerfil.innerText = mensajeError('password_corta')
                 return
             }
-            sesion = { token: r.token, email: r.email }
-            guardarSesionLocal(sesion)
+            msgPasswordPerfil.innerText = 'Cambiando contraseña…'
+            const { error } = await supabaseClient.auth.updateUser({ password: nueva })
+            if (error) {
+                msgPasswordPerfil.innerText = 'No se pudo cambiar la contraseña.'
+                console.error(error)
+                return
+            }
             formCambiarPassword.reset()
             msgPasswordPerfil.innerText = 'Contraseña cambiada correctamente.'
         })
 
         // ==================== INICIO ====================
 
-        sesion = cargarSesionLocal()
-
-        if (sesion) {
-            mostrarApp()
-        } else {
+        async function inicializarAuthSupabase() {
             mostrarLogin()
+            try {
+                const { data, error } = await supabaseClient.auth.getSession()
+                if (error) throw error
+                if (data.session) {
+                    sincronizarSesionSupabase(data.session)
+                    await mostrarApp()
+                }
+            } catch (err) {
+                console.error('[MedMarUNMDP] No se pudo restaurar la sesión', err)
+                mostrarLogin()
+            }
         }
+
+        inicializarAuthSupabase()
 
     </script>
 
