@@ -2151,7 +2151,7 @@
 
     <script>
 
-        const FRONTEND_VERSION = "MedMarUNMDP-frontend-2026-09-24-supabase-v1.2"
+        const FRONTEND_VERSION = "MedMarUNMDP-frontend-2026-09-24-supabase-v1.3"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -2187,6 +2187,7 @@ let chatDatosServidorCargados = false
 let chatPollingTimer = null
 let chatPollingEnCurso = false
 let chatRealtimeChannel = null
+let usuarioRealtimeChannel = null
 let mensajesChatUI = []
 let chatEnvioEnCurso = false
 let hiloPublicacionEnCurso = false
@@ -3139,22 +3140,47 @@ async function cargarBootstrap() {
         formRegistro.addEventListener("submit", async function (e) {
             e.preventDefault()
             authMsg.innerText = "Creando cuenta..."
+
             const email = document.getElementById("regEmail").value.trim()
             const password = document.getElementById("regPassword").value
-            if (password.length < 8) { authMsg.innerText = mensajeError('password_corta'); return }
-            const { data, error } = await supabaseClient.auth.signUp({ email, password })
-            if (error) {
-                authMsg.innerText = 'No se pudo crear la cuenta. Revisá los datos e intentá nuevamente.'
-                console.error(error)
+
+            if (password.length < 8) {
+                authMsg.innerText = mensajeError('password_corta')
                 return
             }
+
+            const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password,
+                options: {
+                    emailRedirectTo: window.location.origin + window.location.pathname
+                }
+            })
+
+            if (error) {
+                const message = String(error.message || '')
+                if (/rate limit|too many|email rate limit/i.test(message)) {
+                    authMsg.innerText = 'Se alcanzó temporalmente el límite de emails de registro. Probá nuevamente más tarde.'
+                } else if (/already registered|already been registered|user already exists/i.test(message)) {
+                    authMsg.innerText = 'Esa cuenta ya está registrada. Probá iniciar sesión.'
+                } else if (/invalid.*email|email.*invalid/i.test(message)) {
+                    authMsg.innerText = 'El email no es válido.'
+                } else {
+                    authMsg.innerText = 'No se pudo crear la cuenta. Revisá los datos e intentá nuevamente.'
+                }
+                console.error('[MedMarUNMDP] Error al registrar', error)
+                return
+            }
+
             formRegistro.reset()
+
             if (data.session) {
                 sincronizarSesionSupabase(data.session)
                 authMsg.innerText = ''
-                mostrarApp()
+                await mostrarApp()
             } else {
                 authMsg.innerText = 'Cuenta creada. Revisá tu email para confirmar la cuenta.'
+                console.debug('[MedMarUNMDP] Registro creado sin sesión; requiere confirmación de email.', data.user?.id || '')
             }
         })
 
@@ -4434,6 +4460,7 @@ async function cargarBootstrap() {
             }
 
             cargarBootstrap()
+            iniciarRealtimeUsuario()
             iniciarActualizacionPeriodica()
         }
 
@@ -4444,6 +4471,7 @@ async function cargarBootstrap() {
         }
 
         function mostrarLogin() {
+            detenerRealtimeUsuario()
             app.style.display = "none"
             loginScreen.style.display = "block"
             seccionActual = "inicio"
@@ -4481,6 +4509,41 @@ async function cargarBootstrap() {
             })
 
             return datosUsuarioRefreshEnCurso
+        }
+
+        function iniciarRealtimeUsuario() {
+            detenerRealtimeUsuario()
+            if (!sesion || !sesion.userId) return
+
+            const userId = String(sesion.userId)
+            usuarioRealtimeChannel = supabaseClient
+                .channel('usuario-' + userId)
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'solicitudes',
+                    filter: 'user_id=eq.' + userId
+                }, function(payload) {
+                    const nuevo = payload.new || {}
+                    console.debug('[MedMarUNMDP] Realtime solicitud', nuevo.id || '', nuevo.status || '')
+
+                    // Un match cambia la solicitud propia de activa -> completada
+                    // y agrega exchange_id. Reconciliamos inmediatamente ambas listas.
+                    if (seccionActual === 'intercambios' || String(nuevo.status || '') === 'completada') {
+                        ultimaActualizacionUsuario = 0
+                        refrescarDatosUsuario(true)
+                    }
+                })
+                .subscribe(function(status) {
+                    console.debug('[MedMarUNMDP] Realtime usuario', status)
+                })
+        }
+
+        function detenerRealtimeUsuario() {
+            if (usuarioRealtimeChannel) {
+                supabaseClient.removeChannel(usuarioRealtimeChannel)
+                usuarioRealtimeChannel = null
+            }
         }
 
         function detenerActualizacionPeriodica() {
