@@ -3301,7 +3301,15 @@ async function cargarBootstrap() {
                     foroCacheCliente.delete(etiquetaFiltroActual || "_todos")
                     cargarHilos(true)
                 } else {
-                    abrirHilo(hiloAbiertoId)
+                    const hiloId = String(hiloAbiertoId)
+
+                    // La respuesta ya fue borrada en el servidor.
+                    // Invalidamos el caché para no volver a mostrarla.
+                    hiloCacheCliente.delete(hiloId)
+                    foroCacheCliente.delete(etiquetaFiltroActual || "_todos")
+
+                    // Fuerza una lectura fresca desde Supabase.
+                    await abrirHilo(hiloId, false)
                 }
             } else {
                 alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : "") )
