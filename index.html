@@ -1713,9 +1713,20 @@
 
             <form id="formRegistro" style="display:none">
                 <label>Email</label>
-                <input type="email" id="regEmail" required>
+                <input type="email" id="regEmail" required autocomplete="email">
+
                 <label>Contraseña (mínimo 8 caracteres)</label>
-                <input type="password" id="regPassword" required minlength="8">
+                <div class="campoPassword">
+                    <input type="password" id="regPassword" required minlength="8" autocomplete="new-password">
+                    <button type="button" class="btnMostrarPassword" data-target="regPassword" aria-label="Mostrar contraseña">👁</button>
+                </div>
+
+                <label>Repetí la contraseña</label>
+                <div class="campoPassword">
+                    <input type="password" id="regPasswordConfirm" required minlength="8" autocomplete="new-password">
+                    <button type="button" class="btnMostrarPassword" data-target="regPasswordConfirm" aria-label="Mostrar contraseña">👁</button>
+                </div>
+
                 <button type="submit" class="btn-primario">Crear cuenta</button>
             </form>
 
@@ -2759,6 +2770,7 @@ const hilosPendientesConfirmacion = new Map()
             const mensajes = {
                 email_invalido: "El email no es válido.",
                 password_corta: "La contraseña debe tener al menos 8 caracteres.",
+                password_no_coincide: "Las contraseñas no coinciden.",
                 email_ya_registrado: "Ese email ya tiene una cuenta creada.",
                 credenciales_invalidas: "Email o contraseña incorrectos.",
                 password_actual_incorrecta: "La contraseña actual no es correcta.",
@@ -3139,15 +3151,22 @@ async function cargarBootstrap() {
 
         formRegistro.addEventListener("submit", async function (e) {
             e.preventDefault()
-            authMsg.innerText = "Creando cuenta..."
 
             const email = document.getElementById("regEmail").value.trim()
             const password = document.getElementById("regPassword").value
+            const passwordConfirm = document.getElementById("regPasswordConfirm").value
 
             if (password.length < 8) {
                 authMsg.innerText = mensajeError('password_corta')
                 return
             }
+
+            if (password !== passwordConfirm) {
+                authMsg.innerText = 'Las contraseñas no coinciden.'
+                return
+            }
+
+            authMsg.innerText = "Creando cuenta..."
 
             const { data, error } = await supabaseClient.auth.signUp({
                 email,
@@ -3159,16 +3178,26 @@ async function cargarBootstrap() {
 
             if (error) {
                 const message = String(error.message || '')
-                if (/rate limit|too many|email rate limit/i.test(message)) {
+                const code = String(error.code || '')
+                const status = Number(error.status || 0)
+
+                if (status === 429 || /rate limit|too many|email rate limit/i.test(message)) {
                     authMsg.innerText = 'Se alcanzó temporalmente el límite de emails de registro. Probá nuevamente más tarde.'
-                } else if (/already registered|already been registered|user already exists/i.test(message)) {
+                } else if (/already registered|already been registered|user already exists|email_exists/i.test(message + ' ' + code)) {
                     authMsg.innerText = 'Esa cuenta ya está registrada. Probá iniciar sesión.'
-                } else if (/invalid.*email|email.*invalid/i.test(message)) {
+                } else if (/invalid.*email|email.*invalid|email_address_invalid/i.test(message + ' ' + code)) {
                     authMsg.innerText = 'El email no es válido.'
+                } else if (/weak.*password|password.*weak/i.test(message + ' ' + code)) {
+                    authMsg.innerText = 'La contraseña no cumple los requisitos de seguridad.'
+                } else if (/database error saving new user|database error|unexpected failure/i.test(message)) {
+                    authMsg.innerText = 'Supabase no pudo completar la creación de la cuenta. Revisá Authentication → Logs para ver el error del registro.'
+                } else if (/error sending.*(email|confirmation)|smtp|mail provider/i.test(message)) {
+                    authMsg.innerText = 'La cuenta no pudo terminar de crearse porque falló el envío del correo de confirmación. Hay que revisar la configuración de emails de Supabase.'
                 } else {
                     authMsg.innerText = 'No se pudo crear la cuenta. Revisá los datos e intentá nuevamente.'
                 }
-                console.error('[MedMarUNMDP] Error al registrar', error)
+
+                console.error('[MedMarUNMDP] Error al registrar', { message, code, status, error })
                 return
             }
 
