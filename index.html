@@ -1946,6 +1946,7 @@
         .notaImagenes > span:first-child { flex:0 0 auto; color:var(--teal-700); font-weight:700; }
         .notaImagenes a { color:var(--teal-900); font-weight:700; text-underline-offset:2px; }
         .notaImagenesComposer { margin:7px 0 0 48px; padding:5px 0 0; border:0; background:transparent; font-size:.72rem; }
+        .imagenExternaNoDisponible { display:flex; align-items:center; gap:8px; margin:8px 0; padding:14px; border:1px dashed var(--line); border-radius:10px; background:rgba(120,140,130,.08); color:var(--ink-soft); font-size:.84rem; }
         .respuestaGrupo { margin:0; }
         #vistaForo .respuestaItem.respuestaRaiz { cursor:pointer; }
         #vistaForo .respuestaItem.respuestaRaiz:focus-visible { outline:2px solid var(--foro-accent); outline-offset:2px; }
@@ -1964,6 +1965,7 @@
         body.temaOscuro .notaImagenes { border-color:#394b44; background:#1a2925; color:#d0dcd6; }
         body.temaOscuro .notaImagenes a { color:#b5ded0; }
         body.temaOscuro .notaImagenesComposer { border:0; background:transparent; }
+        body.temaOscuro .imagenExternaNoDisponible { border-color:#52645c; background:#1a2925; color:#d0dcd6; }
         body.temaOscuro .btnResponderRespuesta { color:#a9d9cc; }
         body.temaOscuro .btnResponderRespuesta:hover { background:#29413b; }
         @media (max-width:480px) {
@@ -2326,7 +2328,7 @@
                         </div>
                         <aside class="notaImagenes notaImagenesComposer">
                             <span aria-hidden="true">ⓘ</span>
-                            <span>Para adjuntar una imagen, subila desde el celular a <a href="https://es.imgbb.com/upload" target="_blank" rel="noopener noreferrer">ImgBB</a> y pegá el enlace directo. La imagen queda alojada fuera de MedMar; compartí solo material público.</span>
+                            <span>Para adjuntar una imagen, subila desde el celular a <a href="https://imgbox.com/" target="_blank" rel="noopener noreferrer">ImgBox</a> y pegá el enlace directo. Si no funciona, probá <a href="https://es.imgbb.com/upload" target="_blank" rel="noopener noreferrer">ImgBB</a>. La imagen se aloja fuera de MedMar; compartí solo material público.</span>
                         </aside>
                         <p id="msgRespuesta" aria-live="polite"></p>
                     </form>
@@ -2448,7 +2450,7 @@
 
         <b>Aviso</b><br>
 
-        Esta página es una herramienta creada por un estudiante para facilitar el intercambio de comisiones.
+        Esta página es una red social con herramientas por y para estudiantes.
         Puede contener errores o comportamientos inesperados.<br><br>
 
         El uso del sistema y la coordinación de intercambios es responsabilidad exclusiva de los usuarios.<br><br>
@@ -2534,7 +2536,7 @@
                 </div>
                 <aside class="notaImagenes">
                     <span aria-hidden="true">ⓘ</span>
-                    <span>¿Vas a compartir una imagen? Desde el celular podés subirla a <a href="https://es.imgbb.com/upload" target="_blank" rel="noopener noreferrer">ImgBB</a> y pegar el enlace directo en el texto. La imagen se aloja fuera de MedMar; compartí solo material público.</span>
+                    <span>¿Vas a compartir una imagen? Desde el celular podés subirla a <a href="https://imgbox.com/" target="_blank" rel="noopener noreferrer">ImgBox</a> y pegá el enlace directo. Si no funciona, usá <a href="https://es.imgbb.com/upload" target="_blank" rel="noopener noreferrer">ImgBB</a>. Se aloja fuera de MedMar; compartí solo material público.</span>
                 </aside>
                 <label class="labelCheckbox">
                     <input type="checkbox" id="inputContenidoSensible">
@@ -3830,7 +3832,7 @@ async function cargarBootstrap() {
             "spotify.com",
             "steampowered.com",
             "steamcommunity.com",
-            "prnt.sc", "lightshot.com", "pinetools.com", "screenapp.io", "imgur.com", "ibb.co", "postimg.cc", "imgbb.com", "imageshack.com"
+            "prnt.sc", "lightshot.com", "pinetools.com", "screenapp.io", "imgur.com", "ibb.co", "postimg.cc", "imgbb.com", "imageshack.com", "imgbox.com"
         ]
 
         let mapaEtiquetasDisponibles = new Map()
@@ -4575,19 +4577,44 @@ async function cargarBootstrap() {
 
         function hidratarImagenesExternas(root) {
             if (!root) return
+            function mostrarImagenNoDisponible(img, despuesDe) {
+                if (!img || !img.isConnected) return
+                const aviso = document.createElement('div')
+                aviso.className = 'imagenExternaNoDisponible'
+                aviso.setAttribute('role', 'img')
+                aviso.setAttribute('aria-label', 'La imagen ya no está disponible')
+                aviso.textContent = '▧  La imagen ya no está disponible.'
+                if (despuesDe) despuesDe.insertAdjacentElement('afterend', aviso)
+                else img.insertAdjacentElement('afterend', aviso)
+                img.remove()
+            }
+            root.querySelectorAll('img.imagenExternaForo').forEach(function(img) {
+                if (img.dataset.fallbackBound) return
+                img.dataset.fallbackBound = '1'
+                img.onerror = function() { mostrarImagenNoDisponible(img) }
+            })
             root.querySelectorAll('.externalImageLink[data-preview-url]').forEach(function(link) {
                 if (link.dataset.previewRequested) return
                 link.dataset.previewRequested = '1'
                 const url = link.dataset.previewUrl
                 llamar('resolverImagen', { url: url }).then(function(result) {
-                    if (!result || !result.ok || !result.imagen || !link.isConnected) return
+                    if (!link.isConnected) return
+                    if (!result || !result.ok || !result.imagen) {
+                        const aviso = document.createElement('div')
+                        aviso.className = 'imagenExternaNoDisponible'
+                        aviso.setAttribute('role', 'img')
+                        aviso.setAttribute('aria-label', 'La imagen ya no está disponible')
+                        aviso.textContent = '▧  La imagen ya no está disponible.'
+                        link.insertAdjacentElement('afterend', aviso)
+                        return
+                    }
                     const img = document.createElement('img')
                     img.className = 'imagenExternaForo'
                     img.src = result.imagen
                     img.alt = 'Imagen externa'
                     img.loading = 'lazy'
                     img.referrerPolicy = 'no-referrer'
-                    img.onerror = function() { img.remove() }
+                    img.onerror = function() { mostrarImagenNoDisponible(img) }
                     link.insertAdjacentElement('afterend', img)
                 }).catch(function(){})
             })
@@ -5980,3 +6007,4 @@ async function cargarBootstrap() {
 
 </body>
 </html>
+
