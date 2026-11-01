@@ -1720,6 +1720,110 @@
         @media(max-width:420px) { .setupAvatares { grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; } .setupAvatarOpcion img,.avatarSinFoto { width:46px;height:46px; } #vistaForo { padding:8px; } #vistaForo .hiloItem { padding:12px; } }
         @media(prefers-color-scheme:dark) { #vistaForo.autoTemaOscuro { --foro-bg:#111817; --foro-card:#1b2422; --foro-text:#edf3f1; --foro-muted:#a5b3ae; --foro-line:#33413d; --foro-accent:#82b9ae; } }
 
+
+        /* Sistema global de tema: misma preferencia para todas las vistas. */
+        body.temaOscuro {
+            --teal-950:#071b19; --teal-900:#102b28; --teal-700:#83b8ad;
+            --teal-100:#233a36; --teal-50:#111917; --gold-500:#d4ad5b;
+            --gold-600:#e0bd73; --ink:#edf2ef; --ink-soft:#aab8b2;
+            --line:#34443f; --red-600:#ef8c7c; --red-700:#d97566;
+            color-scheme:dark;
+            background:#111917; color:var(--ink);
+        }
+        body.temaOscuro .hero { background:#0c2522; }
+        body.temaOscuro .hero-inner p { color:#bdcfca; }
+        body.temaOscuro #loginScreen, body.temaOscuro .panelChat,
+        body.temaOscuro .selectorTrigger, body.temaOscuro .selectorPanel,
+        body.temaOscuro .selectorBusqueda, body.temaOscuro .linkPreview,
+        body.temaOscuro #firma, body.temaOscuro #disclaimer,
+        body.temaOscuro .tabs button.tabActiva { background:#1b2723; color:var(--ink); border-color:var(--line); }
+        body.temaOscuro .tabs button { color:var(--ink-soft); }
+        body.temaOscuro #userBar button { background:#24332e; color:var(--ink); border-color:var(--line); }
+        body.temaOscuro .linkPreview { color:#b7d8cf; }
+        body.temaOscuro .linkPreviewHost, body.temaOscuro .ayudaPerfil,
+        body.temaOscuro .ayudaLink, body.temaOscuro .estadoOptimista { color:var(--ink-soft); }
+        body.temaOscuro .btn-primario { color:#142521; }
+        body.temaOscuro .selectorOpcion:hover, body.temaOscuro .selectorOpcion.seleccionada { background:#2b4039; color:var(--ink); }
+        body.temaOscuro .chatCabecera, body.temaOscuro .chatPie { border-color:var(--line); }
+        body.temaOscuro .mensajePropio { background:#244b42; color:#edf7f2; }
+        body.temaOscuro .mensajeOtro { background:#26332f; color:var(--ink); }
+        body.temaOscuro .contenido, body.temaOscuro #app { color:var(--ink); }
+        body.temaOscuro .tarjetaInicio, body.temaOscuro .card, body.temaOscuro .hiloItem,
+        body.temaOscuro .respuestaItem, body.temaOscuro #detalleHiloContenido,
+        body.temaOscuro .modalCaja, body.temaOscuro .setupPerfilCaja,
+        body.temaOscuro .bloqueTarjeta, body.temaOscuro .configTema {
+            background:#1b2723 !important; color:var(--ink) !important; border-color:var(--line) !important;
+        }
+        body.temaOscuro input, body.temaOscuro select, body.temaOscuro textarea,
+        body.temaOscuro .campoPassword input {
+            background:#17221f; color:var(--ink); border-color:var(--line);
+        }
+        body.temaOscuro input::placeholder, body.temaOscuro textarea::placeholder { color:#91a19a; }
+        body.temaOscuro .btn-secundario, body.temaOscuro .btnMostrarPassword,
+        body.temaOscuro .setupAvatarOpcion { background:#24332e; color:var(--ink); border-color:#40534c; }
+        body.temaOscuro #disclaimer, body.temaOscuro #firma, body.temaOscuro .notaForo,
+        body.temaOscuro .notaPrivacidadIntercambio { background:#17221f; color:var(--ink-soft); border-color:var(--line); }
+        body.temaOscuro a { color:#a6d2c5; }
+        body.temaOscuro .navTarget, body.temaOscuro .navInferior { background:#17221f; border-color:var(--line); }
+        body.temaOscuro .pasos li, body.temaOscuro .composePie { border-color:var(--line); }
+        body.temaOscuro .seccion-titulo, body.temaOscuro h2, body.temaOscuro h3,
+        body.temaOscuro label, body.temaOscuro .hiloAutor { color:var(--ink); }
+        body.temaOscuro .foroCabeceraAcciones .linkModeracion { color:#e0bd73; }
+        body.temaOscuro .setupAvatarOpcion.seleccionado { background:#29433c; border-color:#83b8ad; }
+        body.temaOscuro .modalFondo { background:rgba(0,0,0,.72); }
+        body.temaOscuro .chatMensaje, body.temaOscuro .burbujaMensaje { background:#24332e; color:var(--ink); }
+
+        /* Foro: una acción primaria, búsqueda unificada y menos ruido visual. */
+        #vistaForo { --foro-bg:transparent; --foro-card:#fff; --foro-text:#182522; --foro-muted:#697771; --foro-line:#e1e7e4; --foro-accent:#245954; background:transparent; padding:0; border-radius:0; }
+        body.temaOscuro #vistaForo { --foro-card:#1b2723; --foro-text:#edf2ef; --foro-muted:#aab8b2; --foro-line:#34443f; --foro-accent:#9acbbd; }
+        #vistaForo .notaForo { margin:8px 0 14px; padding:0; border:0; background:transparent; font-size:.82rem; line-height:1.45; color:var(--foro-muted); }
+        #vistaForo .foroCabecera { margin-bottom:0; }
+        #vistaForo .foroCabeceraAcciones { gap:9px; }
+        #vistaForo .btnPublicarForo { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:10px 15px; border-radius:12px; background:var(--teal-900); color:#fff; box-shadow:0 2px 5px rgba(12,40,35,.12); }
+        #vistaForo .btnPublicarForo svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+        #vistaForo .btnPublicarForo:hover { background:var(--teal-700); }
+        body.temaOscuro #vistaForo .btnPublicarForo { background:#9acbbd; color:#102b28; }
+        #vistaForo .busquedaForo { display:flex; align-items:center; gap:9px; margin:0 0 16px; padding:5px 6px 5px 12px; min-height:50px; border:1px solid var(--foro-line); border-radius:14px; background:var(--foro-card); box-shadow:0 1px 2px rgba(0,0,0,.025); }
+        #vistaForo .busquedaForoIcono { display:flex; color:var(--foro-muted); flex:0 0 auto; }
+        #vistaForo .busquedaForoIcono svg { width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; }
+        #vistaForo #inputBuscarForo { flex:1; min-width:0; margin:0; padding:9px 2px; border:0; outline:0; box-shadow:none; background:transparent; color:var(--foro-text); font-size:.93rem; }
+        #vistaForo #inputBuscarForo:focus { box-shadow:none; }
+        #vistaForo #btnBuscarForo { width:auto; margin:0; padding:9px 13px; border-radius:10px; background:#e8efec; color:#24453e; font-size:.85rem; }
+        body.temaOscuro #vistaForo #btnBuscarForo { background:#2b4039; color:#e5f1ec; }
+        #vistaForo .btnLimpiarBusqueda { width:30px; height:30px; padding:0; border-radius:50%; background:transparent; color:var(--foro-muted); font-size:21px; }
+        #vistaForo .ayudaFiltroEtiqueta { margin: -8px 0 12px; color:var(--foro-muted); font-size:.78rem; }
+        #vistaForo .hiloItem, #vistaForo .respuestaItem, #vistaForo #detalleHiloContenido { background:var(--foro-card); color:var(--foro-text); border:1px solid var(--foro-line); border-radius:15px; padding:15px; margin:10px 0; box-shadow:0 1px 2px rgba(18,40,33,.035); }
+        #vistaForo .hiloItem { cursor:pointer; }
+        #vistaForo .hiloItem:hover { border-color:#a9c2b9; transform:none; box-shadow:0 3px 12px rgba(18,40,33,.055); }
+        #vistaForo .hiloTitulo, #vistaForo #detalleHiloContenido h3 { color:var(--foro-text); font-size:1.12rem; line-height:1.35; margin:7px 0 9px; }
+        #vistaForo .hiloResumen, #vistaForo .cuerpoHilo { color:var(--foro-text); line-height:1.58; }
+        #vistaForo .hiloPie { display:flex; align-items:center; gap:7px; flex-wrap:wrap; color:var(--foro-muted); font-size:.8rem; }
+        #vistaForo .hiloRespuestasCount { display:inline-flex; align-items:center; gap:5px; margin-left:auto; color:var(--foro-muted); font-size:.82rem; }
+        #vistaForo .hiloRespuestasCount svg { width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+        #vistaForo .hiloLikeBar { display:flex; justify-content:flex-start; border-top:1px solid var(--foro-line); padding-top:8px; margin-top:10px; }
+        #vistaForo .likeButton { min-width:54px; min-height:34px; justify-content:center; gap:6px; padding:5px 9px; border:1px solid transparent; border-radius:9px; color:var(--foro-muted); }
+        #vistaForo .likeButton:hover { background:rgba(197,78,87,.09); color:#c65360; }
+        #vistaForo .likeButton.activo { color:#c65360; background:rgba(197,78,87,.08); }
+        #vistaForo .likeButton .corazonLike { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+        #vistaForo .likeButton.activo .corazonLike, #vistaForo .likeButton .corazonLike.relleno { fill:currentColor; }
+        #vistaForo .likeButton .likeCount { font-size:.82rem; }
+        #vistaForo .etiquetaChip { background:rgba(36,89,84,.09); color:var(--foro-accent); border-radius:7px; padding:4px 8px; font-size:.72rem; }
+        #vistaForo #btnCargarMas { display:block; width:100%; margin:14px 0; }
+        #vistaForo .btnTemaForo { display:none !important; }
+        .configTema { display:grid; grid-template-columns:1fr minmax(145px, .6fr); align-items:center; gap:8px 16px; margin:18px 0 24px; padding:15px; border:1px solid var(--line); border-radius:14px; background:#fff; }
+        .configTemaTexto { grid-column:1/-1; }
+        .configTemaTexto h3 { margin:0; font-size:1.05rem; }
+        .configTemaTexto p { margin:4px 0 0; }
+        .configTema label { margin:0; }
+        .configTema select { margin:0; }
+        @media(max-width:420px) {
+            #vistaForo .foroCabeceraAcciones { gap:7px; }
+            #vistaForo .btnPublicarForo { min-height:42px; padding:9px 11px; font-size:.84rem; }
+            #vistaForo .hiloItem { padding:13px; }
+            #vistaForo .busquedaForo { gap:6px; }
+            #vistaForo #btnBuscarForo { padding:9px 10px; }
+        }
+
     </style>
 </head>
 
@@ -2014,21 +2118,20 @@
                         <h2 class="seccion-titulo" style="margin-top:0">Foro</h2>
                         <div class="foroCabeceraAcciones">
                             <button type="button" id="btnIrModeracion" class="linkModeracion" style="display:none">🛡️ Moderación</button>
-                            <button type="button" id="btnTemaForo" class="btnTemaForo" aria-label="Cambiar tema del foro" title="Cambiar tema">☾</button>
-                            <button type="button" id="btnAbrirCompose" class="btn-primario btnPublicarForo">✏️ Publicar</button>
+                            <button type="button" id="btnAbrirCompose" class="btn-primario btnPublicarForo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg><span>Crear publicación</span></button>
                         </div>
                     </div>
 
-                    <p class="notaForo">Usalo para compartir apuntes, resúmenes y dudas entre compañeros — y también para el chimento sano. Evitá publicar contenido sensible (datos personales, información de pacientes, etc.).</p>
+                    <p class="notaForo">Compartí dudas, apuntes y recursos de la carrera. No publiques datos personales ni información que permita identificar pacientes.</p>
 
-                    <div id="filtroEtiqueta">
-                        <input type="text" id="inputFiltroEtiqueta" list="listaEtiquetasDisponibles"
-                               placeholder="Buscar una etiqueta existente..." autocomplete="off">
-                        <datalist id="listaEtiquetasDisponibles"></datalist>
-                        <button type="button" id="btnFiltrar" class="btn-secundario">Filtrar</button>
-                        <button type="button" id="btnQuitarFiltro" class="btn-secundario" style="display:none">Quitar filtro</button>
-                    </div>
-                    <p id="ayudaFiltroEtiqueta" class="ayudaFiltroEtiqueta">Solo podés filtrar por etiquetas que ya existen en el foro.</p>
+                    <form id="busquedaForo" class="busquedaForo" role="search">
+                        <span class="busquedaForoIcono" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg></span>
+                        <input type="search" id="inputBuscarForo" placeholder="Buscar en el foro: temas, dudas, palabras…" autocomplete="off" aria-label="Buscar en todo el foro">
+                        <button type="submit" id="btnBuscarForo" aria-label="Buscar">Buscar</button>
+                        <button type="button" id="btnQuitarFiltro" class="btnLimpiarBusqueda" style="display:none" aria-label="Limpiar búsqueda">×</button>
+                    </form>
+                    <datalist id="listaEtiquetasDisponibles"></datalist>
+                    <p id="ayudaFiltroEtiqueta" class="ayudaFiltroEtiqueta" aria-live="polite"></p>
 
                     <div id="listaHilos"></div>
 
@@ -2099,6 +2202,19 @@
                 <h2 class="seccion-titulo" style="margin-top:0">Perfil</h2>
 
                 <p class="ayudaPerfil">Conectado como <b id="emailConfig"></b></p>
+
+                <section class="configTema" aria-labelledby="tituloTema">
+                    <div class="configTemaTexto">
+                        <h3 id="tituloTema">Apariencia</h3>
+                        <p class="ayudaPerfil">Elegí cómo querés ver toda la plataforma.</p>
+                    </div>
+                    <label for="selectorTemaGlobal">Tema</label>
+                    <select id="selectorTemaGlobal" aria-label="Tema de la plataforma">
+                        <option value="claro">Claro</option>
+                        <option value="oscuro">Oscuro</option>
+                        <option value="sistema">Según el dispositivo</option>
+                    </select>
+                </section>
 
                 <h3 class="seccion-titulo">Foto de perfil</h3>
 
@@ -2375,7 +2491,6 @@ const hilosPendientesConfirmacion = new Map()
         const inputContenido = document.getElementById("inputContenido")
         const inputEtiquetas = document.getElementById("inputEtiquetas")
         const inputContenidoSensible = document.getElementById("inputContenidoSensible")
-        const btnTemaForo = document.getElementById("btnTemaForo")
         const modalSetupPerfil = document.getElementById("modalSetupPerfil")
         const formSetupPerfil = document.getElementById("formSetupPerfil")
         const setupPseudonimo = document.getElementById("setupPseudonimo")
@@ -2388,11 +2503,14 @@ const hilosPendientesConfirmacion = new Map()
         const nombreCompose = document.getElementById("nombreCompose")
         const contadorContenido = document.getElementById("contadorContenido")
 
-        const inputFiltroEtiqueta = document.getElementById("inputFiltroEtiqueta")
+        const inputFiltroEtiqueta = document.getElementById("inputBuscarForo")
         const listaEtiquetasDisponibles = document.getElementById("listaEtiquetasDisponibles")
         const ayudaFiltroEtiqueta = document.getElementById("ayudaFiltroEtiqueta")
-        const btnFiltrar = document.getElementById("btnFiltrar")
+        const btnFiltrar = document.getElementById("btnBuscarForo")
         const btnQuitarFiltro = document.getElementById("btnQuitarFiltro")
+        const selectorTemaGlobal = document.getElementById("selectorTemaGlobal")
+        const formBusquedaForo = document.getElementById("busquedaForo")
+        let busquedaForoActual = '' 
         const listaHilos = document.getElementById("listaHilos")
         const btnCargarMas = document.getElementById("btnCargarMas")
 
@@ -3044,7 +3162,7 @@ async function cargarBootstrap() {
         }
 
         async function cargarForoBootstrap() {
-            const key = etiquetaFiltroActual || '_todos'
+            const key = (etiquetaFiltroActual || '_todos') + '::' + (busquedaForoActual || '')
             const cached = foroCacheCliente.get(key)
             const age = cached && cached.actualizadoEn ? Date.now() - cached.actualizadoEn : Infinity
 
@@ -3059,7 +3177,9 @@ async function cargarBootstrap() {
                 }
             }
 
-            const r = await llamar('foroBootstrap', { etiqueta: etiquetaFiltroActual })
+            const r = busquedaForoActual
+                ? await llamar('listarHilos', { etiqueta: etiquetaFiltroActual, busqueda: busquedaForoActual, desde: 0 })
+                : await llamar('foroBootstrap', { etiqueta: etiquetaFiltroActual })
             if (!r.ok) {
                 if (!cached) {
                     listaHilos.innerHTML = "<p class='vacio'>" + escapeHtml(mensajeError(r.error)) + "</p>"
@@ -3074,7 +3194,7 @@ async function cargarBootstrap() {
             }
             esModeradorActual = !!r.esModerador
             btnIrModeracion.style.display = esModeradorActual ? 'inline-block' : 'none'
-            const data = r.data || {}
+            const data = busquedaForoActual ? r : (r.data || {})
             const item = { etiquetas: data.etiquetas || [], hilos: data.hilos || [], hayMas: !!data.hayMas, actualizadoEn: Date.now() }
             foroCacheCliente.set(key, item)
             renderizarEtiquetasCliente(item.etiquetas)
@@ -3560,26 +3680,10 @@ async function cargarBootstrap() {
         }
 
         function aplicarFiltroEtiqueta() {
-            const texto = inputFiltroEtiqueta.value.trim()
-            const normalizada = normalizarEtiqueta(texto)
-
-            if (!normalizada) {
-                etiquetaFiltroActual = ""
-                btnQuitarFiltro.style.display = "none"
-                cargarHilos(true)
-                return true
-            }
-
-            const etiquetaReal = mapaEtiquetasDisponibles.get(normalizada)
-
-            if (!etiquetaReal) {
-                alert("Esa etiqueta todavía no existe. Elegí una de las etiquetas sugeridas.")
-                return false
-            }
-
-            etiquetaFiltroActual = normalizarEtiqueta(etiquetaReal)
-            inputFiltroEtiqueta.value = etiquetaReal
-            btnQuitarFiltro.style.display = "inline-block"
+            busquedaForoActual = String(inputFiltroEtiqueta.value || '').trim().slice(0, 80)
+            etiquetaFiltroActual = ''
+            btnQuitarFiltro.style.display = busquedaForoActual ? 'inline-flex' : 'none'
+            if (ayudaFiltroEtiqueta) ayudaFiltroEtiqueta.textContent = busquedaForoActual ? 'Resultados para: ' + busquedaForoActual : ''
             cargarHilos(true)
             return true
         }
@@ -3604,15 +3708,19 @@ async function cargarBootstrap() {
                     hilosPendientesConfirmacion.delete(tempId)
                     return
                 }
-                if (key === '_todos' || (pendiente.etiquetas || []).some(function(t) { return String(t).toLowerCase() === key })) {
-                    salida.unshift(pendiente)
-                }
+                const partesFiltro = key.split('::')
+                const filtroBase = partesFiltro[0]
+                const terminoBusqueda = String(partesFiltro.slice(1).join('::') || '').toLowerCase()
+                const coincideEtiqueta = filtroBase === '_todos' || (pendiente.etiquetas || []).some(function(t) { return String(t).toLowerCase() === filtroBase })
+                const textoPendiente = [pendiente.titulo, pendiente.resumen].concat(pendiente.etiquetas || []).join(' ').toLowerCase()
+                const coincideBusqueda = !terminoBusqueda || textoPendiente.includes(terminoBusqueda)
+                if (coincideEtiqueta && coincideBusqueda) salida.unshift(pendiente)
             })
             return salida
         }
 
         async function cargarHilos(reiniciar) {
-            const key = etiquetaFiltroActual || '_todos'
+            const key = (etiquetaFiltroActual || '_todos') + '::' + (busquedaForoActual || '')
 
             // No vaciamos la lista al comenzar una petición. Así un retraso o
             // fallo de red nunca transforma una interfaz válida en una pantalla vacía.
@@ -3630,7 +3738,7 @@ async function cargarBootstrap() {
                 listaHilos.setAttribute('aria-busy', 'true')
             }
 
-            const r = await llamar("listarHilos", { etiqueta: etiquetaFiltroActual, desde: reiniciar ? 0 : paginaHilosActual })
+            const r = await llamar("listarHilos", { etiqueta: etiquetaFiltroActual, busqueda: busquedaForoActual, desde: reiniciar ? 0 : paginaHilosActual })
 
             if (!r.ok) {
                 listaHilos.style.opacity = ''
@@ -3678,8 +3786,8 @@ async function cargarBootstrap() {
         // Actualización silenciosa: nunca limpia ni sustituye la interfaz antes
         // de recibir una respuesta válida del servidor.
         async function sincronizarHilosEnSegundoPlano() {
-            const key = etiquetaFiltroActual || '_todos'
-            const r = await llamar("listarHilos", { etiqueta: etiquetaFiltroActual, desde: 0 })
+            const key = (etiquetaFiltroActual || '_todos') + '::' + (busquedaForoActual || '')
+            const r = await llamar("listarHilos", { etiqueta: etiquetaFiltroActual, busqueda: busquedaForoActual, desde: 0 })
             if (!r.ok) {
                 console.warn("No se pudo sincronizar el foro en segundo plano; se conserva la vista.", r)
                 return false
@@ -3695,7 +3803,7 @@ async function cargarBootstrap() {
             foroCacheCliente.set(key, item)
 
             // Solo renderizamos si seguimos viendo el mismo filtro.
-            if (key === (etiquetaFiltroActual || '_todos')) {
+            if (key === (etiquetaFiltroActual || '_todos') + '::' + (busquedaForoActual || '')) {
                 renderizarHilos(item.hilos, true)
                 paginaHilosActual = item.hilos.length
                 btnCargarMas.style.display = r.hayMas ? "block" : "none"
@@ -3776,10 +3884,9 @@ async function cargarBootstrap() {
 
         function likeButtonHtml(tipo, id, likes, meGusta) {
             const activo = meGusta ? " activo" : ""
-            const corazon = meGusta ? "♥" : "♡"
-            const etiqueta = meGusta ? "Quitar like" : "Dar like"
-            return "<button type='button' class='likeButton" + activo + "' data-like-tipo='" + escapeAttr(tipo) + "' data-like-id='" + escapeAttr(id) + "' aria-label='" + etiqueta + "'>" +
-                "<span class='corazonLike'>" + corazon + "</span>" +
+            const etiqueta = meGusta ? "Quitar me gusta" : "Me gusta"
+            return "<button type='button' class='likeButton" + activo + "' data-like-tipo='" + escapeAttr(tipo) + "' data-like-id='" + escapeAttr(id) + "' aria-label='" + etiqueta + "' aria-pressed='" + (meGusta ? 'true' : 'false') + "'>" +
+                "<svg class='corazonLike' viewBox='0 0 24 24' aria-hidden='true'><path d='M20.8 8.8c0 4.2-8.8 10-8.8 10S3.2 13 3.2 8.8A4.7 4.7 0 0 1 12 6.1a4.7 4.7 0 0 1 8.8 2.7Z'></path></svg>" +
                 "<span class='likeCount'>" + Number(likes || 0) + "</span>" +
                 "</button>"
         }
@@ -3819,8 +3926,8 @@ async function cargarBootstrap() {
             const optimisticLikes = Math.max(0, oldLikes + (optimisticLiked ? 1 : -1))
 
             btn.classList.toggle('activo', optimisticLiked)
-            btn.setAttribute('aria-label', optimisticLiked ? 'Quitar like' : 'Dar like')
-            if (heartEl) heartEl.textContent = optimisticLiked ? '♥' : '♡'
+            btn.setAttribute('aria-label', optimisticLiked ? 'Quitar me gusta' : 'Me gusta'); btn.setAttribute('aria-pressed', optimisticLiked ? 'true' : 'false')
+            if (heartEl) heartEl.classList.toggle('relleno', optimisticLiked)
             if (countEl) countEl.textContent = optimisticLikes
             if (optimisticLiked) {
                 btn.classList.remove('pulsando')
@@ -3836,8 +3943,8 @@ async function cargarBootstrap() {
             const r = await llamar('toggleLike', { tipo: tipo, id: id })
             if (r.ok) {
                 btn.classList.toggle('activo', !!r.liked)
-                btn.setAttribute('aria-label', r.liked ? 'Quitar like' : 'Dar like')
-                if (heartEl) heartEl.textContent = r.liked ? '♥' : '♡'
+                btn.setAttribute('aria-label', r.liked ? 'Quitar me gusta' : 'Me gusta'); btn.setAttribute('aria-pressed', r.liked ? 'true' : 'false')
+                if (heartEl) heartEl.classList.toggle('relleno', !!r.liked)
                 if (countEl) countEl.textContent = Number(r.likes || 0)
                 if (tipo === 'respuesta') {
                     const item = respuestasUI.find(function (x) { return String(x.id) === String(id) })
@@ -3860,8 +3967,8 @@ async function cargarBootstrap() {
 
             // Rollback optimistic state.
             btn.classList.toggle('activo', wasLiked)
-            btn.setAttribute('aria-label', wasLiked ? 'Quitar like' : 'Dar like')
-            if (heartEl) heartEl.textContent = wasLiked ? '♥' : '♡'
+            btn.setAttribute('aria-label', wasLiked ? 'Quitar me gusta' : 'Me gusta'); btn.setAttribute('aria-pressed', wasLiked ? 'true' : 'false')
+            if (heartEl) heartEl.classList.toggle('relleno', wasLiked)
             if (countEl) countEl.textContent = oldLikes
             alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : ""))
         }
@@ -3871,7 +3978,7 @@ async function cargarBootstrap() {
             if (reiniciar) listaHilos.innerHTML = ""
 
             if (reiniciar && hilos.length === 0) {
-                listaHilos.innerHTML = "<p class='vacio'>Todavía no hay hilos" + (etiquetaFiltroActual ? " con esa etiqueta." : ".") + "</p>"
+                listaHilos.innerHTML = "<p class='vacio'>" + (busquedaForoActual ? 'No encontramos publicaciones que coincidan con esa búsqueda.' : (etiquetaFiltroActual ? 'Todavía no hay hilos con esa etiqueta.' : 'Todavía no hay publicaciones.')) + "</p>"
                 return
             }
 
@@ -3899,7 +4006,7 @@ async function cargarBootstrap() {
                     "<span class='hiloAutor'>" + escapeHtml(h.autor) + "</span>" +
                     "<span class='puntoSeparador'>·</span>" +
                     "<span class='hiloFecha'>" + formatearFecha(h.fecha) + "</span>" +
-                    "<span class='hiloRespuestasCount'>💬 " + h.respuestas + "</span>" +
+                    "<span class='hiloRespuestasCount' aria-label='" + Number(h.respuestas || 0) + " comentarios'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20 11.5a7.5 7.5 0 0 1-7.5 7.5H6l-3 2v-5.5A7.5 7.5 0 1 1 20 11.5Z'></path><path d='M8 11.5h.01M12 11.5h.01M16 11.5h.01'></path></svg><span>" + Number(h.respuestas || 0) + "</span></span>" +
                     "</div>" +
                     "<div class='hiloLikeBar'>" + likeButtonHtml('hilo', h.id, h.likes, h.meGusta) + "</div>"
 
@@ -3919,8 +4026,10 @@ async function cargarBootstrap() {
                     chip.addEventListener("click", function (e) {
                         e.stopPropagation()
                         etiquetaFiltroActual = chip.dataset.etiqueta.toLowerCase()
-                        inputFiltroEtiqueta.value = chip.dataset.etiqueta
-                        btnQuitarFiltro.style.display = "inline-block"
+                        busquedaForoActual = ''
+                        inputFiltroEtiqueta.value = ''
+                        btnQuitarFiltro.style.display = "inline-flex"
+                        if (ayudaFiltroEtiqueta) ayudaFiltroEtiqueta.textContent = 'Etiqueta: ' + chip.dataset.etiqueta
                         cargarHilos(true)
                     })
                 })
@@ -3939,36 +4048,44 @@ async function cargarBootstrap() {
             cargarHilos(false)
         })
 
-        inputFiltroEtiqueta.addEventListener("keydown", function (e) {
-            if (e.key === "Enter") {
-                e.preventDefault()
+        if (formBusquedaForo) formBusquedaForo.addEventListener('submit', function (e) {
+            e.preventDefault()
+            aplicarFiltroEtiqueta()
+        })
+        inputFiltroEtiqueta.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                inputFiltroEtiqueta.value = ''
                 aplicarFiltroEtiqueta()
             }
         })
-
-        btnFiltrar.addEventListener("click", function () {
-            aplicarFiltroEtiqueta()
-        })
-
-        function aplicarTemaForo(tema) {
-            const oscuro = tema === 'oscuro'
-            vistaForo.classList.toggle('foroTemaOscuro', oscuro)
-            if (btnTemaForo) { btnTemaForo.textContent = oscuro ? '☀' : '☾'; btnTemaForo.setAttribute('aria-label', oscuro ? 'Activar modo claro' : 'Activar modo oscuro') }
-        }
-        const temaForoGuardado = localStorage.getItem('medmar:foro:tema') || 'claro'
-        aplicarTemaForo(temaForoGuardado)
-        if (btnTemaForo) btnTemaForo.addEventListener('click', function() {
-            const nuevo = vistaForo.classList.contains('foroTemaOscuro') ? 'claro' : 'oscuro'
-            localStorage.setItem('medmar:foro:tema', nuevo)
-            aplicarTemaForo(nuevo)
-        })
-
-        btnQuitarFiltro.addEventListener("click", function () {
-            etiquetaFiltroActual = ""
-            inputFiltroEtiqueta.value = ""
-            btnQuitarFiltro.style.display = "none"
+        btnQuitarFiltro.addEventListener('click', function () {
+            etiquetaFiltroActual = ''
+            busquedaForoActual = ''
+            inputFiltroEtiqueta.value = ''
+            btnQuitarFiltro.style.display = 'none'
+            if (ayudaFiltroEtiqueta) ayudaFiltroEtiqueta.textContent = ''
             cargarHilos(true)
         })
+
+        function aplicarTemaGlobal(preferencia, guardar) {
+            const sistemaOscuro = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+            const temaReal = preferencia === 'sistema' ? (sistemaOscuro ? 'oscuro' : 'claro') : preferencia
+            document.body.classList.toggle('temaOscuro', temaReal === 'oscuro')
+            document.documentElement.setAttribute('data-theme', temaReal)
+            if (selectorTemaGlobal && selectorTemaGlobal.value !== preferencia) selectorTemaGlobal.value = preferencia
+            if (guardar) localStorage.setItem('medmar:tema', preferencia)
+        }
+        const temaGuardado = localStorage.getItem('medmar:tema') || 'claro'
+        aplicarTemaGlobal(temaGuardado, false)
+        if (selectorTemaGlobal) selectorTemaGlobal.addEventListener('change', function () {
+            aplicarTemaGlobal(selectorTemaGlobal.value, true)
+        })
+        if (window.matchMedia) {
+            const mediaTema = window.matchMedia('(prefers-color-scheme: dark)')
+            if (mediaTema.addEventListener) mediaTema.addEventListener('change', function () {
+                if ((localStorage.getItem('medmar:tema') || 'claro') === 'sistema') aplicarTemaGlobal('sistema', false)
+            })
+        }
 
         function autoAjustarTextarea(el) {
             el.style.height = "auto"
