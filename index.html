@@ -4,9 +4,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="MedMarUNMDP: espacio para estudiantes de Medicina de la UNMDP. Intercambiá comisiones, encontrá compañeros y conectate con la comunidad estudiantil.">
+
+    <!-- SEO principal -->
+    <title>MedMar | Intercambio de comisiones para estudiantes de Medicina</title>
+    <meta name="description" content="MedMar es una plataforma independiente para estudiantes de Medicina de la UNMDP: encontrá compañeros para intercambiar comisiones y conectate con la comunidad estudiantil.">
     <link rel="canonical" href="https://medmar.com.ar/">
-    <title>MedMarUNMDP</title>
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="theme-color" content="#123A38">
+    <meta name="language" content="Spanish">
+
+    <!-- Vista previa al compartir el enlace -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_AR">
+    <meta property="og:site_name" content="MedMar">
+    <meta property="og:title" content="MedMar | Intercambio de comisiones para estudiantes de Medicina">
+    <meta property="og:description" content="Encontrá compañeros para intercambiar comisiones y conectate con la comunidad estudiantil de Medicina de la UNMDP.">
+    <meta property="og:url" content="https://medmar.com.ar/">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="MedMar | Intercambio de comisiones para estudiantes de Medicina">
+    <meta name="twitter:description" content="Plataforma independiente para intercambiar comisiones y conectar estudiantes de Medicina de la UNMDP.">
+
+    <!-- Datos estructurados: describen el sitio sin atribuir afiliación institucional -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "MedMar",
+      "alternateName": "MedMarUNMDP",
+      "url": "https://medmar.com.ar/",
+      "inLanguage": "es-AR",
+      "description": "Plataforma independiente para estudiantes de Medicina de la UNMDP orientada al intercambio de comisiones y la conexión entre estudiantes."
+    }
+    </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1646,6 +1675,51 @@
             color: var(--ink-soft);
         }
 
+
+        /* Foro renovado: feed compacto inspirado en Reddit, manteniendo identidad MedMar */
+        #vistaForo { --foro-bg:#f5f7f6; --foro-card:#ffffff; --foro-text:#182522; --foro-muted:#66736e; --foro-line:#dce4e1; --foro-accent:#245954; }
+        #vistaForo.foroTemaOscuro { --foro-bg:#111817; --foro-card:#1b2422; --foro-text:#edf3f1; --foro-muted:#a5b3ae; --foro-line:#33413d; --foro-accent:#82b9ae; }
+        #vistaForo { color:var(--foro-text); background:var(--foro-bg); border-radius:16px; padding:12px; transition:background .2s,color .2s; }
+        #vistaForo .foroCabecera { align-items:center; }
+        #vistaForo .notaForo, #vistaForo .ayudaFiltroEtiqueta { color:var(--foro-muted); }
+        #vistaForo #filtroEtiqueta { display:flex; gap:8px; flex-wrap:wrap; }
+        #vistaForo #inputFiltroEtiqueta { flex:1; min-width:150px; background:var(--foro-card); color:var(--foro-text); border-color:var(--foro-line); }
+        #vistaForo .hiloItem, #vistaForo .respuestaItem, #vistaForo #detalleHiloContenido { background:var(--foro-card); color:var(--foro-text); border:1px solid var(--foro-line); border-radius:14px; padding:15px; margin:10px 0; box-shadow:0 1px 2px rgba(0,0,0,.035); }
+        #vistaForo .hiloItem { cursor:pointer; transition:border-color .15s,transform .15s; }
+        #vistaForo .hiloItem:hover { border-color:var(--foro-accent); transform:translateY(-1px); }
+        #vistaForo .hiloTitulo, #vistaForo #detalleHiloContenido h3 { color:var(--foro-text); margin:7px 0; }
+        #vistaForo .hiloResumen, #vistaForo .cuerpoHilo { color:var(--foro-text); line-height:1.55; overflow-wrap:anywhere; }
+        #vistaForo .hiloPie, #vistaForo .respuestaCabecera { color:var(--foro-muted); }
+        #vistaForo .hiloAutor { color:var(--foro-text); }
+        #vistaForo .hiloFecha, #vistaForo .puntoSeparador { color:var(--foro-muted); }
+        #vistaForo .hiloLikeBar { border-top:1px solid var(--foro-line); padding-top:9px; margin-top:10px; }
+        #vistaForo .hiloLikeBar button { color:var(--foro-muted); }
+        #vistaForo .etiquetaChip { background:rgba(36,89,84,.12); color:var(--foro-accent); border-radius:999px; }
+        #vistaForo textarea, #vistaForo input { background:var(--foro-card); color:var(--foro-text); border-color:var(--foro-line); }
+        #vistaForo .btnTemaForo { border:1px solid var(--foro-line); color:var(--foro-text); background:var(--foro-card); border-radius:999px; width:38px; height:38px; font-size:19px; cursor:pointer; }
+        #vistaForo .linkPreview, #vistaForo .enlaceForo { color:var(--foro-accent); overflow-wrap:anywhere; }
+        .contenidoForoRich { white-space:normal; overflow-wrap:anywhere; line-height:1.6; }
+        .contenidoForoRich .imagenExternaForo { display:block; max-width:100%; max-height:560px; object-fit:contain; border-radius:12px; margin:10px 0; border:1px solid var(--foro-line,#dce4e1); }
+        .contenidoForoRich .imagenPendiente { display:inline-block; padding:8px 10px; border:1px solid var(--foro-line); border-radius:8px; }
+        .bloqueSensible { position:relative; }
+        .bloqueSensible.ocultoSensible .contenidoForoRich { filter:blur(18px); user-select:none; pointer-events:none; max-height:260px; overflow:hidden; }
+        .revelarSensible { display:block; margin:10px 0; border:1px solid var(--foro-line); background:var(--foro-card); color:var(--foro-text); border-radius:9px; padding:9px 12px; cursor:pointer; }
+        .modalSetupPerfil { z-index:10050; background:rgba(8,20,18,.82); }
+        .setupPerfilCaja { width:min(520px,calc(100% - 28px)); max-height:90vh; overflow:auto; }
+        .setupPerfilCaja label { display:block; font-weight:600; margin:12px 0 6px; }
+        .setupPerfilCaja input[type=text] { width:100%; }
+        .setupAvatarTitulo { font-weight:600; margin:18px 0 10px; }
+        .setupAvatares { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; }
+        .setupAvatarOpcion { display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 4px; border:1px solid var(--line); border-radius:12px; background:#fff; cursor:pointer; color:var(--ink); }
+        .setupAvatarOpcion img,.avatarSinFoto { width:54px; height:54px; border-radius:50%; object-fit:cover; }
+        .avatarSinFoto { display:grid; place-items:center; background:#e7eeeb; color:#245954; font-size:24px; }
+        .setupAvatarOpcion.seleccionado { border:2px solid var(--teal-700); background:var(--teal-100); }
+        .setupAvatarOpcion small { font-size:11px; }
+        .setupContinuar { width:100%; margin-top:14px; }
+        #msgSetupPerfil { color:var(--red-600); min-height:20px; }
+        @media(max-width:420px) { .setupAvatares { grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; } .setupAvatarOpcion img,.avatarSinFoto { width:46px;height:46px; } #vistaForo { padding:8px; } #vistaForo .hiloItem { padding:12px; } }
+        @media(prefers-color-scheme:dark) { #vistaForo.autoTemaOscuro { --foro-bg:#111817; --foro-card:#1b2422; --foro-text:#edf3f1; --foro-muted:#a5b3ae; --foro-line:#33413d; --foro-accent:#82b9ae; } }
+
     </style>
 </head>
 
@@ -1940,6 +2014,7 @@
                         <h2 class="seccion-titulo" style="margin-top:0">Foro</h2>
                         <div class="foroCabeceraAcciones">
                             <button type="button" id="btnIrModeracion" class="linkModeracion" style="display:none">🛡️ Moderación</button>
+                            <button type="button" id="btnTemaForo" class="btnTemaForo" aria-label="Cambiar tema del foro" title="Cambiar tema">☾</button>
                             <button type="button" id="btnAbrirCompose" class="btn-primario btnPublicarForo">✏️ Publicar</button>
                         </div>
                     </div>
@@ -1973,10 +2048,6 @@
 
                     <form id="formRespuesta">
                         <textarea id="inputRespuesta" class="textareaCompose textareaRespuesta" placeholder="Escribí tu respuesta..." maxlength="5000" rows="2" required></textarea>
-                        <label class="labelCheckbox">
-                            <input type="checkbox" id="inputAnonimoRespuesta">
-                            Responder de forma anónima
-                        </label>
                         <button type="submit" class="btn-primario">Responder</button>
                     </form>
 
@@ -2116,6 +2187,35 @@
     </div><!-- /pieInicio -->
 
 
+    <!-- ==================== CONFIGURACIÓN INICIAL DEL PERFIL ==================== -->
+    <div id="modalSetupPerfil" class="modalFondo modalSetupPerfil" aria-modal="true" role="dialog" aria-labelledby="tituloSetupPerfil">
+        <div class="modalCaja setupPerfilCaja">
+            <div class="modalEncabezado"><h2 id="tituloSetupPerfil">¡Bienvenido a MedMar!</h2></div>
+            <p class="ayudaPerfil">Antes de continuar, elegí cómo querés aparecer en la comunidad.</p>
+            <form id="formSetupPerfil">
+                <label for="setupPseudonimo">Pseudónimo <span aria-hidden="true">*</span></label>
+                <input id="setupPseudonimo" type="text" minlength="3" maxlength="24" autocomplete="nickname" placeholder="Ej. NeuroMed" required>
+                <p class="ayudaPerfil">Entre 3 y 24 caracteres. Será visible para otros estudiantes.</p>
+                <div class="setupAvatarTitulo">Elegí un avatar (opcional)</div>
+                <div id="setupAvatares" class="setupAvatares">
+                    <button type="button" class="setupAvatarOpcion seleccionado" data-avatar="" aria-pressed="true"><span class="avatarSinFoto">?</span><small>Sin foto</small></button>
+                    <button type="button" class="setupAvatarOpcion" data-avatar="neuron"><img src="/assets/avatars/neuron.svg" alt="Neurona"><small>Neurona</small></button>
+                    <button type="button" class="setupAvatarOpcion" data-avatar="heart"><img src="/assets/avatars/heart.svg" alt="Corazón"><small>Corazón</small></button>
+                    <button type="button" class="setupAvatarOpcion" data-avatar="brain"><img src="/assets/avatars/brain.svg" alt="Cerebro"><small>Cerebro</small></button>
+                    <button type="button" class="setupAvatarOpcion" data-avatar="cell"><img src="/assets/avatars/cell.svg" alt="Célula"><small>Célula</small></button>
+                    <button type="button" class="setupAvatarOpcion" data-avatar="microscope"><img src="/assets/avatars/microscope.svg" alt="Microscopio"><small>Microscopio</small></button>
+                    <button type="button" class="setupAvatarOpcion" data-avatar="stethoscope"><img src="/assets/avatars/stethoscope.svg" alt="Estetoscopio"><small>Estetoscopio</small></button>
+                    <button type="button" class="setupAvatarOpcion" data-avatar="bone"><img src="/assets/avatars/bone.svg" alt="Hueso"><small>Hueso</small></button>
+                </div>
+                <label for="setupFotoArchivo" class="setupUploadLabel">O subí tu propia foto (opcional)</label>
+                <input id="setupFotoArchivo" type="file" accept="image/*">
+                <p class="ayudaPerfil">La imagen se recorta y comprime antes de guardarse en el almacenamiento de perfiles.</p>
+                <p id="msgSetupPerfil" role="status"></p>
+                <button type="submit" class="btn-primario setupContinuar">Guardar y continuar</button>
+            </form>
+        </div>
+    </div>
+
     <!-- ==================== MODAL: PUBLICAR EN EL FORO ==================== -->
 
     <div id="modalCompose" class="modalFondo">
@@ -2138,14 +2238,12 @@
                 <textarea id="inputContenido" class="textareaCompose" placeholder="¿Qué querés compartir?" maxlength="5000" rows="3" required></textarea>
 
                 <div class="composeExtra">
-                    <input type="text" id="inputEtiquetas" placeholder="Etiquetas (ej: virología, chisme)">
-                    <input type="url" id="inputLink" placeholder="Link seguro (opcional)">
-                    <p class="ayudaLink">Solo HTTPS de YouTube, Google, UNMDP, sitios académicos autorizados, Spotify o Steam.</p>
+                    <input type="text" id="inputEtiquetas" placeholder="Etiquetas (ej: anatomía, fisiología)">
+                    <p class="ayudaLink">Los enlaces se detectan automáticamente. Solo se admiten sitios compatibles y seguros.</p>
                 </div>
-
                 <label class="labelCheckbox">
-                    <input type="checkbox" id="inputAnonimoHilo">
-                    Publicar de forma anónima
+                    <input type="checkbox" id="inputContenidoSensible">
+                    Marcar como contenido sensible (imágenes o material gráfico)
                 </label>
 
                 <div class="composePie">
@@ -2164,7 +2262,7 @@
 
     <script>
 
-        const FRONTEND_VERSION = "MedMarUNMDP-frontend-2026-09-24-supabase-v1.3"
+        const FRONTEND_VERSION = "MedMarUNMDP-frontend-2026-10-31-foro-perfiles-v2"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -2276,8 +2374,15 @@ const hilosPendientesConfirmacion = new Map()
         const inputTitulo = document.getElementById("inputTitulo")
         const inputContenido = document.getElementById("inputContenido")
         const inputEtiquetas = document.getElementById("inputEtiquetas")
-        const inputLink = document.getElementById("inputLink")
-        const inputAnonimoHilo = document.getElementById("inputAnonimoHilo")
+        const inputContenidoSensible = document.getElementById("inputContenidoSensible")
+        const btnTemaForo = document.getElementById("btnTemaForo")
+        const modalSetupPerfil = document.getElementById("modalSetupPerfil")
+        const formSetupPerfil = document.getElementById("formSetupPerfil")
+        const setupPseudonimo = document.getElementById("setupPseudonimo")
+        const setupAvatares = document.getElementById("setupAvatares")
+        const setupFotoArchivo = document.getElementById("setupFotoArchivo")
+        const msgSetupPerfil = document.getElementById("msgSetupPerfil")
+        let setupAvatarSeleccionado = '' 
         const msgHilo = document.getElementById("msgHilo")
         const avatarCompose = document.getElementById("avatarCompose")
         const nombreCompose = document.getElementById("nombreCompose")
@@ -2296,7 +2401,6 @@ const hilosPendientesConfirmacion = new Map()
         const listaRespuestas = document.getElementById("listaRespuestas")
         const formRespuesta = document.getElementById("formRespuesta")
         const inputRespuesta = document.getElementById("inputRespuesta")
-        const inputAnonimoRespuesta = document.getElementById("inputAnonimoRespuesta")
         const msgRespuesta = document.getElementById("msgRespuesta")
 
         const listaDenuncias = document.getElementById("listaDenuncias")
@@ -2800,6 +2904,7 @@ const hilosPendientesConfirmacion = new Map()
                 rate_limit: "Hiciste demasiadas solicitudes en poco tiempo. Esperá un momento y probá de nuevo.",
                 pseudonimo_invalido: "El pseudónimo debe tener entre 3 y 24 caracteres.",
                 pseudonimo_en_uso: "Ese pseudónimo ya lo está usando otra persona.",
+                enlace_no_permitido: "El texto contiene un enlace a un dominio que MedMar no admite.",
                 ya_es_moderador: "Esa persona ya es moderadora.",
                 imagen_muy_grande: "La imagen es muy pesada. Probá con otra o recortala un poco."
             }
@@ -2899,6 +3004,7 @@ async function cargarBootstrap() {
                 const local = JSON.parse(localStorage.getItem(cacheKey) || 'null')
                 if (local && local.data) {
                     aplicarBootstrap(local.data)
+                    if (local.data.perfil && local.data.perfil.profileCompleted === false) mostrarSetupPerfil(local.data.perfil)
                     if (local.ts && Date.now() - Number(local.ts) < FRESCURA_USUARIO_CLIENTE_MS) return
                 }
             } catch (_) {}
@@ -2914,6 +3020,7 @@ async function cargarBootstrap() {
             }
             aplicarBootstrap(r.data)
             try { localStorage.setItem(cacheKey, JSON.stringify({ data: r.data, ts: Date.now() })) } catch (_) {}
+            if (r.data && r.data.perfil && r.data.perfil.profileCompleted === false) mostrarSetupPerfil(r.data.perfil)
         }
 
         function aplicarBootstrap(data) {
@@ -3215,6 +3322,66 @@ async function cargarBootstrap() {
             }
         })
 
+        const AVATAR_BASE_URL = 'https://medmar.com.ar/assets/avatars/'
+        function mostrarSetupPerfil(perfil) {
+            if (!sesion) return
+            modalSetupPerfil.classList.add('abierto')
+            modalSetupPerfil.style.display = 'flex'
+            setupPseudonimo.value = perfil && perfil.profileCompleted === false ? '' : (perfil?.pseudonimo || '')
+            msgSetupPerfil.textContent = ''
+            document.body.style.overflow = 'hidden'
+        }
+        function ocultarSetupPerfil() {
+            modalSetupPerfil.classList.remove('abierto')
+            modalSetupPerfil.style.display = 'none'
+            document.body.style.overflow = ''
+        }
+        setupFotoArchivo.addEventListener('change', function() {
+            if (setupFotoArchivo.files && setupFotoArchivo.files[0]) {
+                setupAvatarSeleccionado = ''
+                setupAvatares.querySelectorAll('[data-avatar]').forEach(x => { x.classList.remove('seleccionado'); x.setAttribute('aria-pressed','false') })
+            }
+        })
+        setupAvatares.querySelectorAll('[data-avatar]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                setupFotoArchivo.value = '' 
+                setupAvatares.querySelectorAll('[data-avatar]').forEach(x => { x.classList.remove('seleccionado'); x.setAttribute('aria-pressed','false') })
+                btn.classList.add('seleccionado'); btn.setAttribute('aria-pressed','true')
+                setupAvatarSeleccionado = btn.dataset.avatar || ''
+            })
+        })
+        formSetupPerfil.addEventListener('submit', async function(e) {
+            e.preventDefault()
+            const pseudonimo = setupPseudonimo.value.trim()
+            if (!/^[A-Za-zÀ-ÿ0-9 _.-]{3,24}$/.test(pseudonimo)) { msgSetupPerfil.textContent = 'Usá entre 3 y 24 caracteres: letras, números, espacios, punto, guion o guion bajo.'; return }
+            const btn = formSetupPerfil.querySelector('button[type="submit"]')
+            btn.disabled = true; msgSetupPerfil.textContent = 'Guardando perfil…'
+            let foto = setupAvatarSeleccionado ? AVATAR_BASE_URL + setupAvatarSeleccionado + '.svg' : ''
+            const archivo = setupFotoArchivo.files && setupFotoArchivo.files[0]
+            if (archivo) {
+                if (!archivo.type.startsWith('image/')) { btn.disabled = false; msgSetupPerfil.textContent = 'Elegí un archivo de imagen válido.'; return }
+                try {
+                    msgSetupPerfil.textContent = 'Procesando y subiendo la foto…'
+                    const base64 = await recortarYComprimirImagen(archivo, 256)
+                    const upload = await llamarMutacionResiliente('actualizarFoto', { imagen: base64, mimeType: 'image/jpeg' }, 2)
+                    if (!upload.ok) { btn.disabled = false; msgSetupPerfil.textContent = 'No se pudo subir la foto. Probá con un archivo más pequeño.'; return }
+                    foto = upload.foto
+                } catch (_) { btn.disabled = false; msgSetupPerfil.textContent = 'No se pudo procesar la imagen.'; return }
+            }
+            const result = await llamarMutacionResiliente('completarPerfil', { pseudonimo, foto }, 3)
+            btn.disabled = false
+            if (!result.ok) { msgSetupPerfil.textContent = result.error === 'pseudonimo_en_uso' ? 'Ese pseudónimo ya está ocupado. Elegí otro.' : (result.error === 'pseudonimo_invalido' ? 'El pseudónimo no cumple el formato.' : 'No se pudo guardar. Intentá nuevamente.'); return }
+            inputPseudonimo.value = result.perfil.pseudonimo
+            fotoActual = result.perfil.foto || ''
+            actualizarAvataresEnPantalla(result.perfil.pseudonimo)
+            const cacheKey = 'medmar:perfil:' + sesion.email.toLowerCase()
+            try {
+                const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null')
+                if (cached?.data?.perfil) { cached.data.perfil.pseudonimo = result.perfil.pseudonimo; cached.data.perfil.foto = result.perfil.foto; cached.data.perfil.profileCompleted = true; cached.ts = Date.now(); localStorage.setItem(cacheKey, JSON.stringify(cached)) }
+            } catch (_) {}
+            ocultarSetupPerfil()
+        })
+
         // Rehidrata la sesión y atiende el callback de recuperación.
         supabaseClient.auth.onAuthStateChange(function(event, authSession) {
             sincronizarSesionSupabase(authSession)
@@ -3355,7 +3522,8 @@ async function cargarBootstrap() {
             "open.spotify.com",
             "spotify.com",
             "steampowered.com",
-            "steamcommunity.com"
+            "steamcommunity.com",
+            "prnt.sc", "lightshot.com", "pinetools.com", "screenapp.io", "imgur.com", "ibb.co", "postimg.cc", "imgbb.com", "imageshack.com"
         ]
 
         let mapaEtiquetasDisponibles = new Map()
@@ -3722,7 +3890,8 @@ async function cargarBootstrap() {
                 div.innerHTML =
                     (chips ? "<div class='etiquetas'>" + chips + "</div>" : "") +
                     "<h3 class='hiloTitulo'>" + escapeHtml(h.titulo) + "</h3>" +
-                    (h.resumen ? "<p class='hiloResumen'>" + escapeHtml(h.resumen) + "</p>" : "") +
+                    (h.isSensitive ? "<div class='avisoSensibleFeed'>⚠️ Contenido sensible · Abrí la publicación para visualizarlo</div>" :
+                        (h.resumen ? "<p class='hiloResumen'>" + escapeHtml(h.resumen) + "</p>" : "")) +
                     renderizarLinkPreview(h.link, true) +
                     (h._optimista ? "<div class='estadoOptimista'>" + escapeHtml(h._estadoOptimista === "pendiente" ? "Confirmando publicación… No la vuelvas a publicar." : "Publicando…") + "</div>" : "") +
                     "<div class='hiloPie'>" +
@@ -3781,6 +3950,19 @@ async function cargarBootstrap() {
             aplicarFiltroEtiqueta()
         })
 
+        function aplicarTemaForo(tema) {
+            const oscuro = tema === 'oscuro'
+            vistaForo.classList.toggle('foroTemaOscuro', oscuro)
+            if (btnTemaForo) { btnTemaForo.textContent = oscuro ? '☀' : '☾'; btnTemaForo.setAttribute('aria-label', oscuro ? 'Activar modo claro' : 'Activar modo oscuro') }
+        }
+        const temaForoGuardado = localStorage.getItem('medmar:foro:tema') || 'claro'
+        aplicarTemaForo(temaForoGuardado)
+        if (btnTemaForo) btnTemaForo.addEventListener('click', function() {
+            const nuevo = vistaForo.classList.contains('foroTemaOscuro') ? 'claro' : 'oscuro'
+            localStorage.setItem('medmar:foro:tema', nuevo)
+            aplicarTemaForo(nuevo)
+        })
+
         btnQuitarFiltro.addEventListener("click", function () {
             etiquetaFiltroActual = ""
             inputFiltroEtiqueta.value = ""
@@ -3794,18 +3976,9 @@ async function cargarBootstrap() {
         }
 
         function actualizarComposeCabecera() {
-
-            if (inputAnonimoHilo.checked) {
-                avatarCompose.innerHTML = avatarHtml("Anónimo", "", "avatarChico")
-                nombreCompose.textContent = "Anónimo"
-            } else {
-                avatarCompose.innerHTML = avatarHtml(inputPseudonimo.value || "Vos", fotoActual, "avatarChico")
-                nombreCompose.textContent = inputPseudonimo.value || "Vos"
-            }
-
+            avatarCompose.innerHTML = avatarHtml(inputPseudonimo.value || "Vos", fotoActual, "avatarChico")
+            nombreCompose.textContent = inputPseudonimo.value || "Vos"
         }
-
-        inputAnonimoHilo.addEventListener("change", actualizarComposeCabecera)
 
         inputContenido.addEventListener("input", function () {
             autoAjustarTextarea(inputContenido)
@@ -3842,20 +4015,20 @@ async function cargarBootstrap() {
             const titulo = inputTitulo.value.trim()
             const contenido = inputContenido.value.trim()
             const etiquetasTexto = inputEtiquetas.value.trim()
-            const link = inputLink.value.trim()
-            const anonimo = inputAnonimoHilo.checked
+            const isSensitive = !!inputContenidoSensible.checked
             const tags = etiquetasTexto.split(",").map(function (x) { return x.trim() }).filter(Boolean).slice(0, 5)
             const tempId = "tmp-" + Date.now() + "-" + Math.random().toString(36).slice(2)
             const operacionId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ("op-" + Date.now() + "-" + Math.random().toString(36).slice(2))
 
             const hOptimista = {
                 id: tempId,
-                autor: anonimo ? "Anónimo" : (inputPseudonimo.value || "Vos"),
-                autorFoto: anonimo ? "" : fotoActual,
+                autor: inputPseudonimo.value || "Vos",
+                autorFoto: fotoActual,
                 titulo: titulo,
                 resumen: contenido.length > 180 ? contenido.slice(0, 180) + "…" : contenido,
                 etiquetas: tags,
-                link: enlaceSeguroLocal(link) ? link : "",
+                link: "",
+                isSensitive: isSensitive,
                 fecha: new Date().toISOString(),
                 respuestas: 0,
                 _optimista: true,
@@ -3881,8 +4054,7 @@ async function cargarBootstrap() {
                 titulo: titulo,
                 contenido: contenido,
                 etiquetas: etiquetasTexto,
-                link: link,
-                anonimo: anonimo ? "1" : "0",
+                isSensitive: isSensitive,
                 operacionId: operacionId
             }, 3)
 
@@ -3945,8 +4117,7 @@ async function cargarBootstrap() {
                         titulo: titulo,
                         contenido: contenido,
                         etiquetas: etiquetasTexto,
-                        link: link,
-                        anonimo: anonimo ? "1" : "0",
+                        isSensitive: isSensitive,
                         operacionId: operacionId
                     }, 2)
                     if (rr.ok) {
@@ -4057,6 +4228,77 @@ async function cargarBootstrap() {
 
         }
 
+        function esHostPreviewImagen(url) {
+            try {
+                const host = new URL(url).hostname.toLowerCase()
+                return ['prnt.sc','lightshot.com','pinetools.com','screenapp.io','imgur.com','ibb.co','postimg.cc','imgbb.com','imageshack.com'].some(d => host === d || host.endsWith('.' + d))
+            } catch (_) { return false }
+        }
+
+        function renderizarContenidoForo(texto, sensible, id) {
+            const raw = String(texto || '')
+            const urlRegex = /https?:\/\/[^\s<>\"']+/gi
+            let html = ''
+            let last = 0
+            let match
+            while ((match = urlRegex.exec(raw)) !== null) {
+                const original = match[0]
+                const url = original.replace(/[),.;!?]+$/g, '')
+                const suffix = original.slice(url.length)
+                html += escapeHtml(raw.slice(last, match.index)).replace(/\n/g, '<br>')
+                let safe = false
+                try { safe = enlaceSeguroLocal(url) } catch (_) {}
+                if (safe) {
+                    const imageDirect = /\.(?:png|jpe?g|gif|webp)(?:\?.*)?$/i.test(url)
+                    if (imageDirect) {
+                        html += "<a class='enlaceForo' href='" + escapeAttr(url) + "' target='_blank' rel='noopener noreferrer'>" + escapeHtml(url) + "</a><img class='imagenExternaForo' src='" + escapeAttr(url) + "' alt='Imagen externa' loading='lazy' referrerpolicy='no-referrer'>"
+                    } else {
+                        const previewClass = esHostPreviewImagen(url) ? " externalImageLink" : ""
+                        const previewData = esHostPreviewImagen(url) ? " data-preview-url='" + escapeAttr(url) + "'" : ""
+                        html += "<a class='enlaceForo" + previewClass + "'" + previewData + " href='" + escapeAttr(url) + "' target='_blank' rel='noopener noreferrer'>" + escapeHtml(url) + "</a>"
+                    }
+                } else {
+                    html += escapeHtml(url)
+                }
+                html += escapeHtml(suffix)
+                last = match.index + original.length
+            }
+            html += escapeHtml(raw.slice(last)).replace(/\n/g, '<br>')
+            const body = "<div class='contenidoForoRich'>" + html + "</div>"
+            if (!sensible) return body
+            return "<div class='bloqueSensible ocultoSensible' data-sensible-id='" + escapeAttr(id) + "'><button type='button' class='revelarSensible'>⚠️ Contenido sensible · Mostrar contenido</button>" + body + "</div>"
+        }
+
+        function hidratarImagenesExternas(root) {
+            if (!root) return
+            root.querySelectorAll('.externalImageLink[data-preview-url]').forEach(function(link) {
+                if (link.dataset.previewRequested) return
+                link.dataset.previewRequested = '1'
+                const url = link.dataset.previewUrl
+                llamar('resolverImagen', { url: url }).then(function(result) {
+                    if (!result || !result.ok || !result.imagen || !link.isConnected) return
+                    const img = document.createElement('img')
+                    img.className = 'imagenExternaForo'
+                    img.src = result.imagen
+                    img.alt = 'Imagen externa'
+                    img.loading = 'lazy'
+                    img.referrerPolicy = 'no-referrer'
+                    img.onerror = function() { img.remove() }
+                    link.insertAdjacentElement('afterend', img)
+                }).catch(function(){})
+            })
+            root.querySelectorAll('.revelarSensible').forEach(function(button) {
+                if (button.dataset.bound) return
+                button.dataset.bound = '1'
+                button.addEventListener('click', function() {
+                    const block = button.closest('.bloqueSensible')
+                    if (!block) return
+                    block.classList.remove('ocultoSensible')
+                    button.remove()
+                })
+            })
+        }
+
         function renderizarDetalleHilo(h) {
 
             const chips = (h.etiquetas || []).map(function (t) {
@@ -4078,13 +4320,14 @@ async function cargarBootstrap() {
                 "<span class='puntoSeparador'>·</span>" +
                 "<span class='hiloFecha'>" + formatearFecha(h.fecha) + "</span>" +
                 "</div>" +
-                "<div class='cuerpoHilo'>" + escapeHtml(h.contenido) + "</div>" +
+                renderizarContenidoForo(h.contenido, !!h.isSensitive, "hilo-" + h.id) +
                 renderizarLinkPreview(h.link) +
                 "<div class='hiloLikeBar'>" + likeButtonHtml('hilo', h.id, h.likes, h.meGusta) + "</div>" +
                 "<div class='hiloAcciones'>" + acciones + "</div>"
 
             activarAccionesPublicacion(detalleHiloContenido)
             activarBotonLike(detalleHiloContenido)
+            hidratarImagenesExternas(detalleHiloContenido)
 
             const linkEl = detalleHiloContenido.querySelector(".linkPreview")
             if (linkEl) linkEl.addEventListener("click", function (e) { e.stopPropagation() })
@@ -4108,12 +4351,13 @@ async function cargarBootstrap() {
                 "<span class='puntoSeparador'>·</span>" +
                 "<span class='hiloFecha'>" + formatearFecha(r.fecha) + "</span>" +
                 "</div>" +
-                "<div class='cuerpoHilo'>" + escapeHtml(r.contenido) + "</div>" +
+                renderizarContenidoForo(r.contenido, false, "respuesta-" + r.id) +
                 "<div class='hiloLikeBar'>" + likeButtonHtml('respuesta', r.id, r.likes, r.meGusta) + "</div>" +
                 (acciones ? "<div class='hiloAcciones'>" + acciones + "</div>" : "")
 
             activarBotonLike(div)
             activarAccionesPublicacion(div)
+            hidratarImagenesExternas(div)
             return div
         }
 
@@ -4140,13 +4384,12 @@ async function cargarBootstrap() {
 
             const contenido = inputRespuesta.value.trim()
             if (!contenido) return
-            const anonimoRespuesta = inputAnonimoRespuesta.checked
             const operacionId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ("op-" + Date.now() + "-" + Math.random().toString(36).slice(2))
             const tempId = "tmp-resp-" + Date.now() + "-" + Math.random().toString(36).slice(2)
             const optimistic = {
                 id: tempId,
-                autor: anonimoRespuesta ? "Anónimo" : (inputPseudonimo.value || "Vos"),
-                autorFoto: anonimoRespuesta ? "" : fotoActual,
+                autor: inputPseudonimo.value || "Vos",
+                autorFoto: fotoActual,
                 esPropio: true,
                 contenido: contenido,
                 fecha: new Date().toISOString(),
@@ -4164,7 +4407,6 @@ async function cargarBootstrap() {
             const r = await llamarMutacionResiliente("crearRespuesta", {
                 hiloId: hiloAbiertoId,
                 contenido: contenido,
-                anonimo: anonimoRespuesta ? "1" : "0",
                 operacionId: operacionId
             }, 3)
 
@@ -4206,7 +4448,6 @@ async function cargarBootstrap() {
                     const rr = await llamarMutacionResiliente("crearRespuesta", {
                         hiloId: hiloAbiertoId,
                         contenido: contenido,
-                        anonimo: anonimoRespuesta ? "1" : "0",
                         operacionId: operacionId
                     }, 2)
                     if (rr.ok) {
@@ -4296,6 +4537,8 @@ async function cargarBootstrap() {
             vistaModeracion.style.display = nombre === "moderacion" ? "block" : "none"
 
             btnIrInicio.style.display = nombre === "inicio" ? "none" : "flex"
+            // En Inicio la barra superior quedaba vacía y se veía como una cápsula de color.
+            userBar.style.display = nombre === "inicio" ? "none" : "flex"
             if (pieInicio) pieInicio.classList.toggle("oculto", nombre !== "inicio")
 
             if (nombre !== 'intercambios' && chatAbiertoId) cerrarChat()
@@ -4476,6 +4719,7 @@ async function cargarBootstrap() {
 
         logoutBtn.addEventListener("click", async function () {
             await supabaseClient.auth.signOut()
+            ocultarSetupPerfil()
             resetearHistorialPorLogout()
             mostrarLogin()
         })
@@ -4498,7 +4742,7 @@ async function cargarBootstrap() {
                 mostrarSeccion("inicio", null, false)
             }
 
-            cargarBootstrap()
+            await cargarBootstrap()
             iniciarRealtimeUsuario()
             iniciarActualizacionPeriodica()
         }
@@ -4510,6 +4754,7 @@ async function cargarBootstrap() {
         }
 
         function mostrarLogin() {
+            if (modalSetupPerfil) ocultarSetupPerfil()
             detenerRealtimeUsuario()
             app.style.display = "none"
             loginScreen.style.display = "block"
