@@ -1889,6 +1889,103 @@
         body.temaOscuro .btn-primario { color: #18251d; }
         body.temaOscuro .linkAuth { color: #a9d9cc; }
 
+        /* Respuestas vinculadas y compositor siempre disponible en el hilo. */
+        #foroDetalle { padding-bottom: 210px; }
+        .composerRespuesta {
+            position: fixed;
+            z-index: 45;
+            left: 50%;
+            bottom: 0;
+            width: min(640px, 100vw);
+            margin: 0;
+            padding: 11px 18px calc(12px + env(safe-area-inset-bottom, 0px));
+            transform: translateX(-50%);
+            border-top: 1px solid var(--line);
+            background: rgba(246, 248, 245, .97);
+            box-shadow: 0 -10px 30px rgba(13, 43, 38, .12);
+            backdrop-filter: blur(14px);
+        }
+        .respuestaComposerFila { display:flex; align-items:flex-end; gap:10px; }
+        .avatarComposeRespuesta { display:flex; flex:0 0 38px; width:38px; height:38px; margin-bottom:3px; }
+        .avatarComposeRespuesta .avatar { width:38px; height:38px; }
+        #inputRespuesta {
+            flex:1;
+            min-width:0;
+            min-height:46px;
+            max-height:118px;
+            margin:0;
+            padding:12px 15px;
+            border:1px solid var(--line);
+            border-radius:23px;
+            background:#fff;
+            color:var(--ink);
+            font:inherit;
+            font-size:.93rem;
+            line-height:1.4;
+            overflow-y:auto;
+        }
+        #inputRespuesta::placeholder { color:#66756f; }
+        .btnEnviarRespuesta {
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:6px;
+            flex:0 0 auto;
+            width:auto !important;
+            min-height:44px;
+            margin:0 0 2px;
+            padding:0 13px;
+            border-radius:999px;
+            white-space:nowrap;
+        }
+        .btnEnviarRespuesta svg { width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+        .respuestaContexto { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 8px 48px; color:var(--ink-soft); font-size:.82rem; }
+        .respuestaContexto[hidden] { display:none; }
+        #btnCancelarRespuesta { width:28px; min-height:28px; padding:0; border-radius:50%; background:var(--teal-100); color:var(--teal-900); font-size:20px; line-height:1; }
+        .notaImagenes { display:flex; align-items:flex-start; gap:7px; margin:9px 0 12px; padding:9px 11px; border:1px solid #dce5df; border-radius:10px; background:#eff4ef; color:#435850; font-size:.78rem; line-height:1.45; }
+        .notaImagenes > span:first-child { flex:0 0 auto; color:var(--teal-700); font-weight:700; }
+        .notaImagenes a { color:var(--teal-900); font-weight:700; text-underline-offset:2px; }
+        .notaImagenesComposer { margin:7px 0 0 48px; padding:5px 0 0; border:0; background:transparent; font-size:.72rem; }
+        .respuestaGrupo { margin:0; }
+        #vistaForo .respuestaItem.respuestaRaiz { cursor:pointer; }
+        #vistaForo .respuestaItem.respuestaRaiz:focus-visible { outline:2px solid var(--foro-accent); outline-offset:2px; }
+        #vistaForo .respuestasAnidadas { margin:2px 0 12px 28px; padding-left:13px; border-left:2px solid var(--foro-line); }
+        #vistaForo .respuestasAnidadas .respuestasAnidadas { margin-left:10px; padding-left:8px; }
+        #vistaForo .respuestaItem.respuestaAnidada { margin:7px 0; padding:11px 12px; border-radius:12px; box-shadow:none; }
+        .respuestaAContexto { margin:2px 0 6px; color:var(--foro-muted, var(--ink-soft)); font-size:.76rem; }
+        .btnResponderRespuesta { width:auto; margin:0; padding:5px 8px; border:0; border-radius:7px; background:transparent; color:var(--teal-700); font-size:.78rem; font-weight:700; }
+        .btnResponderRespuesta:hover { background:var(--teal-100); }
+        .hiloAcciones .btnResponderRespuesta { margin-right:4px; }
+        body.temaOscuro .composerRespuesta { border-color:#3b4c46; background:rgba(15, 27, 24, .97); box-shadow:0 -10px 30px rgba(0,0,0,.32); }
+        body.temaOscuro #inputRespuesta { border-color:#465952; background:#1a2925; color:#f0f5f2; }
+        body.temaOscuro #inputRespuesta::placeholder { color:#bdcbc5; }
+        body.temaOscuro .respuestaContexto { color:#d0dcd6; }
+        body.temaOscuro #btnCancelarRespuesta { background:#29413b; color:#f2f5ee; }
+        body.temaOscuro .notaImagenes { border-color:#394b44; background:#1a2925; color:#d0dcd6; }
+        body.temaOscuro .notaImagenes a { color:#b5ded0; }
+        body.temaOscuro .notaImagenesComposer { border:0; background:transparent; }
+        body.temaOscuro .btnResponderRespuesta { color:#a9d9cc; }
+        body.temaOscuro .btnResponderRespuesta:hover { background:#29413b; }
+        @media (max-width:480px) {
+            #foroDetalle { padding-bottom:220px; }
+            .composerRespuesta { padding:9px 12px calc(10px + env(safe-area-inset-bottom, 0px)); }
+            .respuestaComposerFila { gap:7px; }
+            .avatarComposeRespuesta, .avatarComposeRespuesta .avatar { width:34px; height:34px; flex-basis:34px; }
+            .respuestaContexto, .notaImagenesComposer { margin-left:41px; }
+            #inputRespuesta { min-height:43px; padding:10px 12px; font-size:.88rem; }
+            .btnEnviarRespuesta { min-height:42px; padding:0 10px; font-size:.82rem; }
+            .btnEnviarRespuesta svg { display:none; }
+            #vistaForo .respuestasAnidadas { margin-left:17px; padding-left:9px; }
+            #vistaForo .respuestasAnidadas .respuestasAnidadas { margin-left:7px; padding-left:6px; }
+        }
+        @media (max-width:350px) {
+            .avatarComposeRespuesta, .avatarComposeRespuesta .avatar { width:30px; height:30px; flex-basis:30px; }
+            .respuestaContexto, .notaImagenesComposer { margin-left:37px; }
+            .respuestaComposerFila { gap:5px; }
+            #inputRespuesta { padding-inline:10px; }
+            .btnEnviarRespuesta { padding-inline:8px; }
+        }
+
     </style>
 </head>
 
@@ -2204,7 +2301,7 @@
 
                 </div>
 
-                <div id="foroDetalle" style="display:none">
+        <div id="foroDetalle" style="display:none">
 
                     <button type="button" id="btnVolverHilos" class="btn-secundario">← Volver a los hilos</button>
 
@@ -2214,12 +2311,25 @@
 
                     <div id="listaRespuestas"></div>
 
-                    <form id="formRespuesta">
-                        <textarea id="inputRespuesta" class="textareaCompose textareaRespuesta" placeholder="Escribí tu respuesta..." maxlength="5000" rows="2" required></textarea>
-                        <button type="submit" class="btn-primario">Responder</button>
+                    <form id="formRespuesta" class="composerRespuesta">
+                        <div id="respuestaContexto" class="respuestaContexto" hidden aria-live="polite">
+                            <span id="respuestaContextoTexto"></span>
+                            <button type="button" id="btnCancelarRespuesta" aria-label="Cancelar respuesta">×</button>
+                        </div>
+                        <div class="respuestaComposerFila">
+                            <span id="avatarComposeRespuesta" class="avatarComposeRespuesta" aria-hidden="true"></span>
+                            <textarea id="inputRespuesta" class="textareaCompose textareaRespuesta" placeholder="Escribí una respuesta..." aria-label="Escribí una respuesta" maxlength="5000" rows="1" required></textarea>
+                            <button type="submit" class="btn-primario btnEnviarRespuesta">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12 20 4l-5 16-3-7-8-1Z"/><path d="m12 13 8-9"/></svg>
+                                <span>Responder</span>
+                            </button>
+                        </div>
+                        <aside class="notaImagenes notaImagenesComposer">
+                            <span aria-hidden="true">ⓘ</span>
+                            <span>Para adjuntar una imagen, subila desde el celular a <a href="https://es.imgbb.com/upload" target="_blank" rel="noopener noreferrer">ImgBB</a> y pegá el enlace directo. La imagen queda alojada fuera de MedMar; compartí solo material público.</span>
+                        </aside>
+                        <p id="msgRespuesta" aria-live="polite"></p>
                     </form>
-
-                    <p id="msgRespuesta"></p>
 
                 </div>
 
@@ -2422,6 +2532,10 @@
                     <input type="text" id="inputEtiquetas" placeholder="Etiquetas (ej: anatomía, fisiología)">
                     <p class="ayudaLink">Los enlaces se detectan automáticamente. Solo se admiten sitios compatibles y seguros.</p>
                 </div>
+                <aside class="notaImagenes">
+                    <span aria-hidden="true">ⓘ</span>
+                    <span>¿Vas a compartir una imagen? Desde el celular podés subirla a <a href="https://es.imgbb.com/upload" target="_blank" rel="noopener noreferrer">ImgBB</a> y pegar el enlace directo en el texto. La imagen se aloja fuera de MedMar; compartí solo material público.</span>
+                </aside>
                 <label class="labelCheckbox">
                     <input type="checkbox" id="inputContenidoSensible">
                     Marcar como contenido sensible (imágenes o material gráfico)
@@ -2443,7 +2557,7 @@
 
     <script>
 
-        const FRONTEND_VERSION = "MedMarUNMDP-frontend-2026-10-31-foro-perfiles-v2"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-01-respuestas-v3"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -2585,6 +2699,10 @@ const hilosPendientesConfirmacion = new Map()
         const formRespuesta = document.getElementById("formRespuesta")
         const inputRespuesta = document.getElementById("inputRespuesta")
         const msgRespuesta = document.getElementById("msgRespuesta")
+        const respuestaContexto = document.getElementById("respuestaContexto")
+        const respuestaContextoTexto = document.getElementById("respuestaContextoTexto")
+        const btnCancelarRespuesta = document.getElementById("btnCancelarRespuesta")
+        const avatarComposeRespuesta = document.getElementById("avatarComposeRespuesta")
 
         const listaDenuncias = document.getElementById("listaDenuncias")
         const seccionModeradores = document.getElementById("seccionModeradores")
@@ -2619,6 +2737,7 @@ const hilosPendientesConfirmacion = new Map()
         let etiquetaFiltroActual = ""
         let paginaHilosActual = 0
         let hiloAbiertoId = null
+        let respuestaObjetivoActual = null
         let esModeradorActual = false
         let esAdminActual = false
 
@@ -3081,6 +3200,7 @@ const hilosPendientesConfirmacion = new Map()
                 servidor: "El servidor devolvió un error. Revisá la implementación de Apps Script.",
                 titulo_invalido: "El título no puede estar vacío ni superar los 140 caracteres.",
                 contenido_invalido: "El contenido no puede estar vacío ni superar los 5000 caracteres.",
+                respuesta_invalida: "No se encontró esa respuesta para este hilo. Actualizá la conversación e intentá de nuevo.",
                 link_invalido: "El enlace no tiene un formato HTTPS válido.",
                 link_no_permitido: "Ese sitio no está permitido. Solo aceptamos dominios seguros de YouTube, Google, UNMDP, sitios académicos autorizados, Spotify y Steam.",
                 servidor_ocupado: "El servidor está ocupado en este momento. Probá de nuevo.",
@@ -3596,12 +3716,14 @@ async function cargarBootstrap() {
             hiloAbiertoId = null
             hiloActualUI = null
             respuestasUI = []
+            limpiarRespuestaObjetivo()
             requestAnimationFrame(function () { foroLista.scrollIntoView({ behavior: "smooth", block: "start" }) })
         }
 
         function mostrarDetalleHilo() {
             foroLista.style.display = "none"
             foroDetalle.style.display = "block"
+            actualizarAvatarComposerRespuesta()
             requestAnimationFrame(function () { foroDetalle.scrollIntoView({ behavior: "smooth", block: "start" }) })
         }
 
@@ -4516,14 +4638,72 @@ async function cargarBootstrap() {
 
         }
 
+        function actualizarAvatarComposerRespuesta() {
+            if (avatarComposeRespuesta) {
+                avatarComposeRespuesta.innerHTML = avatarHtml(inputPseudonimo.value || "Vos", fotoActual, "avatarChico")
+            }
+        }
+
+        function seleccionarRespuestaObjetivo(respuesta) {
+            if (!respuesta || respuesta._optimista) return
+            respuestaObjetivoActual = String(respuesta.id)
+            respuestaContextoTexto.textContent = "Respondiendo a " + (respuesta.autor || "Estudiante")
+            respuestaContexto.hidden = false
+            inputRespuesta.placeholder = "Respondé a " + (respuesta.autor || "Estudiante") + "…"
+            inputRespuesta.focus({ preventScroll: true })
+        }
+
+        function limpiarRespuestaObjetivo() {
+            respuestaObjetivoActual = null
+            if (respuestaContexto) respuestaContexto.hidden = true
+            if (respuestaContextoTexto) respuestaContextoTexto.textContent = ""
+            if (inputRespuesta) inputRespuesta.placeholder = "Escribí una respuesta..."
+        }
+
+        btnCancelarRespuesta.addEventListener("click", limpiarRespuestaObjetivo)
+
+        listaRespuestas.addEventListener("click", function (event) {
+            const boton = event.target.closest(".btnResponderRespuesta")
+            if (boton) {
+                const respuesta = respuestasUI.find(function (r) { return String(r.id) === String(boton.dataset.id) })
+                seleccionarRespuestaObjetivo(respuesta)
+                return
+            }
+            if (event.target.closest("button, a, input, textarea")) return
+            const elemento = event.target.closest(".respuestaItem")
+            if (!elemento) return
+            const respuesta = respuestasUI.find(function (r) { return String(r.id) === String(elemento.dataset.respuestaId) })
+            seleccionarRespuestaObjetivo(respuesta)
+        })
+
+        listaRespuestas.addEventListener("keydown", function (event) {
+            if (event.key !== "Enter" && event.key !== " ") return
+            const elemento = event.target.closest(".respuestaItem[tabindex='0']")
+            if (!elemento || event.target !== elemento) return
+            event.preventDefault()
+            const respuesta = respuestasUI.find(function (r) { return String(r.id) === String(elemento.dataset.respuestaId) })
+            seleccionarRespuestaObjetivo(respuesta)
+        })
+
         function crearElementoRespuesta(r) {
             const div = document.createElement("div")
-            div.className = "respuestaItem" + (r._optimista ? " respuestaOptimista" : "")
+            const esAnidada = !!r.parentId
+            div.className = "respuestaItem" + (r._optimista ? " respuestaOptimista" : "") + (esAnidada ? " respuestaAnidada" : " respuestaRaiz")
             div.dataset.respuestaId = r.id
+            if (!r._optimista) {
+                div.tabIndex = 0
+                div.setAttribute("role", "group")
+                div.setAttribute("aria-label", "Respuesta de " + (r.autor || "Estudiante") + ". Tocá para responder")
+            }
+
+            const padre = esAnidada ? respuestasUI.find(function (x) { return String(x.id) === String(r.parentId) }) : null
 
             let acciones = r._optimista ? "" : "<button type='button' class='accionDenunciar' data-tipo='respuesta' data-id='" + escapeAttr(r.id) + "'>Denunciar</button>"
             if (!r._optimista && (r.esPropio || esModeradorActual)) {
                 acciones += "<button type='button' class='accionBorrar' data-tipo='respuesta' data-id='" + escapeAttr(r.id) + "'>Borrar</button>"
+            }
+            if (!r._optimista) {
+                acciones = "<button type='button' class='btnResponderRespuesta' data-id='" + escapeAttr(r.id) + "'>Responder</button>" + acciones
             }
 
             div.innerHTML =
@@ -4533,6 +4713,7 @@ async function cargarBootstrap() {
                 "<span class='puntoSeparador'>·</span>" +
                 "<span class='hiloFecha'>" + formatearFecha(r.fecha) + "</span>" +
                 "</div>" +
+                (padre ? "<div class='respuestaAContexto'>En respuesta a " + escapeHtml(padre.autor || "Estudiante") + "</div>" : "") +
                 renderizarContenidoForo(r.contenido, false, "respuesta-" + r.id) +
                 "<div class='hiloLikeBar'>" + likeButtonHtml('respuesta', r.id, r.likes, r.meGusta) + "</div>" +
                 (acciones ? "<div class='hiloAcciones'>" + acciones + "</div>" : "")
@@ -4550,9 +4731,32 @@ async function cargarBootstrap() {
                 listaRespuestas.innerHTML = "<p class='vacio'>Todavía no hay respuestas.</p>"
                 return
             }
+
+            const ids = new Set(respuestasUI.map(function (r) { return String(r.id) }))
+            const hijos = new Map()
             respuestasUI.forEach(function (r) {
-                listaRespuestas.appendChild(crearElementoRespuesta(r))
+                if (!r.parentId) return
+                const key = String(r.parentId)
+                if (!hijos.has(key)) hijos.set(key, [])
+                hijos.get(key).push(r)
             })
+            const raices = respuestasUI.filter(function (r) { return !r.parentId || !ids.has(String(r.parentId)) })
+
+            function crearGrupo(respuesta) {
+                const grupo = document.createElement("div")
+                grupo.className = "respuestaGrupo"
+                grupo.appendChild(crearElementoRespuesta(respuesta))
+                const respuestasHijas = hijos.get(String(respuesta.id)) || []
+                if (respuestasHijas.length) {
+                    const anidadas = document.createElement("div")
+                    anidadas.className = "respuestasAnidadas"
+                    respuestasHijas.forEach(function (hija) { anidadas.appendChild(crearGrupo(hija)) })
+                    grupo.appendChild(anidadas)
+                }
+                return grupo
+            }
+
+            raices.forEach(function (respuesta) { listaRespuestas.appendChild(crearGrupo(respuesta)) })
         }
 
         btnVolverHilos.addEventListener("click", function () {
@@ -4566,12 +4770,14 @@ async function cargarBootstrap() {
 
             const contenido = inputRespuesta.value.trim()
             if (!contenido) return
+            const parentId = respuestaObjetivoActual
             const operacionId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ("op-" + Date.now() + "-" + Math.random().toString(36).slice(2))
             const tempId = "tmp-resp-" + Date.now() + "-" + Math.random().toString(36).slice(2)
             const optimistic = {
                 id: tempId,
                 autor: inputPseudonimo.value || "Vos",
                 autorFoto: fotoActual,
+                parentId: parentId,
                 esPropio: true,
                 contenido: contenido,
                 fecha: new Date().toISOString(),
@@ -4588,6 +4794,7 @@ async function cargarBootstrap() {
 
             const r = await llamarMutacionResiliente("crearRespuesta", {
                 hiloId: hiloAbiertoId,
+                parentId: parentId,
                 contenido: contenido,
                 operacionId: operacionId
             }, 3)
@@ -4596,6 +4803,7 @@ async function cargarBootstrap() {
                 const indice = respuestasUI.findIndex(function (x) { return x.id === tempId })
                 const respuestaFinal = r.respuesta || {
                     id: r.id,
+                    parentId: parentId,
                     autor: optimistic.autor,
                     autorFoto: optimistic.autorFoto,
                     esPropio: true,
@@ -4608,6 +4816,7 @@ async function cargarBootstrap() {
                 const tempEl = listaRespuestas.querySelector("[data-respuesta-id='" + CSS.escape(tempId) + "']")
                 if (tempEl) tempEl.replaceWith(crearElementoRespuesta(respuestaFinal))
                 msgRespuesta.innerText = ""
+                if (respuestaObjetivoActual === parentId) limpiarRespuestaObjetivo()
                 if (hiloActualUI) hiloActualUI.respuestas = Number(hiloActualUI.respuestas || 0) + 1
                 const cacheHiloRespuesta = hiloCacheCliente.get(String(hiloAbiertoId))
                 if (cacheHiloRespuesta && cacheHiloRespuesta.data) {
@@ -4629,16 +4838,18 @@ async function cargarBootstrap() {
                 setTimeout(async function() {
                     const rr = await llamarMutacionResiliente("crearRespuesta", {
                         hiloId: hiloAbiertoId,
+                        parentId: parentId,
                         contenido: contenido,
                         operacionId: operacionId
                     }, 2)
                     if (rr.ok) {
                         const indice = respuestasUI.findIndex(function(x) { return x.id === tempId })
-                        const final = rr.respuesta || { id: rr.id, autor: optimistic.autor, autorFoto: optimistic.autorFoto, esPropio: true, contenido: contenido, fecha: optimistic.fecha, likes: 0, meGusta: false }
+                        const final = rr.respuesta || { id: rr.id, parentId: parentId, autor: optimistic.autor, autorFoto: optimistic.autorFoto, esPropio: true, contenido: contenido, fecha: optimistic.fecha, likes: 0, meGusta: false }
                         if (indice !== -1) respuestasUI[indice] = final
                         const el = listaRespuestas.querySelector("[data-respuesta-id='" + CSS.escape(tempId) + "']")
                         if (el) el.replaceWith(crearElementoRespuesta(final))
                         msgRespuesta.innerText = ""
+                        if (respuestaObjetivoActual === parentId) limpiarRespuestaObjetivo()
                     } else {
                         if (hiloAbiertoId) abrirHilo(hiloAbiertoId, false)
                     }
