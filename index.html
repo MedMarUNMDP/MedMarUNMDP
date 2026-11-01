@@ -30,7 +30,7 @@
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "MedMar",
-      "alternateName": "MedMarUNMDP",
+      "alternateName": "MedMar",
       "url": "https://medmar.com.ar/",
       "inLanguage": "es-AR",
       "description": "Plataforma independiente para estudiantes de Medicina de la UNMDP orientada al intercambio de comisiones y la conexión entre estudiantes."
@@ -1824,6 +1824,71 @@
             #vistaForo #btnBuscarForo { padding:9px 10px; }
         }
 
+        /* Contraste reforzado y paleta afinada a la identidad de Medicina UNMDP. */
+        :root {
+            --teal-950: #0b302e;
+            --teal-900: #123f3b;
+            --teal-700: #24665e;
+            --teal-100: #e4eeea;
+            --teal-50: #f6f8f5;
+            --gold-500: #c99f43;
+            --gold-600: #a77d24;
+            --ink: #172421;
+            --ink-soft: #4d6059;
+            --line: #d5e0db;
+        }
+
+        /* El token --teal-50 cambia en modo oscuro; el título del hero necesita
+           conservar un color claro independiente del color de las superficies. */
+        .hero-inner { color: #f7f7ef; }
+        .hero-inner h1 { color: #fffdf4; }
+        .hero-inner p { color: #d3e1dc; }
+
+        body.temaOscuro {
+            --teal-950: #08211f;
+            --teal-900: #123a36;
+            --teal-700: #92c8b9;
+            --teal-100: #29413b;
+            --teal-50: #101917;
+            --gold-500: #d5b45f;
+            --gold-600: #e1c879;
+            --ink: #f0f5f2;
+            --ink-soft: #c0cec8;
+            --line: #3b4c46;
+        }
+
+        body.temaOscuro .hero { background: #0b2926; }
+        body.temaOscuro .hero-inner,
+        body.temaOscuro .hero-inner h1 { color: #fffdf4; }
+        body.temaOscuro .hero-inner p { color: #d3e1dc; }
+        body.temaOscuro #userBar {
+            background: #1a302b;
+            color: #f0f5f2;
+            border: 1px solid #385048;
+        }
+        body.temaOscuro #userBar button { color: #f0f5f2; }
+        body.temaOscuro .btnVolverInicio,
+        body.temaOscuro .btnVolverInicio:visited { color: #e3eee8 !important; }
+        body.temaOscuro .btnVolverInicio:hover { color: #fffdf4 !important; }
+        body.temaOscuro .pasos li { color: #eff5f2; }
+        body.temaOscuro .paso-numero {
+            background: #28564b;
+            color: #fffdf4;
+            border: 1px solid #4d796b;
+        }
+        body.temaOscuro .tarjetaInicio { color: #f0f5f2; }
+        body.temaOscuro .tarjetaInicio .tituloInicio { color: #f5f7f2; }
+        body.temaOscuro .tarjetaInicio .descInicio { color: #bdcbc5; }
+        body.temaOscuro .setupAvatarOpcion { background: #1a2a27; color: #edf4f0; }
+        body.temaOscuro .setupAvatarOpcion small { color: #d0dcd6; }
+        body.temaOscuro .setupAvatarOpcion.seleccionado {
+            background: #24473e;
+            border-color: #d3b457;
+            box-shadow: 0 0 0 2px rgba(211, 180, 87, .18);
+        }
+        body.temaOscuro .btn-primario { color: #18251d; }
+        body.temaOscuro .linkAuth { color: #a9d9cc; }
+
     </style>
 </head>
 
@@ -1837,7 +1902,7 @@
                 <path d="M21 9v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
             </svg>
             <div>
-                <h1>MedMarUNMDP</h1>
+                <h1>MedMar</h1>
                 <p>Una plataforma hecha por y para estudiantes de Medicina de la UNMDP: para ayudarse con las comisiones, compartir lo que saben y no cursar tan solos.</p>
             </div>
         </div>
