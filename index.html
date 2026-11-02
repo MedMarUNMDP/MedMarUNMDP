@@ -11,6 +11,9 @@
     <link rel="canonical" href="https://medmar.com.ar/">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <meta name="theme-color" content="#123A38">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png?v=20261102">
+    <link rel="icon" type="image/png" sizes="48x48" href="/assets/brand/favicon-48.png?v=20261102">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/apple-touch-icon.png?v=20261102">
     <meta name="language" content="Spanish">
 
     <!-- Vista previa al compartir el enlace -->
@@ -110,17 +113,23 @@
             max-width: 640px;
             margin: 0 auto;
             color: var(--teal-50);
-            padding: 32px 24px 28px;
+            padding: 30px 24px 28px;
             display: flex;
-            align-items: flex-start;
-            gap: 14px;
+            align-items: center;
+            gap: 18px;
         }
 
-            .hero-inner svg {
-                flex-shrink: 0;
-                margin-top: 4px;
-                color: var(--gold-500);
-            }
+        .heroLogo {
+            display: block;
+            width: 104px;
+            height: 104px;
+            flex: 0 0 104px;
+            object-fit: cover;
+            border-radius: 50%;
+            background: #0b302e;
+            border: 2px solid #d5ad52;
+            box-shadow: 0 0 0 4px rgba(255,255,255,.08), 0 5px 18px rgba(0,0,0,.24);
+        }
 
             .hero-inner h1 {
                 font-size: 1.55rem;
@@ -1677,7 +1686,7 @@
 
 
         /* Foro renovado: feed compacto inspirado en Reddit, manteniendo identidad MedMar */
-        #vistaForo { --foro-bg:#f5f7f6; --foro-card:#ffffff; --foro-text:#182522; --foro-muted:#66736e; --foro-line:#dce4e1; --foro-accent:#245954; }
+        #vistaForo { --foro-bg:#f5f8f6; --foro-card:#ffffff; --foro-text:#182522; --foro-muted:#66736e; --foro-line:#dce4e1; --foro-accent:#07514e; }
         #vistaForo.foroTemaOscuro { --foro-bg:#111817; --foro-card:#1b2422; --foro-text:#edf3f1; --foro-muted:#a5b3ae; --foro-line:#33413d; --foro-accent:#82b9ae; }
         #vistaForo { color:var(--foro-text); background:var(--foro-bg); border-radius:16px; padding:12px; transition:background .2s,color .2s; }
         #vistaForo .foroCabecera { align-items:center; }
@@ -1826,13 +1835,13 @@
 
         /* Contraste reforzado y paleta afinada a la identidad de Medicina UNMDP. */
         :root {
-            --teal-950: #0b302e;
-            --teal-900: #123f3b;
-            --teal-700: #24665e;
-            --teal-100: #e4eeea;
-            --teal-50: #f6f8f5;
-            --gold-500: #c99f43;
-            --gold-600: #a77d24;
+            --teal-950: #003b39;
+            --teal-900: #07514e;
+            --teal-700: #17665f;
+            --teal-100: #e2eeeb;
+            --teal-50: #f5f8f6;
+            --gold-500: #b89b31;
+            --gold-600: #927710;
             --ink: #172421;
             --ink-soft: #4d6059;
             --line: #d5e0db;
@@ -1845,19 +1854,25 @@
         .hero-inner p { color: #d3e1dc; }
 
         body.temaOscuro {
-            --teal-950: #08211f;
-            --teal-900: #123a36;
-            --teal-700: #92c8b9;
-            --teal-100: #29413b;
+            --teal-950: #061f1e;
+            --teal-900: #0b302e;
+            --teal-700: #8fc5ba;
+            --teal-100: #263e3a;
             --teal-50: #101917;
-            --gold-500: #d5b45f;
-            --gold-600: #e1c879;
+            --gold-500: #d2bd65;
+            --gold-600: #e1cf83;
             --ink: #f0f5f2;
             --ink-soft: #c0cec8;
             --line: #3b4c46;
         }
 
-        body.temaOscuro .hero { background: #0b2926; }
+        body.temaOscuro .hero { background: #073b39; }
+        @media (max-width: 480px) {
+            .heroLogo { width: 72px; height: 72px; flex-basis: 72px; }
+            .hero-inner { gap: 13px; padding: 22px 18px 20px; }
+            .hero-inner h1 { font-size: 1.42rem; }
+            .hero-inner p { font-size: .84rem; line-height: 1.45; }
+        }
         body.temaOscuro .hero-inner,
         body.temaOscuro .hero-inner h1 { color: #fffdf4; }
         body.temaOscuro .hero-inner p { color: #d3e1dc; }
@@ -1995,11 +2010,7 @@
 
     <div class="hero">
         <div class="hero-inner">
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M12 4 2 9l10 5 10-5-10-5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
-                <path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M21 9v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-            </svg>
+            <img class="heroLogo" src="/assets/brand/isotipo-medmar.png" alt="Emblema de MedMar" width="104" height="104">
             <div>
                 <h1>MedMar</h1>
                 <p>Una plataforma hecha por y para estudiantes de Medicina de la UNMDP: para ayudarse con las comisiones, compartir lo que saben y no cursar tan solos.</p>
