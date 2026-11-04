@@ -1910,7 +1910,7 @@
             position: fixed;
             z-index: 45;
             left: 50%;
-            bottom: 0;
+            bottom: var(--medmar-composer-keyboard-bottom, 0px);
             width: min(640px, 100vw);
             margin: 0;
             padding: 11px 18px calc(12px + env(safe-area-inset-bottom, 0px));
@@ -1961,6 +1961,9 @@
         .notaImagenes > span:first-child { flex:0 0 auto; color:var(--teal-700); font-weight:700; }
         .notaImagenes a { color:var(--teal-900); font-weight:700; text-underline-offset:2px; }
         .notaImagenesComposer { margin:7px 0 0 48px; padding:5px 0 0; border:0; background:transparent; font-size:.72rem; }
+        /* Con el teclado abierto priorizamos el campo y el botón de envío. */
+        .composerRespuesta.tecladoAbierto .notaImagenesComposer { display:none; }
+        .composerRespuesta.tecladoAbierto { max-height:calc(var(--medmar-visual-height, 100dvh) - 12px); overflow-y:auto; overscroll-behavior:contain; }
         .imagenExternaNoDisponible { display:flex; align-items:center; gap:8px; margin:8px 0; padding:14px; border:1px dashed var(--line); border-radius:10px; background:rgba(120,140,130,.08); color:var(--ink-soft); font-size:.84rem; }
         .respuestaGrupo { margin:0; }
         #vistaForo .respuestaItem.respuestaRaiz { cursor:pointer; }
@@ -4304,7 +4307,53 @@ async function cargarBootstrap() {
 
         inputRespuesta.addEventListener("input", function () {
             autoAjustarTextarea(inputRespuesta)
+            ajustarComposerTeclado()
         })
+
+        // El viewport visual se reduce al abrir el teclado virtual en móviles.
+        // Ajustamos el bottom del compositor a ese viewport sin alterar el scroll
+        // general de la página ni intervenir en la autenticación o el envío.
+        const viewportVisual = window.visualViewport || null
+        let rafComposerTeclado = 0
+
+        function ajustarComposerTeclado() {
+            if (rafComposerTeclado) cancelAnimationFrame(rafComposerTeclado)
+            rafComposerTeclado = requestAnimationFrame(function () {
+                rafComposerTeclado = 0
+                if (!formRespuesta || !inputRespuesta) return
+
+                const enfocado = document.activeElement === inputRespuesta
+                const alturaViewport = viewportVisual ? viewportVisual.height : window.innerHeight
+                const offsetViewport = viewportVisual ? viewportVisual.offsetTop : 0
+                const tecladoVisible = enfocado && (window.innerHeight - alturaViewport > 100)
+
+                if (tecladoVisible) {
+                    const espacioInferior = Math.max(0, window.innerHeight - alturaViewport - offsetViewport)
+                    formRespuesta.style.setProperty("--medmar-composer-keyboard-bottom", espacioInferior + "px")
+                    formRespuesta.style.setProperty("--medmar-visual-height", alturaViewport + "px")
+                    formRespuesta.classList.add("tecladoAbierto")
+                } else {
+                    formRespuesta.style.removeProperty("--medmar-composer-keyboard-bottom")
+                    formRespuesta.style.removeProperty("--medmar-visual-height")
+                    formRespuesta.classList.remove("tecladoAbierto")
+                }
+            })
+        }
+
+        inputRespuesta.addEventListener("focus", function () {
+            ajustarComposerTeclado()
+            // Segunda medición tras el inicio de la animación del teclado.
+            requestAnimationFrame(ajustarComposerTeclado)
+        })
+        inputRespuesta.addEventListener("blur", function () {
+            // Espera a que el navegador actualice el foco al cerrar el teclado.
+            setTimeout(ajustarComposerTeclado, 120)
+        })
+        if (viewportVisual) {
+            viewportVisual.addEventListener("resize", ajustarComposerTeclado)
+            viewportVisual.addEventListener("scroll", ajustarComposerTeclado)
+        }
+        window.addEventListener("resize", ajustarComposerTeclado)
 
         btnAbrirCompose.addEventListener("click", function () {
 
@@ -4689,6 +4738,7 @@ async function cargarBootstrap() {
             respuestaContexto.hidden = false
             inputRespuesta.placeholder = "Respondé a " + (respuesta.autor || "Estudiante") + "…"
             inputRespuesta.focus({ preventScroll: true })
+            ajustarComposerTeclado()
         }
 
         function limpiarRespuestaObjetivo() {
