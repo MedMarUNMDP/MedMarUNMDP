@@ -1910,24 +1910,16 @@
             position: fixed;
             z-index: 45;
             left: 50%;
-            bottom: var(--medmar-keyboard-inset, 0px);
+            bottom: 0;
             width: min(640px, 100vw);
-            max-height: var(--medmar-composer-max-height, 45vh);
-            overflow-y: auto;
-            overscroll-behavior: contain;
-            -webkit-overflow-scrolling: touch;
             margin: 0;
             padding: 11px 18px calc(12px + env(safe-area-inset-bottom, 0px));
             transform: translateX(-50%);
             border-top: 1px solid var(--line);
-            background: rgba(246, 248, 245, .98);
+            background: rgba(246, 248, 245, .97);
             box-shadow: 0 -10px 30px rgba(13, 43, 38, .12);
             backdrop-filter: blur(14px);
-            transition: bottom .08s linear;
         }
-        /* Con el teclado abierto priorizamos el campo y el botón; la ayuda no debe consumir altura. */
-        body.medmarTecladoAbierto .notaImagenesComposer { display:none; }
-        body.medmarTecladoAbierto .composerRespuesta { padding-bottom:10px; }
         .respuestaComposerFila { display:flex; align-items:flex-end; gap:10px; }
         .avatarComposeRespuesta { display:flex; flex:0 0 38px; width:38px; height:38px; margin-bottom:3px; }
         .avatarComposeRespuesta .avatar { width:38px; height:38px; }
@@ -2578,7 +2570,7 @@
 
     <script>
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-04-teclado-respuestas-v4"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-01-respuestas-v3"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -4314,57 +4306,6 @@ async function cargarBootstrap() {
             autoAjustarTextarea(inputRespuesta)
         })
 
-        // Mantiene el compositor de respuestas por encima del teclado virtual.
-        // VisualViewport es necesario especialmente en Safari iOS, donde el viewport
-        // visual se reduce pero el viewport de layout puede conservar su altura.
-        (function configurarCompositorConTeclado() {
-            const viewportVisual = window.visualViewport || null
-            let rafActualizacion = 0
-            let temporizadorBlur = null
-
-            function actualizarPosicionCompositor() {
-                rafActualizacion = 0
-                const altoLayout = window.innerHeight || document.documentElement.clientHeight || 0
-                const altoVisual = viewportVisual ? viewportVisual.height : altoLayout
-                const offsetVisual = viewportVisual ? viewportVisual.offsetTop : 0
-                const insetTeclado = Math.max(0, altoLayout - (altoVisual + offsetVisual))
-                const tecladoVisible = insetTeclado > 120 && document.activeElement === inputRespuesta
-                const altoDisponible = Math.max(150, altoVisual - 12)
-                const altoMaximo = Math.max(118, Math.min(altoDisponible * (tecladoVisible ? .42 : .45), 300))
-
-                document.documentElement.style.setProperty('--medmar-keyboard-inset', insetTeclado.toFixed(1) + 'px')
-                document.documentElement.style.setProperty('--medmar-composer-max-height', altoMaximo.toFixed(1) + 'px')
-                document.body.classList.toggle('medmarTecladoAbierto', tecladoVisible)
-            }
-
-            function programarActualizacion() {
-                if (rafActualizacion) cancelAnimationFrame(rafActualizacion)
-                rafActualizacion = requestAnimationFrame(actualizarPosicionCompositor)
-            }
-
-            inputRespuesta.addEventListener('focus', function () {
-                if (temporizadorBlur) clearTimeout(temporizadorBlur)
-                programarActualizacion()
-                // Reintentos breves cubren la animación de apertura del teclado en iOS/Android.
-                setTimeout(programarActualizacion, 80)
-                setTimeout(programarActualizacion, 250)
-                setTimeout(programarActualizacion, 450)
-            })
-
-            inputRespuesta.addEventListener('blur', function () {
-                if (temporizadorBlur) clearTimeout(temporizadorBlur)
-                temporizadorBlur = setTimeout(programarActualizacion, 180)
-            })
-
-            window.addEventListener('resize', programarActualizacion, { passive: true })
-            window.addEventListener('orientationchange', function () { setTimeout(programarActualizacion, 250) }, { passive: true })
-            if (viewportVisual) {
-                viewportVisual.addEventListener('resize', programarActualizacion, { passive: true })
-                viewportVisual.addEventListener('scroll', programarActualizacion, { passive: true })
-            }
-            programarActualizacion()
-        })()
-
         btnAbrirCompose.addEventListener("click", function () {
 
             navegarHistorial(crearEstadoNavegacion("foro", "compose"), false)
@@ -4748,7 +4689,6 @@ async function cargarBootstrap() {
             respuestaContexto.hidden = false
             inputRespuesta.placeholder = "Respondé a " + (respuesta.autor || "Estudiante") + "…"
             inputRespuesta.focus({ preventScroll: true })
-            // El foco abre el teclado; el listener de focus ajusta el compositor al viewport visible.
         }
 
         function limpiarRespuestaObjetivo() {
