@@ -2,6 +2,41 @@
 
 Formato: la versión más nueva arriba. Al publicar una versión, agregá una sección nueva acá y subí `?build=` en index.html (ver CLAUDE.md del juego). El historial previo a v3.1 está en `README.txt`.
 
+## v3.5
+
+Correcciones del diagnóstico 2026-11 (`docs/diagnostico-2026-11.md`) y controles de PC.
+
+**Errores**
+1. Subir de nivel ya no congela la partida (JUEGO-01): la selección de pregunta llamaba al azar sin el generador.
+2. Estallido respiratorio activado por Fagocitosis nivel 3 ya no hace daño NaN (JUEGO-02): su nivel arranca en 1.
+3. Volver al menú y empezar otra partida ya no puede dejar la arena en negro (JUEGO-14): el juego no se redimensiona
+   a 0×0 mientras está oculto (tamaño mínimo de Phaser) y el loop duerme en el menú.
+4. "Jugar otra vez" ya no acumula listeners de redimensión (JUEGO-06).
+
+**Jugabilidad**
+5. Jefes: siguen emergiendo en el centro de la arena; el aviso ahora lo dice y durante 1,6 s de entrada no hacen
+   daño por contacto (antes podían aparecer encima del jugador y pegarle).
+6. Homeostasis y Quimiotaxis solo ofrecen mejoras de habilidades que el jugador tiene; las generales (vida,
+   defensa, velocidad, recolección) y las de Desgranulación siempre están (JUEGO-05).
+7. Fagocitosis expansiva permite englobar patógenos grandes (brutos y élite) desde la primera vez (JUEGO-04).
+8. Topes únicos en `LIMITS`: recarga mínima de fagocitosis 280 ms, de NETosis 2,7 s y hasta 7 redes simultáneas,
+   vengan de la mejora que vengan.
+9. Textos que no coincidían con el efecto: Barrera reforzada (−7 %), NETosis (+10 % de radio), Diferenciación y
+   Reconocimiento de patrones (ahora incluyen el nivel), y el historial de evoluciones muestra el antes → después real.
+10. Pregunta del frotis delgado: opciones plausibles reescritas para que respondan esa pregunta (revisadas con
+    `revisor-contenido-medico`, OMS *Basic Malaria Microscopy*).
+
+**Controles**
+11. PC: ESC o P pausan y reanudan; mantener apretado el mouse mueve la célula hacia el puntero.
+12. La partida se pausa sola al cambiar de app o pestaña.
+
+**Otros**
+13. Phaser con SRI y Content Security Policy (el juego comparte origen con la web).
+14. Toda la aleatoriedad pasa por el generador inyectable (`this.rng`).
+15. Se quitó el link roto al catálogo, el emoji de Parasitaria se ve en todos los sistemas y las versiones quedaron
+    unificadas en 3.5.
+16. Tests: arnés que corre la escena real en Node (`tests/helpers/arena-harness.cjs`) y 15 tests de escena.
+
 ## v3.4
 
 INMUNE SURVIVORS v3.4 — CORRECCIONES DE VÍAS Y DESGRANULACIÓN

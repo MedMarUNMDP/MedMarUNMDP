@@ -33,14 +33,33 @@ Detalle de los ítems marcados con códigos (A1, M3…) en [diagnostico-web-2026
 - [ ] Evaluar un proyecto Supabase de staging (el plan Free permite 2 proyectos activos).
 
 ## Juegos
+Detalle de los códigos JUEGO-xx en [games/inmune-survivors/docs/diagnostico-2026-11.md](../games/inmune-survivors/docs/diagnostico-2026-11.md).
+
+Los bugs JUEGO-01 a 14 se corrigieron en v3.5. Queda pendiente:
+
+**Inmune Survivors — rendimiento móvil**
+- [ ] Pasar todos los assets a WebP de 256–512 px (hoy ~7,6 MB por partida, estimado < 1 MB) y borrar los 16 sin uso.
+      La primera carga tarda varios segundos en datos móviles.
+- [ ] Decidir la nitidez en pantallas HiDPI (el canvas no usa `devicePixelRatio`) y agregar pools de objetos
+      (proyectiles, partículas, textos) para evitar tirones del recolector en gama baja.
+
+**Inmune Survivors — diseño y contenido**
+- [ ] Ritmo: en simulaciones de 40 min salen 5–14 preguntas y nunca se llega a la multirresistencia; revisar la
+      curva de XP (`xpNeed`) y medir con jugadores reales (tiempo hasta cada pregunta y duración de partida).
+- [ ] Banco de preguntas: la correcta es la opción más larga en el 70 % de los casos; reescribir opciones con
+      `revisor-contenido-medico` y balancear temas (Epidemiología y Patogenia tienen 1 pregunta cada una).
+- [ ] Test de calidad del banco (longitudes de opciones, opciones plausibles relacionadas con la pregunta).
+
+**Inmune Survivors — arquitectura**
+- [ ] Refactor por etapas (§8 del diagnóstico): formatear `game.js` sin cambiar lógica (verificado con el arnés y la
+      simulación con semilla), extraer datos a `src/data/`, estado inicial único (sin `|| valorPorDefecto`), sistemas con tests.
+
+**Integración**
 - [ ] Integrar Inmune Survivors en la sección Juegos (`#vistaJuegos` → link/iframe a `/juegos/inmune-survivors/`).
       Mientras tanto, la tarjeta de Inicio no debería prometer un ranking.
 - [ ] Ranking: tabla `puntajes_juegos` (RLS: select autenticados, sin insert directo) + acción `guardarPuntaje`
       con validación de plausibilidad (puntaje máximo por segundo jugado, duración mínima, rate limit) + `rankingJuego`.
-- [ ] Inmune Survivors: corregir bugs del diagnóstico v3.4 (NaN en Estallido respiratorio, mejoras cuyo efecto no
-      coincide con el texto), seguir extrayendo lógica de `Arena` a `src/` con tests.
-- [ ] Convertir los `.png` de tejidos (~1,8 MB c/u) a `.webp` y usar solo esos.
-- [ ] Unificar versiones (`?build=`, `iniciar_juego.py`, títulos de `.bat`).
+      Las partidas del Laboratorio no deben poder enviar puntaje.
 
 ## Backend
 - [ ] Quitar `legacyLogin` (acción, RPC `get_legacy_password` y tabla `private.legacy_password_migrations`, que ya

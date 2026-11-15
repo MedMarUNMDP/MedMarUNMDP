@@ -2,7 +2,7 @@
 
 Survivor de arena (estilo "bullet heaven") educativo: un progenitor hematopoyético defiende un tejido
 infectado. Ataque automático; el jugador solo se mueve. Subir de nivel = responder una pregunta de
-inmunología/microbiología (acierto → mejora de vía; error → oleada extra). Versión actual: **3.4**.
+inmunología/microbiología (acierto → mejora de vía; error → oleada extra). Versión actual: **3.5**.
 
 ## Archivos
 
@@ -13,7 +13,11 @@ inmunología/microbiología (acierto → mejora de vía; error → oleada extra)
 - `src/config/game-balance.js` — límites, multiplicadores y efectos por vía (fuente única de verdad de las tarjetas).
 - `src/core/runtime-services.js` — `Rng`, `Clock`, `Storage` inyectables (tests reproducibles).
 - `src/core/lab-actions.js` — acciones del modo Laboratorio.
-- `tests/*.test.cjs` — `node:test` sobre los módulos de `src/`.
+- `tests/*.test.cjs` — `node:test` sobre los módulos de `src/` y sobre la escena completa.
+- `tests/helpers/arena-harness.cjs` — corre la escena `Arena` real en Node con Phaser simulado y RNG con semilla
+  (`createScene({ seed })`, `flushTweens()`). Usalo para reproducir bugs y simular partidas sin navegador.
+  Los bugs conocidos van como tests `{ todo }` (el deploy corre `npm test`: un test rojo bloquea la web).
+- `docs/diagnostico-2026-11.md` — diagnóstico vigente (bugs JUEGO-xx, arquitectura, rendimiento móvil, tests).
 - `docs/diagnostico-v3.4.md` (texto del PDF) — diagnóstico técnico y guía de diseño: fórmulas, bugs conocidos, propuestas.
 - `docs/catalogo-preguntas.md` — catálogo legible de preguntas y respuestas.
 - `CHANGELOG.md` (v3.1+) y `README.txt` (historial anterior y controles).

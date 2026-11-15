@@ -3,8 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- CSP: el juego comparte origen (y localStorage, con la sesión de MedMar) con la web.
+       Phaser carga las imágenes por XHR y las usa como blob:. Si sumás un CDN, agregalo acá. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' data: blob:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="theme-color" content="#091525">
-  <title>Inmune Survivors v3.4 — Ajustes de jefes y progresión</title>
+  <title>Inmune Survivors v3.5 — Correcciones y controles de PC</title>
   <style>
     :root {
       --bg: #07111f; --panel: #101f33; --panel2: #142942; --line: #29415b;
@@ -183,7 +187,7 @@
         <div class="brand-mark" aria-hidden="true"></div>
         <div><div class="eyebrow">MedMar · Prototipo jugable</div><h1>INMUNE SURVIVORS</h1></div>
       </div>
-      <div class="top-tag">v3.4 · AJUSTES DE GAMEPLAY</div>
+      <div class="top-tag">v3.5 · CORRECCIONES</div>
     </header>
 
     <section id="menuScreen">
@@ -199,7 +203,7 @@
               <button class="choice selected" data-infection="bacteriana"><span class="choice-icon">🧫</span><strong>Bacteriana</strong><small>Endotelio vascular o mucosa; predominan bacterias, sin excluir otras familias.</small></button>
               <button class="choice" data-infection="viral"><span class="choice-icon">🦠</span><strong>Viral</strong><small>Epitelio respiratorio o tejido nervioso; virus veloces y variantes de mayor tamaño.</small></button>
               <button class="choice" data-infection="fungica"><span class="choice-icon">🍄</span><strong>Fúngica</strong><small>Dermis o epitelio alveolar; hongos resistentes y nubes de esporas.</small></button>
-              <button class="choice" data-infection="parasitaria"><span class="choice-icon">🪱</span><strong>Parasitaria</strong><small>Protozoos con formas distintas y helmintos grandes que aceleran en línea recta, pero giran con dificultad.</small></button>
+              <button class="choice" data-infection="parasitaria"><span class="choice-icon">🐛</span><strong>Parasitaria</strong><small>Protozoos con formas distintas y helmintos grandes que aceleran en línea recta, pero giran con dificultad.</small></button>
             </div>
             <h3 class="section-title" style="margin-top:20px"><span>2</span> Elegí la célula</h3>
             <div class="cell-card">
@@ -219,7 +223,7 @@
               <button class="diff-choice selected" data-evolution-difficulty="estudiante"><span class="diff-dot"></span><span class="diff-text"><strong>Estudiante</strong><small>Banco NORMAL · teoría frecuente, mecanismos y aplicación.</small></span><span class="multiplier">×1,00</span></button>
               <button class="diff-choice" data-evolution-difficulty="infectologo"><span class="diff-dot"></span><span class="diff-text"><strong>Infectólogo</strong><small>Banco DIFÍCIL · detalles finos y razonamiento diagnóstico.</small></span><span class="multiplier">×1,50</span></button>
             </div>
-            <p class="small-note">Banco total: 83 preguntas. <a href="./CATALOGO_PREGUNTAS_v1.9.md" target="_blank" rel="noopener" style="color:var(--mint);font-weight:800">Ver preguntas y respuestas por dificultad y temática ↗</a></p>
+            <p class="small-note">Banco total: 83 preguntas, con explicación y referencia en cada respuesta.</p>
             <button class="btn-primary" id="startButton" style="margin-top:18px">INICIAR PARTIDA ↗</button><button class="btn-lab" id="debugStartButton">ABRIR LABORATORIO DE PRUEBAS</button><p class="small-note">El laboratorio es independiente: no usa preguntas ni oleadas automáticas y permite ajustar la partida en cualquier momento.</p>
           </div>
         </main>
@@ -227,11 +231,11 @@
           <div class="panel-inner">
             <h3 class="section-title">Cómo se juega</h3>
             <ul class="howto">
-              <li><span class="howto-icon">🕹️</span><span><strong>Movete y saná focos</strong><br>WASD / flechas; en celular, tocá y arrastrá en cualquier parte de la arena. El joystick aparece bajo tu dedo y se oculta al soltar. Quedate encima de una colonia para iniciar la sanación automáticamente.</span></li>
+              <li><span class="howto-icon">🕹️</span><span><strong>Movete y saná focos</strong><br>WASD / flechas, o mantené apretado el mouse hacia donde querés ir (ESC o P pausa); en celular, tocá y arrastrá en cualquier parte de la arena. El joystick aparece bajo tu dedo y se oculta al soltar. Quedate encima de una colonia para iniciar la sanación automáticamente.</span></li>
               <li><span class="howto-icon">✦</span><span><strong>Atacá automáticamente</strong><br>La desgranulación es el ataque inicial. Fagocitosis y NETosis se desbloquean al sanar focos infecciosos.</span></li>
               <li><span class="howto-icon">🧬</span><span><strong>Elegí una estrategia</strong><br>Homeostasis, Citotoxicidad o Quimiotaxis. Cada elección refuerza parámetros; cada tercera de la misma vía suma una evolución avanzada.</span></li>
               <li><span class="howto-icon">🧨</span><span><strong>Notá el cambio en combate</strong><br>Salvas múltiples, gránulos mayores y de otros colores, explosiones en cadena, una célula más resistente o estelas de movimiento. Las colonias sanadas restauran vida y experiencia.</span></li>
-              <li><span class="howto-icon">☠️</span><span><strong>Jefes y multirresistencia</strong><br>Los jefes anuncian su entrada y atacan de formas distintas. Al agotarse las preguntas comienza una crisis de oleadas continuas con enemigos de mayor resistencia.</span></li>
+              <li><span class="howto-icon">☠️</span><span><strong>Jefes y multirresistencia</strong><br>Los jefes emergen en el centro de la arena, anuncian su entrada y atacan de formas distintas. Al agotarse las preguntas comienza una crisis de oleadas continuas con enemigos de mayor resistencia.</span></li>
             </ul>
             <div class="tip-box"><strong>Sobre la dificultad</strong><div class="muted">Infección modifica vida, daño, velocidad, densidad y oleadas. Evolución cambia el nivel del banco de preguntas. Ambos perfiles multiplican el puntaje de forma independiente.</div></div>
             <p class="small-note">*El juego no usa cuentas ni conexiones de MedMar. Phaser se carga desde CDN, así que hace falta conexión a internet al abrirlo. Las preguntas de esta demo son provisionales y deben verificarse con la bibliografía indicada antes de una publicación educativa.</p>
@@ -243,9 +247,9 @@
     <section class="game-section" id="gameScreen">
       <div class="game-topline"><div><strong id="runTitle">Infección bacteriana · Progenitor hematopoyético</strong><br><span id="runSubtitle">Sobreviví y respondé para mejorar.</span></div><div style="display:flex;gap:7px"><button id="fullscreenButton" class="btn-secondary" aria-label="Volver a pantalla completa">Pantalla completa</button><button id="pauseButton" class="btn-secondary">Pausar</button><button id="quitButton" class="btn-secondary">Salir</button></div></div>
       <div id="gameFrame"><div id="gameContainer"></div><div id="debugPanel" class="compact"><strong>LABORATORIO</strong><button class="debug-toggle" id="debugToggle">Abrir</button><div class="debug-content"><div id="debugStatus" style="margin-top:5px;color:#b6f5d6">Solo desgranulación · nivel 1</div><div class="debug-heading">Habilidades</div><select id="debugSkillSelect"></select><div class="debug-row"><button data-debug="skill-add">Añadir / +nivel</button><button data-debug="skill-remove">Quitar</button></div><div class="debug-heading">Ajustar estadísticas</div><div id="debugStats"></div><div class="debug-heading">Atributos de habilidad</div><div id="debugSkillStats"></div><div class="debug-heading">Partida</div><div class="debug-row"><button data-debug="granules">Gránulos ON/OFF</button><button data-debug="invincible">Inmortalidad</button></div><div class="debug-row"><select id="debugQuestion"><option value="facil">Pregunta fácil</option><option value="normal">Pregunta normal</option><option value="dificil">Pregunta difícil</option></select><button data-debug="question">Probar</button></div><div class="debug-row"><button data-debug="primary-menu">Vía principal</button><button data-debug="evolution-menu">Evolutiva</button></div><div class="debug-heading">Aparición manual</div><label>Cantidad <input id="debugSpawnCount" type="number" min="1" max="100" value="1" style="width:58px"></label><select id="debugTypeSelect"><option value="bacteria">Bacterias</option><option value="virus">Virus</option><option value="fungus">Hongos</option><option value="parasite">Parásitos</option><option value="mixed">Mixto</option></select><div class="debug-row"><button data-debug="enemy">Enemigo</button><button data-debug="large">Grande</button><button data-debug="boss">Jefe</button></div><div class="debug-row"><button data-debug="focus">Foco</button><button data-debug="heal">Curar</button><button data-debug="clear">Limpiar</button></div></div></div><div class="crisis-banner" id="crisisBanner" style="display:none">MULTIRRESISTENCIA<small>EL TEJIDO HA PERDIDO EL CONTROL</small></div></div>
-      <div class="game-controls"><span>PC: WASD / flechas</span><span>Móvil: tocá y arrastrá en cualquier parte para moverte · saná colonias al pisar el centro · acercate al ADN/ARN para recoger XP</span></div>
+      <div class="game-controls"><span>PC: WASD / flechas o mantené apretado el mouse · ESC/P pausa</span><span>Móvil: tocá y arrastrá en cualquier parte para moverte · saná colonias al pisar el centro · acercate al ADN/ARN para recoger XP</span></div>
     </section>
-    <footer>INMUNE SURVIVORS · Prototipo v3.4 independiente para MedMar. Vista adaptable, evolución celular y combate optimizado. Banco de preguntas con repetición controlada si se agota antes de completar los cuatro jefes.</footer>
+    <footer>INMUNE SURVIVORS · Prototipo v3.5 independiente para MedMar. Vista adaptable, evolución celular y combate optimizado. Banco de preguntas con repetición controlada si se agota antes de completar los cuatro jefes.</footer>
   </div>
 
   <div class="modal-layer" id="questionLayer" role="dialog" aria-modal="true" aria-labelledby="questionHeading">
@@ -312,11 +316,14 @@
     </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js"></script>
-  <script src="./src/core/runtime-services.js?build=3.4.1"></script>
-  <script src="./src/config/game-balance.js?build=3.4.1"></script>
-  <script src="./src/core/lab-actions.js?build=3.4.1"></script>
-  <script src="./game.js?build=3.4.1"></script>
+  <!-- Versión fija + SRI (hash publicado por cdnjs): si el CDN sirve otro archivo, el navegador no lo ejecuta. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js"
+          integrity="sha512-/tJYyDCrI7hnHWp45P189aOwPa6lTREosRhlxEIqx8skB4A3a3rD3iz4o335SJd4sORqjVHw5y1S2hq4hciwLw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="./src/core/runtime-services.js?build=3.5.0"></script>
+  <script src="./src/config/game-balance.js?build=3.5.0"></script>
+  <script src="./src/core/lab-actions.js?build=3.5.0"></script>
+  <script src="./game.js?build=3.5.0"></script>
 </body>
 </html>
 

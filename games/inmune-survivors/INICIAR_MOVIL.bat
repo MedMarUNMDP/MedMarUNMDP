@@ -1,7 +1,7 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-title Inmune Survivors v3.0 - Modo movil
+title Inmune Survivors v3.5 - Modo movil
 
 py -c "import sys" >nul 2>nul
 if not errorlevel 1 (

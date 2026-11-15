@@ -24,7 +24,7 @@ HISTORIAL v2.8
 - Se redujo trabajo de renderizado móvil: resolución adaptada al dispositivo, solo se carga el fondo usado, se limita la cantidad de enemigos/efectos, se comparte la textura de ADN y se reducen búsquedas repetidas.
 
 CONTROLES Y PRUEBA
-- PC: WASD o flechas para moverte; el ataque es automático. Usa PAUSAR para ver el informe y continuar o regresar al menú.
+- PC: WASD o flechas (o mantené apretado el mouse) para moverte; el ataque es automático. ESC, P o PAUSAR muestran el informe y permiten continuar o regresar al menú.
 - Móvil: joystick flotante al tocar y arrastrar dentro de la arena; desaparece al soltar. El juego solicita pantalla completa.
 - Para jugar en la PC ejecutá INICIAR_LOCAL.bat. Para probar desde el móvil en la misma red Wi-Fi ejecutá INICIAR_MOVIL.bat y abrí en el celular la dirección local que muestra la ventana.
 - Para probar evolución sin esperar, entrá al modo Laboratorio y usá los controles de pregunta, vía principal y evolutiva.

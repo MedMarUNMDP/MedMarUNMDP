@@ -427,7 +427,8 @@ FÁCIL está diseñado para personas sin cursada previa y nivel secundario. La d
 **hard-blood-smear-quant-01 — ¿Qué uso principal tiene el frotis delgado una vez detectados parásitos en una gota gruesa para malaria?**
 
 - Respuesta correcta: Apoyar la identificación de especie y la cuantificación de parasitemia
-- Explicación: El frotis delgado conserva la morfología eritrocitaria y es útil para identificar especie y cuantificar parasitemia.
+  (en Estudiante/Infectólogo: "Identificar la especie y estimar el porcentaje de eritrocitos parasitados")
+- Explicación: El frotis delgado conserva la morfología eritrocitaria y es útil para identificar la especie y cuantificar la parasitemia (% de eritrocitos parasitados); la gota gruesa es más sensible para detectar.
 - Referencia: CDC · diagnóstico de malaria
 
 ### Micología (3)

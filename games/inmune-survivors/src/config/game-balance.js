@@ -8,8 +8,10 @@
   const LIMITS = Object.freeze({
     maxProjectilesPerVolley: 10,
     minimumAttackIntervalMs: 180,
-    minimumPhagocytosisIntervalMs: 350,
+    // Topes únicos: game.js los usa en todas las mejoras (antes había 280/300/350/360 ms según la mejora).
+    minimumPhagocytosisIntervalMs: 280,
     minimumNetCooldownMs: 2700,
+    maximumNetHelpers: 7,
     minimumAntibodyIntervalMs: 500,
     maximumBCells: 8,
     baseBCellCapacity: 2
@@ -116,5 +118,20 @@
 
   const getActivePathEffects = (scene, route) => (PATH_EFFECTS[route] || []).filter((effect) => effect.isActive(scene));
 
-  return Object.freeze({ ABILITY_NAMES, LIMITS, getActivePathEffects, getBCellCap, increaseBCellCap });
+  // Mejoras de vía (EVOLUTION_STRATEGIES): `requires` es una habilidad o lista de habilidades; la mejora
+  // solo se ofrece si el jugador tiene al menos una. Sin `requires` es un atributo general.
+  const isPathUpgradeAvailable = (scene, upgrade) => {
+    if (!upgrade || !upgrade.requires) return true;
+    return [].concat(upgrade.requires).some((ability) => hasAbility(scene, ability));
+  };
+
+  // Elige la mejora número `index` entre las disponibles (rota igual que antes, pero sin ofrecer mejoras
+  // de habilidades que el jugador no tiene).
+  const pickPathUpgrade = (scene, upgrades, index) => {
+    const available = upgrades.filter((upgrade) => isPathUpgradeAvailable(scene, upgrade));
+    const pool = available.length ? available : upgrades;
+    return pool[((index % pool.length) + pool.length) % pool.length];
+  };
+
+  return Object.freeze({ ABILITY_NAMES, LIMITS, getActivePathEffects, getBCellCap, increaseBCellCap, isPathUpgradeAvailable, pickPathUpgrade });
 });

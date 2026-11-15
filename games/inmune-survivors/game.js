@@ -1,4 +1,4 @@
-  /* Inmune Survivors — prototype v2.9
+  /* Inmune Survivors — v3.5
  * Phaser 3.90.0. Microbe sprites are simplified, cached procedural textures.
  * The question bank is provisional and must be cross-checked against the approved course bibliography
  * before this game is used as a formal educational resource.
@@ -8,6 +8,8 @@
 
   let W = 480, H = 800;
   const WORLD = 3000, CENTER = WORLD / 2, ARENA_RADIUS = 1110;
+  const BOSS_SPAWN_GRACE_MS = 1600;
+  const PHAGO_LARGE_TIER = 2; // sizeTier de los arquetipos bruto y élite (los comunes son 0)
   const INFECTIONS = {
     bacteriana: {
       label: 'Infección bacteriana', bg: 0x071724, field: 0x0e2d3b, border: 0x63b8ba, accent: 0x8cf2c9,
@@ -192,7 +194,7 @@
     { id:'hard-influenza-rna-01', difficulty:'dificil', topic:'Virología', q:'Un ensayo molecular de influenza detecta ARN viral en una muestra respiratoria. ¿Qué conclusión no puede establecerse solo con ese resultado?', a:['Que todo el material detectado provenga necesariamente de virus viable con replicación activa','Que había ácido nucleico viral en la muestra analizada','Que el método detectó material genético del virus','Que el resultado debe interpretarse en el contexto clínico'], c:0, exp:'La detección de ARN o ácidos nucleicos no demuestra por sí sola que haya virus viable o replicación activa en ese momento.', source:'CDC · pruebas moleculares para influenza' },
     { id:'hard-malaria-falciparum-01', difficulty:'dificil', topic:'Parasitología', q:'¿Qué combinación describe mejor la ruta de formas asexuales de Plasmodium en el hospedador humano?', a:['Esporozoitos infectan hígado; luego merozoitos pasan a eritrocitos y las formas asexuales se multiplican en sangre','Merozoitos infectan primero el hígado; después los esporozoitos invaden eritrocitos','Gametocitos se multiplican en hepatocitos y producen quistes intestinales','Los ooquistes sanguíneos migran del intestino a los eritrocitos'], c:0, exp:'Los esporozoitos inoculados por el mosquito infectan hepatocitos; los merozoitos liberados inician la fase eritrocítica.', source:'CDC DPDx · biología de Plasmodium' },
     { id:'hard-asper-interpretation-01', difficulty:'dificil', topic:'Micología', q:'¿Qué interpretación es más adecuada ante hifas compatibles con Aspergillus y un galactomanano positivo?', a:['Los hallazgos apoyan la evaluación diagnóstica, pero deben integrarse con cultivo, histopatología y contexto clínico','La combinación identifica por sí sola la especie y confirma enfermedad invasiva en cualquier paciente','El galactomanano demuestra que las hifas son viables y sensibles a todos los antifúngicos','La microscopía excluye la necesidad de valorar muestras y factores clínicos'], c:0, exp:'Microscopía, histopatología, cultivo y biomarcadores aportan evidencia complementaria; ninguna lectura aislada reemplaza la integración diagnóstica.', source:'CDC · diagnóstico de aspergilosis' },
-    { id:'hard-blood-smear-quant-01', difficulty:'dificil', topic:'Laboratorio y diagnóstico', q:'¿Qué uso principal tiene el frotis delgado una vez detectados parásitos en una gota gruesa para malaria?', a:['Apoyar la identificación de especie y la cuantificación de parasitemia','Confirmar anticuerpos y determinar si hay inmunidad protectora','Detectar exclusivamente formas hepáticas latentes','Distinguir bacterias Gram positivas de Gram negativas'], c:0, exp:'El frotis delgado conserva la morfología eritrocitaria y es útil para identificar especie y cuantificar parasitemia.', source:'CDC · diagnóstico de malaria' },
+    { id:'hard-blood-smear-quant-01', difficulty:'dificil', topic:'Laboratorio y diagnóstico', q:'¿Qué uso principal tiene el frotis delgado una vez detectados parásitos en una gota gruesa para malaria?', a:['Apoyar la identificación de especie y la cuantificación de parasitemia','Confirmar anticuerpos y determinar si hay inmunidad protectora','Detectar exclusivamente formas hepáticas latentes','Distinguir bacterias Gram positivas de Gram negativas'], c:0, exp:'El frotis delgado conserva la morfología eritrocitaria y es útil para identificar la especie y cuantificar la parasitemia (% de eritrocitos parasitados); la gota gruesa es más sensible para detectar.', source:'CDC · diagnóstico de malaria' },
     { id:'hard-giardia-stages-01', difficulty:'dificil', topic:'Parasitología', q:'¿Qué secuencia del ciclo de Giardia es correcta tras ingerir quistes infectantes?', a:['La excistación en intestino delgado libera trofozoítos, que se multiplican y luego pueden enquistarse durante el tránsito intestinal','Los trofozoítos ingeridos forman primero ooquistes sanguíneos y luego invaden el hígado','Los quistes se multiplican en sangre y liberan esporozoítos en el colon','Los trofozoítos forman huevos embrionados que maduran en un vector'], c:0, exp:'Tras ingerir quistes, la excistación libera trofozoítos en el intestino delgado; al avanzar por el intestino puede ocurrir enquistamiento.', source:'CDC DPDx · giardiasis' },
   ];
 
@@ -233,22 +235,22 @@
     'hard-influenza-rna-01':['Que todo el material detectado provenga necesariamente de virus viable con replicación activa','Que se detectó ácido nucleico viral en la muestra analizada','Que el resultado molecular deba interpretarse junto con el contexto clínico','Que una señal molecular positiva pueda corresponder a material viral no viable'],
     'hard-malaria-falciparum-01':['Esporozoitos infectan hígado; luego merozoitos pasan a eritrocitos y las formas asexuales se multiplican en sangre','Merozoitos infectan primero el hígado; luego esporozoitos invaden eritrocitos','Los gametocitos se multiplican en hepatocitos y liberan merozoitos a sangre','Los esporozoitos completan el ciclo sexual en eritrocitos antes de llegar al hígado'],
     'hard-asper-interpretation-01':['Los hallazgos apoyan la evaluación, pero deben integrarse con cultivo, histopatología y contexto clínico','La combinación determina siempre la especie y confirma enfermedad invasiva por sí sola','Un galactomanano negativo excluye aspergilosis invasiva en cualquier contexto','La morfología tisular diferencia de forma definitiva Aspergillus de todos los mohos'],
-    'hard-blood-smear-quant-01':['Número de eritrocitos parasitados dividido por eritrocitos evaluados, expresado como porcentaje','Número de parásitos dividido por leucocitos evaluados, expresado como porcentaje de eritrocitos','Número de eritrocitos parasitados dividido por leucocitos evaluados, expresado por microlitro','Número de gametocitos dividido por eritrocitos evaluados, sin contar formas asexuales'],
+    'hard-blood-smear-quant-01':['Identificar la especie y estimar el porcentaje de eritrocitos parasitados','Examinar un mayor volumen de sangre para aumentar la sensibilidad de detección','Detectar antígenos del parásito sin necesidad de evaluar su morfología','Medir anticuerpos para saber si hubo exposición previa al parásito'],
     'hard-giardia-stages-01':['La excistación en intestino delgado libera trofozoítos, que se multiplican y luego pueden enquistarse durante el tránsito intestinal','Los quistes liberan trofozoítos en el estómago, que migran al hígado y luego se enquistan en sangre','Los trofozoítos son la forma infectante ingerida y forman ooquistes en el intestino delgado','Los quistes liberan merozoítos que invaden eritrocitos antes de regresar al intestino']
   };
 
   const EVOLUTION_STRATEGIES = [
     { id:'homeostasis', name:'Homeostasis tisular', role:'SUPERVIVENCIA', icon:'✚', color:'#63e6bd', desc:'Aguantá el frente y aprovechá la fagocitosis.', basics:[
       {name:'Membrana robusta',desc:'+32 de vida máxima y actual; el progenitor hematopoyético gana volumen.',apply:r=>{r.stats.maxHealth+=32;r.stats.health=Math.min(r.stats.maxHealth,r.stats.health+32);}},
-      {name:'Fagocitosis eficaz',desc:'+18% de radio de captura.',apply:r=>{r.stats.phagoRadius*=1.18;}},
+      {name:'Fagocitosis eficaz',requires:'phagocytosis',desc:'+18% de radio de captura.',apply:r=>{r.stats.phagoRadius*=1.18;}},
       {name:'Reserva celular',desc:'Reduce 3,5% el daño recibido.',apply:r=>{r.stats.defenseLevel++;}},
-      {name:'Asimilación reparadora',desc:'+2 de curación instantánea por fagocitosis.',apply:r=>{r.stats.phagoHeal+=2;}},
-      {name:'Ritmo fagocítico',desc:'La fagocitosis se activa 8% más seguido.',apply:r=>{r.stats.phagoInterval=Math.max(360,r.stats.phagoInterval*.92);}}
+      {name:'Asimilación reparadora',requires:'phagocytosis',desc:'+2 de curación instantánea por fagocitosis.',apply:r=>{r.stats.phagoHeal+=2;}},
+      {name:'Ritmo fagocítico',requires:'phagocytosis',desc:'La fagocitosis se activa 8% más seguido.',apply:r=>{r.stats.phagoInterval=Math.max(GAME_BALANCE.LIMITS.minimumPhagocytosisIntervalMs,r.stats.phagoInterval*.92);}}
     ], advanced:[
-      {name:'Fagocitosis expansiva',desc:'+1 nivel de tamaño englobable y +18% de radio.',apply:r=>{r.stats.phagoMaxTier=Math.min(3,r.stats.phagoMaxTier+1);r.stats.phagoRadius*=1.18;}},
-      {name:'Respuesta reparadora',desc:'La curación recibida aumenta 30%.',apply:r=>{r.stats.healingReceivedMultiplier*=1.30;}},
-      {name:'Barrera reforzada',desc:'Reduce 10% adicional el daño recibido.',apply:r=>{r.stats.defenseLevel+=2;}},
-      {name:'Devorador de patógenos',desc:'La fagocitosis es 18% más rápida y restaura +5 de vida.',apply:r=>{r.stats.phagoInterval=Math.max(300,r.stats.phagoInterval*.82);r.stats.phagoHeal+=5;}}
+      {name:'Fagocitosis expansiva',requires:'phagocytosis',desc:'Permite englobar patógenos grandes (brutos y élite) y +18% de radio.',apply:r=>{r.stats.phagoMaxTier=Math.max(r.stats.phagoMaxTier,PHAGO_LARGE_TIER);r.stats.phagoRadius*=1.18;}},
+      {name:'Respuesta reparadora',requires:['phagocytosis','polarization'],desc:'La curación recibida aumenta 30%.',apply:r=>{r.stats.healingReceivedMultiplier*=1.30;}},
+      {name:'Barrera reforzada',desc:'Reduce 7% adicional el daño recibido (máximo total 28%).',apply:r=>{r.stats.defenseLevel+=2;}},
+      {name:'Devorador de patógenos',requires:'phagocytosis',desc:'La fagocitosis es 18% más rápida y restaura +5 de vida.',apply:r=>{r.stats.phagoInterval=Math.max(GAME_BALANCE.LIMITS.minimumPhagocytosisIntervalMs,r.stats.phagoInterval*.82);r.stats.phagoHeal+=5;}}
     ]},
     { id:'cytotoxicity', name:'Citotoxicidad', role:'CITOTOXICIDAD', icon:'✹', color:'#ffbd52', desc:'Convertí cada descarga en una salva más potente.', basics:[
       {name:'Gránulos densos',desc:'+30% de daño; los proyectiles crecen y cambian de color.',apply:r=>{r.stats.attackDamage*=1.30;r.stats.granuleLevel++;}},
@@ -265,14 +267,14 @@
     { id:'chemotaxis', name:'Quimiotaxis', role:'AGILIDAD', icon:'➤', color:'#80caff', desc:'Reposicionate, reuní recursos y extendé las NETosis.', basics:[
       {name:'Gradiente quimiotáctico',desc:'+15% de velocidad; estelas más visibles.',apply:r=>{r.stats.moveSpeed*=1.15;r.stats.agilityLevel++;}},
       {name:'Rastreo celular',desc:'+32 al radio de recolección de ADN/ARN.',apply:r=>{r.stats.xpPickupRadius+=32;}},
-      {name:'NETosis precisa',desc:'+15% de radio de red.',apply:r=>{r.stats.netRadius*=1.15;r.stats.agilityLevel++;}},
-      {name:'Despliegue rápido',desc:'La NETosis se prepara 7% más rápido.',apply:r=>{r.stats.netCooldown=Math.max(3300,r.stats.netCooldown*.93);}},
-      {name:'Pulso extracelular',desc:'+1 de daño por pulso de NETosis.',apply:r=>{r.stats.netDamage+=1;}}
+      {name:'NETosis precisa',requires:'netosis',desc:'+15% de radio de red.',apply:r=>{r.stats.netRadius*=1.15;r.stats.agilityLevel++;}},
+      {name:'Despliegue rápido',requires:'netosis',desc:'La NETosis se prepara 7% más rápido.',apply:r=>{r.stats.netCooldown=Math.max(GAME_BALANCE.LIMITS.minimumNetCooldownMs,r.stats.netCooldown*.93);}},
+      {name:'Pulso extracelular',requires:'netosis',desc:'+1 de daño por pulso de NETosis.',apply:r=>{r.stats.netDamage+=1;}}
     ], advanced:[
-      {name:'Redes simultáneas',desc:'+1 NETosis auxiliar simultánea.',apply:r=>{r.stats.maxNetHelpers=Math.min(6,r.stats.maxNetHelpers+1);}},
-      {name:'Tormenta de NETosis',desc:'La red aparece más seguido y cubre un área mayor.',apply:r=>{r.stats.netCooldown=Math.max(2800,r.stats.netCooldown*.82);r.stats.netRadius*=1.22;}},
+      {name:'Redes simultáneas',requires:'netosis',desc:'+1 NETosis auxiliar simultánea.',apply:r=>{r.stats.maxNetHelpers=Math.min(GAME_BALANCE.LIMITS.maximumNetHelpers,r.stats.maxNetHelpers+1);}},
+      {name:'Tormenta de NETosis',requires:'netosis',desc:'La red aparece más seguido y cubre un área mayor.',apply:r=>{r.stats.netCooldown=Math.max(GAME_BALANCE.LIMITS.minimumNetCooldownMs,r.stats.netCooldown*.82);r.stats.netRadius*=1.22;}},
       {name:'Quimiotaxis voraz',desc:'+55 al radio de recolección y +10% de velocidad.',apply:r=>{r.stats.xpPickupRadius+=55;r.stats.moveSpeed*=1.10;r.stats.agilityLevel++;}},
-      {name:'Malla citotóxica',desc:'+35% de daño y +25% de duración de NETosis.',apply:r=>{r.stats.netDamage*=1.35;r.stats.netDuration*=1.25;r.stats.netTickInterval=Math.max(230,r.stats.netTickInterval*.88);}}
+      {name:'Malla citotóxica',requires:'netosis',desc:'+35% de daño y +25% de duración de NETosis.',apply:r=>{r.stats.netDamage*=1.35;r.stats.netDuration*=1.25;r.stats.netTickInterval=Math.max(230,r.stats.netTickInterval*.88);}}
     ]}
   ];
 
@@ -457,13 +459,16 @@
       cam.startFollow(this.player, true, 1, 1);
       cam.setZoom(mobileViewport()?0.90:1);
       cam.setRoundPixels(false);
-      this.scale.on(Phaser.Scale.Events.RESIZE, gameSize => {
+      // El ScaleManager es global (sobrevive a la escena): el listener se saca en 'shutdown'
+      // (destroyTransientObjects); si no, cada "Jugar otra vez" sumaba uno que retenía la escena anterior.
+      this.onScaleResize = gameSize => {
         W = Math.max(280, Math.round(gameSize.width || this.scale.gameSize.width));
         H = Math.max(480, Math.round(gameSize.height || this.scale.gameSize.height));
         cam.setViewport(0, 0, W, H);
         cam.setZoom(mobileViewport()?0.90:1);
         this.layoutHud();
-      });
+      };
+      this.scale.on(Phaser.Scale.Events.RESIZE, this.onScaleResize);
     }
 
     layoutHud() {
@@ -497,19 +502,28 @@
     }
 
     createControls() {
-      this.keys = this.input.keyboard ? this.input.keyboard.addKeys('W,A,S,D,UP,DOWN,LEFT,RIGHT,ESC,E') : {};
+      this.keys = this.input.keyboard ? this.input.keyboard.addKeys('W,A,S,D,UP,DOWN,LEFT,RIGHT') : {};
+      // PC: ESC o P pausan y reanudan.
+      if (this.input.keyboard) {
+        const togglePause = () => { if (this.manualPaused) this.resumeGame(); else this.pauseGame(); };
+        this.input.keyboard.on('keydown-ESC', togglePause);
+        this.input.keyboard.on('keydown-P', togglePause);
+      }
+      // PC: mantener apretado el botón izquierdo mueve la célula hacia el puntero (para trackpad o sin teclado).
+      this.mouseSteer = false;
       this.joyActive = false; this.joyPointerId = null; this.joyOrigin = { x:0, y:0 }; this.joyVector = { x:0, y:0 };
       this.joyGraphic = this.add.graphics().setDepth(1200).setScrollFactor(0);
       this.input.on('pointerdown', p => {
         if (this.questionPaused || this.gameEnded || this.joyActive) return;
         const eventType = String(p.event?.type || '');
         const isTouch = p.wasTouch || p.event?.pointerType === 'touch' || eventType.startsWith('touch');
-        if (!isTouch) return;
+        if (!isTouch) { if (!p.leftButtonDown || p.leftButtonDown()) this.mouseSteer = true; return; }
         this.joyActive = true; this.joyPointerId = p.id; this.joyOrigin = { x:p.x, y:p.y };
         this.setJoyVector(p.x, p.y); this.drawJoystick();
       });
       this.input.on('pointermove', p => { if (this.joyActive && p.id === this.joyPointerId) { this.setJoyVector(p.x, p.y); this.drawJoystick(); } });
       const releaseJoystick = p => {
+        if (!p || !p.wasTouch) this.mouseSteer = false;
         if (this.joyActive && (!p || p.id === this.joyPointerId)) {
           this.joyActive = false; this.joyPointerId = null; this.joyVector.x = 0; this.joyVector.y = 0; this.drawJoystick();
         }
@@ -672,7 +686,7 @@
     }
 
     pauseGame() {
-      if(this.gameEnded||this.manualPaused)return;
+      if(this.gameEnded||this.manualPaused||this.questionPaused)return;
       this.manualPaused=true;this.time.paused=true;this.tweens.pauseAll();
       this.emit('is:pause',this.getRunSummary());
     }
@@ -696,10 +710,14 @@
       const spawnAt={x:CENTER,y:CENTER};
       const boss=this.spawnEnemy(spec.type,true,spawnAt,spec);
       if(!boss)return;
+      // Los jefes emergen en el centro de la arena (decisión de diseño). Como el jugador puede estar ahí,
+      // durante la entrada no hacen daño por contacto y aparecen semitransparentes.
+      boss.spawnGrace=BOSS_SPAWN_GRACE_MS;
+      if(boss.obj)this.tweens.add({targets:boss.obj,alpha:{from:0.35,to:1},duration:BOSS_SPAWN_GRACE_MS,ease:'Sine.Out'});
       this.bossCount++;this.bossSequenceIndex++;
       this.cameras.main.shake(260,0.0045);
       this.flashPlayerOutline(0xffd875,650);
-      this.showToast(`ALERTA · ${spec.label.toUpperCase()} SE APROXIMA DESDE FUERA DE LA ARENA`);
+      this.showToast(`ALERTA · ${spec.label.toUpperCase()} EMERGE EN EL CENTRO DE LA ARENA`);
     }
 
     spawnEnemy(forceType = null, forcedLarge = false, spawnAt = null, bossSpec = null) {
@@ -801,7 +819,7 @@
 
     spawnBossSpore(enemy) {
       if(this.enemyProjectiles.filter(p=>p.kind==='spore').length>=28)return;
-      const angle=Math.atan2(this.player.y-enemy.y,this.player.x-enemy.x)+Phaser.Math.FloatBetween(-0.42,0.42),speed=105+Math.min(55,this.elapsed*0.025);
+      const angle=Math.atan2(this.player.y-enemy.y,this.player.x-enemy.x)+this.rng.float(-0.42,0.42),speed=105+Math.min(55,this.elapsed*0.025);
       const obj=this.add.image(enemy.x,enemy.y,'boss_spore').setScale(0.025).setRotation(angle+Math.PI/2).setDepth(30);
       this.enemyProjectiles.push({obj,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,damage:13+this.elapsed*0.014,life:9000,radius:13,hp:1,kind:'spore',homing:true});
       this.burstEffect(enemy.x,enemy.y,0xbaff49,16);
@@ -969,7 +987,7 @@
           this.tweens.add({targets:ring,scale:4,alpha:0,duration:360,onComplete:()=>ring.destroy()});
           this.player.setScale(1.18);this.tweens.add({targets:this.player,scale:1,duration:220,ease:'Back.Out'});this.flashPlayerOutline(0x70ffc4,310);
           this.showFloatingText(target.x,target.y-24,'FAGOCITOSIS  +XP','#baffdf',13);this.showToast('FAGOCITOSIS: patógeno englobado');this.killEnemy(target,true);
-          if(this.activeSkills.has('respiratory_burst')){const radius=95+(this.skillLevels.respiratory_burst||this.skillLevels.phagocytosis||1)*17;this.burstEffect(target.x,target.y,0xffae68,radius);for(const e of this.enemies){if(!e.dead&&dist2(e,target)<radius*radius){this.damageEnemy(e,7+this.skillLevels.respiratory_burst*4,false);if(e.hp<=0)this.killEnemy(e,false);}}}
+          if(this.activeSkills.has('respiratory_burst')){const burstLevel=this.skillLevels.respiratory_burst||1,radius=95+burstLevel*17;this.burstEffect(target.x,target.y,0xffae68,radius);for(const e of this.enemies){if(!e.dead&&dist2(e,target)<radius*radius){this.damageEnemy(e,7+burstLevel*4,false);if(e.hp<=0)this.killEnemy(e,false);}}}
           if(this.stats.phagoHeal>0){const healAmount=this.stats.phagoHeal*this.stats.healingReceivedMultiplier,healed=Math.min(healAmount,this.stats.maxHealth-this.stats.health);this.stats.health=Math.min(this.stats.maxHealth,this.stats.health+healAmount);if(healed>0)this.showFloatingText(this.player.x,this.player.y-38,`+${Math.round(healed)} SALUD`,'#8dffd0',11);}
         }
       }});
@@ -998,16 +1016,16 @@
       const s=this.stats,fmt=(n,d=0)=>Number(n).toLocaleString('es-AR',{maximumFractionDigits:d});
       const pct=(before,after)=>before?`${after<before?'−':'+'}${fmt(Math.abs((1-after/before)*100),0)}%`:'';
       const rows={
-        phagocytosis:`Radio +9 (${fmt(s.phagoRadius)}→${fmt(s.phagoRadius+9)}); recarga −10% (${fmt(s.phagoInterval/1000,1)}→${fmt(Math.max(280,s.phagoInterval*.90)/1000,1)} s)${level>=2?'; curación +1 por captura':''}${level>=3?' · habilita Estallido respiratorio':''}`,
-        netosis:`Radio +8%; daño +2,2/pulso; recarga −10%; redes simultáneas +1${s.maxNetHelpers>=7?' (límite alcanzado)':''}`,
+        phagocytosis:`Radio +9 (${fmt(s.phagoRadius)}→${fmt(s.phagoRadius+9)}); recarga −10% (${fmt(s.phagoInterval/1000,1)}→${fmt(Math.max(GAME_BALANCE.LIMITS.minimumPhagocytosisIntervalMs,s.phagoInterval*.90)/1000,1)} s)${level>=2?'; curación +1 por captura':''}${level>=3?' · habilita Estallido respiratorio':''}`,
+        netosis:`Radio +10%; daño +2,2/pulso; recarga −10%; redes simultáneas +1${s.maxNetHelpers>=GAME_BALANCE.LIMITS.maximumNetHelpers?' (límite alcanzado)':''}`,
         immunoregulation:`Daño global +3 (${fmt(s.regulationDamage||4)}→${fmt((s.regulationDamage||4)+3)}); intervalo −12%`,
-        differentiation:`Bonificación por racha +2 puntos (${fmt((this.differentiationBonus||.055)*100,1)}→${fmt(((this.differentiationBonus||.055)+.02)*100,1)}%)`,
+        differentiation:`Daño extra por baja en racha: ${fmt((this.differentiationBonus||.055)*(level-1)*100,1)}% → ${fmt(((this.differentiationBonus||.055)+.02)*level*100,1)}% (tope +90%)`,
         antibodies:`Daño +4 (${fmt(s.antibodyDamage||10)}→${fmt((s.antibodyDamage||10)+4)}); intervalo −15%${level>=2?`; +${(s.antibodyCount||2)<5?1:0} proyectil(es) (${fmt(s.antibodyCount||2)}→${fmt(Math.min(5,(s.antibodyCount||2)+((s.antibodyCount||2)<5?1:0)))})`:''}`,
         complement:`Probabilidad de cadena +7 puntos (${fmt((this.complementChance||.18)*100,0)}→${fmt(Math.min(.7,(this.complementChance||.18)+.07)*100,0)}%)`,
         tb_collaboration:`Capacidad de linfocitos B: ${fmt(Math.max(2,this.bCellCap||2))} → ${Math.min(8,Math.max(2,this.bCellCap||2)+1)} (+1 acompañante; máximo 8)`,
         macrophage_activation:`+1 macrófago acompañante (máximo 5)`,
         differential_profile:`Daño de células amigas +25 puntos porcentuales (${fmt((this.minionDamageBonus||.25)*100,0)}→${fmt(((this.minionDamageBonus||.25)+.25)*100,0)}%)`,
-        pattern:`Radio de reconocimiento +45 (${fmt(this.patternRadius||220)}→${fmt((this.patternRadius||220)+45)} px)`,
+        pattern:`Radio de reconocimiento +45 (${fmt(this.patternRadius||220)}→${fmt((this.patternRadius||220)+45)} px) · daño por agente agrupado ${fmt(4.5*(level-1),1)}% → ${fmt(4.5*level,1)}% (tope +45%)`,
         cytokines:`Daño +3 (${fmt(s.cytokineDamage||6)}→${fmt((s.cytokineDamage||6)+3)}); intervalo −16%${level>=2?`; +${(s.cytokineCount||1)<4?1:0} proyectil(es) (${fmt(s.cytokineCount||1)}→${fmt(Math.min(4,(s.cytokineCount||1)+((s.cytokineCount||1)<4?1:0)))})`:''}`,
         polarization:`Cambio de perfil de las células amigas ${this.minionMode||'M1'}→${(this.minionMode||'M1')==='M1'?'M2':'M1'}`
       };
@@ -1044,17 +1062,17 @@
     chooseFocusEvolution(optionId){
       const o=this.pendingFocusOptions?.find(x=>x.id===optionId);if(!o)return;
       if(!this.activeSkills.has(o.skill)){this.activeSkills.add(o.skill);this.skillLevels[o.skill]=1;this.upgradeHistory.push({time:fmtTime(this.elapsed),type:'Habilidad desbloqueada',name:this.skillOptionLabel(o.skill,false).name,detail:'Nuevo mecanismo activo'});this.showToast(`HABILIDAD DESBLOQUEADA · ${this.skillOptionLabel(o.skill,false).name}`);}
-      else {this.skillLevels[o.skill]=(this.skillLevels[o.skill]||1)+1;this.applySkillEvolution(o.skill,this.skillLevels[o.skill]);const delta=this.skillEvolutionDelta(o.skill,this.skillLevels[o.skill]);this.upgradeHistory.push({time:fmtTime(this.elapsed),type:'Evolución celular',name:this.skillOptionLabel(o.skill,true).name,detail:delta});this.showToast(`EVOLUCIÓN · ${this.skillOptionLabel(o.skill,true).name} · NIVEL ${this.skillLevels[o.skill]} · ${delta}`);}
+      else {const nextLevel=(this.skillLevels[o.skill]||1)+1,delta=this.skillEvolutionDelta(o.skill,nextLevel);this.skillLevels[o.skill]=nextLevel;this.applySkillEvolution(o.skill,nextLevel);this.upgradeHistory.push({time:fmtTime(this.elapsed),type:'Evolución celular',name:this.skillOptionLabel(o.skill,true).name,detail:delta});this.showToast(`EVOLUCIÓN · ${this.skillOptionLabel(o.skill,true).name} · NIVEL ${this.skillLevels[o.skill]} · ${delta}`);}
       if(this.upgradeHistory.length>80)this.upgradeHistory.shift();
-      if(o.skill==='respiratory_burst')this.activeSkills.add('respiratory_burst');
+      
       this.pendingFocusOptions=null;this.questionPaused=false;this.tweens.resumeAll();this.emit('is:close-focus-evolution',{});this.updateHud();if(!this.debugMode&&this.xp>=this.xpNeed)this.openQuestion();
     }
 
     applySkillEvolution(id,level){
       const s=this.stats, n=level;
       if(id==='respiratory_burst'){this.activeSkills.add('respiratory_burst');this.skillLevels.respiratory_burst=n;}
-      if(id==='phagocytosis'){s.phagoRadius+=9;s.phagoInterval=Math.max(280,s.phagoInterval*.90);s.phagoHeal+=n>=2?1:0;if(n>=3)this.activeSkills.add('respiratory_burst');}
-      if(id==='netosis'){s.maxNetHelpers=Math.min(7,s.maxNetHelpers+1);s.netRadius*=1.10;s.netDamage+=2.2;s.netCooldown=Math.max(2700,s.netCooldown*.90);}
+      if(id==='phagocytosis'){s.phagoRadius+=9;s.phagoInterval=Math.max(GAME_BALANCE.LIMITS.minimumPhagocytosisIntervalMs,s.phagoInterval*.90);s.phagoHeal+=n>=2?1:0;if(n>=3){this.activeSkills.add('respiratory_burst');this.skillLevels.respiratory_burst=this.skillLevels.respiratory_burst||1;}}
+      if(id==='netosis'){s.maxNetHelpers=Math.min(GAME_BALANCE.LIMITS.maximumNetHelpers,s.maxNetHelpers+1);s.netRadius*=1.10;s.netDamage+=2.2;s.netCooldown=Math.max(GAME_BALANCE.LIMITS.minimumNetCooldownMs,s.netCooldown*.90);}
       if(id==='antibodies'){s.antibodyDamage=(s.antibodyDamage||10)+4;s.antibodyInterval=Math.max(500,(s.antibodyInterval||1900)*.85);s.antibodyCount=Math.min(5,(s.antibodyCount||2)+(n>=2?1:0));}
       if(id==='immunoregulation'){s.regulationDamage=(s.regulationDamage||4)+3;s.regulationInterval=Math.max(5500,(s.regulationInterval||15000)*.88);}
       if(id==='differentiation')this.differentiationBonus=(this.differentiationBonus||.055)+.02;
@@ -1098,7 +1116,7 @@
         if(this.elapsed>=this.macrophageM2Until){this.minionMode='M1';this.macrophageM2Charge=0;this.macrophageAttackSince=this.elapsed;this.showToast('MACRÓFAGOS · PERFIL M1');this.burstEffect(this.player.x,this.player.y,0x71c6a0,34);}
         else{this.macrophageM2HealClock=(this.macrophageM2HealClock||0)-dtMs;for(let i=0;i<this.macrophages.length;i++){const m=this.macrophages[i];m.angle=(m.angle||i*Math.PI*2/this.macrophages.length)+dt*1.25;m.obj.setPosition(this.player.x+Math.cos(m.angle)*76,this.player.y+Math.sin(m.angle)*58);m.obj.setAlpha(.76+.18*Math.sin(this.elapsed*4+m.angle));}if(this.macrophageM2HealClock<=0){this.macrophageM2HealClock=850;this.stats.health=Math.min(this.stats.maxHealth,this.stats.health+Math.max(1,this.stats.maxHealth*.006));this.updateHud();this.burstEffect(this.player.x,this.player.y,0x86e5bf,23);}return;}
       }
-      for(const m of this.macrophages){m.clock-=dtMs;m.dash=Math.max(0,m.dash-dtMs);let t=this.closestEnemy(440);if(!t){const a=this.elapsed*1.1+(m.heading||0);m.obj.setPosition(this.player.x+Math.cos(a)*48,this.player.y+Math.sin(a)*38);continue;}let dx=t.x-m.obj.x,dy=t.y-m.obj.y,d=Math.hypot(dx,dy)||1;if(m.dash>0){const q=this.constrainToArena(m.obj.x+Math.cos(m.heading)*330*dt,m.obj.y+Math.sin(m.heading)*330*dt,26);m.obj.setPosition(q.x,q.y);continue;}m.heading=Math.atan2(dy,dx);m.obj.x+=dx/d*210*dt;m.obj.y+=dy/d*210*dt;if(d<t.radius+20&&m.clock<=0){if(this.minionMode==='M2'){const heal=Math.min(2,this.stats.maxHealth-this.stats.health);this.stats.health+=heal;this.burstEffect(this.player.x,this.player.y,0x92e9c7,18);}else{this.damageEnemy(t,16+(this.skillLevels.macrophage_activation||1)*5,false,'minion');if(t.hp<=0)this.killEnemy(t,false);}this.burstEffect(m.obj.x,m.obj.y,0x91e0b5,20);m.dash=330;m.clock=500;m.heading+=Phaser.Math.FloatBetween(-.55,.55);}}
+      for(const m of this.macrophages){m.clock-=dtMs;m.dash=Math.max(0,m.dash-dtMs);let t=this.closestEnemy(440);if(!t){const a=this.elapsed*1.1+(m.heading||0);m.obj.setPosition(this.player.x+Math.cos(a)*48,this.player.y+Math.sin(a)*38);continue;}let dx=t.x-m.obj.x,dy=t.y-m.obj.y,d=Math.hypot(dx,dy)||1;if(m.dash>0){const q=this.constrainToArena(m.obj.x+Math.cos(m.heading)*330*dt,m.obj.y+Math.sin(m.heading)*330*dt,26);m.obj.setPosition(q.x,q.y);continue;}m.heading=Math.atan2(dy,dx);m.obj.x+=dx/d*210*dt;m.obj.y+=dy/d*210*dt;if(d<t.radius+20&&m.clock<=0){if(this.minionMode==='M2'){const heal=Math.min(2,this.stats.maxHealth-this.stats.health);this.stats.health+=heal;this.burstEffect(this.player.x,this.player.y,0x92e9c7,18);}else{this.damageEnemy(t,16+(this.skillLevels.macrophage_activation||1)*5,false,'minion');if(t.hp<=0)this.killEnemy(t,false);}this.burstEffect(m.obj.x,m.obj.y,0x91e0b5,20);m.dash=330;m.clock=500;m.heading+=this.rng.float(-.55,.55);}}
     }
 
     removeDebugSkill(id){
@@ -1200,6 +1218,14 @@
       if(this.keys.W?.isDown||this.keys.UP?.isDown)dy-=1;
       if(this.keys.S?.isDown||this.keys.DOWN?.isDown)dy+=1;
       if(dx===0&&dy===0&&this.joyActive){dx=this.joyVector.x;dy=this.joyVector.y;}
+      if(dx===0&&dy===0&&this.mouseSteer){
+        const pointer=this.input.activePointer;
+        if(pointer?.isDown&&pointer.positionToCamera){
+          // positionToCamera usa el scroll actual: sigue funcionando aunque el mouse no se mueva y la cámara sí.
+          const target=pointer.positionToCamera(this.cameras.main),mx=target.x-this.player.x,my=target.y-this.player.y,md=Math.hypot(mx,my);
+          if(md>14){dx=mx/md;dy=my/md;}
+        }else this.mouseSteer=false;
+      }
       const len=Math.hypot(dx,dy);if(len>1){dx/=len;dy/=len;}
       const next=this.constrainToArena(this.player.x+dx*this.stats.moveSpeed*dt,this.player.y+dy*this.stats.moveSpeed*dt,this.playerRadius+10);
       this.player.setPosition(next.x,next.y);
@@ -1456,7 +1482,8 @@
         }
         if(e.outlineSprite?.active)e.outlineSprite.setTint(e.hitFlash>0?0xfff2bb:e.healthOutlineColor).setAlpha(e.hitFlash>0?1:0.88);
         if(e.hitFlash<=0 && e.tintActive && !e.isWorm){ e.obj.clearTint(); e.obj.setScale(e.visualScale); e.tintActive=false; }
-        if(this.enemyTouchesPlayer(e)&&this.invulnerable<=0){
+        if(e.spawnGrace>0)e.spawnGrace-=dtMs;
+        else if(this.enemyTouchesPlayer(e)&&this.invulnerable<=0){
           const dx=this.player.x-e.x,dy=this.player.y-e.y,d=Math.hypot(dx,dy)||1;
           const contactDamage=(e.isBoss&&e.morphology?.id==='helminto-colosal')?Math.min(e.damage,Math.max(12,this.stats.maxHealth*0.22)):e.damage;
           this.damagePlayer(contactDamage);
@@ -1641,13 +1668,13 @@
       const leastSeen=Math.min(...topics.map(topic=>this.questionTopicCounts[topic]||0));
       let balanced=topics.filter(topic=>(this.questionTopicCounts[topic]||0)===leastSeen);
       if(balanced.length>1&&balanced.includes(this.lastQuestionTopic))balanced=balanced.filter(topic=>topic!==this.lastQuestionTopic);
-      return randomItem(candidates.filter(q=>balanced.includes(q.topic)));
+      return randomItem(this.rng,candidates.filter(q=>balanced.includes(q.topic)));
     }
 
     getEvolutionOptions() {
       return EVOLUTION_STRATEGIES.map(strategy=>{
         const count=this.evolutionCounts[strategy.id]||0,advancedNow=(count+1)%3===0;
-        const basic=strategy.basics[count%strategy.basics.length],elite=strategy.advanced[Math.floor(count/3)%strategy.advanced.length];
+        const basic=GAME_BALANCE.pickPathUpgrade(this,strategy.basics,count),elite=GAME_BALANCE.pickPathUpgrade(this,strategy.advanced,Math.floor(count/3));
         const details=this.getPathSkillPreview(strategy.id);
         return {id:strategy.id,name:strategy.name,role:strategy.role,icon:strategy.icon,color:strategy.color,progress:count%3,affects:details.map(d=>d.name),affectDetails:details,
           nextName:advancedNow?elite.name:basic.name,nextDesc:advancedNow?elite.desc:basic.desc,
@@ -1661,7 +1688,7 @@
     }
 
     applyAlternationBonus(id) {
-      if(id==='homeostasis'){this.stats.phagoRadius*=1.04;this.stats.phagoInterval=Math.max(350,this.stats.phagoInterval*0.98);}
+      if(id==='homeostasis'){this.stats.phagoRadius*=1.04;this.stats.phagoInterval=Math.max(GAME_BALANCE.LIMITS.minimumPhagocytosisIntervalMs,this.stats.phagoInterval*0.98);}
       else if(id==='cytotoxicity'){this.stats.attackDamage*=1.04;this.stats.granuleLevel++;}
       else {this.stats.netDamage+=0.5;this.stats.netRadius*=1.03;}
     }
@@ -1719,8 +1746,9 @@
       const strategy=this.currentUpgrades.find(s=>s.id===id);if(!strategy)return;
       const count=this.evolutionCounts[strategy.id]||0;
       const advancedNow=(count+1)%3===0;
-      const basic=strategy.basics[count%strategy.basics.length];
-      const advanced=strategy.advanced[Math.floor(count/3)%strategy.advanced.length];
+      // Solo se ofrecen mejoras que afectan habilidades que el jugador tiene (las generales siempre).
+      const basic=GAME_BALANCE.pickPathUpgrade(this,strategy.basics,count);
+      const advanced=GAME_BALANCE.pickPathUpgrade(this,strategy.advanced,Math.floor(count/3));
       basic.apply(this);
       this.applyPrincipalSkillScaling(strategy.id);
       if(advancedNow)advanced.apply(this);
@@ -1743,6 +1771,7 @@
     }
 
     destroyTransientObjects() {
+      if(this.onScaleResize){this.scale.off(Phaser.Scale.Events.RESIZE,this.onScaleResize);this.onScaleResize=null;}
       this.enemies=[];this.playerBullets=[];this.enemyProjectiles=[];this.helpers=[];this.nets=[];this.xpDrops=[];this.activeEnemyCount=0;this.floatingTexts=[];
       this.ui.clearActions();
     }
@@ -1799,6 +1828,11 @@
   $('fullscreenButton').addEventListener('click',()=>{enterMobileFullscreen();$('fullscreenButton').classList.remove('recovery-visible');setTimeout(refreshFullscreenRecovery,350);});
   document.addEventListener('fullscreenchange',refreshFullscreenRecovery);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(refreshFullscreenRecovery,180);});
+  // Pausa automática: al volver de otra app o pestaña, la partida espera en el menú de pausa en vez de seguir sola.
+  const pauseIfPlaying=()=>{if(gameScreen.style.display!=='none')window.IS_ACTIONS?.pauseGame?.();};
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseIfPlaying();});
+  window.addEventListener('blur',pauseIfPlaying);
+  window.addEventListener('pagehide',pauseIfPlaying);
   window.addEventListener('focus',()=>setTimeout(refreshFullscreenRecovery,180));
   window.addEventListener('pageshow',()=>setTimeout(refreshFullscreenRecovery,180));
   function showGame(){
@@ -1816,17 +1850,23 @@
       fitLogicalViewport();
       const renderResolution=Math.min(1.5,Math.max(1,window.devicePixelRatio||1));
       game=new Phaser.Game({type:Phaser.AUTO,parent:'gameContainer',width:W,height:H,resolution:renderResolution,backgroundColor:'#09192a',antialias:true,roundPixels:false,
-        scale:{mode:Phaser.Scale.RESIZE,parent:'gameContainer',width:W,height:H},fps:{target:60,forceSetTimeOut:false},
+        scale:{mode:Phaser.Scale.RESIZE,parent:'gameContainer',width:W,height:H,min:{width:280,height:480}},fps:{target:60,forceSetTimeOut:false},
         render:{antialias:true,pixelArt:false,powerPreference:'low-power'},scene:[]});
       game.scene.add('Arena',Arena,true,currentSettings);
-    }else game.scene.start('Arena',currentSettings);
+    }else{
+      // En el menú el loop duerme: con el contenedor oculto (0×0), un resize (p. ej. al salir de pantalla
+      // completa en el celular) hacía que Phaser creara un framebuffer vacío y la siguiente partida se veía negra.
+      game.loop.wake(); // no hace nada si el loop ya está corriendo
+      game.scene.start('Arena',currentSettings);
+      requestAnimationFrame(()=>game.scale.refresh());
+    }
     setTimeout(refreshFullscreenRecovery,220);
   }
 
   $('startButton').addEventListener('click',()=>launchGame(false));
   $('debugStartButton').addEventListener('click',()=>launchGame(true));
   $('restartButton').addEventListener('click',()=>launchGame(false));
-  $('menuButton').addEventListener('click',()=>{exitMobileFullscreen();closeLayer(questionLayer);closeLayer(upgradeLayer);closeLayer(focusEvolutionLayer);closeLayer(gameOverLayer);closeLayer(pauseLayer);$('debugPanel').classList.remove('open');if(game)game.scene.stop('Arena');gameScreen.style.display='none';menuScreen.style.display='block';window.scrollTo({top:0,behavior:'smooth'});});
+  $('menuButton').addEventListener('click',()=>{exitMobileFullscreen();closeLayer(questionLayer);closeLayer(upgradeLayer);closeLayer(focusEvolutionLayer);closeLayer(gameOverLayer);closeLayer(pauseLayer);$('debugPanel').classList.remove('open');if(game){game.scene.stop('Arena');game.loop.sleep();}gameScreen.style.display='none';menuScreen.style.display='block';window.scrollTo({top:0,behavior:'smooth'});});
   $('pauseButton').addEventListener('click',()=>window.IS_ACTIONS?.pauseGame?.());
   $('resumeButton').addEventListener('click',()=>window.IS_ACTIONS?.resumeGame?.());
   $('pauseMenuButton').addEventListener('click',()=>{window.IS_ACTIONS?.resumeGame?.();$('menuButton').click();});
