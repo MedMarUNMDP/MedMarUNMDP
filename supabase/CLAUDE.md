@@ -14,13 +14,21 @@ se aplica acá impacta producción.
 
 ## Modelo de datos (resumen)
 
-`profiles` (rol: user/moderador/admin, pseudónimo, avatar) · `solicitudes` → `intercambios` + `intercambio_participantes`
+`profiles` (`is_moderator`/`is_admin` booleanos, pseudónimo único sin distinguir mayúsculas, `foto_url`, `profile_completed`) ·
+`solicitudes` → `intercambios` + `intercambio_participantes`
 (intercambio de comisiones, matching por ciclos en `finalize_exchange`) · `conversaciones`, `conversacion_participantes`,
-`mensajes` (chat de un intercambio, 14 días) · `hilos`, `respuestas`, `likes_hilos`, `likes_respuestas` (foro) ·
+`mensajes` (chat de un intercambio, 14 días) · `hilos` (`is_sensitive`), `respuestas` (anidadas con `parent_id`,
+FK al mismo hilo), `likes_hilos`, `likes_respuestas` (foro) ·
 `denuncias` (moderación) · `notificacion_queue` · `idempotency_keys` · `rate_limit_buckets` · `private.legacy_password_migrations`.
 
 Funciones clave: `is_moderator`, `is_admin`, `prevent_role_escalation`, `consume_rate_limit`, `finalize_exchange`,
 `cleanup_expired_data`, `recount_medmar_counters`. Storage: bucket `profile-photos`.
+
+**Deriva conocida (auditoría 2026-11, ver `docs/auditoria-supabase-2026-11.md`)**: `profile_completed`, `is_sensitive`,
+`parent_id` y sus índices existen en prod pero no en `schema_inicial.sql` (falta la migración de alineación B1).
+En prod hay ~50 RPC heredadas de un esquema viejo (`crear_hilo`, `mailer_tomar`, …) y un bucket `avatares` que
+**no** son parte del sistema actual: no las uses ni las tomes como referencia. Hoy **no hay cron para `maintenance`**,
+y el job `medmar-limpieza-diaria` llama a la función vieja `limpiar_expirados` y falla.
 
 ## Reglas al modificar
 
