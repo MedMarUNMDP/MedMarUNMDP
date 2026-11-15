@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- SEO principal -->
+    <title>MedMar | Intercambio de comisiones para estudiantes de Medicina</title>
+    <meta name="description" content="MedMar es una plataforma independiente para estudiantes de Medicina de la UNMDP: encontrá compañeros para intercambiar comisiones y conectate con la comunidad estudiantil.">
+    <link rel="canonical" href="https://medmar.com.ar/">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="theme-color" content="#123A38">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png?v=20261102">
+    <link rel="icon" type="image/png" sizes="48x48" href="/assets/brand/favicon-48.png?v=20261102">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/apple-touch-icon.png?v=20261102">
+    <meta name="language" content="Spanish">
+
+    <!-- Vista previa al compartir el enlace -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_AR">
+    <meta property="og:site_name" content="MedMar">
+    <meta property="og:title" content="MedMar | Intercambio de comisiones para estudiantes de Medicina">
+    <meta property="og:description" content="Encontrá compañeros para intercambiar comisiones y conectate con la comunidad estudiantil de Medicina de la UNMDP.">
+    <meta property="og:url" content="https://medmar.com.ar/">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="MedMar | Intercambio de comisiones para estudiantes de Medicina">
+    <meta name="twitter:description" content="Plataforma independiente para intercambiar comisiones y conectar estudiantes de Medicina de la UNMDP.">
+
+    <!-- Datos estructurados: describen el sitio sin atribuir afiliación institucional -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "MedMar",
+      "alternateName": "MedMar",
+      "url": "https://medmar.com.ar/",
+      "inLanguage": "es-AR",
+      "description": "Plataforma independiente para estudiantes de Medicina de la UNMDP orientada al intercambio de comisiones y la conexión entre estudiantes."
+    }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/styles.css?v=20261115">
+</head>
+
+<body>
+
+    <div class="hero">
+        <div class="hero-inner">
+            <img class="heroLogo" src="/assets/brand/isotipo-medmar.png" alt="Emblema de MedMar" width="104" height="104">
+            <div>
+                <h1>MedMar</h1>
+                <p>Una plataforma hecha por y para estudiantes de Medicina de la UNMDP: para ayudarse con las comisiones, compartir lo que saben y no cursar tan solos.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="pagina">
+    <div class="contenido">
+
+        <!-- ==================== LOGIN ==================== -->
+
+        <div id="loginScreen" style="margin-top: 26px;">
+
+            <button type="button" id="btnGoogleLogin" class="btn-secundario btnGoogleLogin">Continuar con Google</button>
+
+            <div class="separador">o con email y contraseña</div>
+
+            <div class="tabs">
+                <button type="button" id="tabLogin" class="tabActiva">Iniciar sesión</button>
+                <button type="button" id="tabRegistro">Crear cuenta</button>
+            </div>
+
+            <form id="formLogin">
+                <label>Email</label>
+                <input type="email" id="loginEmail" required autocomplete="username">
+                <label>Contraseña</label>
+                <div class="campoPassword">
+                    <input type="password" id="loginPassword" required autocomplete="current-password">
+                    <button type="button" class="btnMostrarPassword" data-target="loginPassword" aria-label="Mostrar contraseña">👁</button>
+                </div>
+                <button type="submit" class="btn-primario">Iniciar sesión</button>
+                <button type="button" id="btnOlvidePassword" class="linkAuth">¿Olvidaste tu contraseña?</button>
+            </form>
+
+            <div id="panelRecuperarPassword" class="panelAuth" style="display:none">
+                <h3>Recuperar contraseña</h3>
+                <p class="ayudaPerfil">Te enviaremos un enlace seguro para elegir una nueva contraseña. No enviamos contraseñas por correo.</p>
+                <form id="formRecuperarPassword">
+                    <label>Email de tu cuenta</label>
+                    <input type="email" id="resetEmail" required autocomplete="email">
+                    <button type="submit" class="btn-secundario">Enviar enlace</button>
+                </form>
+                <div id="pasoCodigoReset" style="display:none">
+                    <label>Nueva contraseña</label>
+                    <div class="campoPassword">
+                        <input type="password" id="resetNuevaPassword" minlength="8" autocomplete="new-password">
+                        <button type="button" class="btnMostrarPassword" data-target="resetNuevaPassword" aria-label="Mostrar nueva contraseña">👁</button>
+                    </div>
+                    <button type="button" id="btnRestablecerPassword" class="btn-primario">Guardar nueva contraseña</button>
+                </div>
+                <button type="button" id="btnVolverLoginDesdeReset" class="btn-secundario">Volver al inicio de sesión</button>
+                <p id="msgReset"></p>
+            </div>
+
+            <form id="formRegistro" style="display:none">
+                <label>Email</label>
+                <input type="email" id="regEmail" required autocomplete="email">
+
+                <label>Contraseña (mínimo 8 caracteres)</label>
+                <div class="campoPassword">
+                    <input type="password" id="regPassword" required minlength="8" autocomplete="new-password">
+                    <button type="button" class="btnMostrarPassword" data-target="regPassword" aria-label="Mostrar contraseña">👁</button>
+                </div>
+
+                <label>Repetí la contraseña</label>
+                <div class="campoPassword">
+                    <input type="password" id="regPasswordConfirm" required minlength="8" autocomplete="new-password">
+                    <button type="button" class="btnMostrarPassword" data-target="regPasswordConfirm" aria-label="Mostrar contraseña">👁</button>
+                </div>
+
+                <button type="submit" class="btn-primario">Crear cuenta</button>
+            </form>
+
+            <p id="authMsg"></p>
+
+        </div>
+
+        <!-- ==================== APP PRINCIPAL ==================== -->
+
+        <div id="app" style="display:none">
+
+            <div id="userBar">
+                <button type="button" id="btnIrInicio" class="btnVolverInicio">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5 8 12l7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Inicio
+                </button>
+            </div>
+
+            <!-- ==================== INICIO ==================== -->
+
+            <div id="vistaInicio">
+
+                <div id="saludoInicio">
+                    <span id="avatarUserBar"></span>
+                    <p>Conectado como <b id="userEmail"></b></p>
+                </div>
+
+                <div class="menuInicio">
+
+                    <button type="button" class="tarjetaInicio" data-vista="intercambios">
+                        <span class="iconoInicio">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8H17M13 4L17 8L13 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 16H7M11 12L7 16L11 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </span>
+                        <span class="tituloInicio">Intercambio de comisiones</span>
+                        <span class="descInicio">Encontrá con quién cambiar tu comisión</span>
+                    </button>
+
+                    <button type="button" class="tarjetaInicio" data-vista="foro">
+                        <span class="iconoInicio dorado">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-8l-4 3v-3H7a2 2 0 0 1-2-2V6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>
+                        </span>
+                        <span class="tituloInicio">Foro</span>
+                        <span class="descInicio">Compartí, preguntá y enterate de todo</span>
+                    </button>
+
+                    <button type="button" class="tarjetaInicio" data-vista="juegos">
+                        <span class="iconoInicio">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 9h10a4 4 0 0 1 4 4v2a2.5 2.5 0 0 1-4.5 1.5L15 15H9l-1.5 1.5A2.5 2.5 0 0 1 3 15v-2a4 4 0 0 1 4-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 11v2M7 12h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="16" cy="11.5" r="0.8" fill="currentColor"/><circle cx="17.5" cy="13" r="0.8" fill="currentColor"/></svg>
+                        </span>
+                        <span class="tituloInicio">Juegos</span>
+                        <span class="descInicio">Jugá y subí al ranking</span>
+                    </button>
+
+                    <button type="button" class="tarjetaInicio" data-vista="configuracion">
+                        <span class="iconoInicio dorado">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2M12 19v2M4.2 6.2l1.4 1.4M18.4 16.4l1.4 1.4M3 12h2M19 12h2M4.2 17.8l1.4-1.4M18.4 7.6l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                        </span>
+                        <span class="tituloInicio">Perfil</span>
+                        <span class="descInicio">Pseudónimo, foto y más</span>
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div id="vistaIntercambios" style="display:none">
+
+            <h2 class="seccion-titulo" style="margin-top:0">Intercambio de comisiones</h2>
+
+            <ul class="pasos">
+                <li><span class="paso-numero">1</span><span>Elegí la materia, la comisión que tenés y la que buscás.</span></li>
+                <li><span class="paso-numero">2</span><span>Publicá tu solicitud. Podés editarla o borrarla después en "Mis solicitudes".</span></li>
+                <li><span class="paso-numero">3</span><span>Si aparece un cruce posible, recibís un correo automático. Las solicitudes vencen a los 14 días y los intercambios completados se conservan 14 días.</span></li>
+            </ul>
+
+            <div id="seccionFormulario">
+
+            <h2 class="seccion-titulo" id="tituloFormulario">Publicar una solicitud</h2>
+
+            <form id="form">
+
+                <label>Materia</label>
+
+                <select name="materia" required>
+
+                    <option value="">Seleccionar materia</option>
+
+                    <optgroup label="1° Año">
+                        <option>Concepción y Formación del Ser Humano I</option>
+                        <option>Articulación Básico Clínico Comunitaria I</option>
+                        <option>Hábitat, Ecología y Salud</option>
+                        <option>Psicología Comunitaria, Social e Institucional</option>
+                        <option>Promoción de Salud Crítica y Educación para la Salud</option>
+                        <option>Concepción y Formación del Ser Humano II</option>
+                        <option>Articulación Básico Clínico Comunitaria II</option>
+                    </optgroup>
+
+                    <optgroup label="2° Año">
+                        <option>Nacimiento, Crecimiento y Desarrollo</option>
+                        <option>Articulación Básico Clínico Comunitaria III</option>
+                        <option>Agentes, Mecanismos de Defensa y Nutrición</option>
+                        <option>Prevención e Investigación Acción en Salud</option>
+                        <option>Interculturalidad y Salud</option>
+                        <option>Desgaste y Envejecimiento</option>
+                    </optgroup>
+
+                    <optgroup label="3° Año">
+                        <option>Articulación Básico Clínico Comunitaria IV</option>
+                        <option>Epidemiología Crítica Social y Comunitaria</option>
+                        <option>Tamizaje y Ciencias de Diagnóstico</option>
+                        <option>Redes y Sistemas de Salud</option>
+                        <option>Salud Integral de la Mujer</option>
+                    </optgroup>
+
+                    <optgroup label="4° Año">
+                        <option>Medicina Interna y Campos Clínicos I</option>
+                        <option>Salud Colectiva y Comunitaria</option>
+                        <option>Terapéuticas y Farmacología</option>
+                        <option>Salud del Trabajador y Medicina del Deporte</option>
+                        <option>Salud del Niño, Niña y Adolescente</option>
+                        <option>Salud Mental</option>
+                    </optgroup>
+
+                    <optgroup label="5° Año">
+                        <option>Medicina Interna y Campos Clínicos II</option>
+                        <option>Medicina General I</option>
+                        <option>Programas de Salud</option>
+                        <option>Salud del Adulto Mayor</option>
+                        <option>Clínica Quirúrgica y Emergentología</option>
+                        <option>Bioética y Derechos Humanos</option>
+                        <option>Medicina General II y Rehabilitación</option>
+                        <option>Medicina Legal y Toxicología</option>
+                    </optgroup>
+
+                    <optgroup label="Materias Transversales">
+                        <option>Tecnologías en Salud</option>
+                        <option>Informática en Salud</option>
+                        <option>Inglés Aplicado a la Medicina I</option>
+                        <option>Inglés Aplicado a la Medicina II</option>
+                        <option>Inglés Aplicado a la Medicina III</option>
+                        <option>Inglés Aplicado a la Medicina IV</option>
+                    </optgroup>
+
+                    <optgroup label="Electivas">
+                        <option>Historia Argentina y Latinoamericana de la Salud</option>
+                        <option>Medicina Social</option>
+                        <option>Consumos Problemáticos</option>
+                        <option>Ecología</option>
+                        <option>Salud Global</option>
+                        <option>Cuidados Paliativos</option>
+                        <option>Principios de Oncología</option>
+                        <option>Discapacidad</option>
+                        <option>Anatomía Patológica</option>
+                        <option>Diagnóstico por Imágenes</option>
+                    </optgroup>
+
+                </select>
+
+                <label>Comisión que tenés</label>
+                <select id="tengo" name="tengo" required></select>
+
+                <label>Comisión que buscás</label>
+                <select id="busco" name="busco" required></select>
+
+                <button type="submit" id="submitBtn" class="btn-primario">Publicar solicitud</button>
+                <button type="button" id="cancelarEdicionBtn" class="btn-secundario" style="display:none">Cancelar edición</button>
+
+            </form>
+
+            <p id="msg"></p>
+
+            </div>
+
+            <h2 class="seccion-titulo">Mis solicitudes</h2>
+            <div id="listaSolicitudes"></div>
+
+            <h2 class="seccion-titulo">Intercambios completados</h2>
+            <div id="listaIntercambios"></div>
+
+            <div id="panelChat" class="panelChat" style="display:none">
+                <div class="chatCabecera">
+                    <div>
+                        <button type="button" id="btnCerrarChat" class="btn-secundario chatVolver">← Volver a intercambios</button>
+                        <h3 id="chatTitulo" class="seccion-titulo" style="margin-top:16px">Chat</h3>
+                        <p id="chatParticipantes" class="ayudaPerfil"></p>
+                    </div>
+                    <span id="chatEstado" class="chatEstado"></span>
+                </div>
+                <div id="listaMensajesChat" class="listaMensajesChat"></div>
+                <form id="formChat" class="formChat">
+                    <textarea id="inputMensajeChat" maxlength="2000" rows="2" placeholder="Escribí un mensaje…" required></textarea>
+                    <div class="chatPie">
+                        <span class="ayudaPerfil">Texto únicamente · el chat se borra tras 14 días sin actividad.</span>
+                        <button type="submit" class="btn-primario">Enviar</button>
+                    </div>
+                </form>
+                <p id="msgChat"></p>
+            </div>
+
+            </div>
+
+            <!-- ==================== FORO ==================== -->
+
+            <div id="vistaForo" style="display:none">
+
+                <div id="foroLista">
+
+                    <div class="foroCabecera">
+                        <h2 class="seccion-titulo" style="margin-top:0">Foro</h2>
+                        <div class="foroCabeceraAcciones">
+                            <button type="button" id="btnIrModeracion" class="linkModeracion" style="display:none">🛡️ Moderación</button>
+                            <button type="button" id="btnAbrirCompose" class="btn-primario btnPublicarForo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg><span>Crear publicación</span></button>
+                        </div>
+                    </div>
+
+                    <p class="notaForo">Compartí dudas, apuntes y recursos de la carrera. No publiques datos personales ni información que permita identificar pacientes.</p>
+
+                    <form id="busquedaForo" class="busquedaForo" role="search">
+                        <span class="busquedaForoIcono" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg></span>
+                        <input type="search" id="inputBuscarForo" placeholder="Buscar en el foro: temas, dudas, palabras…" autocomplete="off" aria-label="Buscar en todo el foro">
+                        <button type="submit" id="btnBuscarForo" aria-label="Buscar">Buscar</button>
+                        <button type="button" id="btnQuitarFiltro" class="btnLimpiarBusqueda" style="display:none" aria-label="Limpiar búsqueda">×</button>
+                    </form>
+                    <datalist id="listaEtiquetasDisponibles"></datalist>
+                    <p id="ayudaFiltroEtiqueta" class="ayudaFiltroEtiqueta" aria-live="polite"></p>
+
+                    <div id="listaHilos"></div>
+
+                    <button type="button" id="btnCargarMas" class="btn-secundario" style="display:none">Cargar más</button>
+
+                </div>
+
+        <div id="foroDetalle" style="display:none">
+
+                    <button type="button" id="btnVolverHilos" class="btn-secundario">← Volver a los hilos</button>
+
+                    <div id="detalleHiloContenido"></div>
+
+                    <h2 class="seccion-titulo">Respuestas</h2>
+
+                    <div id="listaRespuestas"></div>
+
+                    <form id="formRespuesta" class="composerRespuesta">
+                        <div id="respuestaContexto" class="respuestaContexto" hidden aria-live="polite">
+                            <span id="respuestaContextoTexto"></span>
+                            <button type="button" id="btnCancelarRespuesta" aria-label="Cancelar respuesta">×</button>
+                        </div>
+                        <div class="respuestaComposerFila">
+                            <span id="avatarComposeRespuesta" class="avatarComposeRespuesta" aria-hidden="true"></span>
+                            <textarea id="inputRespuesta" class="textareaCompose textareaRespuesta" placeholder="Escribí una respuesta..." aria-label="Escribí una respuesta" maxlength="5000" rows="1" required></textarea>
+                            <button type="submit" class="btn-primario btnEnviarRespuesta">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12 20 4l-5 16-3-7-8-1Z"/><path d="m12 13 8-9"/></svg>
+                                <span>Responder</span>
+                            </button>
+                        </div>
+                        <aside class="notaImagenes notaImagenesComposer">
+                            <span aria-hidden="true">ⓘ</span>
+                            <span>Para adjuntar una imagen, subila desde el celular a <a href="https://imgbox.com/" target="_blank" rel="noopener noreferrer">ImgBox</a> y pegá el enlace directo. Si no funciona, probá <a href="https://es.imgbb.com/upload" target="_blank" rel="noopener noreferrer">ImgBB</a>. La imagen se aloja fuera de MedMar; compartí solo material público.</span>
+                        </aside>
+                        <p id="msgRespuesta" aria-live="polite"></p>
+                    </form>
+
+                </div>
+
+            </div>
+
+            <!-- ==================== MODERACIÓN ==================== -->
+
+            <div id="vistaModeracion" style="display:none">
+
+                <button type="button" id="btnVolverForoDesdeModeracion" class="btn-secundario">← Volver al foro</button>
+
+                <h2 class="seccion-titulo">Denuncias pendientes</h2>
+                <div id="listaDenuncias"></div>
+
+                <div id="seccionModeradores" style="display:none">
+
+                    <h2 class="seccion-titulo">Moderadores</h2>
+
+                    <form id="formModerador">
+                        <input type="email" id="inputNuevoModerador" placeholder="email@ejemplo.com" required>
+                        <button type="submit" class="btn-secundario">Agregar moderador</button>
+                    </form>
+
+                    <p id="msgModerador"></p>
+
+                    <div id="listaModeradores"></div>
+
+                </div>
+
+            </div>
+
+            <!-- ==================== JUEGOS ==================== -->
+
+            <div id="vistaJuegos" style="display:none">
+
+                <h2 class="seccion-titulo" style="margin-top:0">Juegos</h2>
+                <p class="vacio">Estamos preparando esta sección. Acá vas a poder jugar y, debajo de cada juego, ver el ranking de los mejores puntajes con el pseudónimo de cada uno. 🎮</p>
+
+            </div>
+
+            <!-- ==================== MI CUENTA ==================== -->
+
+            <div id="vistaConfiguracion" style="display:none">
+
+                <h2 class="seccion-titulo" style="margin-top:0">Perfil</h2>
+
+                <p class="ayudaPerfil">Conectado como <b id="emailConfig"></b></p>
+
+                <section class="configTema" aria-labelledby="tituloTema">
+                    <div class="configTemaTexto">
+                        <h3 id="tituloTema">Apariencia</h3>
+                        <p class="ayudaPerfil">Elegí cómo querés ver toda la plataforma.</p>
+                    </div>
+                    <label for="selectorTemaGlobal">Tema</label>
+                    <select id="selectorTemaGlobal" aria-label="Tema de la plataforma">
+                        <option value="claro">Claro</option>
+                        <option value="oscuro">Oscuro</option>
+                        <option value="sistema">Según el dispositivo</option>
+                    </select>
+                </section>
+
+                <h3 class="seccion-titulo">Foto de perfil</h3>
+
+                <div class="filaAvatar">
+                    <span id="avatarConfigPreview"></span>
+                    <div>
+                        <button type="button" id="btnCambiarFoto" class="btn-secundario">Cambiar foto</button>
+                        <input type="file" id="inputArchivoFoto" accept="image/*">
+                    </div>
+                </div>
+
+                <p id="msgFoto"></p>
+
+                <h3 class="seccion-titulo">Tu pseudónimo</h3>
+                <p class="ayudaPerfil">Así te van a ver otros estudiantes en el foro y en los juegos.</p>
+
+                <form id="formPerfil">
+                    <input type="text" id="inputPseudonimo" maxlength="24" required>
+                    <button type="submit" class="btn-secundario">Guardar pseudónimo</button>
+                </form>
+
+                <p id="msgPerfil"></p>
+
+                <div id="seccionSeguridadCuenta">
+                    <h3 class="seccion-titulo">Seguridad de la cuenta</h3>
+                    <p id="ayudaSeguridadCuenta" class="ayudaPerfil"></p>
+                    <form id="formCambiarPassword" style="display:none" class="formSeguridad">
+                        <label>Contraseña actual</label>
+                        <div class="campoPassword">
+                            <input type="password" id="passwordActualPerfil" autocomplete="current-password">
+                            <button type="button" class="btnMostrarPassword" data-target="passwordActualPerfil" aria-label="Mostrar contraseña">👁</button>
+                        </div>
+                        <label>Nueva contraseña</label>
+                        <div class="campoPassword">
+                            <input type="password" id="nuevaPasswordPerfil" minlength="8" autocomplete="new-password">
+                            <button type="button" class="btnMostrarPassword" data-target="nuevaPasswordPerfil" aria-label="Mostrar nueva contraseña">👁</button>
+                        </div>
+                        <button type="submit" class="btn-secundario">Cambiar contraseña</button>
+                    </form>
+                    <p id="msgPasswordPerfil"></p>
+                </div>
+
+                <h3 class="seccion-titulo">Sesión</h3>
+                <button type="button" id="logoutBtn" class="btn-secundario">Cerrar sesión</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div id="pieInicio" class="pieSoloInicio">
+
+    <div id="disclaimer">
+
+        <b>Aviso</b><br>
+
+        Esta página es una red social con herramientas por y para estudiantes.
+        Puede contener errores o comportamientos inesperados.<br><br>
+
+        El uso del sistema y la coordinación de intercambios es responsabilidad exclusiva de los usuarios.<br><br>
+
+        Proyecto independiente creado por <b>Simón Moreno</b>.<br>
+        No afiliado oficialmente a la Facultad de Ciencias de la Salud (UNMDP).<br><br>
+
+        <a href="mailto:MedMarUNMDP@gmail.com">Contactar a MedMarUNMDP</a>
+
+    </div>
+
+    <div id="firma">
+        <img src="data:image/webp;base64,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" alt="Foto de Simón, el creador de la página, con anteojos de sol">
+        <div>
+            <p>Hecho por tu amigo y vecino el Saimon</p>
+            <a class="linkInstagram" href="https://www.instagram.com/_simonellimon?stkn=MTQyd3c0cjg5dmdkOA==" target="_blank" rel="noopener">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/>
+                    <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/>
+                    <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/>
+                </svg>
+                @_simonellimon
+            </a>
+        </div>
+    </div>
+
+    </div><!-- /pieInicio -->
+
+
+    <!-- ==================== CONFIGURACIÓN INICIAL DEL PERFIL ==================== -->
+    <div id="modalSetupPerfil" class="modalFondo modalSetupPerfil" aria-modal="true" role="dialog" aria-labelledby="tituloSetupPerfil">
+        <div class="modalCaja setupPerfilCaja">
+            <div class="modalEncabezado"><h2 id="tituloSetupPerfil">¡Bienvenido a MedMar!</h2></div>
+            <p class="ayudaPerfil">Antes de continuar, elegí cómo querés aparecer en la comunidad.</p>
+            <form id="formSetupPerfil">
+                <label for="setupPseudonimo">Pseudónimo <span aria-hidden="true">*</span></label>
+                <input id="setupPseudonimo" type="text" minlength="3" maxlength="24" autocomplete="nickname" placeholder="Ej. NeuroMed" required>
+                <p class="ayudaPerfil">Entre 3 y 24 caracteres. Será visible para otros estudiantes.</p>
+                <div class="setupAvatarTitulo">Elegí un avatar (opcional)</div>
+                <div id="setupAvatares" class="setupAvatares">
+                    <button type="button" class="setupAvatarOpcion seleccionado" data-avatar="" aria-pressed="true"><span class="avatarSinFoto">?</span><small>Sin foto</small></button>
+                    <button type="button" class="setupAvatarOpcion" data-avatar="neuron"><img src="/assets/avatars/neuron.svg" alt="Neurona"><small>Neurona</small></button>
+                    <button type="button" class="setupAvatarOpcion" data-avatar="heart"><img src="/assets/avatars/heart.svg" alt="Corazón"><small>Corazón</small></button>
+                    <button type="button" class="setupAvatarOpcion" data-avatar="brain"><img src="/assets/avatars/brain.svg" alt="Cerebro"><small>Cerebro</small></button>
+                    <button type="button" class="setupAvatarOpcion" data-avatar="cell"><img src="/assets/avatars/cell.svg" alt="Célula"><small>Célula</small></button>
+                    <button type="button" class="setupAvatarOpcion" data-avatar="microscope"><img src="/assets/avatars/microscope.svg" alt="Microscopio"><small>Microscopio</small></button>
+                    <button type="button" class="setupAvatarOpcion" data-avatar="stethoscope"><img src="/assets/avatars/stethoscope.svg" alt="Estetoscopio"><small>Estetoscopio</small></button>
+                    <button type="button" class="setupAvatarOpcion" data-avatar="bone"><img src="/assets/avatars/bone.svg" alt="Hueso"><small>Hueso</small></button>
+                </div>
+                <label for="setupFotoArchivo" class="setupUploadLabel">O subí tu propia foto (opcional)</label>
+                <input id="setupFotoArchivo" type="file" accept="image/*">
+                <p class="ayudaPerfil">La imagen se recorta y comprime antes de guardarse en el almacenamiento de perfiles.</p>
+                <p id="msgSetupPerfil" role="status"></p>
+                <button type="submit" class="btn-primario setupContinuar">Guardar y continuar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL: PUBLICAR EN EL FORO ==================== -->
+
+    <div id="modalCompose" class="modalFondo">
+        <div class="modalCaja">
+
+            <div class="modalEncabezado">
+                <h2>Publicar en el foro</h2>
+                <button type="button" class="modalCerrar" id="btnCerrarCompose" aria-label="Cerrar">×</button>
+            </div>
+
+            <form id="formHilo">
+
+                <div class="composeCabecera">
+                    <span id="avatarCompose"></span>
+                    <span id="nombreCompose" class="hiloAutor"></span>
+                </div>
+
+                <input type="text" id="inputTitulo" class="inputTitulo" placeholder="Título" maxlength="140" required>
+
+                <textarea id="inputContenido" class="textareaCompose" placeholder="¿Qué querés compartir?" maxlength="5000" rows="3" required></textarea>
+
+                <div class="composeExtra">
+                    <input type="text" id="inputEtiquetas" placeholder="Etiquetas (ej: anatomía, fisiología)">
+                    <p class="ayudaLink">Los enlaces se detectan automáticamente. Solo se admiten sitios compatibles y seguros.</p>
+                </div>
+                <aside class="notaImagenes">
+                    <span aria-hidden="true">ⓘ</span>
+                    <span>¿Vas a compartir una imagen? Desde el celular podés subirla a <a href="https://imgbox.com/" target="_blank" rel="noopener noreferrer">ImgBox</a> y pegá el enlace directo. Si no funciona, usá <a href="https://es.imgbb.com/upload" target="_blank" rel="noopener noreferrer">ImgBB</a>. Se aloja fuera de MedMar; compartí solo material público.</span>
+                </aside>
+                <label class="labelCheckbox">
+                    <input type="checkbox" id="inputContenidoSensible">
+                    Marcar como contenido sensible (imágenes o material gráfico)
+                </label>
+
+                <div class="composePie">
+                    <span id="contadorContenido" class="contadorCompose">0 / 5000</span>
+                    <button type="submit" class="btnPublicarCompose">Publicar</button>
+                </div>
+
+            </form>
+
+            <p id="msgHilo"></p>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="/js/app.js?v=20261115"></script>
+
+
+</body>
+</html>
+

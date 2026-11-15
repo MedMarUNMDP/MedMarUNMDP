@@ -1,0 +1,14 @@
+{
+  "name": "medmar",
+  "private": true,
+  "description": "MedMar: red social de estudiantes de Medicina UNMDP (web estática + Supabase + juegos Phaser)",
+  "scripts": {
+    "test": "node --test \"games/*/tests/*.test.cjs\"",
+    "check": "node scripts/check.mjs",
+    "dev:web": "python -m http.server 5500 --directory web",
+    "dev:juego": "python -m http.server 5501 --directory games/inmune-survivors"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

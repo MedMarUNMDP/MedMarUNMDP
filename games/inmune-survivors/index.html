@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#091525">
+  <title>Inmune Survivors v3.4 — Ajustes de jefes y progresión</title>
+  <style>
+    :root {
+      --bg: #07111f; --panel: #101f33; --panel2: #142942; --line: #29415b;
+      --ink: #f1f7ff; --muted: #9bb0c7; --mint: #9df2ce; --mint2: #55d7b0;
+      --yellow: #ffd875; --red: #ff728a; --blue: #8bd7ff;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: radial-gradient(ellipse at 50% 0%, #152943 0%, var(--bg) 56%); color: var(--ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { min-height: 100svh; }
+    button, select { font: inherit; }
+    button { cursor: pointer; }
+    .shell { width: min(100%, 1040px); margin: 0 auto; padding: 22px 18px 36px; }
+    header { display:flex; align-items:center; justify-content:space-between; gap: 12px; margin-bottom: 18px; }
+    .brand { display:flex; align-items:center; gap: 12px; }
+    .brand-mark { width: 42px; height: 42px; flex:0 0 auto; border-radius: 50%; background: radial-gradient(circle at 30% 25%, #f2fff8 0 12%, #92f3cd 13% 52%, #49b8a0 53% 100%); box-shadow: inset -5px -7px 0 #267e7d, 0 0 30px #67dfbd30; position:relative; }
+    .brand-mark:after { content:""; position:absolute; width:20px; height:12px; border-radius:60%; background:#7864b5; left:11px; top:14px; transform:rotate(-27deg); box-shadow:5px -2px 0 -1px #8c79cf; }
+    .eyebrow { color:var(--mint); font-size:11px; font-weight:800; letter-spacing:.17em; text-transform:uppercase; }
+    h1 { font-size: clamp(22px, 4vw, 32px); line-height:1; letter-spacing:-.04em; margin:4px 0 0; }
+    .top-tag { border:1px solid #36516c; background:#0e2033aa; color:#bdd0e5; border-radius:999px; padding:7px 11px; font-size:11px; font-weight:700; white-space:nowrap; }
+    .intro { max-width:760px; margin: 0 auto 18px; text-align:center; }
+    .intro h2 { margin:0 0 8px; font-size:clamp(22px, 4vw, 34px); letter-spacing:-.04em; }
+    .intro p { margin:0 auto; max-width:630px; color:var(--muted); line-height:1.55; font-size:14px; }
+    .layout { display:grid; grid-template-columns:minmax(0, 1fr) minmax(250px, 310px); gap:16px; align-items:start; }
+    .panel { border:1px solid var(--line); border-radius:20px; background:linear-gradient(165deg, #13253aef, #0b1929f5); box-shadow:0 20px 60px #0003; overflow:hidden; }
+    .panel-inner { padding:18px; }
+    .section-title { display:flex; align-items:center; gap:9px; margin:0 0 12px; font-size:13px; color:#dceafa; text-transform:uppercase; letter-spacing:.09em; font-weight:850; }
+    .section-title span { display:inline-grid; place-items:center; width:25px; height:25px; border:1px solid #36516c; border-radius:8px; color:var(--mint); font-size:12px; }
+    .infection-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .choice { border:1px solid #29435c; background:#0b1a2b; color:var(--ink); padding:12px; border-radius:14px; text-align:left; min-width:0; transition:border-color .15s, transform .15s, background .15s; position:relative; }
+    .choice:hover { transform:translateY(-1px); border-color:#5d8da2; }
+    .choice.selected { border-color:var(--mint2); background:linear-gradient(145deg,#15382f,#10293a); box-shadow:inset 0 0 0 1px #55d7b055; }
+    .choice.selected:after { content:"✓"; position:absolute; top:8px; right:9px; color:var(--mint); font-weight:900; font-size:12px; }
+    .choice-icon { display:grid; place-items:center; width:40px; height:40px; margin-bottom:8px; font-size:26px; border-radius:12px; background:#21394e; }
+    .choice strong { display:block; font-size:14px; }
+    .choice small { display:block; margin-top:4px; color:#9bb0c7; font-size:11px; line-height:1.35; padding-right:8px; }
+    .cell-card { display:flex; gap:13px; align-items:center; padding:13px; background:#0b1a2b; border:1px solid #356d67; border-radius:15px; }
+    .cell-visual { flex:0 0 69px; height:69px; border-radius:19px; background:radial-gradient(circle at 35% 25%,#f2fff9 0 6%,#c7ffe9 7% 25%,#80e5c4 26% 59%,#2c918f 60% 100%); position:relative; box-shadow:inset -7px -8px 0 #226d78, 0 4px 24px #5be3bb2a; }
+    .cell-visual:before { content:""; position:absolute; width:26px; height:16px; background:#7864b5; border-radius:45% 55% 50% 50%; top:26px; left:20px; transform:rotate(-28deg); box-shadow:9px -2px 0 -3px #9c8de0; }
+    .cell-visual:after { content:""; position:absolute; width:6px; height:5px; background:#3b9d9b; border-radius:50%; left:14px; top:14px; box-shadow:31px 7px 0 #43aaa0, 15px 37px 0 #3d9e9b, 39px 33px 0 #3d9e9b; }
+    .cell-copy strong { font-size:15px; }
+    .cell-copy p { color:var(--muted); font-size:12px; line-height:1.45; margin:5px 0 0; }
+    .stats { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+    .stat-pill { font-size:10px; background:#1d3449; border:1px solid #2e4b62; color:#d2e3f4; padding:4px 7px; border-radius:999px; }
+    .difficulty-list { display:grid; gap:8px; }
+    .diff-choice { display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:11px; border-radius:13px; border:1px solid #29435c; background:#0b1a2b; color:var(--ink); }
+    .diff-choice.selected { border-color:var(--mint2); background:#15352f; }
+    .diff-dot { width:10px; height:10px; border-radius:50%; background:#71849a; box-shadow:0 0 0 4px #71849a22; flex:0 0 auto; }
+    .diff-choice[data-infection-difficulty="ambulatorio"] .diff-dot, .diff-choice[data-evolution-difficulty="no_curse"] .diff-dot { background:#73dbb6; box-shadow:0 0 0 4px #73dbb622; }
+    .diff-choice[data-infection-difficulty="internado"] .diff-dot, .diff-choice[data-evolution-difficulty="estudiante"] .diff-dot { background:#ffd875; box-shadow:0 0 0 4px #ffd87522; }
+    .diff-choice[data-infection-difficulty="inmunosuprimido"] .diff-dot, .diff-choice[data-evolution-difficulty="infectologo"] .diff-dot { background:#ff728a; box-shadow:0 0 0 4px #ff728a22; }
+    .diff-text { flex:1; }
+    .diff-text strong { display:block; font-size:13px; }
+    .diff-text small { display:block; color:var(--muted); margin-top:3px; font-size:11px; }
+    .multiplier { font-size:12px; font-weight:900; color:var(--mint); }
+    .btn-primary { width:100%; border:0; color:#08251f; background:linear-gradient(135deg,#adf7d9,#5bd8b5); padding:15px 18px; border-radius:14px; font-weight:950; letter-spacing:.015em; box-shadow:0 8px 28px #55d7b025; transition:transform .15s, filter .15s; }
+    .btn-primary:hover { transform:translateY(-1px); filter:brightness(1.05); }
+    .btn-lab { width:100%; margin-top:9px; border:1px solid #7f69c5; color:#eee7ff; background:linear-gradient(135deg,#3b2a67,#241d43); padding:13px 16px; border-radius:14px; font-weight:900; letter-spacing:.04em; }
+    .btn-lab:hover { filter:brightness(1.15); }
+    .btn-secondary { border:1px solid #35536b; color:#d9e8f7; background:#14283b; border-radius:11px; padding:10px 13px; font-weight:800; }
+    .muted { color:var(--muted); font-size:12px; line-height:1.5; }
+    .small-note { color:#8099b2; font-size:10px; line-height:1.45; margin-top:12px; }
+    .howto { list-style:none; padding:0; margin:0; display:grid; gap:14px; }
+    .howto li { display:flex; gap:10px; align-items:flex-start; color:#b9cbe0; font-size:12px; line-height:1.5; }
+    .howto-icon { flex:0 0 30px; width:30px; height:30px; border-radius:10px; background:#1b3348; display:grid; place-items:center; font-size:15px; }
+    .tip-box { border:1px solid #324e66; background:#0a1929; padding:12px; border-radius:13px; margin-top:16px; }
+    .tip-box strong { font-size:12px; display:block; margin-bottom:4px; color:var(--yellow); }
+    .game-section { display:none; }
+    .game-topline { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px; }
+    .game-topline strong { font-size:13px; }
+    .game-topline span { color:var(--muted); font-size:11px; }
+    #gameFrame { width:min(100%, 520px); aspect-ratio: 480 / 800; margin:0 auto; border:1px solid #38536d; border-radius:19px; overflow:hidden; box-shadow:0 26px 70px #0006; background:#071321; position:relative; }
+    .crisis-banner { position:absolute; z-index:100; inset:0 0 auto; padding:20px 12px 17px; text-align:center; color:#fff2ef; font-weight:950; letter-spacing:.12em; font-size:clamp(15px,4vw,23px); text-shadow:0 2px 12px #21040d,0 0 18px #ff4865; background:linear-gradient(180deg,#5b1022ed,#6d1728d6 72%,transparent); border-top:3px solid #ff526a; pointer-events:none; animation:crisisIn .45s cubic-bezier(.2,1.4,.4,1) both; }
+    .crisis-banner small { display:block; margin-top:6px; letter-spacing:.16em; font-size:10px; color:#ffd0bd; }
+    @keyframes crisisIn { from { opacity:0; transform:translateY(-38px); } to { opacity:1; transform:translateY(0); } }
+    #gameContainer, #gameContainer canvas { width:100%; height:100%; display:block; }
+    #gameContainer canvas { touch-action:none; }
+    body.mobile-game-fullscreen { overflow:hidden; overscroll-behavior:none; }
+    body.mobile-game-fullscreen .shell { width:100%; height:100vh; height:100dvh; min-height:0; margin:0; padding:0; }
+    body.mobile-game-fullscreen header, body.mobile-game-fullscreen footer { display:none; }
+    body.mobile-game-fullscreen #gameScreen { display:block!important; position:fixed; inset:0; z-index:2000; padding:0; background:#071321; }
+    body.mobile-game-fullscreen .game-topline { position:absolute; z-index:30; top:auto; bottom:calc(env(safe-area-inset-bottom,0px) + 8px); left:0; right:0; justify-content:flex-end; margin:0; padding:8px max(10px,env(safe-area-inset-right,0px)) 0 10px; pointer-events:none; }
+    body.mobile-game-fullscreen .game-topline > div:first-child { display:none; }
+    body.mobile-game-fullscreen .game-topline > div:last-child { pointer-events:auto; }
+    body.mobile-game-fullscreen .game-topline .btn-secondary { padding:8px 11px; border-color:#b7d6c677; background:#071321d9; box-shadow:0 2px 12px #0008; }
+    #fullscreenButton { display:none; }
+    #fullscreenButton.recovery-visible { display:inline-flex; }
+    body.mobile-game-fullscreen #gameFrame { width:100vw; max-width:none; height:100vh; height:100dvh; aspect-ratio:auto; margin:0; border:0; border-radius:0; box-shadow:none; }
+    body.mobile-game-fullscreen .game-controls { display:none; }
+    body.mobile-game-fullscreen .modal-layer { z-index:2100; }
+    #debugPanel { display:none; position:absolute; z-index:90; left:8px; bottom:8px; width:min(255px,58vw); max-height:64%; overflow:auto; padding:9px; border:1px solid #ab91ff99; border-radius:12px; background:#0a1024eF; color:#f2edff; font-size:10px; box-shadow:0 8px 28px #0008; }
+    #debugPanel.open { display:block; }
+    #debugPanel.compact { width:190px; max-height:48px; overflow:hidden; }
+    #debugPanel.compact .debug-content { display:none; }
+    #debugPanel .debug-toggle { float:right; }
+    #debugPanel select, #debugPanel button { color:#f2edff; background:#1d2441; border:1px solid #505b83; border-radius:7px; padding:5px; font-size:10px; }
+    .debug-row { display:flex; flex-wrap:wrap; gap:4px; margin:5px 0 8px; }
+    .debug-row button { flex:1; }
+    .debug-heading { color:#b9a8ff; font-weight:900; margin-top:6px; }
+    .game-controls { display:flex; justify-content:space-between; gap:12px; width:min(100%,520px); margin:10px auto 0; color:var(--muted); font-size:11px; }
+    .modal-layer { position:fixed; inset:0; z-index:10; display:none; align-items:center; justify-content:center; padding:16px; background:#030914b8; backdrop-filter:blur(8px); }
+    .modal-layer.open { display:flex; }
+    .modal { width:min(100%, 520px); border:1px solid #37566d; background:linear-gradient(160deg,#152b41,#0a1929); border-radius:22px; padding:22px; box-shadow:0 28px 90px #0009; animation:pop .18s ease-out; max-height:min(90svh,850px); overflow:auto; }
+    @keyframes pop { from { opacity:0; transform:translateY(8px) scale(.98); } to { opacity:1; transform:translateY(0) scale(1); } }
+    .modal-kicker { font-size:10px; color:var(--mint); font-weight:900; letter-spacing:.16em; text-transform:uppercase; }
+    .modal h2 { font-size:clamp(22px,4vw,29px); letter-spacing:-.035em; margin:8px 0 7px; }
+    .modal p { color:#a9bfd5; font-size:13px; line-height:1.5; }
+    #questionText { font-size:18px; line-height:1.38; color:#f4f8ff; font-weight:800; margin:18px 0; }
+    .answers { display:grid; gap:9px; }
+    .answer-btn, .upgrade-btn { text-align:left; width:100%; padding:13px; border:1px solid #34516a; border-radius:13px; background:#0c1b2b; color:#eaf2fc; line-height:1.4; }
+    .answer-btn:hover, .upgrade-btn:hover { border-color:#8cebc9; background:#132a35; }
+    .answer-btn:disabled { cursor:default; opacity:.65; }
+    .feedback { display:none; padding:12px; border-radius:12px; margin-top:12px; font-size:12px; line-height:1.5; }
+    .feedback.open { display:block; }
+    .feedback.correct { background:#12372d; border:1px solid #337a64; color:#bcf5da; }
+    .feedback.wrong { background:#3b202b; border:1px solid #874253; color:#ffd6df; }
+    .upgrade-grid { display:grid; gap:9px; margin-top:16px; }
+    .upgrade-btn strong { display:block; font-size:14px; margin-bottom:3px; }
+    .upgrade-btn span { color:#9cb3c8; font-size:12px; }
+    .strategy-btn { display:flex; align-items:center; gap:13px; min-height:92px; border-color:color-mix(in srgb,var(--strategy-color) 50%,#34516a); transition:transform .16s,border-color .16s,background .16s; }
+    .strategy-progress { display:flex; gap:4px; width:100%; margin-top:5px; }
+    .strategy-progress i { display:block; flex:1; height:4px; border-radius:4px; background:#26394a; }
+    .strategy-progress i.on { background:var(--strategy-color); box-shadow:0 0 8px color-mix(in srgb,var(--strategy-color) 55%,transparent); }
+    .upgrade-skill-details { white-space:pre-line; display:none; margin-top:10px; padding:11px 13px; border:1px solid #63e6bd66; border-radius:12px; background:#081522; color:#dce9f7; font-size:12px; line-height:1.45; }
+    .upgrade-skill-details.open { display:block; }
+    .upgrade-skill-details strong { display:block; margin-bottom:4px; color:#9df2ce; }
+    .strategy-btn:hover { transform:translateY(-2px); border-color:var(--strategy-color); box-shadow:0 8px 24px color-mix(in srgb,var(--strategy-color) 15%,transparent); }
+    .strategy-icon { display:grid; place-items:center; flex:0 0 48px; width:48px; height:48px; border-radius:15px; color:var(--strategy-color)!important; background:color-mix(in srgb,var(--strategy-color) 18%,#0c1b2b); border:1px solid color-mix(in srgb,var(--strategy-color) 40%,transparent); }
+    .strategy-icon svg { display:block; width:31px; height:31px; }
+    .strategy-copy { display:grid; gap:3px; min-width:0; flex:1; }
+    .strategy-copy small { color:var(--strategy-color); font-size:9px; font-weight:900; letter-spacing:.14em; }
+    .strategy-copy strong { margin:0; }
+    .strategy-copy > span { color:#b8cbe0; }
+    .affected-skills { display:flex; align-items:center; gap:0; min-height:34px; margin-top:4px; padding-left:2px; }
+    .skill-sprite-chip { display:grid; flex:0 0 34px; place-items:center; box-sizing:border-box; width:34px; height:34px; margin-left:-5px; padding:0; line-height:0; border:1px solid var(--strategy-color); border-radius:10px; background:#102238; cursor:pointer; box-shadow:0 2px 5px #0007; position:relative; }
+    .skill-sprite-chip:focus-visible { outline:2px solid #fff; outline-offset:2px; z-index:2; }
+    .skill-sprite-chip img { display:block; width:26px; height:26px; margin:auto; object-fit:contain; pointer-events:none; }
+    .skill-evolution-card { display:grid; grid-template-columns:42px 1fr; align-items:center; column-gap:10px; }
+    .skill-evolution-card .evolution-impact { color:#b8f5d8; font-size:11px; font-weight:800; line-height:1.4; }
+    .evolution-sprite { grid-row:span 2; display:grid; place-items:center; width:40px; height:40px; border-radius:12px; background:linear-gradient(145deg,#193a4a,#30264a); border:1px solid #76e9c588; color:#9df2ce; box-shadow:inset 0 0 14px #75e5cf22; }
+    .evolution-sprite img { width:36px; height:36px; object-fit:contain; filter:drop-shadow(0 2px 2px #0008); }
+    .strategy-copy em { color:#839bb2; font-size:10px; font-style:normal; }
+    .gameover-statgrid { display:grid; grid-template-columns:repeat(2,1fr); gap:9px; margin:18px 0; }
+    .gameover-stat { border:1px solid #2f4b63; background:#0b1a2b; border-radius:13px; padding:11px; min-width:0; }
+    .gameover-stat strong { font-size:clamp(16px,4vw,22px); overflow-wrap:anywhere; }
+    .run-upgrade-log { border:1px solid #2f4b63; background:#0b1a2b; border-radius:12px; padding:11px 13px; margin:12px 0 16px; color:#b9cde0; font-size:12px; }
+    .run-upgrade-log summary { cursor:pointer; color:#a8f1d0; font-weight:850; }
+    .run-upgrade-log ol { max-height:180px; overflow:auto; padding-left:23px; margin:10px 0 0; }
+    .run-upgrade-log li { padding:4px 0; line-height:1.4; border-bottom:1px solid #223a50; }
+    .run-upgrade-log li strong { color:#e4effa; }
+    .run-upgrade-log li span { color:#90a9c0; }
+    .gameover-stat span { display:block; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; }
+    .gameover-stat strong { display:block; font-size:24px; margin-top:3px; }
+    footer { color:#728aa3; font-size:10px; line-height:1.5; text-align:center; margin:20px 0 0; }
+    @media (max-width: 760px) {
+      .shell { padding:15px 10px 24px; }
+      header { margin-bottom:16px; }
+      .layout { grid-template-columns:1fr; }
+      .panel-inner { padding:15px; }
+      .intro { margin-bottom:16px; }
+      #gameFrame { width:min(100%, 480px); border-radius:14px; }
+      .game-controls { padding:0 2px; }
+      .top-tag { font-size:9px; padding:6px 8px; }
+    }
+    @media (max-width: 380px) {
+      .infection-grid { gap:7px; }
+      .choice { padding:10px; }
+      .choice-icon { width:35px; height:35px; font-size:23px; }
+      .modal { padding:17px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div><div class="eyebrow">MedMar · Prototipo jugable</div><h1>INMUNE SURVIVORS</h1></div>
+      </div>
+      <div class="top-tag">v3.4 · AJUSTES DE GAMEPLAY</div>
+    </header>
+
+    <section id="menuScreen">
+      <div class="intro">
+        <h2>El tejido está bajo ataque.</h2>
+        <p>Controlá un progenitor hematopoyético en una infección creciente. En partida normal, cada foco saneado permite desbloquear o evolucionar habilidades; el laboratorio ofrece controles manuales independientes.</p>
+      </div>
+      <div class="layout">
+        <main class="panel">
+          <div class="panel-inner">
+            <h3 class="section-title"><span>1</span> Elegí la infección</h3>
+            <div class="infection-grid" id="infectionChoices">
+              <button class="choice selected" data-infection="bacteriana"><span class="choice-icon">🧫</span><strong>Bacteriana</strong><small>Endotelio vascular o mucosa; predominan bacterias, sin excluir otras familias.</small></button>
+              <button class="choice" data-infection="viral"><span class="choice-icon">🦠</span><strong>Viral</strong><small>Epitelio respiratorio o tejido nervioso; virus veloces y variantes de mayor tamaño.</small></button>
+              <button class="choice" data-infection="fungica"><span class="choice-icon">🍄</span><strong>Fúngica</strong><small>Dermis o epitelio alveolar; hongos resistentes y nubes de esporas.</small></button>
+              <button class="choice" data-infection="parasitaria"><span class="choice-icon">🪱</span><strong>Parasitaria</strong><small>Protozoos con formas distintas y helmintos grandes que aceleran en línea recta, pero giran con dificultad.</small></button>
+            </div>
+            <h3 class="section-title" style="margin-top:20px"><span>2</span> Elegí la célula</h3>
+            <div class="cell-card">
+              <div class="cell-visual" aria-hidden="true"></div>
+              <div class="cell-copy"><strong>Progenitor hematopoyético</strong><p>Una célula pluripotente en desarrollo. Comienza con desgranulación y adquiere funciones inmunitarias al sanar focos.</p><div class="stats"><span class="stat-pill">VIDA · 5/10</span><span class="stat-pill">VELOCIDAD · 9/10</span><span class="stat-pill">DAÑO · 6/10</span><span class="stat-pill">ALCANCE · 4/10</span></div></div>
+            </div>
+            <p class="small-note">Esta primera prueba incluye un personaje jugable. Las demás células se incorporarán cuando validemos la mecánica central.</p>
+            <h3 class="section-title" style="margin-top:20px"><span>3</span> Elegí la presión de infección</h3>
+            <div class="difficulty-list" id="infectionDifficultyChoices">
+              <button class="diff-choice" data-infection-difficulty="ambulatorio"><span class="diff-dot"></span><span class="diff-text"><strong>Ambulatorio</strong><small>Modo accesible: menos vida y daño enemigos, menor velocidad y oleadas más espaciadas.</small></span><span class="multiplier">×0,75</span></button>
+              <button class="diff-choice selected" data-infection-difficulty="internado"><span class="diff-dot"></span><span class="diff-text"><strong>Internado</strong><small>Presión estándar con escalado durante la partida.</small></span><span class="multiplier">×1,00</span></button>
+              <button class="diff-choice" data-infection-difficulty="inmunosuprimido"><span class="diff-dot"></span><span class="diff-text"><strong>Inmunosuprimido</strong><small>Mayor densidad, velocidad, vida y daño enemigo.</small></span><span class="multiplier">×1,50</span></button>
+            </div>
+            <h3 class="section-title" style="margin-top:18px"><span>4</span> Elegí la dificultad de evolución</h3>
+            <div class="difficulty-list" id="evolutionDifficultyChoices">
+              <button class="diff-choice" data-evolution-difficulty="no_curse"><span class="diff-dot"></span><span class="diff-text"><strong>No cursé</strong><small>Banco FÁCIL · defensas del cuerpo, microbios y prevención; nivel secundario.</small></span><span class="multiplier">×0,75</span></button>
+              <button class="diff-choice selected" data-evolution-difficulty="estudiante"><span class="diff-dot"></span><span class="diff-text"><strong>Estudiante</strong><small>Banco NORMAL · teoría frecuente, mecanismos y aplicación.</small></span><span class="multiplier">×1,00</span></button>
+              <button class="diff-choice" data-evolution-difficulty="infectologo"><span class="diff-dot"></span><span class="diff-text"><strong>Infectólogo</strong><small>Banco DIFÍCIL · detalles finos y razonamiento diagnóstico.</small></span><span class="multiplier">×1,50</span></button>
+            </div>
+            <p class="small-note">Banco total: 83 preguntas. <a href="./CATALOGO_PREGUNTAS_v1.9.md" target="_blank" rel="noopener" style="color:var(--mint);font-weight:800">Ver preguntas y respuestas por dificultad y temática ↗</a></p>
+            <button class="btn-primary" id="startButton" style="margin-top:18px">INICIAR PARTIDA ↗</button><button class="btn-lab" id="debugStartButton">ABRIR LABORATORIO DE PRUEBAS</button><p class="small-note">El laboratorio es independiente: no usa preguntas ni oleadas automáticas y permite ajustar la partida en cualquier momento.</p>
+          </div>
+        </main>
+        <aside class="panel">
+          <div class="panel-inner">
+            <h3 class="section-title">Cómo se juega</h3>
+            <ul class="howto">
+              <li><span class="howto-icon">🕹️</span><span><strong>Movete y saná focos</strong><br>WASD / flechas; en celular, tocá y arrastrá en cualquier parte de la arena. El joystick aparece bajo tu dedo y se oculta al soltar. Quedate encima de una colonia para iniciar la sanación automáticamente.</span></li>
+              <li><span class="howto-icon">✦</span><span><strong>Atacá automáticamente</strong><br>La desgranulación es el ataque inicial. Fagocitosis y NETosis se desbloquean al sanar focos infecciosos.</span></li>
+              <li><span class="howto-icon">🧬</span><span><strong>Elegí una estrategia</strong><br>Homeostasis, Citotoxicidad o Quimiotaxis. Cada elección refuerza parámetros; cada tercera de la misma vía suma una evolución avanzada.</span></li>
+              <li><span class="howto-icon">🧨</span><span><strong>Notá el cambio en combate</strong><br>Salvas múltiples, gránulos mayores y de otros colores, explosiones en cadena, una célula más resistente o estelas de movimiento. Las colonias sanadas restauran vida y experiencia.</span></li>
+              <li><span class="howto-icon">☠️</span><span><strong>Jefes y multirresistencia</strong><br>Los jefes anuncian su entrada y atacan de formas distintas. Al agotarse las preguntas comienza una crisis de oleadas continuas con enemigos de mayor resistencia.</span></li>
+            </ul>
+            <div class="tip-box"><strong>Sobre la dificultad</strong><div class="muted">Infección modifica vida, daño, velocidad, densidad y oleadas. Evolución cambia el nivel del banco de preguntas. Ambos perfiles multiplican el puntaje de forma independiente.</div></div>
+            <p class="small-note">*El juego no usa cuentas ni conexiones de MedMar. Phaser se carga desde CDN, así que hace falta conexión a internet al abrirlo. Las preguntas de esta demo son provisionales y deben verificarse con la bibliografía indicada antes de una publicación educativa.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="game-section" id="gameScreen">
+      <div class="game-topline"><div><strong id="runTitle">Infección bacteriana · Progenitor hematopoyético</strong><br><span id="runSubtitle">Sobreviví y respondé para mejorar.</span></div><div style="display:flex;gap:7px"><button id="fullscreenButton" class="btn-secondary" aria-label="Volver a pantalla completa">Pantalla completa</button><button id="pauseButton" class="btn-secondary">Pausar</button><button id="quitButton" class="btn-secondary">Salir</button></div></div>
+      <div id="gameFrame"><div id="gameContainer"></div><div id="debugPanel" class="compact"><strong>LABORATORIO</strong><button class="debug-toggle" id="debugToggle">Abrir</button><div class="debug-content"><div id="debugStatus" style="margin-top:5px;color:#b6f5d6">Solo desgranulación · nivel 1</div><div class="debug-heading">Habilidades</div><select id="debugSkillSelect"></select><div class="debug-row"><button data-debug="skill-add">Añadir / +nivel</button><button data-debug="skill-remove">Quitar</button></div><div class="debug-heading">Ajustar estadísticas</div><div id="debugStats"></div><div class="debug-heading">Atributos de habilidad</div><div id="debugSkillStats"></div><div class="debug-heading">Partida</div><div class="debug-row"><button data-debug="granules">Gránulos ON/OFF</button><button data-debug="invincible">Inmortalidad</button></div><div class="debug-row"><select id="debugQuestion"><option value="facil">Pregunta fácil</option><option value="normal">Pregunta normal</option><option value="dificil">Pregunta difícil</option></select><button data-debug="question">Probar</button></div><div class="debug-row"><button data-debug="primary-menu">Vía principal</button><button data-debug="evolution-menu">Evolutiva</button></div><div class="debug-heading">Aparición manual</div><label>Cantidad <input id="debugSpawnCount" type="number" min="1" max="100" value="1" style="width:58px"></label><select id="debugTypeSelect"><option value="bacteria">Bacterias</option><option value="virus">Virus</option><option value="fungus">Hongos</option><option value="parasite">Parásitos</option><option value="mixed">Mixto</option></select><div class="debug-row"><button data-debug="enemy">Enemigo</button><button data-debug="large">Grande</button><button data-debug="boss">Jefe</button></div><div class="debug-row"><button data-debug="focus">Foco</button><button data-debug="heal">Curar</button><button data-debug="clear">Limpiar</button></div></div></div><div class="crisis-banner" id="crisisBanner" style="display:none">MULTIRRESISTENCIA<small>EL TEJIDO HA PERDIDO EL CONTROL</small></div></div>
+      <div class="game-controls"><span>PC: WASD / flechas</span><span>Móvil: tocá y arrastrá en cualquier parte para moverte · saná colonias al pisar el centro · acercate al ADN/ARN para recoger XP</span></div>
+    </section>
+    <footer>INMUNE SURVIVORS · Prototipo v3.4 independiente para MedMar. Vista adaptable, evolución celular y combate optimizado. Banco de preguntas con repetición controlada si se agota antes de completar los cuatro jefes.</footer>
+  </div>
+
+  <div class="modal-layer" id="questionLayer" role="dialog" aria-modal="true" aria-labelledby="questionHeading">
+    <div class="modal">
+      <div class="modal-kicker" id="questionKicker">Desafío inmunológico</div>
+      <h2 id="questionHeading">Pregunta teórica</h2>
+      <p id="questionMeta">Respondé correctamente para desbloquear una mejora.</p>
+      <div id="questionText"></div>
+      <div class="answers" id="answerButtons"></div>
+      <div class="feedback" id="questionFeedback" role="status"></div>
+      <button class="btn-primary" id="continueQuestion" style="display:none;margin-top:13px">CONTINUAR</button>
+    </div>
+  </div>
+  <div class="modal-layer" id="upgradeLayer" role="dialog" aria-modal="true" aria-labelledby="upgradeHeading">
+    <div class="modal">
+      <div class="modal-kicker">Respuesta correcta</div>
+      <h2 id="upgradeHeading">Elegí una estrategia</h2>
+      <p>Elegí una mejora de parámetro. Cada tercera elección en la misma vía también aplica una evolución avanzada; alternar da una sinergia menor.</p>
+      <div class="upgrade-grid" id="upgradeButtons"></div>
+      <div class="upgrade-skill-details" id="upgradeSkillDetails" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="modal-layer" id="focusEvolutionLayer" role="dialog" aria-modal="true" aria-labelledby="focusEvolutionHeading"><div class="modal"><div class="modal-kicker">Foco infeccioso saneado</div><h2 id="focusEvolutionHeading">Elegí una evolución celular</h2><p>Las funciones obtenidas se acumulan. Mejorar una función conocida es más probable que descubrir una nueva.</p><div class="upgrade-grid" id="focusEvolutionButtons"></div></div></div>
+  <div class="modal-layer" id="gameOverLayer" role="dialog" aria-modal="true" aria-labelledby="gameOverHeading">
+    <div class="modal">
+      <div class="modal-kicker">Fin de la partida</div>
+      <h2 id="gameOverHeading">El tejido ha caído.</h2>
+      <p id="gameOverText">La infección superó tus defensas.</p>
+      <div class="gameover-statgrid">
+        <div class="gameover-stat"><span>Puntuación</span><strong id="finalScore">0</strong></div>
+        <div class="gameover-stat"><span>Tiempo</span><strong id="finalTime">0:00</strong></div>
+        <div class="gameover-stat"><span>Daño total</span><strong id="finalDamage">0</strong></div>
+        <div class="gameover-stat"><span>DPS promedio / estimado</span><strong id="finalDps">0 / 0</strong></div>
+        <div class="gameover-stat"><span>Enemigos eliminados</span><strong id="finalKills">0</strong></div>
+        <div class="gameover-stat"><span>Jefes eliminados</span><strong id="finalBossKills">0</strong></div>
+        <div class="gameover-stat"><span>Focos saneados</span><strong id="finalFoci">0</strong></div>
+        <div class="gameover-stat"><span>Focos desatendidos</span><strong id="finalBreaches">0</strong></div>
+        <div class="gameover-stat"><span>Preguntas correctas</span><strong id="finalCorrect">0</strong></div>
+      </div>
+      <details class="run-upgrade-log"><summary>Ver mejoras de la partida</summary><ol id="finalUpgradeList"></ol></details>
+      <p id="bestScoreText" class="muted"></p>
+      <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:18px"><button id="restartButton" class="btn-primary" style="flex:1">JUGAR OTRA VEZ</button><button id="menuButton" class="btn-secondary">Menú</button></div>
+    </div>
+  </div>
+  <div class="modal-layer" id="pauseLayer" role="dialog" aria-modal="true" aria-labelledby="pauseHeading">
+    <div class="modal">
+      <div class="modal-kicker">Partida pausada</div>
+      <h2 id="pauseHeading">Tomate un respiro</h2>
+      <p>La infección y el cronómetro están detenidos.</p>
+      <div class="gameover-statgrid">
+        <div class="gameover-stat"><span>Puntos</span><strong id="pauseScore">0</strong></div>
+        <div class="gameover-stat"><span>Tiempo</span><strong id="pauseTime">0:00</strong></div>
+        <div class="gameover-stat"><span>Daño total</span><strong id="pauseDamage">0</strong></div>
+        <div class="gameover-stat"><span>DPS promedio / estimado</span><strong id="pauseDps">0 / 0</strong></div>
+        <div class="gameover-stat"><span>Enemigos eliminados</span><strong id="pauseKills">0</strong></div>
+        <div class="gameover-stat"><span>Jefes eliminados</span><strong id="pauseBossKills">0</strong></div>
+        <div class="gameover-stat"><span>Focos saneados</span><strong id="pauseFoci">0</strong></div>
+        <div class="gameover-stat"><span>Focos desatendidos</span><strong id="pauseBreaches">0</strong></div>
+        <div class="gameover-stat"><span>Preguntas correctas</span><strong id="pauseCorrect">0</strong></div>
+      </div>
+      <details class="run-upgrade-log"><summary>Ver mejoras de la partida</summary><ol id="pauseUpgradeList"></ol></details>
+      <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:18px"><button id="resumeButton" class="btn-primary" style="flex:1">SEGUIR JUGANDO</button><button id="pauseMenuButton" class="btn-secondary">VOLVER AL MENÚ</button></div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js"></script>
+  <script src="./src/core/runtime-services.js?build=3.4.1"></script>
+  <script src="./src/config/game-balance.js?build=3.4.1"></script>
+  <script src="./src/core/lab-actions.js?build=3.4.1"></script>
+  <script src="./game.js?build=3.4.1"></script>
+</body>
+</html>
+
+
+
+

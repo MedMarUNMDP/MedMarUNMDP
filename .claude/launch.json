@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "5500", "--directory", "web"],
+      "port": 5500
+    },
+    {
+      "name": "inmune-survivors",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "5501", "--directory", "games/inmune-survivors"],
+      "port": 5501
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+# Secretos y credenciales (NUNCA commitear)
+.secrets/
+.env
+.env.*
+!.env.example
+
+# Archivos y zips viejos
+archive/
+*.zip
+
+# Claude Code: preferencias personales y worktrees
+.claude/settings.local.json
+.claude/worktrees/
+CLAUDE.local.md
+
+# Supabase CLI (temporales locales)
+supabase/.temp/
+supabase/.branches/
+
+# Node / herramientas
+node_modules/
+_site/
+
+# Sistema
+Thumbs.db
+Desktop.ini
+.DS_Store
+__pycache__/
+*.pyc
