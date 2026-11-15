@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-15-hardening"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-15-diagnostico"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -14,6 +14,23 @@
         let idEditando = null
 let foroCargado = false
 const foroCacheCliente = new Map()
+// Caché del foro por filtro: clave "<etiqueta|_todos>::<búsqueda>". Usar siempre estas funciones
+// (antes se borraba "_todos" a mano, una clave que no existía, y la caché nunca se invalidaba).
+function claveForo(etiqueta, busqueda) {
+    return (etiqueta || '_todos') + '::' + (busqueda || '')
+}
+function claveForoActual() {
+    return claveForo(etiquetaFiltroActual, busquedaForoActual)
+}
+// Marca todas las entradas como viejas (se pintan al instante pero se vuelven a pedir) y,
+// opcionalmente, ajusta la lista de hilos de cada una.
+function invalidarCacheForo(ajustarHilos) {
+    foroCacheCliente.forEach(function (cache) {
+        if (!cache) return
+        if (typeof ajustarHilos === 'function' && Array.isArray(cache.hilos)) cache.hilos = ajustarHilos(cache.hilos)
+        cache.actualizadoEn = 0
+    })
+}
 const chatCacheCliente = new Map()
 const hiloCacheCliente = new Map()
 const ACCIONES_LECTURA_DEDUPE = new Set([
@@ -92,6 +109,7 @@ const hilosPendientesConfirmacion = new Map()
         const ayudaSeguridadCuenta = document.getElementById("ayudaSeguridadCuenta")
         const formCambiarPassword = document.getElementById("formCambiarPassword")
         const passwordActualPerfil = document.getElementById("passwordActualPerfil")
+        const campoPasswordActual = document.getElementById("campoPasswordActual")
         const nuevaPasswordPerfil = document.getElementById("nuevaPasswordPerfil")
         const msgPasswordPerfil = document.getElementById("msgPasswordPerfil")
 
@@ -603,15 +621,19 @@ const hilosPendientesConfirmacion = new Map()
             document.removeEventListener("keydown", cerrarModalConEscape)
         }
 
+        // El modal de bienvenida es obligatorio: no se cierra con Escape ni tocando afuera
+        // (antes se cerraba y dejaba el body con overflow:hidden, sin scroll).
         function cerrarModalConEscape(e) {
             if (e.key === "Escape") {
-                document.querySelectorAll(".modalFondo.abierto").forEach(cerrarModal)
+                document.querySelectorAll(".modalFondo.abierto").forEach(function (modal) {
+                    if (modal !== modalSetupPerfil) cerrarModal(modal)
+                })
             }
         }
 
         document.querySelectorAll(".modalFondo").forEach(function (fondo) {
             fondo.addEventListener("click", function (e) {
-                if (e.target !== fondo) return
+                if (e.target !== fondo || fondo === modalSetupPerfil) return
                 if (fondo === modalCompose) {
                     volverHistorialOverlay("compose", function () { cerrarModal(fondo) })
                 } else {
@@ -792,13 +814,17 @@ async function cargarBootstrap() {
             renderizarIntercambios(intercambiosUI)
             esModeradorActual = !!(data.rol && data.rol.esModerador)
             esAdminActual = !!(data.rol && data.rol.esAdmin)
-            ayudaSeguridadCuenta.textContent = 'Podés definir o cambiar una contraseña para tu cuenta desde acá.'
+            const conPassword = cuentaTienePassword()
+            ayudaSeguridadCuenta.textContent = conPassword
+                ? 'Para cambiar tu contraseña, confirmá primero la actual.'
+                : 'Tu cuenta entra con Google. Si querés, podés definir una contraseña para entrar también con email.'
+            campoPasswordActual.style.display = conPassword ? 'block' : 'none'
             formCambiarPassword.style.display = 'block'
             btnIrModeracion.style.display = esModeradorActual ? 'inline-block' : 'none'
         }
 
         async function cargarForoBootstrap() {
-            const key = (etiquetaFiltroActual || '_todos') + '::' + (busquedaForoActual || '')
+            const key = claveForoActual()
             const cached = foroCacheCliente.get(key)
             const age = cached && cached.actualizadoEn ? Date.now() - cached.actualizadoEn : Infinity
 
@@ -881,6 +907,16 @@ async function cargarBootstrap() {
                 authSession: authSession
             }
             return sesion
+        }
+
+        // ¿La cuenta tiene contraseña propia? (registro por email). Las cuentas solo de Google no
+        // tienen una contraseña actual que verificar.
+        function cuentaTienePassword() {
+            const usuario = sesion && sesion.authSession && sesion.authSession.user
+            if (!usuario) return true
+            const identidades = Array.isArray(usuario.identities) ? usuario.identities : []
+            const proveedores = (usuario.app_metadata && Array.isArray(usuario.app_metadata.providers)) ? usuario.app_metadata.providers : []
+            return identidades.some(function (i) { return i && i.provider === 'email' }) || proveedores.indexOf('email') !== -1
         }
 
         async function mostrarLoginSupabase() {
@@ -1151,6 +1187,8 @@ async function cargarBootstrap() {
                 return
             }
             if (event === 'SIGNED_OUT') {
+                // También llega cuando se cierra sesión en otra pestaña o vence el refresh token.
+                limpiarDatosDeSesion(true)
                 mostrarLoginSupabase()
             }
         })
@@ -1225,7 +1263,8 @@ async function cargarBootstrap() {
                 if (tipo === "hilo") {
                     navegarHistorial(crearEstadoNavegacion("foro", null), true)
                     mostrarListaHilos(false)
-                    foroCacheCliente.delete(etiquetaFiltroActual || "_todos")
+                    invalidarCacheForo(function (hilos) { return hilos.filter(function (h) { return String(h.id) !== String(id) }) })
+                    hiloCacheCliente.delete(String(id))
                     cargarHilos(true)
                 } else {
                     const hiloId = String(hiloAbiertoId)
@@ -1233,7 +1272,7 @@ async function cargarBootstrap() {
                     // La respuesta ya fue borrada en el servidor.
                     // Invalidamos el caché para no volver a mostrarla.
                     hiloCacheCliente.delete(hiloId)
-                    foroCacheCliente.delete(etiquetaFiltroActual || "_todos")
+                    invalidarCacheForo()
 
                     // Fuerza una lectura fresca desde Supabase.
                     await abrirHilo(hiloId, false)
@@ -1307,7 +1346,7 @@ async function cargarBootstrap() {
         }
 
         async function cargarEtiquetasDisponibles() {
-            const cache = foroCacheCliente.get('_todos')
+            const cache = foroCacheCliente.get(claveForo('', ''))
             if (cache && cache.actualizadoEn && Date.now() - cache.actualizadoEn < FRESCURA_FORO_CLIENTE_MS && Array.isArray(cache.etiquetas)) {
                 renderizarEtiquetasCliente(cache.etiquetas)
                 return
@@ -1358,7 +1397,7 @@ async function cargarBootstrap() {
         }
 
         async function cargarHilos(reiniciar) {
-            const key = (etiquetaFiltroActual || '_todos') + '::' + (busquedaForoActual || '')
+            const key = claveForoActual()
 
             // No vaciamos la lista al comenzar una petición. Así un retraso o
             // fallo de red nunca transforma una interfaz válida en una pantalla vacía.
@@ -1424,7 +1463,7 @@ async function cargarBootstrap() {
         // Actualización silenciosa: nunca limpia ni sustituye la interfaz antes
         // de recibir una respuesta válida del servidor.
         async function sincronizarHilosEnSegundoPlano() {
-            const key = (etiquetaFiltroActual || '_todos') + '::' + (busquedaForoActual || '')
+            const key = claveForoActual()
             const r = await llamar("listarHilos", { etiqueta: etiquetaFiltroActual, busqueda: busquedaForoActual, desde: 0 })
             if (!r.ok) {
                 console.warn("No se pudo sincronizar el foro en segundo plano; se conserva la vista.", r)
@@ -1441,13 +1480,72 @@ async function cargarBootstrap() {
             foroCacheCliente.set(key, item)
 
             // Solo renderizamos si seguimos viendo el mismo filtro.
-            if (key === (etiquetaFiltroActual || '_todos') + '::' + (busquedaForoActual || '')) {
+            if (key === claveForoActual()) {
                 renderizarHilos(item.hilos, true)
                 paginaHilosActual = item.hilos.length
                 btnCargarMas.style.display = r.hayMas ? "block" : "none"
             }
 
             return true
+        }
+
+        // Clasifica un enlace permitido para elegir la vista previa (embed de YouTube/Spotify o tarjeta).
+        // Se había borrado por error en f05ebaa y renderizarLinkPreview fallaba con cualquier hilo con link.
+        function detectarTipoLink(link) {
+            try {
+                const u = new URL(link)
+                const host = u.hostname.replace(/^www\./, "").toLowerCase()
+                const path = u.pathname
+
+                if (host === "youtu.be" || host === "youtube.com" || host === "youtube-nocookie.com") {
+                    let id = ""
+
+                    if (host === "youtu.be") {
+                        id = path.split("/").filter(Boolean)[0] || ""
+                    } else {
+                        const matchWatch = u.searchParams.get("v")
+                        const matchPath = path.match(/^\/(?:shorts|embed|live)\/([^/?#]+)/i)
+                        id = matchWatch || (matchPath ? matchPath[1] : "")
+                    }
+
+                    return { tipo: "youtube", id: id }
+                }
+
+                if (host === "open.spotify.com" || host === "spotify.com") {
+                    const segmentos = path.split("/").filter(Boolean)
+                    const tiposSpotify = ["track", "album", "playlist", "episode", "show"]
+                    const indiceTipo = segmentos.findIndex(function (s) { return tiposSpotify.includes(s) })
+
+                    if (indiceTipo !== -1 && segmentos[indiceTipo + 1]) {
+                        return {
+                            tipo: "spotify",
+                            subtipo: segmentos[indiceTipo],
+                            id: segmentos[indiceTipo + 1]
+                        }
+                    }
+
+                    return { tipo: "spotify", subtipo: "", id: "" }
+                }
+
+                if (host === "docs.google.com" || host === "drive.google.com" || host === "forms.google.com" ||
+                    host === "sheets.google.com" || host === "slides.google.com" || host === "classroom.google.com" ||
+                    host === "sites.google.com" || host === "scholar.google.com") {
+                    return { tipo: "google" }
+                }
+
+                if (host === "unmdp.edu.ar" || host.endsWith(".unmdp.edu.ar")) {
+                    return { tipo: "unmdp" }
+                }
+
+                if (host === "steampowered.com" || host.endsWith(".steampowered.com") ||
+                    host === "steamcommunity.com" || host.endsWith(".steamcommunity.com")) {
+                    return { tipo: "steam" }
+                }
+
+                return { tipo: "academico" }
+            } catch (err) {
+                return { tipo: "otro" }
+            }
         }
 
         function renderizarLinkPreview(link, compacto) {
@@ -1637,7 +1735,8 @@ async function cargarBootstrap() {
                     "<h3 class='hiloTitulo'>" + escapeHtml(h.titulo) + "</h3>" +
                     (h.isSensitive ? "<div class='avisoSensibleFeed'>⚠️ Contenido sensible · Abrí la publicación para visualizarlo</div>" :
                         (h.resumen ? "<p class='hiloResumen'>" + escapeHtml(h.resumen) + "</p>" : "")) +
-                    renderizarLinkPreview(h.link, true) +
+                    // En un hilo sensible tampoco mostramos la miniatura del enlace en el listado.
+                    (h.isSensitive ? "" : renderizarLinkPreview(h.link, true)) +
                     (h._optimista ? "<div class='estadoOptimista'>" + escapeHtml(h._estadoOptimista === "pendiente" ? "Confirmando publicación… No la vuelvas a publicar." : "Publicando…") + "</div>" : "") +
                     "<div class='hiloPie'>" +
                     avatarHtml(h.autor, h.autorFoto, "avatarChico") +
@@ -1886,7 +1985,8 @@ async function cargarBootstrap() {
                     if (nuevo) listaHilos.insertBefore(nuevo, listaHilos.firstChild)
                 }
 
-                const keyForo = etiquetaFiltroActual || "_todos"
+                invalidarCacheForo()
+                const keyForo = claveForoActual()
                 const cacheActual = foroCacheCliente.get(keyForo)
                 if (cacheActual && Array.isArray(cacheActual.hilos)) {
                     cacheActual.hilos = [hReal, ...cacheActual.hilos.filter(function (h) {
@@ -2154,12 +2254,21 @@ async function cargarBootstrap() {
                 "<span class='hiloFecha'>" + formatearFecha(h.fecha) + "</span>" +
                 "</div>" +
                 renderizarContenidoForo(h.contenido, !!h.isSensitive, "hilo-" + h.id) +
-                renderizarLinkPreview(h.link) +
+                // Si es sensible, la vista previa (embed de YouTube/Spotify) se agrega recién al revelar.
+                (h.isSensitive ? "" : renderizarLinkPreview(h.link)) +
                 "<div class='hiloLikeBar'>" + likeButtonHtml('hilo', h.id, h.likes, h.meGusta) + "</div>" +
                 "<div class='hiloAcciones'>" + acciones + "</div>"
 
             activarAccionesPublicacion(detalleHiloContenido)
             activarBotonLike(detalleHiloContenido)
+
+            const btnRevelar = detalleHiloContenido.querySelector(".revelarSensible")
+            if (btnRevelar && h.link) {
+                btnRevelar.addEventListener("click", function () {
+                    const bloque = detalleHiloContenido.querySelector(".bloqueSensible")
+                    if (bloque) bloque.insertAdjacentHTML("afterend", renderizarLinkPreview(h.link))
+                }, { once: true })
+            }
             hidratarImagenesExternas(detalleHiloContenido)
 
             const linkEl = detalleHiloContenido.querySelector(".linkPreview")
@@ -2300,6 +2409,9 @@ async function cargarBootstrap() {
 
             const contenido = inputRespuesta.value.trim()
             if (!contenido) return
+            // Fijamos el hilo al enviar: el reintento de 15 s no debe usar el hilo abierto en ese momento
+            // (si el usuario cambió de hilo, la respuesta se publicaba en el equivocado).
+            const hiloIdEnviado = String(hiloAbiertoId)
             const parentId = respuestaObjetivoActual
             const operacionId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ("op-" + Date.now() + "-" + Math.random().toString(36).slice(2))
             const tempId = "tmp-resp-" + Date.now() + "-" + Math.random().toString(36).slice(2)
@@ -2323,11 +2435,19 @@ async function cargarBootstrap() {
             msgRespuesta.innerText = ""
 
             const r = await llamarMutacionResiliente("crearRespuesta", {
-                hiloId: hiloAbiertoId,
+                hiloId: hiloIdEnviado,
                 parentId: parentId,
                 contenido: contenido,
                 operacionId: operacionId
             }, 3)
+
+            // Si mientras tanto se abrió otro hilo, no tocamos la pantalla actual (son otras respuestas).
+            if (String(hiloAbiertoId) !== hiloIdEnviado && !esErrorAmbiguo("crearRespuesta", r)) {
+                hiloCacheCliente.delete(hiloIdEnviado)
+                invalidarCacheForo()
+                if (!r.ok && r.error !== "sesion_invalida") alert("No se pudo publicar tu respuesta en el hilo anterior. " + mensajeError(r.error))
+                return
+            }
 
             if (r.ok) {
                 const indice = respuestasUI.findIndex(function (x) { return x.id === tempId })
@@ -2354,7 +2474,11 @@ async function cargarBootstrap() {
                     cacheHiloRespuesta.data.respuestas = respuestasUI.filter(function(x) { return !x._optimista })
                     cacheHiloRespuesta.actualizadoEn = Date.now()
                 }
-                foroCacheCliente.delete(etiquetaFiltroActual || "_todos")
+                invalidarCacheForo(function (hilos) {
+                    return hilos.map(function (h) {
+                        return String(h.id) === hiloIdEnviado ? Object.assign({}, h, { respuestas: Number(h.respuestas || 0) + 1 }) : h
+                    })
+                })
                 return
             }
 
@@ -2367,11 +2491,13 @@ async function cargarBootstrap() {
                 // El próximo verHilo reconciliará la respuesta gracias al contenido.
                 setTimeout(async function() {
                     const rr = await llamarMutacionResiliente("crearRespuesta", {
-                        hiloId: hiloAbiertoId,
+                        hiloId: hiloIdEnviado,
                         parentId: parentId,
                         contenido: contenido,
                         operacionId: operacionId
                     }, 2)
+                    hiloCacheCliente.delete(hiloIdEnviado)
+                    if (String(hiloAbiertoId) !== hiloIdEnviado) return
                     if (rr.ok) {
                         const indice = respuestasUI.findIndex(function(x) { return x.id === tempId })
                         const final = rr.respuesta || { id: rr.id, parentId: parentId, autor: optimistic.autor, autorFoto: optimistic.autorFoto, esPropio: true, contenido: contenido, fecha: optimistic.fecha, likes: 0, meGusta: false }
@@ -2381,7 +2507,7 @@ async function cargarBootstrap() {
                         msgRespuesta.innerText = ""
                         if (respuestaObjetivoActual === parentId) limpiarRespuestaObjetivo()
                     } else {
-                        if (hiloAbiertoId) abrirHilo(hiloAbiertoId, false)
+                        abrirHilo(hiloIdEnviado, false)
                     }
                 }, 15000)
                 return
@@ -2641,8 +2767,65 @@ async function cargarBootstrap() {
 
         // ==================== CERRAR SESIÓN ====================
 
+        // Vacía todo lo que quedó del usuario anterior: cachés en memoria, listas y vistas. Con
+        // borrarAlmacenamiento también borra la caché de perfil de localStorage (solicitudes e
+        // intercambios), para no dejarla en una compu compartida. El tema se conserva.
+        function limpiarDatosDeSesion(borrarAlmacenamiento) {
+            foroCacheCliente.clear()
+            hiloCacheCliente.clear()
+            chatCacheCliente.clear()
+            imagenesResueltasCliente.clear()
+            hilosPendientesConfirmacion.clear()
+            llamadasEnCurso.clear()
+
+            if (chatAbiertoId) cerrarChat(false)
+            if (idEditando) salirModoEdicion()
+            solicitudesUI = []
+            intercambiosUI = []
+            respuestasUI = []
+            hiloActualUI = null
+            hiloAbiertoId = null
+            ultimaActualizacionUsuario = 0
+            foroCargado = false
+            esModeradorActual = false
+            esAdminActual = false
+            fotoActual = ""
+            etiquetaFiltroActual = ""
+            busquedaForoActual = ""
+            paginaHilosActual = 0
+
+            ;[listaHilos, listaRespuestas, detalleHiloContenido, listaSolicitudes, listaIntercambios,
+                listaDenuncias, listaModeradores, avatarUserBar, avatarConfigPreview].forEach(function (el) {
+                if (el) el.innerHTML = ""
+            })
+            ;[userEmail, emailConfig, msg, msgPerfil, msgFoto, msgPasswordPerfil, msgRespuesta, msgHilo].forEach(function (el) {
+                if (el) el.innerText = ""
+            })
+            inputPseudonimo.value = ""
+            inputFiltroEtiqueta.value = ""
+            btnQuitarFiltro.style.display = "none"
+            btnCargarMas.style.display = "none"
+            btnIrModeracion.style.display = "none"
+            seccionModeradores.style.display = "none"
+            foroLista.style.display = "block"
+            foroDetalle.style.display = "none"
+            limpiarRespuestaObjetivo()
+
+            if (borrarAlmacenamiento) {
+                try {
+                    const claves = []
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const clave = localStorage.key(i)
+                        if (clave && clave.indexOf("medmar:perfil:") === 0) claves.push(clave)
+                    }
+                    claves.forEach(function (clave) { localStorage.removeItem(clave) })
+                } catch (_) {}
+            }
+        }
+
         logoutBtn.addEventListener("click", async function () {
             await supabaseClient.auth.signOut()
+            limpiarDatosDeSesion(true)
             ocultarSetupPerfil()
             resetearHistorialPorLogout()
             mostrarLogin()
@@ -2680,6 +2863,8 @@ async function cargarBootstrap() {
         function mostrarLogin() {
             if (modalSetupPerfil) ocultarSetupPerfil()
             detenerRealtimeUsuario()
+            // Sesión vencida o cierre: nada del usuario anterior queda en memoria ni en pantalla.
+            limpiarDatosDeSesion(false)
             app.style.display = "none"
             loginScreen.style.display = "block"
             seccionActual = "inicio"
@@ -3416,8 +3601,20 @@ async function cargarBootstrap() {
             if (publicacionEnCurso) return
 
             msg.innerText = ""
+            // El form es novalidate: el <select> de materia está oculto por el selector propio y el
+            // navegador bloqueaba el envío sin poder mostrar el error (no pasaba nada al tocar Publicar).
+            if (!form.materia.value) {
+                msg.innerText = "Elegí la materia de la solicitud."
+                const triggerMateria = form.materia.nextElementSibling && form.materia.nextElementSibling.querySelector(".selectorTrigger")
+                if (triggerMateria) triggerMateria.focus()
+                return
+            }
+            if (!tengo.value || !busco.value) {
+                msg.innerText = "Elegí la comisión que tenés y la que buscás."
+                return
+            }
             if (tengo.value === busco.value) {
-                alert("No podés buscar la misma comisión que tenés")
+                msg.innerText = mensajeError("misma_comision")
                 return
             }
 
@@ -3479,9 +3676,25 @@ async function cargarBootstrap() {
         formCambiarPassword.addEventListener('submit', async function(e) {
             e.preventDefault()
             const nueva = nuevaPasswordPerfil.value
+            const actual = passwordActualPerfil.value
             if (nueva.length < 8) {
                 msgPasswordPerfil.innerText = mensajeError('password_corta')
                 return
+            }
+            if (cuentaTienePassword() && !actual) {
+                msgPasswordPerfil.innerText = 'Escribí tu contraseña actual.'
+                return
+            }
+            // updateUser no pide la contraseña actual: la verificamos antes con un login, así una sesión
+            // abierta en una compu ajena no alcanza para cambiarla. (Con "Secure password change" activo
+            // en Supabase Auth, el servidor además exige reautenticación en sesiones viejas.)
+            if (actual) {
+                msgPasswordPerfil.innerText = 'Verificando tu contraseña actual…'
+                const verificacion = await supabaseClient.auth.signInWithPassword({ email: sesion.email, password: actual })
+                if (verificacion.error) {
+                    msgPasswordPerfil.innerText = mensajeError('password_actual_incorrecta')
+                    return
+                }
             }
             msgPasswordPerfil.innerText = 'Cambiando contraseña…'
             const { error } = await supabaseClient.auth.updateUser({ password: nueva })

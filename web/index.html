@@ -48,7 +48,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261115b">
+    <link rel="stylesheet" href="/css/styles.css?v=20261115c">
 </head>
 
 <body>
@@ -206,7 +206,9 @@
 
             <h2 class="seccion-titulo" id="tituloFormulario">Publicar una solicitud</h2>
 
-            <form id="form">
+            <!-- novalidate: el <select> de materia está oculto (selector propio) y el navegador no puede
+                 mostrar su globo de error; la validación se hace en app.js. -->
+            <form id="form" novalidate>
 
                 <label>Materia</label>
 
@@ -475,10 +477,12 @@
                     <h3 class="seccion-titulo">Seguridad de la cuenta</h3>
                     <p id="ayudaSeguridadCuenta" class="ayudaPerfil"></p>
                     <form id="formCambiarPassword" style="display:none" class="formSeguridad">
-                        <label>Contraseña actual</label>
-                        <div class="campoPassword">
-                            <input type="password" id="passwordActualPerfil" autocomplete="current-password">
-                            <button type="button" class="btnMostrarPassword" data-target="passwordActualPerfil" aria-label="Mostrar contraseña">👁</button>
+                        <div id="campoPasswordActual">
+                            <label for="passwordActualPerfil">Contraseña actual</label>
+                            <div class="campoPassword">
+                                <input type="password" id="passwordActualPerfil" autocomplete="current-password">
+                                <button type="button" class="btnMostrarPassword" data-target="passwordActualPerfil" aria-label="Mostrar contraseña">👁</button>
+                            </div>
                         </div>
                         <label>Nueva contraseña</label>
                         <div class="campoPassword">
@@ -617,7 +621,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261115b"></script>
+    <script src="/js/app.js?v=20261115c"></script>
 
 
 </body>

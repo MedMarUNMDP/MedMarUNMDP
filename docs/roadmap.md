@@ -1,16 +1,40 @@
 # Roadmap técnico
 
 Lista viva. Al terminar algo, borralo de acá (el historial queda en git).
+Detalle de los ítems marcados con códigos (A1, M3…) en [diagnostico-web-2026-11.md](diagnostico-web-2026-11.md).
 
 ## Seguridad (urgente)
 - [ ] Rotar la secret key de Supabase y el client secret de Google OAuth: estuvieron en texto plano en
-      `Datos.txt` y fueron leídos durante la configuración con Claude Code. Actualizar los secrets de las Edge Functions.
-- [ ] Borrar el bucket heredado `avatares` (vacío) desde Dashboard → Storage.
+      `Datos.txt` y fueron leídos durante la configuración con Claude Code. Actualizar los secrets de las Edge Functions
+      (`GMAIL_CLIENT_SECRET` si cambia el de Google).
 - [ ] Activar la protección contra contraseñas filtradas (Dashboard → Auth → Password security).
+- [ ] Activar *Secure password change* en Auth (Dashboard → Auth → Providers → Email): el servidor exige
+      reautenticación en sesiones viejas. La web ya verifica la contraseña actual (A3).
+- [ ] Borrar el bucket heredado `avatares` (vacío) desde Dashboard → Storage.
 - [ ] Probar un match real de punta a punta y confirmar que el mail llega (los `GMAIL_*` no se pudieron verificar).
+- [ ] Documentar en un ADR (y en el aviso del sitio) que los moderadores ven el mail real del autor denunciado (M12).
+
+## Web — bugs (diagnóstico 2026-11)
+- [ ] `abrirHilo`: ignorar respuestas viejas si cambió el hilo y no llamar a `verHilo` con caché fresca (M1, M2).
+- [ ] Placeholder en los selectores de comisión y foto PNG con fondo blanco al pasar a JPEG (M4, M5).
+
+## Web — UX, accesibilidad y limpieza
+- [ ] Reemplazar `alert` / `confirm` / `prompt` por mensajes en línea o un modal propio, sin "Detalle técnico" (M7).
+- [ ] Sacar del registro los mensajes de error pensados para el admin (M8).
+- [ ] Buscador del foro: texto de ayuda correcto, conectar o quitar el `datalist`, búsqueda sin tildes (`unaccent`) (M6).
+- [ ] Evitar el parpadeo del login con sesión y del tema (aplicar el tema en el `<head>`; default "según el dispositivo") (M10).
+- [ ] Selector de materia usable con teclado y lector de pantalla; `for` en los `<label>` del login (M11).
+- [ ] Chat: "ver mensajes anteriores" y destrabar el botón Enviar tras un envío ambiguo (M9).
+- [ ] Borrar código muerto (`cargarPerfil`, `cargarRolModerador`, `cargarSesionLocal`, `resetCodigo`,
+      `medmar:perfil:optimista`, clave duplicada en `mensajeError`) y ordenar los parches del final de `styles.css`.
+- [ ] Partir `web/js/app.js` en varios scripts por área (foro, intercambios, auth, …) cuidando el orden de carga;
+      cada archivo < 800 líneas mejora mucho el trabajo con Claude Code y entre colaboradores.
+- [ ] Tests de humo con Playwright (login, navegar vistas) contra un proyecto Supabase de prueba.
+- [ ] Evaluar un proyecto Supabase de staging (el plan Free permite 2 proyectos activos).
 
 ## Juegos
 - [ ] Integrar Inmune Survivors en la sección Juegos (`#vistaJuegos` → link/iframe a `/juegos/inmune-survivors/`).
+      Mientras tanto, la tarjeta de Inicio no debería prometer un ranking.
 - [ ] Ranking: tabla `puntajes_juegos` (RLS: select autenticados, sin insert directo) + acción `guardarPuntaje`
       con validación de plausibilidad (puntaje máximo por segundo jugado, duración mínima, rate limit) + `rankingJuego`.
 - [ ] Inmune Survivors: corregir bugs del diagnóstico v3.4 (NaN en Estallido respiratorio, mejoras cuyo efecto no
@@ -18,13 +42,10 @@ Lista viva. Al terminar algo, borralo de acá (el historial queda en git).
 - [ ] Convertir los `.png` de tejidos (~1,8 MB c/u) a `.webp` y usar solo esos.
 - [ ] Unificar versiones (`?build=`, `iniciar_juego.py`, títulos de `.bat`).
 
-## Web
-- [ ] Partir `web/js/app.js` en varios scripts por área (foro, intercambios, auth, …) cuidando el orden de carga;
-      cada archivo < 800 líneas mejora mucho el trabajo con Claude Code y entre colaboradores.
-- [ ] Tests de humo con Playwright (login, navegar vistas) contra un proyecto Supabase de prueba.
-- [ ] Evaluar un proyecto Supabase de staging (el plan Free permite 2 proyectos activos).
-
 ## Backend
+- [ ] Quitar `legacyLogin` (acción, RPC `get_legacy_password` y tabla `private.legacy_password_migrations`, que ya
+      está vacía): hoy cada login fallido gasta una invocación extra (M3).
+- [ ] Etiquetas del foro sin leer 1000 hilos por carga (vista o tabla de etiquetas) y sin `count: 'exact'` por página (M13).
 - [ ] Dividir `functions/api/index.ts` en módulos (`foro.ts`, `intercambios.ts`, …) importados por `index.ts`.
 - [ ] Registrar las migraciones ya aplicadas en `supabase_migrations` (`supabase migration repair`) antes de
       usar `supabase db push`: hoy el historial está vacío.
