@@ -57,15 +57,46 @@ const ALLOWED_HOSTS = [
   'prnt.sc','lightshot.com','lightshot.org','pinetools.com','screenapp.io','imgur.com','imgur.io','ibb.co','postimg.cc','imgbb.com','imageshack.com','imgbox.com',
 ]
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Content-Type': 'application/json; charset=utf-8',
+// CORS: solo los orígenes del sitio (y el servidor local de desarrollo) pueden llamar a la API desde un navegador.
+// https://supabase.com/docs/guides/functions/cors
+const ALLOWED_ORIGINS = new Set([
+  'https://medmar.com.ar',
+  'https://www.medmar.com.ar',
+  'https://medmarunmdp.github.io',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+])
+const MAX_BODY_BYTES = 1_000_000
+const MAX_MATERIA = 120
+const MAX_PHOTO_BYTES = 256 * 1024
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+function corsHeadersFor(req: Request): Record<string, string> {
+  const origin = req.headers.get('Origin') || ''
+  return {
+    'Access-Control-Allow-Origin': ALLOWED_ORIGINS.has(origin) ? origin : 'https://medmar.com.ar',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Max-Age': '86400',
+    'Vary': 'Origin',
+  }
 }
 
 function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: corsHeaders })
+  return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8' } })
+}
+
+function uuidOrEmpty(value: unknown) {
+  const text = String(value || '').trim()
+  return UUID_RE.test(text) ? text.toLowerCase() : ''
+}
+
+function validMateria(value: string) {
+  return value.length > 0 && value.length <= MAX_MATERIA && /^[\p{L}\p{N} ,.°()'-]+$/u.test(value)
+}
+
+function pgCode(error: unknown) {
+  return String((error as { code?: string } | null)?.code || '')
 }
 
 function adminClient(): SupabaseClient {
@@ -98,7 +129,11 @@ async function rateLimit(admin: SupabaseClient, action: string, userId: string) 
     p_limit: rule[0],
     p_window_seconds: rule[1],
   })
-  if (error) return null
+  if (error) {
+    // Falla abierta a propósito (disponibilidad), pero queda registrado en los logs de la función.
+    console.error('rate_limit_unavailable', action, error.message)
+    return null
+  }
   const row = Array.isArray(data) ? data[0] : data
   if (!row?.allowed) return json({ ok: false, error: 'rate_limit', retryAfter: Number(row?.retry_after || 1) }, 200)
   return null
@@ -172,10 +207,12 @@ function validOperationId(value: unknown) {
 }
 
 function cleanTags(raw: unknown) {
-  const text = String(raw || '')
-  return [...new Set(text.split(',').map(x => x.trim()).filter(Boolean))]
+  // En minúsculas: el filtro por etiqueta compara en minúsculas (`contains`), así una etiqueta "Anatomía" no queda inencontrable.
+  const text = String(raw || '').normalize('NFC').toLowerCase()
+  return [...new Set(text.split(',')
+    .map(x => x.replace(/[^\p{L}\p{N} _-]/gu, '').trim().replace(/\s+/g, ' ').slice(0, MAX_TAG_LENGTH))
+    .filter(Boolean))]
     .slice(0, MAX_TAGS)
-    .map(x => x.slice(0, MAX_TAG_LENGTH))
 }
 
 function safeLink(raw: unknown) {
@@ -447,6 +484,7 @@ async function getThreadPage(client: SupabaseClient, userId: string, etiqueta: s
 async function obtenerChat(user: User, client: SupabaseClient, admin: SupabaseClient, conversacionId: string, cantidadCliente: number | null) {
   const rl = await rateLimit(admin, 'obtenerChat', user.id)
   if (rl) return rl
+  if (!conversacionId) return json({ ok: false, error: 'chat_no_encontrado' })
   const { data: conv, error } = await client.from('conversaciones')
     .select('id,intercambio_id,materia,created_at,ultima_actividad,cantidad_mensajes')
     .eq('id', conversacionId).single()
@@ -459,10 +497,12 @@ async function obtenerChat(user: User, client: SupabaseClient, admin: SupabaseCl
 
   const [{ data: parts, error: partsError }, { data: messages, error: msgError }] = await Promise.all([
     client.from('conversacion_participantes').select('user_id').eq('conversacion_id', conversacionId),
-    client.from('mensajes').select('id,remitente_id,texto,created_at,operation_id').eq('conversacion_id', conversacionId).order('created_at', { ascending: true }).limit(100),
+    // Los 100 mensajes MÁS RECIENTES (antes se pedían los 100 más viejos y los nuevos dejaban de verse).
+    client.from('mensajes').select('id,remitente_id,texto,created_at,operation_id').eq('conversacion_id', conversacionId).order('created_at', { ascending: false }).limit(100),
   ])
   if (partsError) throw partsError
   if (msgError) throw msgError
+  messages?.reverse()
   const pmap = await profileMap(client, (parts || []).map((p: any) => String(p.user_id)))
   const participantes = (parts || []).map((p: any) => {
     const prof = pmap.get(String(p.user_id))
@@ -498,7 +538,12 @@ async function handle(req: Request, body: any) {
     client = auth.client
   }
 
-  if (action === 'health') return json({ ok: true, service: 'medmar-api', version: 'supabase-v1' })
+  if (action === 'health') {
+    // Consulta mínima a Postgres: el keep-alive semanal (GitHub Actions) llama acá para que el
+    // proyecto del plan Free no se pause por inactividad.
+    const { error } = await admin.from('rate_limit_buckets').select('bucket_key', { head: true }).limit(1)
+    return json({ ok: !error, service: 'medmar-api', version: 'supabase-v2', db: error ? 'error' : 'ok' })
+  }
   if (action === 'legacyLogin') return legacyLogin(admin, String(body?.email || ''), String(body?.password || ''))
   if (!user) return json({ ok: false, error: 'sesion_invalida' })
 
@@ -523,7 +568,8 @@ async function handle(req: Request, body: any) {
     }
     case 'verHilo': {
       const rl = await rateLimit(admin, action, user.id); if (rl) return rl
-      const id = String(body.id || '')
+      const id = uuidOrEmpty(body.id)
+      if (!id) return json({ ok: false, error: 'no_encontrado' })
       const { data: h, error } = await client.from('hilos').select('id,autor_id,es_anonimo,titulo,contenido,etiquetas,link,is_sensitive,created_at,respuestas').eq('id', id).single()
       if (error || !h) return json({ ok:false,error:'no_encontrado' })
       const { data: rs, error: re } = await client.from('respuestas').select('id,autor_id,es_anonimo,contenido,created_at,operation_id,parent_id').eq('hilo_id', id).order('created_at', { ascending: true }).limit(500)
@@ -564,7 +610,7 @@ async function handle(req: Request, body: any) {
     }
     case 'crearRespuesta': {
       const rl=await rateLimit(admin,action,user.id); if(rl)return rl
-      const hiloId=String(body.hiloId||''), contenido=String(body.contenido||'').trim(), operationId=String(body.operacionId||'')
+      const hiloId=uuidOrEmpty(body.hiloId), contenido=String(body.contenido||'').trim(), operationId=String(body.operacionId||'')
       const parentId=String(body.parentId||'').trim()
       if(!validOperationId(operationId)) return json({ok:false,error:'datos_invalidos'})
       const cached=await getIdempotent(admin,user.id,operationId); if(cached)return json(cached)
@@ -583,11 +629,19 @@ async function handle(req: Request, body: any) {
       const operationId=String(body.operacionId||''); if(!validOperationId(operationId)) return json({ok:false,error:'datos_invalidos'})
       const cached=await getIdempotent(admin,user.id,operationId); if(cached)return json(cached)
       const materia=String(body.materia||'').trim(), tengo=Number(body.tengo||0), busco=Number(body.busco||0)
-      if(!materia||tengo<1||tengo>40||busco<1||busco>40||tengo===busco)return json({ok:false,error:tengo===busco?'misma_comision':'datos_invalidos'})
+      if(!validMateria(materia)||!Number.isInteger(tengo)||!Number.isInteger(busco)||tengo<1||tengo>40||busco<1||busco>40||tengo===busco)return json({ok:false,error:tengo===busco?'misma_comision':'datos_invalidos'})
       const {data:duplicate}=await client.from('solicitudes').select('id').eq('user_id',user.id).eq('status','activa').eq('materia',materia).limit(1)
       if((duplicate||[]).length)return json({ok:false,error:'ya_tenes_otra'})
       const {data,error}=await admin.from('solicitudes').insert({user_id:user.id,materia,tengo,busco,status:'activa',operation_id:operationId}).select('id').single()
-      if(error){if((error as any).code==='23505'){const {data:existing}=await client.from('solicitudes').select('id,status,exchange_id').eq('user_id',user.id).eq('operation_id',operationId).single(); if(existing){const response={ok:true,id:String(existing.id),emparejado:existing.status==='completada',intercambioId:existing.exchange_id};await saveIdempotent(admin,user.id,action,operationId,response);return json(response)}}throw error}
+      if(error){
+        if(pgCode(error)==='23505'){
+          const {data:existing}=await client.from('solicitudes').select('id,status,exchange_id').eq('user_id',user.id).eq('operation_id',operationId).maybeSingle()
+          if(existing){const response={ok:true,id:String(existing.id),emparejado:existing.status==='completada',intercambioId:existing.exchange_id};await saveIdempotent(admin,user.id,action,operationId,response);return json(response)}
+          // Choque con el índice único (usuario, materia) de solicitudes activas: carrera entre dos pestañas.
+          return json({ok:false,error:'ya_tenes_otra'})
+        }
+        throw error
+      }
       const match=await maybeMatch(admin,user.id,materia)
       const response={ok:true,id:String(data.id),emparejado:!!match.matched,intercambioId:match.intercambioId||null,conversacionId:match.conversacionId||null}
       await saveIdempotent(admin,user.id,action,operationId,response)
@@ -595,20 +649,26 @@ async function handle(req: Request, body: any) {
     }
     case 'editar': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      const id=String(body.id||''), materia=String(body.materia||'').trim(),tengo=Number(body.tengo||0),busco=Number(body.busco||0)
-      if(!id||!materia||tengo<1||tengo>40||busco<1||busco>40||tengo===busco)return json({ok:false,error:tengo===busco?'misma_comision':'datos_invalidos'})
-      const {data,error}=await admin.from('solicitudes').update({materia,tengo,busco}).eq('id',id).eq('user_id',user.id).eq('status','activa').select('id').single()
-      if(error||!data)return json({ok:false,error:'no_encontrado'})
+      const id=uuidOrEmpty(body.id), materia=String(body.materia||'').trim(),tengo=Number(body.tengo||0),busco=Number(body.busco||0)
+      if(!id||!validMateria(materia)||!Number.isInteger(tengo)||!Number.isInteger(busco)||tengo<1||tengo>40||busco<1||busco>40||tengo===busco)return json({ok:false,error:tengo===busco?'misma_comision':'datos_invalidos'})
+      const {data,error}=await admin.from('solicitudes').update({materia,tengo,busco}).eq('id',id).eq('user_id',user.id).eq('status','activa').select('id').maybeSingle()
+      if(error&&pgCode(error)==='23505')return json({ok:false,error:'ya_tenes_otra'})
+      if(error)throw error
+      if(!data)return json({ok:false,error:'no_encontrado'})
       const match=await maybeMatch(admin,user.id,materia)
       return json({ok:true,emparejado:!!match.matched,intercambioId:match.intercambioId||null,conversacionId:match.conversacionId||null})
     }
     case 'borrar': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      const id=String(body.id||''); const {data,error}=await admin.from('solicitudes').update({status:'cancelada',updated_at:new Date().toISOString()}).eq('id',id).eq('user_id',user.id).eq('status','activa').select('id').single(); if(error||!data)return json({ok:false,error:'no_encontrado'}); return json({ok:true})
+      const id=uuidOrEmpty(body.id); if(!id)return json({ok:false,error:'no_encontrado'})
+      const {data,error}=await admin.from('solicitudes').update({status:'cancelada',updated_at:new Date().toISOString()}).eq('id',id).eq('user_id',user.id).eq('status','activa').select('id').maybeSingle()
+      if(error)throw error
+      if(!data)return json({ok:false,error:'no_encontrado'})
+      return json({ok:true})
     }
     case 'borrarHilo': {
       const rl = await rateLimit(admin, action, user.id); if (rl) return rl
-      const id = String(body.id || '')
+      const id = uuidOrEmpty(body.id)
       if (!id) return json({ ok: false, error: 'datos_invalidos' })
 
       const { data: hilo, error: hiloError } = await admin
@@ -622,28 +682,12 @@ async function handle(req: Request, body: any) {
       const puedeBorrar = String(hilo.autor_id) === user.id || await isModerator(admin, user.id)
       if (!puedeBorrar) return json({ ok: false, error: 'no_autorizado' })
 
-      // Denuncias no tienen FK hacia publicaciones, así que limpiamos las
-      // denuncias asociadas antes de borrar el hilo y sus respuestas en cascada.
-      const { data: respuestas, error: respuestasError } = await admin
-        .from('respuestas')
-        .select('id')
-        .eq('hilo_id', id)
-      if (respuestasError) throw respuestasError
-
-      const idsDenuncia = [id, ...(respuestas || []).map((r:any) => String(r.id))]
-      const { error: denunciasError } = await admin
-        .from('denuncias')
-        .delete()
-        .in('id_publicacion', idsDenuncia)
-      if (denunciasError) throw denunciasError
-
-      const { error } = await admin.from('hilos').delete().eq('id', id)
-      if (error) throw error
+      await borrarPublicacion(admin, 'hilo', id)
       return json({ ok: true })
     }
     case 'borrarRespuesta': {
       const rl = await rateLimit(admin, action, user.id); if (rl) return rl
-      const id = String(body.id || '')
+      const id = uuidOrEmpty(body.id)
       if (!id) return json({ ok: false, error: 'datos_invalidos' })
 
       const { data: respuesta, error: respuestaError } = await admin
@@ -657,14 +701,7 @@ async function handle(req: Request, body: any) {
       const puedeBorrar = String(respuesta.autor_id) === user.id || await isModerator(admin, user.id)
       if (!puedeBorrar) return json({ ok: false, error: 'no_autorizado' })
 
-      const { error: denunciasError } = await admin
-        .from('denuncias')
-        .delete()
-        .eq('id_publicacion', id)
-      if (denunciasError) throw denunciasError
-
-      const { error } = await admin.from('respuestas').delete().eq('id', id)
-      if (error) throw error
+      await borrarPublicacion(admin, 'respuesta', id)
       return json({ ok: true })
     }
     case 'misSolicitudes': {
@@ -676,10 +713,10 @@ async function handle(req: Request, body: any) {
       const {data,error}=await client.from('intercambio_participantes').select('intercambio_id,user_id,tengo,busco,intercambios!inner(id,materia,created_at,completed_at)').eq('user_id',user.id).order('intercambio_id',{ascending:false}); if(error)throw error
       const ids=[...new Set((data||[]).map((x:any)=>String(x.intercambio_id)))]; const {data:parts}=ids.length?await client.from('intercambio_participantes').select('intercambio_id,user_id,tengo,busco').in('intercambio_id',ids):{data:[]}; const pmap=await profileMap(client,(parts||[]).map((x:any)=>String(x.user_id))); const convs=ids.length?(await client.from('conversaciones').select('id,intercambio_id').in('intercambio_id',ids)).data||[]:[];const cm=new Map(convs.map((x:any)=>[String(x.intercambio_id),String(x.id)]));const map=new Map<string,any>();for(const ex of data||[]){const id=String(ex.intercambio_id);if(!map.has(id))map.set(id,{id,materia:ex.intercambios.materia,fecha:ex.intercambios.completed_at||ex.intercambios.created_at,conversacionId:cm.get(id)||null,participantes:[]})}for(const p of parts||[]){const ex=map.get(String(p.intercambio_id));if(!ex)continue;const prof=pmap.get(String(p.user_id));ex.participantes.push({pseudonimo:prof?.pseudonimo||'Estudiante',foto:prof?.foto_url||'',esVos:String(p.user_id)===user.id,tengo:Number(p.tengo),busco:Number(p.busco)})}return json({ok:true,intercambios:[...map.values()]})
     }
-    case 'obtenerChat': return obtenerChat(user,client,admin,String(body.conversacionId||''),body.cantidadMensajes===''||body.cantidadMensajes===undefined?null:Number(body.cantidadMensajes))
+    case 'obtenerChat': return obtenerChat(user,client,admin,uuidOrEmpty(body.conversacionId),body.cantidadMensajes===''||body.cantidadMensajes===undefined?null:Number(body.cantidadMensajes))
     case 'enviarMensaje': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      const conversacionId=String(body.conversacionId||''),texto=String(body.texto||'').trim(),operationId=String(body.operacionId||''); if(!conversacionId||!texto||texto.length>MAX_MESSAGE||!validOperationId(operationId))return json({ok:false,error:'mensaje_invalido'})
+      const conversacionId=uuidOrEmpty(body.conversacionId),texto=String(body.texto||'').trim(),operationId=String(body.operacionId||''); if(!conversacionId||!texto||texto.length>MAX_MESSAGE||!validOperationId(operationId))return json({ok:false,error:'mensaje_invalido'})
       const cached=await getIdempotent(admin,user.id,operationId);if(cached)return json(cached)
       const {data:conv,error:convErr}=await client.from('conversaciones').select('id,cantidad_mensajes,ultima_actividad').eq('id',conversacionId).single();if(convErr||!conv)return json({ok:false,error:'chat_no_encontrado'});if(Date.now()-new Date(conv.ultima_actividad).getTime()>CHAT_DAYS*86400000)return json({ok:false,error:'chat_expirado'});if(Number(conv.cantidad_mensajes)>=MAX_CHAT_MESSAGES)return json({ok:false,error:'chat_lleno'})
       const {data,error}=await admin.from('mensajes').insert({conversacion_id:conversacionId,remitente_id:user.id,texto,operation_id:operationId}).select('id,created_at').single();if(error){if((error as any).code==='23505'){const {data:existing}=await client.from('mensajes').select('id,created_at,texto').eq('operation_id',operationId).single();if(existing)return json({ok:true,repetido:true,cantidadMensajes:Number(conv.cantidad_mensajes),mensaje:{id:String(existing.id),pseudonimo:'Vos',esVos:true,texto:existing.texto,fecha:existing.created_at,operacionId:operationId}})}throw error}
@@ -698,6 +735,8 @@ async function handle(req: Request, body: any) {
       if((duplicates||[]).length) return json({ok:false,error:'pseudonimo_en_uso'})
       const {data,error}=await admin.from('profiles').update({pseudonimo,foto_url:foto||null,profile_completed:true}).eq('id',user.id).select('pseudonimo,foto_url,profile_completed').single()
       if(error){ if((error as any).code==='23505') return json({ok:false,error:'pseudonimo_en_uso'}); throw error }
+      const prefijoFotos=`${SUPABASE_URL}/storage/v1/object/public/profile-photos/`
+      await borrarFotosAnteriores(admin,user.id,foto.startsWith(prefijoFotos)?foto.slice(prefijoFotos.length).split('?')[0]:'')
       return json({ok:true,perfil:{pseudonimo:data.pseudonimo,foto:data.foto_url||'',profileCompleted:true}})
     }
     case 'resolverImagen': {
@@ -713,20 +752,54 @@ async function handle(req: Request, body: any) {
     }
     case 'actualizarPseudonimo': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      const pseudonimo=String(body.pseudonimo||'').trim();if(!/^[A-Za-zÀ-ÿ0-9 _.-]{3,24}$/.test(pseudonimo))return json({ok:false,error:'pseudonimo_invalido'});const {data,error}=await admin.from('profiles').update({pseudonimo}).eq('id',user.id).select('pseudonimo').single();if(error){if((error as any).code==='23505')return json({ok:false,error:'pseudonimo_en_uso'});throw error}return json({ok:true,pseudonimo:data.pseudonimo})
+      const pseudonimo=String(body.pseudonimo||'').trim().normalize('NFC');if(!/^[A-Za-zÀ-ÿ0-9 _.-]{3,24}$/.test(pseudonimo))return json({ok:false,error:'pseudonimo_invalido'});const {data,error}=await admin.from('profiles').update({pseudonimo}).eq('id',user.id).select('pseudonimo').single();if(error){if((error as any).code==='23505')return json({ok:false,error:'pseudonimo_en_uso'});throw error}return json({ok:true,pseudonimo:data.pseudonimo})
     }
     case 'actualizarFoto': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      const raw=String(body.imagen||'');if(!raw||raw.length>3_000_000)return json({ok:false,error:'imagen_muy_grande'});const bytes=Uint8Array.from(atob(raw),c=>c.charCodeAt(0));const path=`${user.id}/${crypto.randomUUID()}.jpg`;const {error}=await admin.storage.from('profile-photos').upload(path,bytes,{contentType:'image/jpeg',cacheControl:'86400',upsert:false});if(error)throw error;const url=`${SUPABASE_URL}/storage/v1/object/public/profile-photos/${path}`;const {error:pe}=await admin.from('profiles').update({foto_url:url}).eq('id',user.id);if(pe)throw pe;return json({ok:true,foto:url})
+      // El cliente ya recorta y comprime a 256x256 JPEG; acá se valida igual (tamaño y firma real del archivo)
+      // porque la API es la única puerta de escritura al bucket.
+      const raw=String(body.imagen||'')
+      if(!raw||raw.length>Math.ceil(MAX_PHOTO_BYTES*4/3)+4)return json({ok:false,error:'imagen_muy_grande'})
+      let bytes:Uint8Array
+      try { bytes=Uint8Array.from(atob(raw),c=>c.charCodeAt(0)) } catch { return json({ok:false,error:'imagen_invalida'}) }
+      const isJpeg=bytes.length>3&&bytes[0]===0xff&&bytes[1]===0xd8&&bytes[2]===0xff
+      if(!isJpeg)return json({ok:false,error:'imagen_invalida'})
+      const path=`${user.id}/${crypto.randomUUID()}.jpg`
+      const {error}=await admin.storage.from('profile-photos').upload(path,bytes,{contentType:'image/jpeg',cacheControl:'31536000',upsert:false});if(error)throw error
+      const url=`${SUPABASE_URL}/storage/v1/object/public/profile-photos/${path}`
+      const {error:pe}=await admin.from('profiles').update({foto_url:url}).eq('id',user.id);if(pe)throw pe
+      await borrarFotosAnteriores(admin,user.id,path)
+      return json({ok:true,foto:url})
     }
     case 'toggleLike': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      const tipo=String(body.tipo||'').toLowerCase(),id=String(body.id||'');if(!['hilo','respuesta'].includes(tipo)||!id)return json({ok:false,error:'datos_invalidos'})
-      const table=tipo==='hilo'?'likes_hilos':'likes_respuestas';const key=tipo==='hilo'?'hilo_id':'respuesta_id';const {data:existing}=await client.from(table).select('*').eq(key,id).eq('user_id',user.id).maybeSingle();let liked=false;if(existing){const {error}=await admin.from(table).delete().eq(key,id).eq('user_id',user.id);if(error)throw error}else{const {error}=await admin.from(table).insert({[key]:id,user_id:user.id});if(error)throw error;liked=true}const {count,error}=await client.from(table).select('*',{count:'exact',head:true}).eq(key,id);if(error)throw error;return json({ok:true,liked,likes:Number(count||0)})
+      const tipo=String(body.tipo||'').toLowerCase(),id=uuidOrEmpty(body.id);if(!['hilo','respuesta'].includes(tipo)||!id)return json({ok:false,error:'datos_invalidos'})
+      const table=tipo==='hilo'?'likes_hilos':'likes_respuestas';const key=tipo==='hilo'?'hilo_id':'respuesta_id'
+      const {data:existing}=await client.from(table).select(key).eq(key,id).eq('user_id',user.id).maybeSingle()
+      let liked=false
+      if(existing){const {error}=await admin.from(table).delete().eq(key,id).eq('user_id',user.id);if(error)throw error}
+      else{
+        const {error}=await admin.from(table).insert({[key]:id,user_id:user.id})
+        // 23505: doble clic / otra pestaña ya dio like. 23503: la publicación ya no existe.
+        if(error&&pgCode(error)==='23503')return json({ok:false,error:'no_encontrado'})
+        if(error&&pgCode(error)!=='23505')throw error
+        liked=true
+      }
+      const {count,error}=await client.from(table).select(key,{count:'exact',head:true}).eq(key,id);if(error)throw error
+      return json({ok:true,liked,likes:Number(count||0)})
     }
     case 'denunciar': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      const tipo=String(body.tipo||''),id=String(body.id||''),motivo=String(body.motivo||'').trim().slice(0,300);if(!['hilo','respuesta'].includes(tipo)||!id)return json({ok:false,error:'datos_invalidos'});const {error}=await admin.from('denuncias').insert({tipo,id_publicacion:id,denunciante_id:user.id,motivo});if(error)throw error;return json({ok:true})
+      const tipo=String(body.tipo||''),id=uuidOrEmpty(body.id),motivo=String(body.motivo||'').trim().slice(0,300)
+      if(!['hilo','respuesta'].includes(tipo)||!id)return json({ok:false,error:'datos_invalidos'})
+      const {data:pub,error:pubError}=await admin.from(tipo==='hilo'?'hilos':'respuestas').select('id').eq('id',id).maybeSingle()
+      if(pubError)throw pubError
+      if(!pub)return json({ok:false,error:'no_encontrado'})
+      // Una sola denuncia pendiente por persona y publicación: evita inflar la cola de moderación.
+      const {data:previa}=await admin.from('denuncias').select('id').eq('id_publicacion',id).eq('denunciante_id',user.id).eq('estado','pendiente').limit(1)
+      if((previa||[]).length)return json({ok:true,repetida:true})
+      const {error}=await admin.from('denuncias').insert({tipo,id_publicacion:id,denunciante_id:user.id,motivo});if(error)throw error
+      return json({ok:true})
     }
     case 'soyModerador': { const rl=await rateLimit(admin,action,user.id);if(rl)return rl; return json({ok:true,esModerador:await isModerator(admin,user.id),esAdmin:await isAdmin(admin,user.id)}) }
     case 'listarModeradores': {
@@ -739,10 +812,30 @@ async function handle(req: Request, body: any) {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl;if(!(await isAdmin(admin,user.id)))return json({ok:false,error:'no_autorizado'});const email=String(body.email||'').trim().toLowerCase();const u=await findUserByEmail(admin,email);if(!u)return json({ok:false,error:'no_encontrado'});if(String(u.email).toLowerCase()==='medmarunmdp@gmail.com')return json({ok:false,error:'no_autorizado'});const {error}=await admin.from('profiles').update({is_moderator:false}).eq('id',u.id);if(error)throw error;return json({ok:true})
     }
     case 'listarDenuncias': {
-      const rl=await rateLimit(admin,action,user.id);if(rl)return rl;if(!(await isModerator(admin,user.id)))return json({ok:false,error:'no_autorizado'});const {data,error}=await client.from('denuncias').select('id,tipo,id_publicacion,denunciante_id,motivo,created_at,estado,resuelto_por,fecha_resolucion').eq('estado','pendiente').order('created_at',{ascending:true});if(error)throw error;return json({ok:true,denuncias:data||[]})
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      if(!(await isModerator(admin,user.id)))return json({ok:false,error:'no_autorizado'})
+      const {data,error}=await client.from('denuncias').select('id,tipo,id_publicacion,motivo,created_at').eq('estado','pendiente').order('created_at',{ascending:true}).limit(100)
+      if(error)throw error
+      return json({ok:true,denuncias:await enriquecerDenuncias(admin,data||[])})
     }
     case 'resolverDenuncia': {
-      const rl=await rateLimit(admin,action,user.id);if(rl)return rl;if(!(await isModerator(admin,user.id)))return json({ok:false,error:'no_autorizado'});const id=String(body.id||''),accion=String(body.accion||'');if(!['descartar','eliminar'].includes(accion))return json({ok:false,error:'datos_invalidos'});const {data:rep}=await admin.from('denuncias').select('id,tipo,id_publicacion').eq('id',id).single();if(!rep)return json({ok:false,error:'no_encontrado'});if(accion==='eliminar'){if(rep.tipo==='hilo'){const {error}=await admin.from('hilos').delete().eq('id',rep.id_publicacion);if(error)throw error}else{const {error}=await admin.from('respuestas').delete().eq('id',rep.id_publicacion);if(error)throw error}}const {error}=await admin.from('denuncias').update({estado:accion==='eliminar'?'eliminada':'descartada',resuelto_por:user.id,fecha_resolucion:new Date().toISOString()}).eq('id',id);if(error)throw error;return json({ok:true})
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      if(!(await isModerator(admin,user.id)))return json({ok:false,error:'no_autorizado'})
+      const id=uuidOrEmpty(body.id),accion=String(body.accion||'')
+      if(!id||!['descartar','eliminar'].includes(accion))return json({ok:false,error:'datos_invalidos'})
+      const {data:rep,error:repError}=await admin.from('denuncias').select('id,tipo,id_publicacion,estado').eq('id',id).maybeSingle()
+      if(repError)throw repError
+      if(!rep)return json({ok:false,error:'no_encontrado'})
+      const resolucion={resuelto_por:user.id,fecha_resolucion:new Date().toISOString()}
+      if(accion==='eliminar'){
+        // Se marcan como resueltas todas las denuncias pendientes de esa publicación y después se la borra.
+        const {error:upError}=await admin.from('denuncias').update({estado:'eliminada',...resolucion}).eq('id_publicacion',rep.id_publicacion).eq('estado','pendiente')
+        if(upError)throw upError
+        await borrarPublicacion(admin,rep.tipo==='hilo'?'hilo':'respuesta',String(rep.id_publicacion),false)
+      } else {
+        const {error}=await admin.from('denuncias').update({estado:'descartada',...resolucion}).eq('id',id);if(error)throw error
+      }
+      return json({ok:true})
     }
     default: return json({ok:false,error:'accion_invalida'})
   }
@@ -755,19 +848,100 @@ async function getOrBuildThreadResponse(client: SupabaseClient, userId: string, 
 async function getOrBuildResponseResponse(client: SupabaseClient,userId:string,responseId:string,newlyInserted=false){const {data,error}=await client.from('respuestas').select('id,autor_id,es_anonimo,contenido,created_at,operation_id,parent_id').eq('id',responseId).single();if(error||!data)throw error||new Error('response not found');const prof=await profileMap(client,[String(data.autor_id)]);const p=prof.get(String(data.autor_id));return {ok:true,id:String(data.id),respuesta:{id:String(data.id),parentId:data.parent_id?String(data.parent_id):null,autor:data.es_anonimo?'Anónimo':(p?.pseudonimo||'Estudiante'),autorFoto:data.es_anonimo?'':(p?.foto_url||''),esPropio:String(data.autor_id)===userId,contenido:data.contenido,fecha:data.created_at,likes:0,meGusta:false,operacionId:String(data.operation_id||'')}}
 }
 
+// Borra un hilo o una respuesta. Las respuestas hijas caen por FK `on delete cascade`; como `denuncias`
+// no tiene FK hacia publicaciones, primero se limpian las denuncias de todo lo que se va a borrar.
+async function borrarPublicacion(admin: SupabaseClient, tipo: 'hilo' | 'respuesta', id: string, borrarDenuncias = true) {
+  if (borrarDenuncias) {
+    let ids: string[] = [id]
+    if (tipo === 'hilo') {
+      const { data, error } = await admin.from('respuestas').select('id').eq('hilo_id', id)
+      if (error) throw error
+      ids = ids.concat((data || []).map((r: any) => String(r.id)))
+    } else {
+      const { data: actual, error: e1 } = await admin.from('respuestas').select('hilo_id').eq('id', id).maybeSingle()
+      if (e1) throw e1
+      if (actual) {
+        const { data: todas, error: e2 } = await admin.from('respuestas').select('id,parent_id').eq('hilo_id', actual.hilo_id)
+        if (e2) throw e2
+        const hijos = new Map<string, string[]>()
+        for (const r of todas || []) {
+          if (!r.parent_id) continue
+          const p = String(r.parent_id)
+          if (!hijos.has(p)) hijos.set(p, [])
+          hijos.get(p)!.push(String(r.id))
+        }
+        for (let i = 0; i < ids.length; i++) ids.push(...(hijos.get(ids[i]) || []))
+      }
+    }
+    const { error } = await admin.from('denuncias').delete().in('id_publicacion', ids)
+    if (error) throw error
+  }
+  const { error } = await admin.from(tipo === 'hilo' ? 'hilos' : 'respuestas').delete().eq('id', id)
+  if (error) throw error
+}
+
+// Mantiene una sola foto por usuario en el bucket (ahorra storage del plan Free).
+async function borrarFotosAnteriores(admin: SupabaseClient, userId: string, conservar: string) {
+  try {
+    const { data, error } = await admin.storage.from('profile-photos').list(userId, { limit: 100 })
+    if (error) throw error
+    const viejas = (data || []).map(o => `${userId}/${o.name}`).filter(p => p !== conservar)
+    if (viejas.length) await admin.storage.from('profile-photos').remove(viejas)
+  } catch (err) {
+    console.warn('old_photos_cleanup_failed', String(err))
+  }
+}
+
+// El panel de moderación necesita ver qué se denunció (título/contenido/autor) además de la denuncia.
+async function enriquecerDenuncias(admin: SupabaseClient, denuncias: any[]) {
+  const idsHilos = denuncias.filter(d => d.tipo === 'hilo').map(d => String(d.id_publicacion))
+  const idsResp = denuncias.filter(d => d.tipo === 'respuesta').map(d => String(d.id_publicacion))
+  const [hilos, resps] = await Promise.all([
+    idsHilos.length ? admin.from('hilos').select('id,titulo,contenido,autor_id').in('id', idsHilos) : Promise.resolve({ data: [], error: null }),
+    idsResp.length ? admin.from('respuestas').select('id,contenido,autor_id').in('id', idsResp) : Promise.resolve({ data: [], error: null }),
+  ])
+  if (hilos.error) throw hilos.error
+  if (resps.error) throw resps.error
+  const pubs = new Map<string, any>()
+  for (const h of hilos.data || []) pubs.set(String(h.id), h)
+  for (const r of resps.data || []) pubs.set(String(r.id), r)
+  const autores = await profileMap(admin, [...pubs.values()].map(p => String(p.autor_id)))
+  return denuncias.map(d => {
+    const p = pubs.get(String(d.id_publicacion))
+    return {
+      id: String(d.id),
+      tipo: d.tipo,
+      motivo: d.motivo || '',
+      fecha: d.created_at,
+      publicacion: p
+        ? { existe: true, titulo: p.titulo || '', contenido: String(p.contenido || '').slice(0, 1000), autorReal: autores.get(String(p.autor_id))?.pseudonimo || 'Estudiante' }
+        : { existe: false, titulo: '', contenido: '', autorReal: '' },
+    }
+  })
+}
+
 async function findUserByEmail(admin: SupabaseClient,email:string){for(let page=1;page<=10;page++){const {data,error}=await admin.auth.admin.listUsers({page,perPage:1000});if(error)throw error;const u=(data.users||[]).find((x:any)=>String(x.email||'').toLowerCase()===email);if(u)return u;if(!data.users?.length||data.users.length<1000)break}return null}
 
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+async function serve(req: Request): Promise<Response> {
+  if (req.method === 'OPTIONS') return new Response('ok')
+  if (req.method !== 'POST') return json({ ok: false, error: 'metodo_no_permitido' }, 405)
+  if (Number(req.headers.get('content-length') || 0) > MAX_BODY_BYTES) return json({ ok: false, error: 'imagen_muy_grande' }, 413)
   try {
     const body = await req.json().catch(() => ({}))
     return await handle(req, body)
   } catch (err) {
+    // El detalle queda solo en los logs: no se devuelven mensajes internos de Postgres al cliente.
     console.error(err)
     // Deliberadamente respondemos 200 con un estado de error: para mutaciones,
     // un HTTP 500 no permite al cliente saber si la operación ya llegó a Postgres.
     // La operación debe permanecer en estado incierto y poder reconciliarse por ID.
-    return json({ ok: false, error: 'servidor', ambiguo: true, detalle: String(err && (err as any).message ? (err as any).message : err) }, 200)
+    return json({ ok: false, error: 'servidor', ambiguo: true }, 200)
   }
+}
+
+Deno.serve(async (req) => {
+  const res = await serve(req)
+  for (const [k, v] of Object.entries(corsHeadersFor(req))) res.headers.set(k, v)
+  return res
 })
 

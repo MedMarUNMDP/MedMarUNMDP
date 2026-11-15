@@ -24,11 +24,12 @@ FK al mismo hilo), `likes_hilos`, `likes_respuestas` (foro) ·
 Funciones clave: `is_moderator`, `is_admin`, `prevent_role_escalation`, `consume_rate_limit`, `finalize_exchange`,
 `cleanup_expired_data`, `recount_medmar_counters`. Storage: bucket `profile-photos`.
 
-**Deriva conocida (auditoría 2026-11, ver `docs/auditoria-supabase-2026-11.md`)**: `profile_completed`, `is_sensitive`,
-`parent_id` y sus índices existen en prod pero no en `schema_inicial.sql` (falta la migración de alineación B1).
-En prod hay ~50 RPC heredadas de un esquema viejo (`crear_hilo`, `mailer_tomar`, …) y un bucket `avatares` que
-**no** son parte del sistema actual: no las uses ni las tomes como referencia. Hoy **no hay cron para `maintenance`**,
-y el job `medmar-limpieza-diaria` llama a la función vieja `limpiar_expirados` y falla.
+**Estado tras la auditoría 2026-11** (`docs/auditoria-supabase-2026-11.md`): repo y prod alineados
+(`…170000_alinear_repo_con_prod.sql`, `…180000_hardening_y_cron.sql`). Las escrituras pasan **solo** por la API:
+no hay políticas RLS de INSERT/UPDATE/DELETE ni subidas directas a Storage (ADR `docs/decisiones/0002`).
+Cron (pg_cron): `medmar-cleanup-diario` (06:00 UTC, `cleanup_expired_data`) y `medmar-maintenance` (cada 10 min,
+solo invoca la función si hay mails pendientes; token en Vault `medmar_cron_secret`, validado con `cron_token_valido`).
+Keep-alive: `.github/workflows/keep-alive.yml` llama a `api/health` dos veces por semana.
 
 ## Reglas al modificar
 
@@ -57,5 +58,6 @@ npx supabase functions deploy api
 npx supabase functions deploy maintenance
 ```
 
-Migraciones: hoy se aplican pegando el SQL en el SQL Editor. El MCP de Supabase está configurado en **solo lectura**
+Migraciones: el MCP en modo escritura aplica DDL simple, pero **rechaza solo** el SQL que considera destructivo
+(`drop`, `revoke`, `update`, `delete`): eso se pega en el SQL Editor. Todos los archivos de `migrations/` son idempotentes. El MCP de Supabase está configurado en **solo lectura**
 (sirve para `list_tables`, `execute_sql` de lectura, logs y advisors de seguridad/performance).

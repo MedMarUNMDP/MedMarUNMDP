@@ -4,6 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Content Security Policy (GitHub Pages no permite headers propios: va por <meta>).
+         https://developer.mozilla.org/docs/Web/HTTP/CSP · Si agregás un CDN o un embed nuevo, sumalo acá. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://ekfwdrsehhmrqxxlefyx.supabase.co wss://ekfwdrsehhmrqxxlefyx.supabase.co; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
 
     <!-- SEO principal -->
     <title>MedMar | Intercambio de comisiones para estudiantes de Medicina</title>
@@ -44,7 +48,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261115">
+    <link rel="stylesheet" href="/css/styles.css?v=20261115b">
 </head>
 
 <body>
@@ -607,9 +611,13 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Versión fija + Subresource Integrity: si el CDN sirve otro archivo, el navegador no lo ejecuta.
+         Para actualizar: cambiar la versión y recalcular el hash (ver web/CLAUDE.md). -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"
+            integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
+            crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261115"></script>
+    <script src="/js/app.js?v=20261115b"></script>
 
 
 </body>

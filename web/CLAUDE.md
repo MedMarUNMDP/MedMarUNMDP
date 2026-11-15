@@ -24,6 +24,10 @@ Para ubicarte: `Grep "// ====" web/js/app.js` y leé solo el rango que necesitá
   Si agregás una acción de lectura frecuente, sumala ahí: ahorra invocaciones del plan Free.
 - Realtime de Supabase solo para chat y `solicitudes` (matches); el resto es por request.
 - Textos de usuario: siempre pasar por `escapeHtml()` / `escapeAttr()` antes de insertarlos con `innerHTML`.
+- `index.html` tiene una **Content Security Policy** en `<meta>`: un CDN, embed o dominio nuevo hay que sumarlo ahí o no carga.
+- supabase-js va con versión fija + `integrity` (SRI). Para actualizarlo: cambiar la versión en la URL y recalcular con
+  `curl -s <url> | openssl dgst -sha384 -binary | openssl base64 -A`.
+- Las escrituras a la base van siempre por la API: las políticas RLS no permiten escribir desde el navegador.
 - Al cambiar `css/styles.css` o `js/app.js`, subí el `?v=AAAAMMDD` en `index.html` para romper la caché de los usuarios,
   y actualizá `FRONTEND_VERSION` en `app.js`.
 

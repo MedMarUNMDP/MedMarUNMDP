@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-01-respuestas-v3"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-15-hardening"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -35,7 +35,10 @@ let chatDatosServidorCargados = false
 let chatPollingTimer = null
 let chatPollingEnCurso = false
 let chatRealtimeChannel = null
+let chatRealtimeEstado = ''
 let usuarioRealtimeChannel = null
+let usuarioRealtimeEstado = ''
+const imagenesResueltasCliente = new Map()
 let mensajesChatUI = []
 let chatEnvioEnCurso = false
 let hiloPublicacionEnCurso = false
@@ -431,15 +434,17 @@ const hilosPendientesConfirmacion = new Map()
         // ==================== MENSAJES DE ERROR ====================
 
         // Escapa texto de usuarios antes de insertarlo con innerHTML (evita HTML/JS injection)
+        // Escapa los 5 caracteres significativos de HTML (OWASP XSS Prevention, regla 1 y 2).
+        // Antes no se escapaban las comillas simples y los atributos de este archivo usan '...':
+        // una foto_url con ' podía cerrar el atributo e inyectar un handler (XSS almacenado).
+        const ESCAPES_HTML = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }
         function escapeHtml(str) {
-            const div = document.createElement("div")
-            div.textContent = str == null ? "" : String(str)
-            return div.innerHTML
+            return (str == null ? "" : String(str)).replace(/[&<>"']/g, function (c) { return ESCAPES_HTML[c] })
         }
 
-        // Igual que escapeHtml pero además escapa comillas, para usar dentro de atributos (href="...")
+        // Para valores dentro de atributos ('...' o "...").
         function escapeAttr(str) {
-            return escapeHtml(str).replace(/"/g, "&quot;")
+            return escapeHtml(str)
         }
 
         // Devuelve el HTML de un avatar: la foto si tiene, si no un círculo con la inicial
@@ -639,7 +644,11 @@ const hilosPendientesConfirmacion = new Map()
                 conexion: "No se pudo conectar con el servidor. Probá de nuevo en un momento.",
                 mensaje_en_verificacion: "La operación quedó en verificación. No la reenvíes; MedMar está confirmando si se guardó.",
                 servidor_ocupado: "Hay otra operación en curso. Probá de nuevo en unos segundos.",
-                servidor: "El servidor devolvió un error. Revisá la implementación de Apps Script.",
+                servidor: "El servidor tuvo un problema. Probá de nuevo en un momento.",
+                ya_tenes_otra: "Ya tenés una solicitud activa para esa materia. Editala en lugar de crear otra.",
+                imagen_invalida: "La imagen no es válida. Probá con otra foto.",
+                foto_invalida: "Esa foto no se puede usar. Elegí un avatar o subí una imagen.",
+                metodo_no_permitido: "La operación no está permitida.",
                 titulo_invalido: "El título no puede estar vacío ni superar los 140 caracteres.",
                 contenido_invalido: "El contenido no puede estar vacío ni superar los 5000 caracteres.",
                 respuesta_invalida: "No se encontró esa respuesta para este hilo. Actualizá la conversación e intentá de nuevo.",
@@ -2083,7 +2092,14 @@ async function cargarBootstrap() {
                 if (link.dataset.previewRequested) return
                 link.dataset.previewRequested = '1'
                 const url = link.dataset.previewUrl
-                llamar('resolverImagen', { url: url }).then(function(result) {
+                // Cache por sesión: re-renderizar el hilo no vuelve a invocar la Edge Function por cada enlace.
+                if (!imagenesResueltasCliente.has(url)) {
+                    imagenesResueltasCliente.set(url, llamar('resolverImagen', { url: url }).then(function(r) {
+                        if (!r || (!r.ok && esErrorAmbiguo('resolverImagen', r))) imagenesResueltasCliente.delete(url)
+                        return r
+                    }))
+                }
+                imagenesResueltasCliente.get(url).then(function(result) {
                     if (!link.isConnected) return
                     if (!result || !result.ok || !result.imagen) {
                         const aviso = document.createElement('div')
@@ -2505,6 +2521,7 @@ async function cargarBootstrap() {
 
                 const div = document.createElement("div")
                 div.className = "denunciaItem"
+                d.publicacion = d.publicacion || { existe: false }
 
                 const contenidoTexto = d.publicacion.existe
                     ? (d.publicacion.titulo ? "<b>" + escapeHtml(d.publicacion.titulo) + "</b> — " : "") + escapeHtml(d.publicacion.contenido)
@@ -2679,6 +2696,8 @@ async function cargarBootstrap() {
             detenerActualizacionPeriodica()
             intervaloActualizacion = setInterval(function () {
                 if (!sesion || document.visibilityState !== "visible") return
+                // Con Realtime suscripto los matches llegan solos: el refresco periódico es solo respaldo.
+                if (usuarioRealtimeEstado === "SUBSCRIBED") return
                 if (seccionActual === "intercambios") {
                     refrescarDatosUsuario(false)
                 }
@@ -2726,11 +2745,13 @@ async function cargarBootstrap() {
                     }
                 })
                 .subscribe(function(status) {
+                    usuarioRealtimeEstado = status
                     console.debug('[MedMarUNMDP] Realtime usuario', status)
                 })
         }
 
         function detenerRealtimeUsuario() {
+            usuarioRealtimeEstado = ''
             if (usuarioRealtimeChannel) {
                 supabaseClient.removeChannel(usuarioRealtimeChannel)
                 usuarioRealtimeChannel = null
@@ -3157,15 +3178,17 @@ async function cargarBootstrap() {
                     cargarChatActual(true).finally(function() { chatPollingEnCurso = false })
                 })
                 .subscribe(function(status) {
+                    chatRealtimeEstado = status
                     console.debug('[MedMarUNMDP] Realtime chat', idChat, status)
                 })
 
-            // Fallback muy lento: si Realtime se cae, seguimos reconciliando cada 30 s.
+            // Fallback muy lento: solo si Realtime NO está suscripto se reconcilia cada 30 s
+            // (con Realtime activo, el polling solo gastaba invocaciones del plan Free).
             const programar = function() {
                 if (!chatAbiertoId || chatAbiertoId !== idChat || seccionActual !== 'intercambios') return
                 chatPollingTimer = setTimeout(async function() {
                     chatPollingTimer = null
-                    if (!chatAbiertoId || chatAbiertoId !== idChat || document.visibilityState !== 'visible') {
+                    if (!chatAbiertoId || chatAbiertoId !== idChat || document.visibilityState !== 'visible' || chatRealtimeEstado === 'SUBSCRIBED') {
                         programar()
                         return
                     }
@@ -3185,6 +3208,7 @@ async function cargarBootstrap() {
                 chatPollingTimer = null
             }
             chatPollingEnCurso = false
+            chatRealtimeEstado = ''
             if (chatRealtimeChannel) {
                 supabaseClient.removeChannel(chatRealtimeChannel)
                 chatRealtimeChannel = null

@@ -21,6 +21,9 @@ Caché: al cambiar `web/css/styles.css` o `web/js/app.js`, subí el `?v=` en `we
   `npx supabase functions deploy api` (o `maintenance`). Alternativa: pegar el código en el editor del dashboard.
 - **Secrets**: Dashboard → Edge Functions → Secrets (nombres en `.env.example`).
 - **Migraciones**: pegar el archivo de `supabase/migrations/` en el SQL Editor. Orden por timestamp.
-- **Cron de `maintenance`**: **no está configurado** (auditoría 2026-11, hallazgo A1). Debe invocarse con el header `x-medmar-cron-secret` (pg_cron + pg_net o GitHub Actions).
+- **Cron**: lo crea la migración `20261115180000_hardening_y_cron.sql` (pg_cron + pg_net + Vault). Ver `cron.job` y
+  `cron.job_run_details` para revisar corridas.
+- **Keep-alive**: `.github/workflows/keep-alive.yml` (lunes y jueves) evita la pausa del plan Free. Se puede correr a mano
+  desde la pestaña Actions. GitHub lo desactiva tras 60 días sin actividad en el repo: si llega el aviso, reactivalo.
 
 Orden seguro cuando un cambio toca ambos lados: migración → Edge Function → frontend.

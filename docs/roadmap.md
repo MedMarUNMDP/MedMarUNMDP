@@ -5,17 +5,9 @@ Lista viva. Al terminar algo, borralo de acá (el historial queda en git).
 ## Seguridad (urgente)
 - [ ] Rotar la secret key de Supabase y el client secret de Google OAuth: estuvieron en texto plano en
       `Datos.txt` y fueron leídos durante la configuración con Claude Code. Actualizar los secrets de las Edge Functions.
-- [ ] Resolver los hallazgos de [auditoria-supabase-2026-11.md](auditoria-supabase-2026-11.md) (advisors ya corridos):
-  - [ ] **A1** Programar `maintenance`: hoy nada la invoca y los mails de match no salen. Antes, decidir qué hacer
-        con las 4 notificaciones `pendiente` de septiembre.
-  - [ ] **A2** Reemplazar el cron roto `medmar-limpieza-diaria` (`limpiar_expirados`, falla a diario) por
-        `cleanup_expired_data()`.
-  - [ ] **A3** Commitear la migración de alineación B1 (`profile_completed`, `is_sensitive`, `parent_id`, índices).
-  - [ ] **M1–M4** Migración B2: borrar 50 RPC heredadas y el bucket `avatares`, revocar `consume_rate_limit` a
-        `authenticated`, fijar `search_path` y poner límites al bucket `profile-photos`.
-  - [ ] **M5** `maintenance` fail-closed si falta `MEDMAR_CRON_SECRET` (requiere deploy).
-  - [ ] Activar la protección contra contraseñas filtradas en Auth.
-- [ ] Keep-alive semanal (GitHub Actions → acción `health`) para que el proyecto no se pause en el receso.
+- [ ] Borrar el bucket heredado `avatares` (vacío) desde Dashboard → Storage.
+- [ ] Activar la protección contra contraseñas filtradas (Dashboard → Auth → Password security).
+- [ ] Probar un match real de punta a punta y confirmar que el mail llega (los `GMAIL_*` no se pudieron verificar).
 
 ## Juegos
 - [ ] Integrar Inmune Survivors en la sección Juegos (`#vistaJuegos` → link/iframe a `/juegos/inmune-survivors/`).

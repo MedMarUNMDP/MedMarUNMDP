@@ -8,6 +8,11 @@
 - **Comparado contra**: `supabase/migrations/20261101000000_schema_inicial.sql`, `…000100_realtime.sql`,
   `supabase/functions/api/index.ts` y `supabase/functions/maintenance/index.ts` (commit `fc778ca`).
 
+> **Actualización 2026-11-15 (tarde):** los hallazgos A1–A3, M1–M5 y B-1, B-5, B-6 quedaron corregidos con las
+> migraciones `20261115170000_alinear_repo_con_prod.sql` y `20261115180000_hardening_y_cron.sql`, el deploy de
+> `api` v11 / `maintenance` v4 y el workflow de keep-alive. Quedan pendientes B-4 (contraseñas filtradas) y borrar el
+> bucket `avatares`. Ver `docs/decisiones/0002-escrituras-solo-por-api.md`.
+
 ## Resumen ejecutivo
 
 1. **El código de las Edge Functions coincide con el repo.** `api` (v10, desplegada el 2026-10-31) es idéntica byte a

@@ -74,7 +74,8 @@ async function sendGmail(to: string, subject: string, body: string) {
   const mime = [
     `From: ${GMAIL_FROM_NAME} <${GMAIL_FROM_EMAIL}>`,
     `To: ${to}`,
-    `Subject: ${subject}`,
+    // RFC 2047: el asunto lleva tildes ("comisión"); sin codificar, algunos clientes lo muestran roto.
+    `Subject: =?UTF-8?B?${btoa(String.fromCharCode(...new TextEncoder().encode(subject.replace(/[\r\n]+/g, ' '))))}?=`,
     'MIME-Version: 1.0',
     'Content-Type: text/plain; charset=UTF-8',
     '',
@@ -132,12 +133,24 @@ async function processEmails(admin: ReturnType<typeof adminClient>) {
   return { sent, failed, seen: (rows || []).length }
 }
 
-async function run(req: Request) {
-  if (CRON_SECRET) {
-    const secret = req.headers.get('x-medmar-cron-secret') || ''
-    if (secret !== CRON_SECRET) return json({ ok: false, error: 'no_autorizado' }, 200)
+// Autoriza la llamada del cron. Falla cerrada: sin token válido no se procesa nada.
+// El token vive en Supabase Vault (`medmar_cron_secret`, creado por la migración de cron) y pg_cron lo manda en
+// el header; también se acepta `MEDMAR_CRON_SECRET` (secret de la Edge Function) por compatibilidad.
+async function autorizado(req: Request, admin: ReturnType<typeof adminClient>) {
+  const token = req.headers.get('x-medmar-cron-secret') || ''
+  if (token.length < 32) return false
+  if (CRON_SECRET && token === CRON_SECRET) return true
+  const { data, error } = await admin.rpc('cron_token_valido', { p_token: token })
+  if (error) {
+    console.error('cron_token_check_failed', error.message)
+    return false
   }
+  return data === true
+}
+
+async function run(req: Request) {
   const admin = adminClient()
+  if (!(await autorizado(req, admin))) return json({ ok: false, error: 'no_autorizado' }, 401)
   const emails = await processEmails(admin)
   return json({ ok: true, emails, timestamp: new Date().toISOString() })
 }
@@ -148,6 +161,6 @@ Deno.serve(async (req) => {
     return await run(req)
   } catch (err) {
     console.error(err)
-    return json({ ok: false, error: 'maintenance_error', detalle: String(err instanceof Error ? err.message : err) }, 200)
+    return json({ ok: false, error: 'maintenance_error' }, 500)
   }
 })
