@@ -55,7 +55,7 @@ Los bugs JUEGO-01 a 14 se corrigieron en v3.5. Queda pendiente:
 **Inmune Survivors — modos por núcleo de ADN** (plan en `games/inmune-survivors/docs/plan-modos-nucleos.md`)
 - [ ] Etapa 2: horneado de texturas por especie (tinte y variaciones), nombre al aparecer, fichas médicas revisadas
       con `revisor-contenido-medico` y bestiario. El catálogo ya está en `src/data/agentes.js` (114 agentes, 10 núcleos).
-- [ ] Decidir si el núcleo 6.1 (urinario, solo bacterias) se juega solo o junto con el 6.
+- [ ] Revisar las 114 fichas desde la página de revisión (artifact "Fichas de agentes ADN") y aplicar las correcciones.
 - [ ] 12 piezas de sprite nuevas (bacilo ácido-alcohol resistente, retrovirus, *Plasmodium*, *Pneumocystis*…).
 - [ ] Modo Foco por núcleo (agentes y preguntas del núcleo) y Sandbox (Laboratorio para jugadores).
 

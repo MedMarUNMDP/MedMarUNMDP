@@ -16,8 +16,7 @@ tests en `tests/agentes-datos.test.cjs`. El juego todavía no lo usa.
 4. **Sandbox totalmente libre**, como el Laboratorio: mezcla agentes de todos los núcleos y no guarda nada.
 5. **Sprites por morfología con variación por código**, horneados en una textura por especie (ver más abajo).
 
-**Pendiente**: el núcleo 6.1 (urinario) solo tiene bacterias en el material (5 confirmadas, más 4 nosocomiales y el
-adenovirus "a confirmar"). ¿Se juega solo o como variante del 6 (Digestivo y urinario)?
+6. **Digestivo y urinario van juntos** en el núcleo 6: el urinario (6.1) solo trae bacterias en el material.
 
 **Fuentes** (material del usuario, carpeta ADN 2.º año; no se copian en el repo):
 - *2026 PTD ADN*: núcleos y su numeración vigente.
@@ -259,4 +258,4 @@ Todo en `src/data/` (UMD, con tests), separado del motor:
 
 ## Decisiones pendientes
 
-- Núcleo 6.1: ¿se juega solo o junto con el 6? (ver arriba).
+- (ninguna por ahora)

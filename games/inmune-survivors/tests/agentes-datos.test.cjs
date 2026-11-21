@@ -53,8 +53,7 @@ test('cada núcleo tiene variedad suficiente para una partida', () => {
   for (const n of NUCLEOS) {
     const ags = datos.agentesDeNucleo(n.id);
     assert.ok(ags.length >= 5, `${n.id} tiene solo ${ags.length} agentes`);
-    // El material de 6.1 (urinario) solo trae bacterias: es un dato de la cátedra, no un error de carga.
-    if (n.id !== '6.1') assert.ok(new Set(ags.map((a) => a.familia)).size >= 2, `${n.id} tiene una sola familia`);
+    assert.ok(new Set(ags.map((a) => a.familia)).size >= 2, `${n.id} tiene una sola familia`);
     assert.ok(fs.existsSync(path.join(assets, `${n.tejido}.webp`)), `${n.id}: falta el tejido ${n.tejido}`);
   }
 });
@@ -67,4 +66,17 @@ test('los núcleos 1-5 y los artrópodos grandes quedan afuera', () => {
     const genero = ex.split(' ')[0].toLowerCase();
     assert.ok(!nombres.some((nm) => nm.startsWith(genero)), `${ex} está excluido y figura como agente`);
   }
+});
+
+test('cada agente tiene su ficha completa y corta (src/data/fichas.js)', () => {
+  const { FICHAS } = require('../src/data/fichas.js');
+  for (const a of AGENTES) {
+    const f = FICHAS[a.id];
+    assert.ok(f, `${a.id} no tiene ficha`);
+    for (const campo of ['clase', 'cuadro', 'clave']) {
+      assert.ok(typeof f[campo] === 'string' && f[campo].length >= 10, `${a.id}.${campo} vacío`);
+      assert.ok(f[campo].length <= 170, `${a.id}.${campo} demasiado largo para leer en el juego`);
+    }
+  }
+  for (const id of Object.keys(FICHAS)) assert.ok(datos.agente(id), `ficha huérfana: ${id}`);
 });
