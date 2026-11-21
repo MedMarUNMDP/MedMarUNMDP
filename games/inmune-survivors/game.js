@@ -299,16 +299,17 @@
     sharpText(x,y,text,style) { return this.add.text(x,y,text,style).setResolution(2); }
 
     preload() {
-      const redesigned = new Set(['bacteria_cocci','bacteria_flagellated_bacillus','bacteria_spirochete','fungus_budding_yeast','fungus_conidiophore','fungus_encapsulated_yeast','fungus_hyphae','parasite_amoeba','parasite_giardia','parasite_trypanosome','parasite_ciliate','helminth_fluke_head']);
-      for (const key of MICROBE_TEXTURES) this.load.image(key, `assets/${key}.${redesigned.has(key) ? 'png' : 'webp'}`);
-      for (const key of ['helminth_nematode_head','helminth_tapeworm_scolex']) this.load.image(key, `assets/${key}.png`);
-      for (const boss of BOSS_MORPHOLOGIES) this.load.image(boss.texture, `assets/${boss.texture}.png`);
-      this.load.image('boss_spore','assets/boss_spore.png');
-      for (const key of ['focus_viral','focus_bacterial','focus_fungal','focus_parasitic']) this.load.image(key, `assets/${key}.png`);
+      // Todos los assets son WebP (sprites calidad 90 con alfa al 100 %, tejidos calidad 95, resolución original):
+      // ~2,5 MB en vez de ~15,6 MB en PNG. Para regenerarlos ver assets/README.md.
+      for (const key of MICROBE_TEXTURES) this.load.image(key, `assets/${key}.webp`);
+      for (const key of ['helminth_nematode_head','helminth_tapeworm_scolex']) this.load.image(key, `assets/${key}.webp`);
+      for (const boss of BOSS_MORPHOLOGIES) this.load.image(boss.texture, `assets/${boss.texture}.webp`);
+      this.load.image('boss_spore','assets/boss_spore.webp');
+      for (const key of ['focus_viral','focus_bacterial','focus_fungal','focus_parasitic']) this.load.image(key, `assets/${key}.webp`);
       const tissueKey=TISSUE_TEXTURES[this.map.id]||'tissue_vascular';
-      this.load.image(tissueKey,`assets/${tissueKey}.png`);
-      this.load.image('phago_mark_1','assets/skills/phagocytosis_frame1.png');
-      this.load.image('phago_mark_2','assets/skills/phagocytosis_frame2.png');
+      this.load.image(tissueKey,`assets/${tissueKey}.webp`);
+      this.load.image('phago_mark_1','assets/skills/phagocytosis_frame1.webp');
+      this.load.image('phago_mark_2','assets/skills/phagocytosis_frame2.webp');
     }
 
     init(data) {

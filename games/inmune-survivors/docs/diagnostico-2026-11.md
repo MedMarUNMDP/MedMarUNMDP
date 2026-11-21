@@ -16,7 +16,9 @@ habilidades: acá se verifica qué sigue roto de aquel documento y se agrega lo 
 > Homeostasis y Quimiotaxis son vías de atributos generales: solo ofrecen mejoras de habilidades que el jugador
 > tiene, más las generales y las de Desgranulación.
 >
-> Siguen pendientes (ver el roadmap): peso de assets, nitidez HiDPI, pools de objetos, ritmo de XP, la pista de la
+> **v3.5.1**: assets en WebP con la resolución original (~1,5 MB de imágenes por partida en vez de ~7,6 MB).
+>
+> Siguen pendientes (ver el roadmap): nitidez HiDPI, pools de objetos, ritmo de XP, la pista de la
 > opción más larga en el banco de preguntas y el refactor por etapas.
 
 **Método**

@@ -38,8 +38,6 @@ Detalle de los códigos JUEGO-xx en [games/inmune-survivors/docs/diagnostico-202
 Los bugs JUEGO-01 a 14 se corrigieron en v3.5. Queda pendiente:
 
 **Inmune Survivors — rendimiento móvil**
-- [ ] Pasar todos los assets a WebP de 256–512 px (hoy ~7,6 MB por partida, estimado < 1 MB) y borrar los 16 sin uso.
-      La primera carga tarda varios segundos en datos móviles.
 - [ ] Decidir la nitidez en pantallas HiDPI (el canvas no usa `devicePixelRatio`) y agregar pools de objetos
       (proyectiles, partículas, textos) para evitar tirones del recolector en gama baja.
 

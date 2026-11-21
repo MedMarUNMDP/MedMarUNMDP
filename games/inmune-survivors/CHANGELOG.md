@@ -2,6 +2,14 @@
 
 Formato: la versión más nueva arriba. Al publicar una versión, agregá una sección nueva acá y subí `?build=` en index.html (ver CLAUDE.md del juego). El historial previo a v3.1 está en `README.txt`.
 
+## v3.5.1
+
+- Todas las imágenes pasan a WebP en su resolución original: sprites con calidad 90 (alfa al 100 %) y tejidos con
+  calidad 95. `assets/` baja de ~17 MB a ~2,7 MB y una partida descarga ~1,5 MB de imágenes en vez de ~7,6 MB.
+  Se compararon recortes al 200 % y a la escala del juego, sin diferencias visibles. Cómo regenerarlas: `assets/README.md`.
+- Se borraron los PNG reemplazados y la imagen sin uso `parasite_segmented_reference`.
+- Test `tests/assets.test.cjs`: sin PNG/JPG, cada textura con su WebP y ningún archivo de más de 300 KB.
+
 ## v3.5
 
 Correcciones del diagnóstico 2026-11 (`docs/diagnostico-2026-11.md`) y controles de PC.
