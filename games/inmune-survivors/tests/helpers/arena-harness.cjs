@@ -135,7 +135,7 @@ function loadGame() {
   const Phaser = {
     Scene,
     AUTO: 0,
-    Scale: { RESIZE: 0, Events: { RESIZE: 'resize' } },
+    Scale: { NONE: 0, RESIZE: 0, Events: { RESIZE: 'resize' } },
     Game: class { constructor() { this.scene = { add() {}, start() {}, stop() {} }; } },
     Math: { FloatBetween: (a, b) => a + (b - a) * 0.5, Between: (a, b) => Math.floor((a + b) / 2), Clamp: (v, a, b) => Math.max(a, Math.min(b, v)) },
     Input: { Keyboard: { KeyCodes: {} } }
@@ -181,7 +181,8 @@ function createScene(options = {}) {
     tweens: makeTweens(),
     time: makeStub({ paused: false }),
     events: makeStub(),
-    cameras: { main: makeStub({ worldView: { contains: () => true } }) },
+    cameras: { main: makeStub({ worldView: { contains: () => true }, width: 480, height: 800 }), add: () => makeStub() },
+    children: { list: [] },
     input: makeStub({ keyboard: makeStub({ addKeys: () => ({}) }) }),
     // ScaleManager con registro de listeners: permite verificar que la escena los saca al cerrarse.
     scale: {

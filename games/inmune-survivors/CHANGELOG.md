@@ -2,6 +2,33 @@
 
 Formato: la versión más nueva arriba. Al publicar una versión, agregá una sección nueva acá y subí `?build=` en index.html (ver CLAUDE.md del juego). El historial previo a v3.1 está en `README.txt`.
 
+## v3.6
+
+**Fagocitosis**
+- Pseudópodos orgánicos: tubos que se afinan, con una onda que viaja y punta redondeada. Sin blanco tantean
+  alrededor de la membrana; con un patógeno fagocitable cerca, los dos se estiran y lo rodean.
+- El blanco fijado lleva una mira giratoria y el ícono de fagocitable crece cuando está al alcance. Las primeras
+  veces aparece "FAGOCITABLE · ACERCATE" y, al desbloquear Fagocitosis, un aviso explica qué buscan los pseudópodos.
+
+**Subir de nivel**
+- Cada tarjeta de vía muestra a la vista qué cambia en cada habilidad que tenés (antes había que tocar íconos chicos).
+
+**Pantallas**
+- Nitidez: el canvas se dibuja a la densidad de la pantalla (hasta ×2 en PC y ×1,5 en celular; ×1 en gama baja).
+  El HUD va en su propia cámara para conservar sus posiciones.
+- En PC con mouse y pantalla ancha el área de juego es apaisada; en celular sigue vertical.
+- Safari: pantalla completa con la API `webkit` en Mac/iPad. En iPhone (que no la permite) el botón explica cómo
+  agregar el juego a la pantalla de inicio, desde donde abre sin barras (manifest + meta de Apple).
+
+**Movimiento**
+- Parallax: capas de partículas y manchas que se mueven a distinta velocidad que la cámara y fluyen solas.
+- Enemigos con animación propia: aparición con rebote, bacterias que se tambalean, virus que giran y laten, hongos
+  que respiran y se hinchan antes de soltar esporas, parásitos que ondulan y jefes que respiran.
+
+**Reportes**
+- Botón "Reportar o sugerir" en la pausa y al terminar la partida: reportes anónimos a una planilla de Drive
+  (se activa al configurar `REPORTES_URL`; ver `tools/reportes-apps-script/README.md`).
+
 ## v3.5.1
 
 - Todas las imágenes pasan a WebP en su resolución original: sprites con calidad 90 (alfa al 100 %) y tejidos con

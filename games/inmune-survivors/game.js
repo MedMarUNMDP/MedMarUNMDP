@@ -1,4 +1,4 @@
-  /* Inmune Survivors — v3.5
+  /* Inmune Survivors — v3.6
  * Phaser 3.90.0. Microbe sprites are simplified, cached procedural textures.
  * The question bank is provisional and must be cross-checked against the approved course bibliography
  * before this game is used as a formal educational resource.
@@ -6,7 +6,10 @@
 (function () {
   'use strict';
 
-  let W = 480, H = 800;
+  // W y H son el tamaño LÓGICO del área de juego en píxeles CSS (HUD y distancias de spawn se calculan con esto).
+  // RENDER_RES es cuántos píxeles reales se dibujan por píxel CSS: el canvas mide W·RENDER_RES × H·RENDER_RES y
+  // se muestra con zoom 1/RENDER_RES, así se ve nítido en pantallas HiDPI (Phaser 3.60+ ya no tiene `resolution`).
+  let W = 480, H = 800, RENDER_RES = 1;
   const WORLD = 3000, CENTER = WORLD / 2, ARENA_RADIUS = 1110;
   const BOSS_SPAWN_GRACE_MS = 1600;
   const PHAGO_LARGE_TIER = 2; // sizeTier de los arquetipos bruto y élite (los comunes son 0)
@@ -286,6 +289,7 @@
   const dist2 = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
   const wrapAngle = a => { while (a > Math.PI) a -= Math.PI * 2; while (a < -Math.PI) a += Math.PI * 2; return a; };
   const clampAngle = (a, max) => clamp(a, -max, max);
+  const easeOutBack = t => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
   function pointSegmentDistanceSq(px,py,ax,ay,bx,by) {
     const vx=bx-ax,vy=by-ay,wx=px-ax,wy=py-ay,len=vx*vx+vy*vy;
     const t=len?clamp((wx*vx+wy*vy)/len,0,1):0;
@@ -343,11 +347,12 @@
       this.evolutionCounts={homeostasis:0,cytotoxicity:0,chemotaxis:0};
       this.activeSkills=new Set(['granules']);this.skillLevels={granules:1};this.skillEvolution={};this.skillTimers={};this.bMinions=[];this.macrophages=[];this.skillProjectiles=[];this.differentiationSpecies=null;this.differentiationStreak=0;this.patternBonus=0;this.minionMode='M1';this.debugSpawnLimit=140;
       this.lastStrategy=null;
+      this.phagoHintsLeft=3;this.lastPhagoHintAt=-99;
       this.progressionMilestone = 0;
       this.enemies = []; this.playerBullets = []; this.enemyProjectiles = []; this.helpers = []; this.nets = [];this.activeEnemyCount=0;
       this.usedQuestionIds = new Set(); this.currentQuestion = null; this.currentUpgrades = []; this.questionTopicCounts={}; this.lastQuestionTopic=null;
       this.stats = { health:100, maxHealth:100, moveSpeed:190, attackDamage:21, attackInterval:520, attackRange:260, projectileSpeed:470, projectileCount:1, projectilePierce:0, blastRadius:0, blastDamage:0, swarmLevel:0, granuleLevel:0, defenseLevel:0, agilityLevel:0, dodgeWindow:620, phagoRadius:50, phagoInterval:800, phagoHeal:0, healingReceivedMultiplier:1, phagoMaxTier:0, xpPickupRadius:82, netCooldown:10800, netRadius:88, netDuration:7600, netDamage:5.5, netTickInterval:430, maxNetHelpers:2, netHelperDuration:4400, antibodyDamage:10, antibodyInterval:1900, antibodyCount:2, regulationDamage:4, regulationInterval:15000, cytokineDamage:6, cytokineInterval:5400, xpMultiplier:1 };
-      this.createXpTexture(); this.createBackdrop(); this.createPlayer(); this.createCamera(); this.createHud(); this.createControls();
+      this.createXpTexture(); this.createBackdrop(); this.createPlayer(); this.createCamera(); this.createHud(); this.createControls(); this.setupHudCamera();
       this.updateHud();
       this.events.once('shutdown', () => this.destroyTransientObjects());
       this.ui.setActions({
@@ -386,6 +391,50 @@
       this.add.circle(CENTER, CENTER, ARENA_RADIUS - 8, 0x000000, 0).setStrokeStyle(15, 0x27123f, 0.9).setDepth(2);
       this.add.circle(CENTER, CENTER, ARENA_RADIUS - 17, 0x000000, 0).setStrokeStyle(4, this.tissueVisual.accent, 0.92).setDepth(3);
       this.add.circle(CENTER, CENTER, ARENA_RADIUS - 29, 0x000000, 0).setStrokeStyle(2, 0xffffff, 0.22).setDepth(3);
+      this.createAmbientLayers();
+    }
+
+    // Parallax: capas que se desplazan a distinta velocidad que la cámara (y fluyen solas) para dar
+    // profundidad al tejido. Son tileSprites del tamaño de la pantalla con texturas generadas una sola vez,
+    // así cuestan un solo dibujo por capa. En equipos de gama baja va solo la capa lejana.
+    makeAmbientTexture(key,size,blobs,rMin,rMax,alphaMax,rng){
+      if(this.textures.exists(key))return;
+      const tex=this.textures.createCanvas(key,size,size),ctx=tex.context;
+      for(let i=0;i<blobs;i++){
+        const x=rng.float(0,size),y=rng.float(0,size),r=rng.float(rMin,rMax),a=rng.float(alphaMax*0.4,alphaMax);
+        // Se dibuja también envuelto en los bordes para que el mosaico no tenga costuras.
+        for(const ox of [-size,0,size])for(const oy of [-size,0,size]){
+          const g=ctx.createRadialGradient(x+ox,y+oy,0,x+ox,y+oy,r);
+          g.addColorStop(0,`rgba(255,255,255,${a})`);g.addColorStop(0.55,`rgba(255,255,255,${a*0.45})`);g.addColorStop(1,'rgba(255,255,255,0)');
+          ctx.fillStyle=g;ctx.beginPath();ctx.arc(x+ox,y+oy,r,0,Math.PI*2);ctx.fill();
+        }
+      }
+      tex.refresh();
+    }
+
+    createAmbientLayers(){
+      const rng=this.rng,accent=this.tissueVisual.accent||0x8cf2c9;
+      this.makeAmbientTexture('amb_far',512,26,40,120,0.20,rng);
+      this.makeAmbientTexture('amb_mid',512,22,10,34,0.34,rng);
+      this.makeAmbientTexture('amb_near',256,14,2.5,7,0.85,rng);
+      const layer=(key,depth,factor,alpha,drift,tint)=>({obj:this.add.tileSprite(0,0,64,64,key).setOrigin(0.5).setScrollFactor(0).setDepth(depth).setAlpha(alpha).setTint(tint),factor,drift});
+      this.ambientLayers=[layer('amb_far',-2,0.35,1,{x:4,y:-2},0x6a5cc4)];
+      if(!this.lowPerformanceDevice){
+        this.ambientLayers.push(layer('amb_mid',1.5,0.82,0.5,{x:-7,y:5},accent));
+        this.ambientLayers.push(layer('amb_near',4,1.28,0.38,{x:10,y:-13},0xd8fff0));
+      }
+      this.layoutAmbientLayers();
+    }
+
+    layoutAmbientLayers(){
+      const cam=this.cameras.main;if(!this.ambientLayers||!cam)return;
+      for(const l of this.ambientLayers)l.obj.setPosition(cam.width/2,cam.height/2).setSize(cam.width/cam.zoom+8,cam.height/cam.zoom+8);
+    }
+
+    updateAmbientLayers(){
+      if(!this.ambientLayers)return;
+      const cam=this.cameras.main,t=this.elapsed;
+      for(const l of this.ambientLayers){l.obj.tilePositionX=cam.scrollX*l.factor+t*l.drift.x;l.obj.tilePositionY=cam.scrollY*l.factor+t*l.drift.y;}
     }
 
     makeCell(x, y, scale = 1, small = false) {
@@ -458,18 +507,38 @@
       const cam = this.cameras.main;
       cam.setBounds(0, 0, WORLD, WORLD);
       cam.startFollow(this.player, true, 1, 1);
-      cam.setZoom(mobileViewport()?0.90:1);
+      cam.setZoom(this.baseZoom()*RENDER_RES);
       cam.setRoundPixels(false);
       // El ScaleManager es global (sobrevive a la escena): el listener se saca en 'shutdown'
       // (destroyTransientObjects); si no, cada "Jugar otra vez" sumaba uno que retenía la escena anterior.
       this.onScaleResize = gameSize => {
-        W = Math.max(280, Math.round(gameSize.width || this.scale.gameSize.width));
-        H = Math.max(480, Math.round(gameSize.height || this.scale.gameSize.height));
-        cam.setViewport(0, 0, W, H);
-        cam.setZoom(mobileViewport()?0.90:1);
+        const pw = Math.round(gameSize.width || this.scale.gameSize.width), ph = Math.round(gameSize.height || this.scale.gameSize.height);
+        W = Math.max(280, Math.round(pw / RENDER_RES)); H = Math.max(480, Math.round(ph / RENDER_RES));
+        cam.setViewport(0, 0, pw, ph);
+        cam.setZoom(this.baseZoom()*RENDER_RES);
+        if (this.hudCam) this.hudCam.setViewport(0, 0, pw, ph).setZoom(RENDER_RES);
+        this.layoutAmbientLayers();
         this.layoutHud();
       };
       this.scale.on(Phaser.Scale.Events.RESIZE, this.onScaleResize);
+      this.layoutAmbientLayers();
+    }
+
+    // Zoom de juego en píxeles CSS: en celular se aleja un poco para ver más arena alrededor.
+    baseZoom() { return mobileViewport() ? 0.90 : 1; }
+
+    // El HUD va en su propia cámara con origen arriba a la izquierda y zoom RENDER_RES: así sus coordenadas
+    // siguen siendo píxeles CSS (W×H) aunque el canvas tenga más resolución. La cámara principal no lo dibuja
+    // y la de HUD ignora todo lo demás, incluidos los objetos que se crean después.
+    setupHudCamera() {
+      const hud = [this.hudPanel,this.hudTitle,this.hudTime,this.hudScore,this.focusArrow,this.focusArrowLabel,this.bossArrow,this.bossArrowLabel,this.hudBuild,this.hudBarGraphics,this.hudToast,this.joyGraphic].filter(Boolean);
+      const main = this.cameras.main;
+      this.hudCam = this.cameras.add(0, 0, main.width, main.height, false, 'hud').setOrigin(0, 0).setZoom(RENDER_RES).setScroll(0, 0);
+      main.ignore(hud);
+      const hudSet = new Set(hud);
+      this.hudCam.ignore(this.children.list.filter(o => !hudSet.has(o)));
+      this.onAddedToScene = go => { if (!hudSet.has(go)) this.hudCam.ignore(go); };
+      this.events.on('addedtoscene', this.onAddedToScene);
     }
 
     layoutHud() {
@@ -519,10 +588,10 @@
         const eventType = String(p.event?.type || '');
         const isTouch = p.wasTouch || p.event?.pointerType === 'touch' || eventType.startsWith('touch');
         if (!isTouch) { if (!p.leftButtonDown || p.leftButtonDown()) this.mouseSteer = true; return; }
-        this.joyActive = true; this.joyPointerId = p.id; this.joyOrigin = { x:p.x, y:p.y };
-        this.setJoyVector(p.x, p.y); this.drawJoystick();
+        this.joyActive = true; this.joyPointerId = p.id; this.joyOrigin = { x:p.x/RENDER_RES, y:p.y/RENDER_RES };
+        this.setJoyVector(p.x/RENDER_RES, p.y/RENDER_RES); this.drawJoystick();
       });
-      this.input.on('pointermove', p => { if (this.joyActive && p.id === this.joyPointerId) { this.setJoyVector(p.x, p.y); this.drawJoystick(); } });
+      this.input.on('pointermove', p => { if (this.joyActive && p.id === this.joyPointerId) { this.setJoyVector(p.x/RENDER_RES, p.y/RENDER_RES); this.drawJoystick(); } });
       const releaseJoystick = p => {
         if (!p || !p.wasTouch) this.mouseSteer = false;
         if (this.joyActive && (!p || p.id === this.joyPointerId)) {
@@ -771,7 +840,7 @@
         visualScale:morphology.worm?1:this.enemyBaseVisualSize(type) * size / Math.max((this.textures.get(morphology.texture)?.getSourceImage()?.width||256),(this.textures.get(morphology.texture)?.getSourceImage()?.height||256)),
         color:morphology.color, outlineColor:archetype==='elite'?0xffdf75:morphology.outline, healthOutlineColor:0x55f0ba, healthOutlineBand:3,
         sporeCooldown:this.rng.float(1300,3100), dead:false, hitFlash:0, heading, bossAttackClock:this.rng.float(2500,3500), biofilmClock:300, stationary:!!bossSpec?.stationary, minion:!!bossSpec?.minion,
-        animPhase:this.rng.float(0,Math.PI*2), animFrequency:this.rng.float(2.2,4.7), animSquash:archetype==='runner'?0.13:archetype==='brute'?0.045:0.075, animBob:0,
+        spawnAge:0, animPhase:this.rng.float(0,Math.PI*2), animFrequency:this.rng.float(2.2,4.7), animSquash:archetype==='runner'?0.13:archetype==='brute'?0.045:0.075, animBob:0,
         wanderClock:this.rng.float(400,1700), trail:[], trailAccumulator:0,
         isWorm:morphology.worm === true,
         wormWidth:morphology.worm?(archetype==='brute'?38:archetype==='runner'?26:archetype==='elite'?34:30)*(bossSpec?1.5:0.72):0,
@@ -943,20 +1012,70 @@
       return best;
     }
 
+    // Pseudópodo orgánico: tubo que se afina hacia la punta, con una onda que viaja hacia afuera
+    // (como una prolongación de membrana que tantea) y una punta redondeada. Se dibuja con círculos
+    // solapados, que se ven más blandos que una polilínea.
+    drawPseudopod(g,sx,sy,ex,ey,opts={}){
+      const t=this.elapsed,side=opts.side||1,amp=opts.amp??7,thick=opts.thick??8.5,alpha=opts.alpha??0.9;
+      const dx=ex-sx,dy=ey-sy,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len;
+      const bend=(opts.bend??10)*side;
+      const steps=Math.max(8,Math.min(18,Math.round(len/4)));
+      const pts=[];
+      for(let i=0;i<=steps;i++){
+        const u=i/steps,env=Math.sin(Math.PI*u)*(0.35+0.65*u);
+        const wave=Math.sin(u*7.5-t*(opts.speed??6.5)+(opts.phase||0))*amp*env;
+        const curve=Math.sin(Math.PI*u)*bend;
+        pts.push({x:sx+dx*u+nx*(wave+curve),y:sy+dy*u+ny*(wave+curve),r:thick*(1-0.62*u)});
+      }
+      g.fillStyle(opts.glow??0x75f5c5,0.20*alpha);for(const q of pts)g.fillCircle(q.x,q.y,q.r+3.2);
+      g.fillStyle(opts.color??0x9dfadb,0.80*alpha);for(const q of pts)g.fillCircle(q.x,q.y,q.r);
+      g.fillStyle(0xeafff7,0.55*alpha);for(let i=0;i<pts.length-1;i+=2)g.fillCircle(pts[i].x-nx*pts[i].r*0.35,pts[i].y-ny*pts[i].r*0.35,pts[i].r*0.32);
+      const tip=pts[pts.length-1],pulse=1+0.18*Math.sin(t*9+(opts.phase||0));
+      g.fillStyle(0xd8fff2,0.95*alpha);g.fillCircle(tip.x,tip.y,(opts.tip??4.2)*pulse);
+      return tip;
+    }
+
+    // Mira sobre el patógeno que los pseudópodos tienen "fijado": deja claro qué se va a englobar.
+    drawPhagoLock(g,target,ready){
+      const t=this.elapsed,r=Math.max(18,(target.visualSize||40)*0.42),spin=t*2.2;
+      g.lineStyle(2.2,0x8fffd9,ready?0.95:0.55);
+      for(let k=0;k<4;k++){const a=spin+k*Math.PI/2;g.beginPath();g.arc(target.x,target.y,r+4+Math.sin(t*6)*2,a,a+0.85);g.strokePath();}
+      g.fillStyle(0x8fffd9,ready?0.12:0.06);g.fillCircle(target.x,target.y,r);
+    }
+
     updatePhagoTendrils(){
       if(!this.phagoTendrils?.active)return;
       const g=this.phagoTendrils;g.clear();
       if(!this.activeSkills.has('phagocytosis'))return;
       const target=this.closestEnemy(this.stats.phagoRadius+45,e=>!e.isBoss&&e.phagoEligible&&e.sizeTier<=this.stats.phagoMaxTier);
-      const phase=this.elapsed*2.4;
+      const ready=this.phagoClock<=0&&!this.phagoPending;
+      const px=this.player.x,py=this.player.y,t=this.elapsed;
       for(const side of [-1,1]){
-        const a=phase+side*0.42, sx=this.player.x+Math.cos(a)*10, sy=this.player.y+Math.sin(a)*10;
-        let ex=sx+Math.cos(a+side*.22)*34,ey=sy+Math.sin(a+side*.22)*34;
-        if(target){const dx=target.x-this.player.x,dy=target.y-this.player.y,d=Math.hypot(dx,dy)||1;const reach=Math.min(d,Math.max(28,this.stats.phagoRadius*.58));ex=this.player.x+dx/d*reach+Math.cos(phase+side)*5;ey=this.player.y+dy/d*reach+Math.sin(phase+side)*5;}
-        const mx=(sx+ex)/2+Math.cos(a+Math.PI/2)*9*side,my=(sy+ey)/2+Math.sin(a+Math.PI/2)*9*side;
-        g.lineStyle(7,0x75f5c5,.24);g.beginPath();g.moveTo(sx,sy);g.lineTo(mx,my);g.lineTo(ex,ey);g.strokePath();
-        g.lineStyle(2.6,0xd2fff0,.86);g.beginPath();g.moveTo(sx,sy);g.lineTo(mx,my);g.lineTo(ex,ey);g.strokePath();
-        g.fillStyle(0xc5ffed,.8);g.fillCircle(ex,ey,3.2);
+        let ex,ey,a;
+        if(target){
+          // Los dos pseudópodos se abren y rodean al blanco, como en un fagocitosis real.
+          const dx=target.x-px,dy=target.y-py,d=Math.hypot(dx,dy)||1,base=Math.atan2(dy,dx),ux=dx/d,uy=dy/d;
+          a=base+side*0.55;
+          // Punta a un costado del patógeno (un poco antes del centro): los dos lo envuelven.
+          const tr=Math.max(10,(target.visualSize||40)*0.32),gx=target.x-ux*tr*0.25-uy*side*tr*0.85,gy=target.y-uy*tr*0.25+ux*side*tr*0.85;
+          const stretch=0.86+0.14*Math.sin(t*5+side),sx0=px+Math.cos(a)*19,sy0=py+Math.sin(a)*19;
+          ex=sx0+(gx-sx0)*stretch;ey=sy0+(gy-sy0)*stretch;
+        }else{
+          // Sin blanco: tantean alrededor de la membrana, se estiran y se retraen.
+          a=t*0.9+(side>0?0:Math.PI)+Math.sin(t*1.3+side)*0.6;
+          const reach=30+10*Math.sin(t*1.7+side*1.9)+6*Math.sin(t*3.1+side);
+          ex=px+Math.cos(a)*(18+reach);ey=py+Math.sin(a)*(18+reach);
+        }
+        const sx=px+Math.cos(a)*19,sy=py+Math.sin(a)*19;
+        this.drawPseudopod(g,sx,sy,ex,ey,{side,phase:side*1.7,amp:target?4.5:6.5,bend:target?14:8,alpha:target?(ready?1:0.75):0.62});
+      }
+      if(target){
+        this.drawPhagoLock(g,target,ready);
+        // Las primeras veces se nombra lo que pasa: el jugador aprende qué buscan los pseudópodos.
+        if(this.phagoHintsLeft>0&&this.elapsed-(this.lastPhagoHintAt??-99)>4){
+          this.lastPhagoHintAt=this.elapsed;this.phagoHintsLeft--;
+          this.showFloatingText(target.x,target.y-(target.visualSize||40)*0.75,'FAGOCITABLE · ACERCATE','#a6ffe0',11);
+        }
       }
     }
 
@@ -975,9 +1094,7 @@
           const reach=Math.min(d,Math.max(18,this.stats.phagoRadius*progress));
           const sx=this.player.x+px*side*9,sy=this.player.y+py*side*9,ex=this.player.x+dx/d*reach,ey=this.player.y+dy/d*reach;
           const bend=12*side*Math.sin(progress*Math.PI);
-          tendrils.lineStyle(8,0x75f5c5,0.30);tendrils.beginPath();tendrils.moveTo(sx,sy);tendrils.lineTo((sx+ex)/2+px*bend,(sy+ey)/2+py*bend);tendrils.lineTo(ex,ey);tendrils.strokePath();
-          tendrils.lineStyle(3,0xd2fff0,0.96);tendrils.beginPath();tendrils.moveTo(sx,sy);tendrils.lineTo((sx+ex)/2+px*bend,(sy+ey)/2+py*bend);tendrils.lineTo(ex,ey);tendrils.strokePath();
-          tendrils.fillStyle(0xc5ffed,0.95);tendrils.fillCircle(ex,ey,4+progress*2);
+          this.drawPseudopod(tendrils,sx,sy,ex,ey,{side,phase:side*2.1,amp:3.5+progress*3,bend:bend*1.4,thick:9.5,tip:4+progress*2.5,speed:9,alpha:1});
         }
       };
       const progress={value:0.05};drawTendrils(progress.value);
@@ -1062,7 +1179,7 @@
 
     chooseFocusEvolution(optionId){
       const o=this.pendingFocusOptions?.find(x=>x.id===optionId);if(!o)return;
-      if(!this.activeSkills.has(o.skill)){this.activeSkills.add(o.skill);this.skillLevels[o.skill]=1;this.upgradeHistory.push({time:fmtTime(this.elapsed),type:'Habilidad desbloqueada',name:this.skillOptionLabel(o.skill,false).name,detail:'Nuevo mecanismo activo'});this.showToast(`HABILIDAD DESBLOQUEADA · ${this.skillOptionLabel(o.skill,false).name}`);}
+      if(!this.activeSkills.has(o.skill)){this.activeSkills.add(o.skill);this.skillLevels[o.skill]=1;this.upgradeHistory.push({time:fmtTime(this.elapsed),type:'Habilidad desbloqueada',name:this.skillOptionLabel(o.skill,false).name,detail:'Nuevo mecanismo activo'});this.showToast(`HABILIDAD DESBLOQUEADA · ${this.skillOptionLabel(o.skill,false).name}`);if(o.skill==='phagocytosis'){this.phagoHintsLeft=3;this.showToast('PSEUDÓPODOS · buscan patógenos con el ícono verde: acercate y los englobás');}}
       else {const nextLevel=(this.skillLevels[o.skill]||1)+1,delta=this.skillEvolutionDelta(o.skill,nextLevel);this.skillLevels[o.skill]=nextLevel;this.applySkillEvolution(o.skill,nextLevel);this.upgradeHistory.push({time:fmtTime(this.elapsed),type:'Evolución celular',name:this.skillOptionLabel(o.skill,true).name,detail:delta});this.showToast(`EVOLUCIÓN · ${this.skillOptionLabel(o.skill,true).name} · NIVEL ${this.skillLevels[o.skill]} · ${delta}`);}
       if(this.upgradeHistory.length>80)this.upgradeHistory.shift();
       
@@ -1251,6 +1368,7 @@
         else{this.hudToast.setAlpha(0);this.toastUntil=0;}
       }
       this.updateColonies(dtMs,dt);
+      this.updateAmbientLayers();
 
       // Gameplay difficulty rises with survival time. Quiz difficulty does not affect combat.
       if(!this.debugMode)this.updateProgressionMilestones();
@@ -1456,19 +1574,35 @@
         }else{
           e.animBob=Math.sin(this.elapsed*e.animFrequency+e.animPhase)*2.2;
           e.obj.setPosition(e.x,e.y+e.animBob);
-          if(e.type==='virus'&&!e.isBoss) e.obj.rotation+=dt*0.35;
-          if(e.type==='parasite') e.obj.rotation=e.heading+(e.morphology.id==='giardia'?Math.PI/2:e.morphology.id==='trypanosome'?Math.PI*0.75:0);
-          if((e.type==='bacteria'||e.type==='fungus')&&!e.isBoss){
-            const targetAngle=Math.atan2(this.player.y-e.y,this.player.x-e.x);
-            e.obj.rotation+=wrapAngle(targetAngle-e.obj.rotation)*Math.min(1,dt*1.8);
+          // Animación por familia (todo con senos sobre el tiempo: sin tweens ni texturas extra por enemigo).
+          const ph=this.elapsed*e.animFrequency+e.animPhase;
+          let pulse=1;
+          if(e.spawnAge<1){e.spawnAge=Math.min(1,e.spawnAge+dtMs/340);pulse*=Math.max(0.05,easeOutBack(e.spawnAge));}
+          if(e.type==='virus'){
+            if(!e.isBoss)e.obj.rotation+=dt*(0.35+0.25*Math.sin(ph*0.4));
+            pulse*=1+Math.sin(ph*1.7)*0.06; // la cápside "late"
+          }else if(e.type==='parasite'){
+            // Protozoos: avanzan ondulando hacia los lados de su rumbo.
+            e.obj.rotation=e.heading+(e.morphology.id==='giardia'?Math.PI/2:e.morphology.id==='trypanosome'?Math.PI*0.75:0)+Math.sin(ph*1.3)*0.16;
+          }else{
+            if(!e.isBoss){
+              const targetAngle=Math.atan2(this.player.y-e.y,this.player.x-e.x);
+              e.faceRot=(e.faceRot??e.obj.rotation)+wrapAngle(targetAngle-(e.faceRot??e.obj.rotation))*Math.min(1,dt*1.8);
+              e.obj.rotation=e.faceRot+Math.sin(ph*0.9)*(e.type==='bacteria'?0.12:0.07); // tambaleo
+            }
+            if(e.type==='fungus'){
+              pulse*=1+Math.sin(ph*0.5)*0.045; // respiración lenta
+              if(!e.isBoss&&e.sporeCooldown<450)pulse*=1+0.16*(1-Math.max(0,e.sporeCooldown)/450); // se hincha antes de soltar esporas
+            }
           }
-          if(e.hitFlash<=0&&!e.tintActive)e.obj.setScale(e.visualScale*(1+Math.max(0,gait-1)),e.visualScale*(1-Math.max(0,gait-1)*0.55));
+          if(e.isBoss)pulse*=1+Math.sin(this.elapsed*1.8)*0.03;
+          if(e.hitFlash<=0&&!e.tintActive)e.obj.setScale(e.visualScale*(1+Math.max(0,gait-1))*pulse,e.visualScale*(1-Math.max(0,gait-1)*0.55)*pulse);
           if(e.outlineSprite?.active){e.outlineSprite.setPosition(e.x,e.y+e.animBob).setRotation(e.obj.rotation).setScale(e.obj.scaleX,e.obj.scaleY).setTint(e.hitFlash>0?0xffedb1:e.healthOutlineColor).setAlpha(e.hitFlash>0?1:0.88);}
         }
       if(e.phagoMarker?.active){
           const eligible=this.activeSkills.has('phagocytosis')&&e.phagoEligible&&e.sizeTier<=this.stats.phagoMaxTier;
           const frame=((this.elapsed*2)|0)%2?'phago_mark_2':'phago_mark_1';
-          e.phagoMarker.setVisible(eligible).setAlpha(0.60+0.20*Math.sin(this.elapsed*1.6+e.animPhase)).setPosition(e.x,e.y-e.visualSize*0.62+e.animBob+Math.sin(this.elapsed*4+e.animPhase)*2);
+          const inReach=eligible&&dist2(e,this.player)<(this.stats.phagoRadius+45)**2;e.phagoMarker.setVisible(eligible).setDisplaySize(inReach?42:32,inReach?42:32).setAlpha(inReach?1:0.60+0.20*Math.sin(this.elapsed*1.6+e.animPhase)).setPosition(e.x,e.y-e.visualSize*0.62+e.animBob+Math.sin(this.elapsed*4+e.animPhase)*2);
           if(eligible&&e.phagoMarker.texture.key!==frame)e.phagoMarker.setTexture(frame);
         }
         if(e.bossRing?.active)e.bossRing.setPosition(e.x,e.y).setScale(1+Math.sin(this.elapsed*3.4)*0.035).setAlpha(0.58+Math.sin(this.elapsed*3.4)*0.20);
@@ -1773,6 +1907,7 @@
 
     destroyTransientObjects() {
       if(this.onScaleResize){this.scale.off(Phaser.Scale.Events.RESIZE,this.onScaleResize);this.onScaleResize=null;}
+      if(this.onAddedToScene){this.events.off('addedtoscene',this.onAddedToScene);this.onAddedToScene=null;}
       this.enemies=[];this.playerBullets=[];this.enemyProjectiles=[];this.helpers=[];this.nets=[];this.xpDrops=[];this.activeEnemyCount=0;this.floatingTexts=[];
       this.ui.clearActions();
     }
@@ -1801,32 +1936,72 @@
   document.querySelectorAll('[data-evolution-difficulty]').forEach(btn=>btn.addEventListener('click',()=>{selectedEvolutionDifficulty=btn.dataset.evolutionDifficulty;document.querySelectorAll('[data-evolution-difficulty]').forEach(b=>b.classList.toggle('selected',b===btn));}));
 
   const mobileViewport=()=>window.matchMedia('(max-width: 760px), (pointer: coarse)').matches;
+  // Píxeles reales por píxel CSS: hasta ×2 en PC y ×1,5 en celular (pantallas chicas con DPR 3 no lo notan y
+  // cuesta mucho rendimiento); equipos de pocos núcleos o poca memoria quedan en ×1.
+  function computeRenderResolution(){
+    const dpr=window.devicePixelRatio||1,cores=navigator.hardwareConcurrency||4,memory=navigator.deviceMemory||0;
+    const lowEnd=cores<=4||(memory>0&&memory<=4),cap=mobileViewport()?(lowEnd?1:1.5):(lowEnd?1.5:2);
+    return Math.round(Math.min(cap,Math.max(1,dpr))*4)/4;
+  }
   function fitLogicalViewport(){
     const bounds=$('gameContainer').getBoundingClientRect();
     W=Math.max(280,Math.round(bounds.width||window.innerWidth||480));
     H=Math.max(480,Math.round(bounds.height||window.innerHeight||800));
+    RENDER_RES=computeRenderResolution();
+  }
+  // Ajusta el canvas al contenedor. Con el juego oculto (menú) el contenedor mide 0: no se toca nada (ese
+  // redimensionado a 0×0 era el que dejaba la siguiente partida en negro).
+  function fitGameToContainer(){
+    if(!game?.scale)return;
+    const bounds=$('gameContainer').getBoundingClientRect();
+    if(bounds.width<2||bounds.height<2)return;
+    fitLogicalViewport();
+    game.scale.setZoom(1/RENDER_RES);
+    game.scale.resize(Math.round(W*RENDER_RES),Math.round(H*RENDER_RES));
+  }
+  let fitQueued=false;
+  const queueFit=()=>{if(fitQueued)return;fitQueued=true;requestAnimationFrame(()=>{fitQueued=false;fitGameToContainer();});};
+  if(window.ResizeObserver)new ResizeObserver(queueFit).observe($('gameContainer'));
+  window.addEventListener('resize',queueFit);
+  window.addEventListener('orientationchange',queueFit);
+  // Pantalla completa: Fullscreen API estándar o con prefijo webkit (Safari en Mac/iPad). Safari de iPhone no
+  // permite pantalla completa de elementos que no sean video: ahí se usa el modo CSS (body.mobile-game-fullscreen)
+  // y se explica cómo agregarlo a la pantalla de inicio, desde donde abre sin barras (manifest + meta apple).
+  const fullscreenElement=()=>document.fullscreenElement||document.webkitFullscreenElement||null;
+  const standalone=()=>window.navigator.standalone===true||window.matchMedia?.('(display-mode: fullscreen), (display-mode: standalone)').matches;
+  const fullscreenSupported=()=>{const r=document.documentElement;return !!(r.requestFullscreen||r.webkitRequestFullscreen)&&(document.fullscreenEnabled!==false||document.webkitFullscreenEnabled===true);};
+  function requestElementFullscreen(el){
+    try{
+      if(el.requestFullscreen){const r=el.requestFullscreen({navigationUI:'hide'});if(r?.catch)r.catch(()=>{});return true;}
+      if(el.webkitRequestFullscreen){el.webkitRequestFullscreen();return true;}
+    }catch(_){}
+    return false;
   }
   function enterMobileFullscreen(){
     document.body.classList.add('mobile-game-fullscreen');
-    const root=document.documentElement;
-    if(!document.fullscreenElement&&root.requestFullscreen){
-      try{const result=root.requestFullscreen({navigationUI:'hide'});if(result?.catch)result.catch(()=>document.body.classList.add('mobile-game-fullscreen'));}catch(_){document.body.classList.add('mobile-game-fullscreen');}
-    }
+    if(!fullscreenElement()&&!standalone())requestElementFullscreen(document.documentElement);
     if(screen.orientation?.lock)screen.orientation.lock('portrait').catch(()=>{});
   }
   function exitMobileFullscreen(){
     document.body.classList.remove('mobile-game-fullscreen');
-    if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});
+    if(fullscreenElement()){if(document.exitFullscreen)document.exitFullscreen().catch(()=>{});else if(document.webkitExitFullscreen)document.webkitExitFullscreen();}
     $('fullscreenButton')?.classList.remove('recovery-visible');
   }
   function refreshFullscreenRecovery(){
     const button=$('fullscreenButton');
     if(!button)return;
     const active=gameScreen.style.display!=='none'&&mobileViewport();
-    button.classList.toggle('recovery-visible',active&&!document.fullscreenElement);
-    if(active&&game?.scale){requestAnimationFrame(()=>game.scale.refresh());}
+    // En iPhone (sin API) el botón explica cómo instalarlo; si ya se abrió desde el inicio, no hace falta.
+    button.textContent=fullscreenSupported()?'Pantalla completa':'Ver a pantalla completa';
+    button.classList.toggle('recovery-visible',active&&!fullscreenElement()&&!standalone());
+    if(active)requestAnimationFrame(fitGameToContainer);
   }
-  $('fullscreenButton').addEventListener('click',()=>{enterMobileFullscreen();$('fullscreenButton').classList.remove('recovery-visible');setTimeout(refreshFullscreenRecovery,350);});
+  $('fullscreenButton').addEventListener('click',()=>{
+    if(!fullscreenSupported()){$('installHint').classList.add('open');return;}
+    enterMobileFullscreen();$('fullscreenButton').classList.remove('recovery-visible');setTimeout(refreshFullscreenRecovery,350);
+  });
+  $('installHintClose')?.addEventListener('click',()=>$('installHint').classList.remove('open'));
+  document.addEventListener('webkitfullscreenchange',refreshFullscreenRecovery);
   document.addEventListener('fullscreenchange',refreshFullscreenRecovery);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(refreshFullscreenRecovery,180);});
   // Pausa automática: al volver de otra app o pestaña, la partida espera en el menú de pausa en vez de seguir sola.
@@ -1849,21 +2024,48 @@
     else requestAnimationFrame(()=>gameScreen.scrollIntoView({behavior:'smooth',block:'center',inline:'nearest'}));
     if(!game){
       fitLogicalViewport();
-      const renderResolution=Math.min(1.5,Math.max(1,window.devicePixelRatio||1));
-      game=new Phaser.Game({type:Phaser.AUTO,parent:'gameContainer',width:W,height:H,resolution:renderResolution,backgroundColor:'#09192a',antialias:true,roundPixels:false,
-        scale:{mode:Phaser.Scale.RESIZE,parent:'gameContainer',width:W,height:H,min:{width:280,height:480}},fps:{target:60,forceSetTimeOut:false},
+      // Escala manual (NONE + zoom) en vez de RESIZE: RESIZE siempre usa 1 píxel real por píxel CSS.
+      game=new Phaser.Game({type:Phaser.AUTO,parent:'gameContainer',width:Math.round(W*RENDER_RES),height:Math.round(H*RENDER_RES),backgroundColor:'#09192a',antialias:true,roundPixels:false,
+        scale:{mode:Phaser.Scale.NONE,parent:'gameContainer',width:Math.round(W*RENDER_RES),height:Math.round(H*RENDER_RES),zoom:1/RENDER_RES},fps:{target:60,forceSetTimeOut:false},
         render:{antialias:true,pixelArt:false,powerPreference:'low-power'},scene:[]});
       game.scene.add('Arena',Arena,true,currentSettings);
     }else{
       // En el menú el loop duerme: con el contenedor oculto (0×0), un resize (p. ej. al salir de pantalla
       // completa en el celular) hacía que Phaser creara un framebuffer vacío y la siguiente partida se veía negra.
       game.loop.wake(); // no hace nada si el loop ya está corriendo
+      fitGameToContainer();
       game.scene.start('Arena',currentSettings);
-      requestAnimationFrame(()=>game.scale.refresh());
     }
     setTimeout(refreshFullscreenRecovery,220);
   }
 
+  // ---- Reportes anónimos (bugs, sugerencias, correcciones) → planilla de Drive vía Apps Script ----
+  // Misma URL que web/js/app.js (ver tools/reportes-apps-script/README.md). Vacía = no se muestran los botones.
+  const REPORTES_URL='';
+  const reportLayer=$('reportLayer');
+  let lastRunInfo='';
+  if(REPORTES_URL)document.querySelectorAll('.report-open').forEach(b=>{b.hidden=false;b.addEventListener('click',()=>{$('reportStatus').textContent='';reportLayer.classList.add('open');setTimeout(()=>$('reportMessage').focus(),60);});});
+  $('reportClose').addEventListener('click',()=>reportLayer.classList.remove('open'));
+  window.addEventListener('is:run-start',e=>{const d=e.detail||{};lastRunInfo=`${d.infection||''} · ${d.infectionDifficulty||''} · ${d.evolutionDifficulty||''}${d.debug?' · laboratorio':''}`;});
+  $('reportForm').addEventListener('submit',async ev=>{
+    ev.preventDefault();
+    const status=$('reportStatus'),mensaje=$('reportMessage').value.trim();
+    if(mensaje.length<10){status.textContent='Contanos un poco más (al menos 10 caracteres).';return;}
+    const hoy=new Date().toISOString().slice(0,10);let reg={dia:hoy,cantidad:0,ultimo:0};
+    try{const r=JSON.parse(localStorage.getItem('medmar:reportes')||'null');if(r&&r.dia===hoy)reg=r;}catch(_){}
+    if(reg.cantidad>=10){status.textContent='Por hoy ya mandaste varios reportes. ¡Gracias!';return;}
+    if(Date.now()-reg.ultimo<30000){status.textContent='Esperá unos segundos antes de mandar otro.';return;}
+    const button=$('reportForm').querySelector('button[type="submit"]');button.disabled=true;status.textContent='Enviando…';
+    const datos={tipo:$('reportType').value,seccion:'Juego · Inmune Survivors',mensaje,website:$('reportWebsite').value,origen:'juego',
+      version:document.querySelector('script[src*="game.js"]')?.src.split('build=')[1]||'',detalle:lastRunInfo,
+      dispositivo:`${mobileViewport()?'táctil':'mouse'} · ${window.innerWidth}×${window.innerHeight} · ${navigator.userAgent.slice(0,110)}`};
+    try{
+      await fetch(REPORTES_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(datos)});
+      reg.cantidad++;reg.ultimo=Date.now();try{localStorage.setItem('medmar:reportes',JSON.stringify(reg));}catch(_){}
+      $('reportForm').reset();status.textContent='¡Gracias! Lo recibimos.';
+    }catch(_){status.textContent='No se pudo enviar. Revisá la conexión y probá de nuevo.';}
+    finally{button.disabled=false;}
+  });
   $('startButton').addEventListener('click',()=>launchGame(false));
   $('debugStartButton').addEventListener('click',()=>launchGame(true));
   $('restartButton').addEventListener('click',()=>launchGame(false));
@@ -1921,7 +2123,11 @@
     const box=$('upgradeButtons');box.innerHTML='';const skillDetails=$('upgradeSkillDetails');skillDetails.classList.remove('open');skillDetails.textContent='';
     e.detail.upgrades.forEach(strategy=>{
       const b=document.createElement('button');b.className='upgrade-btn strategy-btn';b.style.setProperty('--strategy-color',strategy.color||'#8cebc9');
-      const icon=document.createElement('span');icon.className='strategy-icon';const pathMarks={homeostasis:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5 40 11v11c0 10-7 17-16 21C15 39 8 32 8 22V11Z" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round"/><path d="M24 15v15m-7-7h14" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>',cytotoxicity:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4 28 17 41 11 34 23 46 27 33 30 38 43 26 35 19 47 18 33 4 36 14 26 4 17 18 19Z" fill="currentColor"/><circle cx="24" cy="25" r="6" fill="#102238"/><circle cx="24" cy="25" r="2.5" fill="#fff1bd"/></svg>',chemotaxis:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M5 24h27" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="m25 12 12 12-12 12" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="15" r="2.3" fill="currentColor"/><circle cx="15" cy="33" r="2" fill="currentColor"/></svg>'};icon.innerHTML=pathMarks[strategy.id]||'';const affected=document.createElement('span');affected.className='affected-skills';for(const skill of (strategy.affectDetails||[])){const chip=document.createElement('span');chip.className='skill-sprite-chip';chip.title=skill.name;chip.setAttribute('role','button');chip.setAttribute('tabindex','0');chip.setAttribute('aria-label',`${skill.name}: ${skill.change}`);const img=document.createElement('img');img.src=`assets/skills/${skill.id}.svg`;img.alt='';chip.appendChild(img);const showDetail=ev=>{ev?.stopPropagation();const panel=$('upgradeSkillDetails');panel.innerHTML='';const title=document.createElement('strong');title.textContent=skill.name;const body=document.createElement('span');body.textContent=`ESTADO ACTUAL\n${skill.current}\n\nEFECTO DE ESTA MEJORA\n${skill.change}`;panel.append(title,body);panel.classList.add('open');};chip.addEventListener('click',showDetail);chip.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();showDetail(ev);}});affected.appendChild(chip);}if(affected.childElementCount)affected.title='Tocá un sprite para consultar parámetros actuales y el cambio de esta mejora';
+      const icon=document.createElement('span');icon.className='strategy-icon';const pathMarks={homeostasis:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5 40 11v11c0 10-7 17-16 21C15 39 8 32 8 22V11Z" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round"/><path d="M24 15v15m-7-7h14" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>',cytotoxicity:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4 28 17 41 11 34 23 46 27 33 30 38 43 26 35 19 47 18 33 4 36 14 26 4 17 18 19Z" fill="currentColor"/><circle cx="24" cy="25" r="6" fill="#102238"/><circle cx="24" cy="25" r="2.5" fill="#fff1bd"/></svg>',chemotaxis:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M5 24h27" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="m25 12 12 12-12 12" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="15" r="2.3" fill="currentColor"/><circle cx="15" cy="33" r="2" fill="currentColor"/></svg>'};icon.innerHTML=pathMarks[strategy.id]||'';// Lo que mejora en cada habilidad que tenés va siempre visible en la tarjeta (antes estaba escondido
+      // detrás de íconos superpuestos que había que descubrir tocándolos).
+      const affected=document.createElement('span');affected.className='affected-skills';
+      if((strategy.affectDetails||[]).length){const head=document.createElement('small');head.className='affected-head';head.textContent='También mejora tus habilidades:';affected.appendChild(head);}
+      for(const skill of (strategy.affectDetails||[])){const row=document.createElement('span');row.className='affected-row';const img=document.createElement('img');img.src=`assets/skills/${skill.id}.svg`;img.alt='';const txt=document.createElement('span');const nm=document.createElement('b');nm.textContent=skill.name;const ch=document.createElement('span');ch.className='affected-change';ch.textContent=skill.change;txt.append(nm,ch);row.append(img,txt);affected.appendChild(row);}
       const copy=document.createElement('span');copy.className='strategy-copy';
       const role=document.createElement('small');role.textContent=`${strategy.role||'ESTRATEGIA'} · ${strategy.nextLevel||''}`;
       const strong=document.createElement('strong');strong.textContent=strategy.name;

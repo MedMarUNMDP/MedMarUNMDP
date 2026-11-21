@@ -1,11 +1,14 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-15-diagnostico"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-21-pc"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
         const SUPABASE_URL = "https://ekfwdrsehhmrqxxlefyx.supabase.co"
         const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ZZQREdrsOfFn8vIOaO3S0w_S7NKP9KS"
         const SUPABASE_FUNCTION_NAME = "api"
+        // URL de la aplicación web de Apps Script que guarda los reportes anónimos en una planilla de Drive
+        // (ver tools/reportes-apps-script/README.md). Vacía = la sección de reportes no se muestra.
+        const REPORTES_URL = ""
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
             auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
         })
@@ -121,6 +124,7 @@ const hilosPendientesConfirmacion = new Map()
         const vistaForo = document.getElementById("vistaForo")
         const vistaJuegos = document.getElementById("vistaJuegos")
         const vistaConfiguracion = document.getElementById("vistaConfiguracion")
+        const vistaReportes = document.getElementById("vistaReportes")
         const vistaModeracion = document.getElementById("vistaModeracion")
         const btnIrModeracion = document.getElementById("btnIrModeracion")
         const btnVolverForoDesdeModeracion = document.getElementById("btnVolverForoDesdeModeracion")
@@ -2583,6 +2587,7 @@ async function cargarBootstrap() {
             vistaForo.style.display = nombre === "foro" ? "block" : "none"
             vistaJuegos.style.display = nombre === "juegos" ? "block" : "none"
             vistaConfiguracion.style.display = nombre === "configuracion" ? "block" : "none"
+            vistaReportes.style.display = nombre === "reportes" ? "block" : "none"
             vistaModeracion.style.display = nombre === "moderacion" ? "block" : "none"
 
             btnIrInicio.style.display = nombre === "inicio" ? "none" : "flex"
@@ -2614,6 +2619,7 @@ async function cargarBootstrap() {
                     nombre === "intercambios" ? vistaIntercambios :
                     nombre === "juegos" ? vistaJuegos :
                     nombre === "configuracion" ? vistaConfiguracion :
+                    nombre === "reportes" ? vistaReportes :
                     vistaModeracion
 
                 if (destino) destino.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -3705,6 +3711,60 @@ async function cargarBootstrap() {
             }
             formCambiarPassword.reset()
             msgPasswordPerfil.innerText = 'Contraseña cambiada correctamente.'
+        })
+
+        // ==================== SUGERENCIAS Y REPORTES ====================
+        // Anónimos: no se manda email, usuario ni token, solo lo que escribe la persona y contexto técnico.
+        // Apps Script no responde a preflight CORS: se manda como text/plain con mode "no-cors" (respuesta opaca).
+
+        const formReporte = document.getElementById("formReporte")
+        const msgReporte = document.getElementById("msgReporte")
+        const LIMITE_REPORTES_DIA = 10
+        const ESPERA_ENTRE_REPORTES_MS = 30000
+
+        if (REPORTES_URL) document.getElementById("tarjetaReportes").hidden = false
+
+        function registroReportes() {
+            const hoy = new Date().toISOString().slice(0, 10)
+            try {
+                const r = JSON.parse(localStorage.getItem("medmar:reportes") || "null")
+                if (r && r.dia === hoy) return r
+            } catch (_) {}
+            return { dia: hoy, cantidad: 0, ultimo: 0 }
+        }
+
+        formReporte.addEventListener("submit", async function (e) {
+            e.preventDefault()
+            const mensaje = document.getElementById("reporteMensaje").value.trim()
+            if (mensaje.length < 10) { msgReporte.innerText = "Contanos un poco más (al menos 10 caracteres)."; return }
+            const registro = registroReportes()
+            if (registro.cantidad >= LIMITE_REPORTES_DIA) { msgReporte.innerText = "Por hoy ya mandaste varios reportes. ¡Gracias! Probá de nuevo mañana."; return }
+            if (Date.now() - registro.ultimo < ESPERA_ENTRE_REPORTES_MS) { msgReporte.innerText = "Esperá unos segundos antes de mandar otro."; return }
+
+            const boton = formReporte.querySelector("button[type='submit']")
+            boton.disabled = true
+            msgReporte.innerText = "Enviando…"
+            const datos = {
+                tipo: document.getElementById("reporteTipo").value,
+                seccion: document.getElementById("reporteSeccion").value,
+                mensaje,
+                website: document.getElementById("reporteWebsite").value,
+                origen: "web",
+                version: FRONTEND_VERSION,
+                dispositivo: (window.matchMedia("(pointer: coarse)").matches ? "táctil" : "mouse") + " · " + window.innerWidth + "×" + window.innerHeight + " · " + navigator.userAgent.slice(0, 110)
+            }
+            try {
+                await fetch(REPORTES_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(datos) })
+                registro.cantidad += 1
+                registro.ultimo = Date.now()
+                try { localStorage.setItem("medmar:reportes", JSON.stringify(registro)) } catch (_) {}
+                formReporte.reset()
+                msgReporte.innerText = "¡Gracias! Lo recibimos. Lo vamos a leer para mejorar MedMar."
+            } catch (err) {
+                msgReporte.innerText = mensajeError("conexion")
+            } finally {
+                boton.disabled = false
+            }
         })
 
         // ==================== INICIO ====================

@@ -28,6 +28,8 @@ Para ubicarte: `Grep "// ====" web/js/app.js` y leé solo el rango que necesitá
 - supabase-js va con versión fija + `integrity` (SRI). Para actualizarlo: cambiar la versión en la URL y recalcular con
   `curl -s <url> | openssl dgst -sha384 -binary | openssl base64 -A`.
 - Las escrituras a la base van siempre por la API: las políticas RLS no permiten escribir desde el navegador.
+- Reportes anónimos (vista `#vistaReportes`): van a una planilla de Drive por Apps Script, no a Supabase.
+  `REPORTES_URL` en `app.js` (vacía = la tarjeta no aparece). Ver `tools/reportes-apps-script/README.md`.
 - Al cambiar `css/styles.css` o `js/app.js`, subí el `?v=AAAAMMDD` en `index.html` para romper la caché de los usuarios,
   y actualizá `FRONTEND_VERSION` en `app.js`.
 

@@ -38,8 +38,8 @@ Detalle de los códigos JUEGO-xx en [games/inmune-survivors/docs/diagnostico-202
 Los bugs JUEGO-01 a 14 se corrigieron en v3.5. Queda pendiente:
 
 **Inmune Survivors — rendimiento móvil**
-- [ ] Decidir la nitidez en pantallas HiDPI (el canvas no usa `devicePixelRatio`) y agregar pools de objetos
-      (proyectiles, partículas, textos) para evitar tirones del recolector en gama baja.
+- [ ] Pools de objetos (proyectiles, partículas, textos) para evitar tirones del recolector en gama baja.
+- [ ] Probar en celulares reales la nitidez ×1,5, el parallax y la pantalla completa (iPhone instalado en el inicio).
 
 **Inmune Survivors — diseño y contenido**
 - [ ] Ritmo: en simulaciones de 40 min salen 5–14 preguntas y nunca se llega a la multirresistencia; revisar la
@@ -51,6 +51,14 @@ Los bugs JUEGO-01 a 14 se corrigieron en v3.5. Queda pendiente:
 **Inmune Survivors — arquitectura**
 - [ ] Refactor por etapas (§8 del diagnóstico): formatear `game.js` sin cambiar lógica (verificado con el arnés y la
       simulación con semilla), extraer datos a `src/data/`, estado inicial único (sin `|| valorPorDefecto`), sistemas con tests.
+
+**Inmune Survivors — modos por núcleo de ADN** (plan en `games/inmune-survivors/docs/plan-modos-nucleos.md`)
+- [ ] Recibir el material de los núcleos y armar `src/data/nucleos.js` y `agentes.js` (identidad de cada enemigo).
+- [ ] Modo Foco por núcleo (agentes y preguntas del núcleo) y Sandbox (Laboratorio para jugadores).
+
+**Reportes anónimos**
+- [ ] Instalar el Apps Script (`tools/reportes-apps-script/README.md`) y pegar la URL en `REPORTES_URL`
+      (`web/js/app.js` y `games/inmune-survivors/game.js`). Hasta entonces la opción no se muestra.
 
 **Integración**
 - [ ] Integrar Inmune Survivors en la sección Juegos (`#vistaJuegos` → link/iframe a `/juegos/inmune-survivors/`).

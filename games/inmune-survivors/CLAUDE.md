@@ -2,7 +2,7 @@
 
 Survivor de arena (estilo "bullet heaven") educativo: un progenitor hematopoyético defiende un tejido
 infectado. Ataque automático; el jugador solo se mueve. Subir de nivel = responder una pregunta de
-inmunología/microbiología (acierto → mejora de vía; error → oleada extra). Versión actual: **3.5**.
+inmunología/microbiología (acierto → mejora de vía; error → oleada extra). Versión actual: **3.6**.
 
 ## Archivos
 

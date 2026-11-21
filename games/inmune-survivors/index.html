@@ -5,10 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <!-- CSP: el juego comparte origen (y localStorage, con la sesión de MedMar) con la web.
        Phaser carga las imágenes por XHR y las usa como blob:. Si sumás un CDN, agregalo acá. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' data: blob:; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' data: blob: https://script.google.com https://script.googleusercontent.com; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="theme-color" content="#091525">
-  <title>Inmune Survivors v3.5 — Correcciones y controles de PC</title>
+  <!-- Instalable: desde la pantalla de inicio abre sin barras (la única pantalla completa posible en iPhone). -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Inmune Survivors">
+  <link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
+  <title>Inmune Survivors v3.6 — Pseudópodos, parallax y pantallas</title>
   <style>
     :root {
       --bg: #07111f; --panel: #101f33; --panel2: #142942; --line: #29415b;
@@ -84,6 +91,10 @@
     .crisis-banner small { display:block; margin-top:6px; letter-spacing:.16em; font-size:10px; color:#ffd0bd; }
     @keyframes crisisIn { from { opacity:0; transform:translateY(-38px); } to { opacity:1; transform:translateY(0); } }
     #gameContainer, #gameContainer canvas { width:100%; height:100%; display:block; }
+    /* PC con mouse y pantalla ancha: marco apaisado que usa el ancho disponible (en celular sigue vertical). */
+    @media (min-width: 900px) and (pointer: fine) {
+      #gameFrame { width:min(100%, 1040px); aspect-ratio:16 / 10; max-height:calc(100vh - 150px); }
+    }
     #gameContainer canvas { touch-action:none; }
     body.mobile-game-fullscreen { overflow:hidden; overscroll-behavior:none; }
     body.mobile-game-fullscreen .shell { width:100%; height:100vh; height:100dvh; min-height:0; margin:0; padding:0; }
@@ -94,6 +105,16 @@
     body.mobile-game-fullscreen .game-topline > div:last-child { pointer-events:auto; }
     body.mobile-game-fullscreen .game-topline .btn-secondary { padding:8px 11px; border-color:#b7d6c677; background:#071321d9; box-shadow:0 2px 12px #0008; }
     #fullscreenButton { display:none; }
+    .install-hint { display:none; position:fixed; z-index:2300; left:12px; right:12px; bottom:calc(env(safe-area-inset-bottom,0px) + 64px); padding:14px 16px; border:1px solid #63e6bd88; border-radius:14px; background:#081522f2; color:#dce9f7; font-size:13px; line-height:1.45; box-shadow:0 8px 30px #000a; }
+    .install-hint.open { display:block; }
+    .report-label { display:block; margin:10px 0 5px; color:#9fb6cc; font-size:12px; font-weight:800; }
+    .report-field { width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #2f4b63; border-radius:11px; background:#0b1a2b; color:#e6f2fb; font:inherit; font-size:14px; }
+    textarea.report-field { resize:vertical; min-height:110px; }
+    .report-trap { position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
+    .report-status { min-height:1.2em; color:#b9f3dc; font-size:13px; }
+    #reportLayer { z-index:2200; }
+    .install-hint strong { color:#9df2ce; }
+    .install-hint button { margin-top:10px; }
     #fullscreenButton.recovery-visible { display:inline-flex; }
     body.mobile-game-fullscreen #gameFrame { width:100vw; max-width:none; height:100vh; height:100dvh; aspect-ratio:auto; margin:0; border:0; border-radius:0; box-shadow:none; }
     body.mobile-game-fullscreen .game-controls { display:none; }
@@ -141,10 +162,12 @@
     .strategy-copy small { color:var(--strategy-color); font-size:9px; font-weight:900; letter-spacing:.14em; }
     .strategy-copy strong { margin:0; }
     .strategy-copy > span { color:#b8cbe0; }
-    .affected-skills { display:flex; align-items:center; gap:0; min-height:34px; margin-top:4px; padding-left:2px; }
-    .skill-sprite-chip { display:grid; flex:0 0 34px; place-items:center; box-sizing:border-box; width:34px; height:34px; margin-left:-5px; padding:0; line-height:0; border:1px solid var(--strategy-color); border-radius:10px; background:#102238; cursor:pointer; box-shadow:0 2px 5px #0007; position:relative; }
-    .skill-sprite-chip:focus-visible { outline:2px solid #fff; outline-offset:2px; z-index:2; }
-    .skill-sprite-chip img { display:block; width:26px; height:26px; margin:auto; object-fit:contain; pointer-events:none; }
+    .affected-skills { display:grid; gap:6px; margin-top:8px; padding:9px 10px; border:1px solid color-mix(in srgb, var(--strategy-color) 45%, transparent); border-radius:11px; background:#0a1828; }
+    .affected-head { color:#9fb6cc; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+    .affected-row { display:grid; grid-template-columns:24px 1fr; gap:8px; align-items:start; text-align:left; }
+    .affected-row img { width:24px; height:24px; object-fit:contain; }
+    .affected-row b { display:block; color:#e6f2fb; font-size:12px; }
+    .affected-change { display:block; color:#b9f3dc; font-size:11.5px; line-height:1.35; }
     .skill-evolution-card { display:grid; grid-template-columns:42px 1fr; align-items:center; column-gap:10px; }
     .skill-evolution-card .evolution-impact { color:#b8f5d8; font-size:11px; font-weight:800; line-height:1.4; }
     .evolution-sprite { grid-row:span 2; display:grid; place-items:center; width:40px; height:40px; border-radius:12px; background:linear-gradient(145deg,#193a4a,#30264a); border:1px solid #76e9c588; color:#9df2ce; box-shadow:inset 0 0 14px #75e5cf22; }
@@ -187,7 +210,7 @@
         <div class="brand-mark" aria-hidden="true"></div>
         <div><div class="eyebrow">MedMar · Prototipo jugable</div><h1>INMUNE SURVIVORS</h1></div>
       </div>
-      <div class="top-tag">v3.5 · CORRECCIONES</div>
+      <div class="top-tag">v3.6 · MOVIMIENTO Y NITIDEZ</div>
     </header>
 
     <section id="menuScreen">
@@ -249,7 +272,7 @@
       <div id="gameFrame"><div id="gameContainer"></div><div id="debugPanel" class="compact"><strong>LABORATORIO</strong><button class="debug-toggle" id="debugToggle">Abrir</button><div class="debug-content"><div id="debugStatus" style="margin-top:5px;color:#b6f5d6">Solo desgranulación · nivel 1</div><div class="debug-heading">Habilidades</div><select id="debugSkillSelect"></select><div class="debug-row"><button data-debug="skill-add">Añadir / +nivel</button><button data-debug="skill-remove">Quitar</button></div><div class="debug-heading">Ajustar estadísticas</div><div id="debugStats"></div><div class="debug-heading">Atributos de habilidad</div><div id="debugSkillStats"></div><div class="debug-heading">Partida</div><div class="debug-row"><button data-debug="granules">Gránulos ON/OFF</button><button data-debug="invincible">Inmortalidad</button></div><div class="debug-row"><select id="debugQuestion"><option value="facil">Pregunta fácil</option><option value="normal">Pregunta normal</option><option value="dificil">Pregunta difícil</option></select><button data-debug="question">Probar</button></div><div class="debug-row"><button data-debug="primary-menu">Vía principal</button><button data-debug="evolution-menu">Evolutiva</button></div><div class="debug-heading">Aparición manual</div><label>Cantidad <input id="debugSpawnCount" type="number" min="1" max="100" value="1" style="width:58px"></label><select id="debugTypeSelect"><option value="bacteria">Bacterias</option><option value="virus">Virus</option><option value="fungus">Hongos</option><option value="parasite">Parásitos</option><option value="mixed">Mixto</option></select><div class="debug-row"><button data-debug="enemy">Enemigo</button><button data-debug="large">Grande</button><button data-debug="boss">Jefe</button></div><div class="debug-row"><button data-debug="focus">Foco</button><button data-debug="heal">Curar</button><button data-debug="clear">Limpiar</button></div></div></div><div class="crisis-banner" id="crisisBanner" style="display:none">MULTIRRESISTENCIA<small>EL TEJIDO HA PERDIDO EL CONTROL</small></div></div>
       <div class="game-controls"><span>PC: WASD / flechas o mantené apretado el mouse · ESC/P pausa</span><span>Móvil: tocá y arrastrá en cualquier parte para moverte · saná colonias al pisar el centro · acercate al ADN/ARN para recoger XP</span></div>
     </section>
-    <footer>INMUNE SURVIVORS · Prototipo v3.5 independiente para MedMar. Vista adaptable, evolución celular y combate optimizado. Banco de preguntas con repetición controlada si se agota antes de completar los cuatro jefes.</footer>
+    <footer>INMUNE SURVIVORS · Prototipo v3.6 independiente para MedMar. Vista adaptable, evolución celular y combate optimizado. Banco de preguntas con repetición controlada si se agota antes de completar los cuatro jefes.</footer>
   </div>
 
   <div class="modal-layer" id="questionLayer" role="dialog" aria-modal="true" aria-labelledby="questionHeading">
@@ -292,7 +315,7 @@
       </div>
       <details class="run-upgrade-log"><summary>Ver mejoras de la partida</summary><ol id="finalUpgradeList"></ol></details>
       <p id="bestScoreText" class="muted"></p>
-      <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:18px"><button id="restartButton" class="btn-primary" style="flex:1">JUGAR OTRA VEZ</button><button id="menuButton" class="btn-secondary">Menú</button></div>
+      <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:18px"><button id="restartButton" class="btn-primary" style="flex:1">JUGAR OTRA VEZ</button><button type="button" class="btn-secondary report-open" hidden>Reportar o sugerir</button><button id="menuButton" class="btn-secondary">Menú</button></div>
     </div>
   </div>
   <div class="modal-layer" id="pauseLayer" role="dialog" aria-modal="true" aria-labelledby="pauseHeading">
@@ -312,18 +335,40 @@
         <div class="gameover-stat"><span>Preguntas correctas</span><strong id="pauseCorrect">0</strong></div>
       </div>
       <details class="run-upgrade-log"><summary>Ver mejoras de la partida</summary><ol id="pauseUpgradeList"></ol></details>
-      <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:18px"><button id="resumeButton" class="btn-primary" style="flex:1">SEGUIR JUGANDO</button><button id="pauseMenuButton" class="btn-secondary">VOLVER AL MENÚ</button></div>
+      <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:18px"><button id="resumeButton" class="btn-primary" style="flex:1">SEGUIR JUGANDO</button><button type="button" class="btn-secondary report-open" hidden>Reportar o sugerir</button><button id="pauseMenuButton" class="btn-secondary">VOLVER AL MENÚ</button></div>
     </div>
   </div>
 
+  <div class="modal-layer" id="reportLayer" role="dialog" aria-modal="true" aria-labelledby="reportHeading">
+    <div class="modal">
+      <div class="modal-kicker">Anónimo</div>
+      <h2 id="reportHeading">Reportar o sugerir</h2>
+      <p>Contanos un error, una idea o una corrección (por ejemplo, de una pregunta). No se envía tu email ni tu usuario.</p>
+      <form id="reportForm" novalidate>
+        <label class="report-label" for="reportType">Tipo</label>
+        <select id="reportType" class="report-field"><option>Bug</option><option>Sugerencia</option><option>Corrección de contenido</option><option>Otro</option></select>
+        <label class="report-label" for="reportMessage">Mensaje</label>
+        <textarea id="reportMessage" class="report-field" rows="5" maxlength="2000" placeholder="¿Qué pasó o qué te gustaría? Si es un error, contá qué estabas haciendo."></textarea>
+        <input type="text" id="reportWebsite" name="website" tabindex="-1" autocomplete="off" class="report-trap" aria-hidden="true">
+        <p id="reportStatus" class="report-status" aria-live="polite"></p>
+        <div style="display:flex;gap:9px;flex-wrap:wrap"><button type="submit" class="btn-primary" style="flex:1">ENVIAR</button><button type="button" class="btn-secondary" id="reportClose">Cerrar</button></div>
+      </form>
+    </div>
+  </div>
+  <div class="install-hint" id="installHint" role="dialog" aria-labelledby="installHintTitle">
+    <strong id="installHintTitle">Pantalla completa en iPhone</strong><br>
+    Safari de iPhone no permite pantalla completa en juegos web. Tocá <b>Compartir</b> (el cuadrado con la flecha) →
+    <b>Agregar a pantalla de inicio</b> y abrí el juego desde ese ícono: se ve sin barras.
+    <br><button type="button" class="btn-secondary" id="installHintClose">Entendido</button>
+  </div>
   <!-- Versión fija + SRI (hash publicado por cdnjs): si el CDN sirve otro archivo, el navegador no lo ejecuta. -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js"
           integrity="sha512-/tJYyDCrI7hnHWp45P189aOwPa6lTREosRhlxEIqx8skB4A3a3rD3iz4o335SJd4sORqjVHw5y1S2hq4hciwLw=="
           crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="./src/core/runtime-services.js?build=3.5.1"></script>
-  <script src="./src/config/game-balance.js?build=3.5.1"></script>
-  <script src="./src/core/lab-actions.js?build=3.5.1"></script>
-  <script src="./game.js?build=3.5.1"></script>
+  <script src="./src/core/runtime-services.js?build=3.6.0"></script>
+  <script src="./src/config/game-balance.js?build=3.6.0"></script>
+  <script src="./src/core/lab-actions.js?build=3.6.0"></script>
+  <script src="./game.js?build=3.6.0"></script>
 </body>
 </html>
 

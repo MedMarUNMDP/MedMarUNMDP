@@ -258,3 +258,36 @@ test('JUEGO-08: las opciones plausibles de la pregunta del frotis delgado respon
   const largos = opciones.map((o) => o.length);
   assert.ok(largos[0] < Math.max(...largos), 'la correcta no debería ser la opción más larga');
 });
+
+// ---------- v3.6: pseudópodos, animaciones, parallax ----------
+
+test('pseudópodos: con un patógeno fagocitable cerca lo marcan y avisan las primeras veces', () => {
+  const { scene: s } = createScene({ seed: 14 });
+  s.activeSkills.add('phagocytosis');
+  s.skillLevels.phagocytosis = 1;
+  s.spawnEnemy('bacteria', false, { x: s.player.x + 60, y: s.player.y });
+  for (const e of s.enemies) { e.phagoEligible = true; e.sizeTier = 0; }
+  const textosAntes = s.floatingTexts.length;
+  assert.doesNotThrow(() => s.updatePhagoTendrils());
+  assert.equal(s.phagoHintsLeft, 2, 'debería consumir una pista');
+  assert.ok(s.floatingTexts.length > textosAntes, 'debería mostrar "FAGOCITABLE"');
+  s.enemies.length = 0;
+  assert.doesNotThrow(() => s.updatePhagoTendrils(), 'sin blanco los pseudópodos tantean sin errores');
+});
+
+test('animaciones: los enemigos aparecen con rebote y terminan en su escala normal', () => {
+  const { scene: s } = createScene({ seed: 15 });
+  for (const tipo of ['bacteria', 'virus', 'fungus', 'parasite']) s.spawnEnemy(tipo, false, { x: s.player.x + 400, y: s.player.y });
+  for (let i = 0; i < 30; i++) s.updateEnemies(1000 / 60, 1 / 60);
+  for (const e of s.enemies.filter((x) => !x.isWorm)) {
+    assert.equal(e.spawnAge, 1);
+    assert.ok(Number.isFinite(e.obj.rotation));
+  }
+});
+
+test('parallax: se crean las capas de ambiente y la cámara de HUD', () => {
+  const { scene: s } = createScene({ seed: 16 });
+  assert.ok(s.ambientLayers.length >= 1);
+  assert.ok(s.hudCam, 'debería existir la cámara de HUD');
+  assert.doesNotThrow(() => s.updateAmbientLayers());
+});

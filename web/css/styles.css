@@ -1959,3 +1959,24 @@
             .btnEnviarRespuesta { padding-inline:8px; }
         }
 
+
+        /* ---------- PC: PANTALLAS ANCHAS ---------- */
+        /* En PC con mouse se aprovecha el ancho: contenido más ancho, Inicio en 4 columnas y listas de
+           intercambios en grilla. Las lecturas largas (foro, formularios, chat) mantienen un ancho cómodo.
+           En celular y tablet no cambia nada. */
+        @media (min-width: 1024px) and (pointer: fine) {
+            .pagina, .hero-inner { max-width: 980px; }
+            .menuInicio { grid-template-columns: repeat(4, 1fr); }
+            #vistaForo, #vistaModeracion, #vistaConfiguracion, #seccionFormulario, #panelChat {
+                max-width: 760px; margin-left: auto; margin-right: auto;
+            }
+            #listaSolicitudes, #listaIntercambios {
+                display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start;
+            }
+            #listaSolicitudes > .vacio, #listaIntercambios > .vacio { grid-column: 1 / -1; }
+        }
+
+        /* ---------- SUGERENCIAS Y REPORTES ---------- */
+        .tarjetaReportes { grid-column: 1 / -1; }
+        #formReporte textarea { width: 100%; box-sizing: border-box; resize: vertical; font: inherit; }
+        .campoTrampa { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Content Security Policy (GitHub Pages no permite headers propios: va por <meta>).
          https://developer.mozilla.org/docs/Web/HTTP/CSP · Si agregás un CDN o un embed nuevo, sumalo acá. -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://ekfwdrsehhmrqxxlefyx.supabase.co wss://ekfwdrsehhmrqxxlefyx.supabase.co; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://ekfwdrsehhmrqxxlefyx.supabase.co wss://ekfwdrsehhmrqxxlefyx.supabase.co https://script.google.com https://script.googleusercontent.com; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="referrer" content="strict-origin-when-cross-origin">
 
     <!-- SEO principal -->
@@ -48,7 +48,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261115c">
+    <link rel="stylesheet" href="/css/styles.css?v=20261121a">
 </head>
 
 <body>
@@ -186,6 +186,14 @@
                         </span>
                         <span class="tituloInicio">Perfil</span>
                         <span class="descInicio">Pseudónimo, foto y más</span>
+                    </button>
+
+                    <button type="button" class="tarjetaInicio tarjetaReportes" data-vista="reportes" id="tarjetaReportes" hidden>
+                        <span class="iconoInicio">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 5h14v10H9l-4 4V5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 8v3.2M12 13.3v.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        </span>
+                        <span class="tituloInicio">Sugerencias y reportes</span>
+                        <span class="descInicio">Contanos un error o una idea. Es anónimo.</span>
                     </button>
 
                 </div>
@@ -432,6 +440,38 @@
 
             <!-- ==================== MI CUENTA ==================== -->
 
+            <!-- ==================== SUGERENCIAS Y REPORTES ==================== -->
+            <div id="vistaReportes" style="display:none">
+                <h2 class="seccion-titulo" style="margin-top:0">Sugerencias y reportes</h2>
+                <p class="ayudaPerfil">Contanos un error, una idea o algo que haya que corregir (también en el contenido de los juegos).
+                    <b>Es anónimo</b>: no se envía tu email ni tu usuario, solo lo que escribas y datos técnicos de la página.</p>
+                <form id="formReporte" novalidate>
+                    <label for="reporteTipo">Tipo</label>
+                    <select id="reporteTipo">
+                        <option>Bug</option>
+                        <option>Sugerencia</option>
+                        <option>Corrección de contenido</option>
+                        <option>Otro</option>
+                    </select>
+                    <label for="reporteSeccion">¿Sobre qué parte?</label>
+                    <select id="reporteSeccion">
+                        <option>General</option>
+                        <option>Intercambio de comisiones</option>
+                        <option>Chat</option>
+                        <option>Foro</option>
+                        <option>Juegos</option>
+                        <option>Perfil</option>
+                        <option>Inicio de sesión</option>
+                    </select>
+                    <label for="reporteMensaje">Mensaje</label>
+                    <textarea id="reporteMensaje" rows="6" maxlength="2000" placeholder="¿Qué pasó o qué te gustaría? Si es un error, contá qué estabas haciendo."></textarea>
+                    <!-- Campo trampa para bots: las personas no lo ven -->
+                    <input type="text" id="reporteWebsite" name="website" tabindex="-1" autocomplete="off" class="campoTrampa" aria-hidden="true">
+                    <button type="submit" class="btn-primario">Enviar</button>
+                </form>
+                <p id="msgReporte" aria-live="polite"></p>
+            </div>
+
             <div id="vistaConfiguracion" style="display:none">
 
                 <h2 class="seccion-titulo" style="margin-top:0">Perfil</h2>
@@ -621,7 +661,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261115c"></script>
+    <script src="/js/app.js?v=20261121a"></script>
 
 
 </body>
