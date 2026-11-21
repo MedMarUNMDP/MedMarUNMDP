@@ -1,6 +1,23 @@
 # Plan: modo Sandbox y focos por núcleo de ADN
 
-Estado: **planificación con datos de la cátedra** (2026-11-21). Todavía no hay nada implementado.
+Estado: **etapa 1 hecha** (2026-11-21). El catálogo de núcleos y agentes está en `src/data/agentes.js`, con
+tests en `tests/agentes-datos.test.cjs`. El juego todavía no lo usa.
+
+## Decisiones tomadas
+
+1. **Núcleos 1 a 5: afuera.** A lo sumo se usan sus preguntas sobre defensa contra virus, bacterias, parásitos y
+   hongos (inmunidad antiviral, antibacteriana, antiparasitaria y antifúngica) como banco general.
+2. **Un jefe por núcleo, bien distintivo y sin repetirse entre núcleos.** Urinario pasa a *Proteus mirabilis*
+   (antes *E. coli* repetía con Digestivo). Piel pasa a *Clostridium perfringens* (gangrena gaseosa):
+   *S. aureus* aparece en cuatro núcleos y no se distinguía.
+3. **Artrópodos grandes: ninguno.** Quedan afuera los vectores, los ponzoñosos y los insectos ectoparásitos
+   (piojos, *Tunga*, *Dermatobia*). Se mantiene *Sarcoptes*, que es microscópico. El núcleo de vectores se juega con
+   los agentes que transmiten (rasgo `vector`: entran en oleadas desde el borde).
+4. **Sandbox totalmente libre**, como el Laboratorio: mezcla agentes de todos los núcleos y no guarda nada.
+5. **Sprites por morfología con variación por código**, horneados en una textura por especie (ver más abajo).
+
+**Pendiente**: el núcleo 6.1 (urinario) solo tiene bacterias en el material (5 confirmadas, más 4 nosocomiales y el
+adenovirus "a confirmar"). ¿Se juega solo o como variante del 6 (Digestivo y urinario)?
 
 **Fuentes** (material del usuario, carpeta ADN 2.º año; no se copian en el repo):
 - *2026 PTD ADN*: núcleos y su numeración vigente.
@@ -28,14 +45,14 @@ esos núcleos.
 | Núcleo | Tejido / escenario | Jefe propuesto |
 |---|---|---|
 | 6 · Agentes con ingreso digestivo | epitelio intestinal | *E. coli* productora de toxina Shiga (SUH) |
-| 6.1 · Agentes urinarios | epitelio urinario (nuevo fondo) | *E. coli* uropatógena |
+| 6.1 · Agentes urinarios | epitelio urinario (nuevo fondo) | *Proteus mirabilis* |
 | 7 · Agentes con ingreso respiratorio | epitelio alveolar | *Mycobacterium tuberculosis* (granuloma) |
 | 7.1 · Agentes que afectan al SNC | tejido neural | *Neisseria meningitidis* |
 | 8 · Infecciones de transmisión sexual | mucosa | VIH |
 | 9 · Transmisión vertical | vascular / placenta (nuevo fondo) | *Toxoplasma gondii* |
-| 10 · Transmitidas por vectores | vascular | *Plasmodium* (con oleadas de *Aedes* como evento) |
+| 10 · Transmitidas por vectores | vascular | *Plasmodium* |
 | 11 · Zoonosis | tejido conectivo / hepático | *Echinococcus granulosus* (quiste hidatídico) |
-| 12 · Agentes que ingresan por la piel | dermis | *Staphylococcus aureus* |
+| 12 · Agentes que ingresan por la piel | dermis | *Clostridium perfringens* (gangrena gaseosa) |
 | 13-14 · Oportunistas | alveolar con inmunodepresión | *Pneumocystis jirovecii* o *Aspergillus* |
 
 ### Agentes por núcleo
@@ -83,8 +100,7 @@ esos núcleos.
 **10 · Vectores**
 - *Virus*: dengue, fiebre amarilla, zika, chikungunya. *(a confirmar)*: Oropouche, encefalitis equina del oeste.
 - *Parásitos*: *Plasmodium* spp., *Leishmania* spp., *Trypanosoma cruzi*.
-- *Vectores* (como elementos del escenario, no como enemigos): *Aedes aegypti*, *Anopheles*, *Lutzomyia*,
-  *Triatoma infestans*.
+- *Vectores*: **no entran** (artrópodos grandes). La transmisión se representa con el rasgo `vector`.
 
 **11 · Zoonosis**
 - *Virus*: rabia (*Lyssavirus*), hantavirus, fiebre hemorrágica argentina (Junín), influenza zoonótica.
@@ -97,13 +113,12 @@ esos núcleos.
   rubéola, Epstein-Barr, HHV-8.
 - *Bacterias*: *Staphylococcus aureus*, *Streptococcus pyogenes*, *Clostridium perfringens*, *C. tetani*,
   *Mycobacterium leprae*.
-- *Ectoparásitos y larvas*: *Sarcoptes scabiei*, *Pediculus humanus*, *Tunga penetrans*, *Dermatobia hominis*,
-  *Ancylostoma braziliense* / *caninum* (larva migrans).
+- *Ectoparásitos y larvas*: *Sarcoptes scabiei* y *Ancylostoma braziliense* / *caninum* (larva migrans). Los insectos
+  (*Pediculus*, *Tunga*, *Dermatobia*) no entran.
 - *Hongos*:
   - superficiales: dermatofitos (*Trichophyton*, *Microsporum*, *Epidermophyton*), *Candida*, *Malassezia furfur*;
   - profundos: *Histoplasma capsulatum*, *Coccidioides*, *Paracoccidioides brasiliensis*, *Sporothrix schenckii*.
-- *Artrópodos ponzoñosos*: escorpiones (*Tityus*), viuda negra y araña violinista. Más que enemigos de la
-  infección, sirven como **peligros del escenario**.
+- *Artrópodos ponzoñosos*: **no entran**.
 
 **13-14 · Oportunistas**
 - *Virus*: citomegalovirus, VHS-1 y 2, varicela-zóster, Epstein-Barr, HHV-8 (en el contexto de VIH/SIDA y
@@ -116,11 +131,25 @@ esos núcleos.
 - *Hongos*: *Candida albicans*, *Pneumocystis jirovecii*, *Cryptococcus neoformans*, *Aspergillus* spp.,
   *Histoplasma capsulatum*, mucorales, *Fusarium*.
 
-En total son unos **120 agentes únicos**. Muchos aparecen en varios núcleos: *S. aureus*, *S. pyogenes*,
+En total son **114 agentes únicos** en `src/data/agentes.js`. Muchos aparecen en varios núcleos: *S. aureus*, *S. pyogenes*,
 *T. pallidum*, *T. cruzi*, *Toxoplasma*, herpesvirus y *M. tuberculosis*. Por eso cada agente se define **una vez**
 y declara a qué núcleos pertenece.
 
 ## Sprites: por morfología, no por especie
+
+**Técnica liviana elegida: horneado por especie.** La primera vez que aparece una especie, se dibuja una sola vez
+en una textura chica (192 px) a partir de la pieza base:
+- tinte;
+- estiramiento;
+- copias en par, cadena o racimo;
+- y, según la especie, cápsula, flagelos o espora.
+
+La textura queda cacheada. Desde ahí cada enemigo es **una sola imagen**, igual que hoy: no suma objetos ni dibujos
+por frame. Solo se hornean las especies que salen en la partida (un núcleo tiene 5 a 30), así que en memoria son
+unos pocos MB. Es la misma técnica que ya usa el juego para las siluetas de contorno.
+
+Se descartó armar cada enemigo con varias imágenes por frame: multiplica objetos y dibujos (68 enemigos × 3-4
+piezas) y en celulares de gama baja se nota.
 
 Hacer ~120 sprites únicos no es viable ni hace falta: lo que se ve al microscopio es la morfología. Propuesta:
 **un sprite por morfología** (~35) y la identidad de cada especie dada por:
@@ -159,10 +188,14 @@ Hacer ~120 sprites únicos no es viable ni hace falta: lo que se ve al microscop
 | levadura en gemación / encapsulada | ✅ existen | *Candida*, *Cryptococcus*, *Malassezia*, *Histoplasma* |
 | hifas / conidióforo | ✅ existen | *Aspergillus*, dermatofitos, *Fusarium*, mucorales |
 | *Pneumocystis* (quistes) | ➕ nuevo | *P. jirovecii* |
-| ácaro / piojo / pulga / larva | ➕ nuevos | *Sarcoptes*, *Pediculus*/*Phthirus*, *Tunga*, *Dermatobia* |
-| vectores (escenario) | ➕ nuevos | mosquito, vinchuca, flebótomo |
+| ácaro | ➕ nuevo | *Sarcoptes scabiei* |
 
-Hoy existen unos 15 sprites; harían falta **~20 nuevos**, en el mismo estilo y en WebP (`assets/README.md`).
+En `src/data/agentes.js` quedaron **39 morfologías**:
+- **17** usan un sprite existente tal cual.
+- **10** se arman por código desde un sprite existente (variación).
+- **12** necesitan una pieza nueva. Mientras tanto usan un suplente: bacilo ácido-alcohol resistente, sin pared,
+  *Chlamydia*, retrovirus, virus en bala, poxvirus, *Leishmania*, *Trichomonas*, apicomplexa, *Plasmodium*, ácaro y
+  *Pneumocystis*.
 
 ## Modelo de datos
 
@@ -213,20 +246,17 @@ Todo en `src/data/` (UMD, con tests), separado del motor:
 
 ## Etapas
 
-1. **Datos**: `src/data/nucleos.js` y `agentes.js` con lo de arriba, fichas revisadas y tests (cada agente con
-   sprite existente, núcleo válido y sin duplicados).
-2. **Identidad con los sprites actuales**: asignar especie, tinte y nombre al aparecer, y un bestiario al terminar
-   la partida.
+1. ✅ **Datos**: `src/data/agentes.js` con núcleos, agentes, morfologías, rasgos y jefes, más tests de consistencia.
+   Faltan las fichas médicas: van en la etapa 2, revisadas con `revisor-contenido-medico`.
+2. **Identidad con los sprites actuales**: horneado por especie (tinte y variaciones), nombre al aparecer, fichas
+   revisadas y bestiario al terminar la partida.
 3. **Modo Foco por núcleo**: selector en el menú, enemigos y preguntas filtrados, tejido y jefe del núcleo,
    récord por núcleo.
-4. **Sandbox**: Laboratorio para jugadores (elegir núcleo y agentes, sin puntaje).
-5. **Sprites nuevos** (~20, por morfología).
+4. **Sandbox**: Laboratorio para jugadores que mezcla todo, sin puntaje.
+5. **Las 12 piezas nuevas** de sprite.
 6. **Rasgos de comportamiento**, uno por vez, con tests en el arnés.
-7. **Preguntas por núcleo**.
+7. **Preguntas por núcleo**, más el banco general de defensa contra agentes.
 
 ## Decisiones pendientes
 
-- ¿Los núcleos 1 a 5 quedan como modo "Fundamentos" con el juego actual?
-- ¿El jefe de cada núcleo es el de la tabla?
-- ¿Los vectores y artrópodos ponzoñosos van como peligros del escenario y no como enemigos?
-- ¿Sandbox guarda algo (agentes vistos, bestiario) o es totalmente libre?
+- Núcleo 6.1: ¿se juega solo o junto con el 6? (ver arriba).

@@ -53,9 +53,10 @@ Los bugs JUEGO-01 a 14 se corrigieron en v3.5. Queda pendiente:
       simulación con semilla), extraer datos a `src/data/`, estado inicial único (sin `|| valorPorDefecto`), sistemas con tests.
 
 **Inmune Survivors — modos por núcleo de ADN** (plan en `games/inmune-survivors/docs/plan-modos-nucleos.md`)
-- [ ] Armar `src/data/nucleos.js` y `agentes.js` con el mapeo ya relevado (~120 agentes en 10 núcleos) y revisar
-      las fichas con `revisor-contenido-medico`. Decidir los puntos abiertos del plan (jefes, núcleos 1-5, Sandbox).
-- [ ] ~20 sprites nuevos por morfología (cocos en cadena, diplococos, esporulados, BAAR, retrovirus, *Plasmodium*…).
+- [ ] Etapa 2: horneado de texturas por especie (tinte y variaciones), nombre al aparecer, fichas médicas revisadas
+      con `revisor-contenido-medico` y bestiario. El catálogo ya está en `src/data/agentes.js` (114 agentes, 10 núcleos).
+- [ ] Decidir si el núcleo 6.1 (urinario, solo bacterias) se juega solo o junto con el 6.
+- [ ] 12 piezas de sprite nuevas (bacilo ácido-alcohol resistente, retrovirus, *Plasmodium*, *Pneumocystis*…).
 - [ ] Modo Foco por núcleo (agentes y preguntas del núcleo) y Sandbox (Laboratorio para jugadores).
 
 **Reportes anónimos**
