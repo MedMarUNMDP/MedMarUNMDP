@@ -246,9 +246,10 @@ Todo en `src/data/` (UMD, con tests), separado del motor:
 ## Etapas
 
 1. ✅ **Datos**: `src/data/agentes.js` con núcleos, agentes, morfologías, rasgos y jefes, más tests de consistencia.
-   Faltan las fichas médicas: van en la etapa 2, revisadas con `revisor-contenido-medico`.
-2. **Identidad con los sprites actuales**: horneado por especie (tinte y variaciones), nombre al aparecer, fichas
-   revisadas y bestiario al terminar la partida.
+   Fichas de los 114 agentes en `src/data/fichas.js`, revisadas con `revisor-contenido-medico` y aprobadas por el
+   autor el 2026-11-21.
+2. **Identidad con los sprites actuales**: horneado por especie (tinte y variaciones), nombre al aparecer y
+   bestiario con las fichas al terminar la partida.
 3. **Modo Foco por núcleo**: selector en el menú, enemigos y preguntas filtrados, tejido y jefe del núcleo,
    récord por núcleo.
 4. **Sandbox**: Laboratorio para jugadores que mezcla todo, sin puntaje.

@@ -5,8 +5,8 @@
  *   cuadro: qué produce (síndrome o cuadro principal)
  *   clave: un dato para recordar (diagnóstico, virulencia, transmisión o prevención)
  * Fuente: material de la cátedra ADN 2026 (cuadernillos, Compendio, agentes del tercer parcial) y bibliografía
- * estándar. Estado de revisión en docs/plan-modos-nucleos.md: cualquier cambio pasa por `revisor-contenido-medico`
- * y por el docente/estudiante que valida.
+ * estándar. Validadas el 2026-11-21: revisión de `revisor-contenido-medico` contra el material de la cátedra y
+ * aprobación del autor de MedMar (las 114). Cualquier cambio vuelve a pasar por las dos.
  */
 (function registerFichas(root, factory) {
   const api = factory();
