@@ -291,7 +291,7 @@
   const AGENTES_DATA = globalThis.InmuneAgentes || null;
   const FICHAS_DATA = globalThis.InmuneFichas || null;
   const MODOS_API = globalThis.InmuneModos || null;
-  const GAME_VERSION = '3.8.0';
+  const GAME_VERSION = '3.8.1';
   const SPECIES_TEXTURE_SIZE = 256;
   const randomItem = (rng, list) => rng.pick(list);
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
@@ -364,7 +364,7 @@
       this.activeSkills=new Set(['granules']);this.skillLevels={granules:1};this.skillEvolution={};this.skillTimers={};this.bMinions=[];this.macrophages=[];this.skillProjectiles=[];this.differentiationSpecies=null;this.differentiationStreak=0;this.patternBonus=0;this.minionMode='M1';this.debugSpawnLimit=140;
       this.lastStrategy=null;
       this.speciesLog={};this.speciesOrder=[];
-      this.phagoHintsLeft=3;this.lastPhagoHintAt=-99;
+      this.phagoHintsLeft=3;this.lastPhagoHintAt=-99;this.pseudopods=null;this.phagoEngulf=null;this.pseudopodLast=null;
       this.progressionMilestone = 0;
       this.enemies = []; this.playerBullets = []; this.enemyProjectiles = []; this.helpers = []; this.nets = [];this.activeEnemyCount=0;
       this.usedQuestionIds = new Set(); this.currentQuestion = null; this.currentUpgrades = []; this.questionTopicCounts={}; this.lastQuestionTopic=null;
@@ -1178,27 +1178,37 @@
       return best;
     }
 
-    // Pseudópodo orgánico: tubo que se afina hacia la punta, con una onda que viaja hacia afuera
-    // (como una prolongación de membrana que tantea) y una punta redondeada. Se dibuja con círculos
-    // solapados, que se ven más blandos que una polilínea.
-    drawPseudopod(g,sx,sy,ex,ey,opts={}){
-      const t=this.elapsed,side=opts.side||1,amp=opts.amp??7,thick=opts.thick??8.5,alpha=opts.alpha??0.9;
-      const dx=ex-sx,dy=ey-sy,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len;
-      const bend=(opts.bend??10)*side;
-      const steps=Math.max(8,Math.min(18,Math.round(len/4)));
-      const pts=[];
-      for(let i=0;i<=steps;i++){
-        const u=i/steps,env=Math.sin(Math.PI*u)*(0.35+0.65*u);
-        const wave=Math.sin(u*7.5-t*(opts.speed??6.5)+(opts.phase||0))*amp*env;
-        const curve=Math.sin(Math.PI*u)*bend;
-        pts.push({x:sx+dx*u+nx*(wave+curve),y:sy+dy*u+ny*(wave+curve),r:thick*(1-0.62*u)});
+    // ---------- Pseudópodos de fagocitosis ----------
+    // Modelo inspirado en la fagocitosis real: dos prolongaciones de membrana anchas en la base y de punta roma
+    // (lamelipodios, no tentáculos finos) que salen del lado de la célula que mira al blanco. Cada punta es un
+    // resorte amortiguado con un poco de rebote, como una membrana elástica:
+    //  - sin blanco: dos lóbulos cortos que respiran hacia donde avanza la célula;
+    //  - fagocitable cerca (hasta PHAGO_SEEK_RANGE más allá del alcance): se estiran hacia él;
+    //  - al alcance: lo abrazan por los costados (copa fagocítica);
+    //  - al englobar: se cierran por detrás del patógeno y después se retraen.
+    // Todo usa los MISMOS dos pseudópodos (antes el englobamiento dibujaba otros aparte y se veía un tercero).
+
+    // Dibuja un pseudópodo como una curva de Bézier cuadrática con ancho variable: polígono relleno, borde claro
+    // en los costados y punta redondeada. Sin ondas viajeras: solo una leve respiración del ancho.
+    drawPseudopod(g,base,ctrl,tip,opts={}){
+      const alpha=opts.alpha??0.9,w0=opts.baseWidth??11,w1=opts.tipWidth??4.6,n=14,t=this.elapsed,phase=opts.phase||0;
+      const left=[],right=[];let tx=1,ty=0;
+      for(let i=0;i<=n;i++){
+        const u=i/n,iu=1-u;
+        const x=iu*iu*base.x+2*iu*u*ctrl.x+u*u*tip.x,y=iu*iu*base.y+2*iu*u*ctrl.y+u*u*tip.y;
+        tx=2*iu*(ctrl.x-base.x)+2*u*(tip.x-ctrl.x);ty=2*iu*(ctrl.y-base.y)+2*u*(tip.y-ctrl.y);
+        const tl=Math.hypot(tx,ty)||1,nx=-ty/tl,ny=tx/tl;
+        const w=(w1+(w0-w1)*Math.pow(iu,1.3))*(1+0.05*Math.sin(u*5-t*2.4+phase));
+        left.push({x:x+nx*w,y:y+ny*w});right.push({x:x-nx*w,y:y-ny*w});
       }
-      g.fillStyle(opts.glow??0x75f5c5,0.20*alpha);for(const q of pts)g.fillCircle(q.x,q.y,q.r+3.2);
-      g.fillStyle(opts.color??0x9dfadb,0.80*alpha);for(const q of pts)g.fillCircle(q.x,q.y,q.r);
-      g.fillStyle(0xeafff7,0.55*alpha);for(let i=0;i<pts.length-1;i+=2)g.fillCircle(pts[i].x-nx*pts[i].r*0.35,pts[i].y-ny*pts[i].r*0.35,pts[i].r*0.32);
-      const tip=pts[pts.length-1],pulse=1+0.18*Math.sin(t*9+(opts.phase||0));
-      g.fillStyle(0xd8fff2,0.95*alpha);g.fillCircle(tip.x,tip.y,(opts.tip??4.2)*pulse);
-      return tip;
+      const shape=left.concat(right.slice().reverse()),tipAngle=Math.atan2(ty,tx);
+      g.lineStyle(7,opts.glow??0x75f5c5,0.13*alpha);g.strokePoints(shape,true,true);
+      g.fillStyle(opts.color??0x8ff6d2,0.72*alpha);g.fillPoints(shape,true,true);g.fillCircle(tip.x,tip.y,w1);
+      g.lineStyle(1.7,0xeafff8,0.78*alpha);g.strokePoints(left,false,false);g.strokePoints(right,false,false);
+      g.beginPath();g.arc(tip.x,tip.y,w1,tipAngle-Math.PI/2,tipAngle+Math.PI/2);g.strokePath();
+      // brillo interno a lo largo del eje (citoplasma)
+      g.fillStyle(0xf2fffa,0.32*alpha);
+      for(let i=2;i<=n-2;i+=3){const a=left[i],b=right[i];g.fillCircle(a.x*0.62+b.x*0.38,a.y*0.62+b.y*0.38,Math.max(1.2,Math.hypot(a.x-b.x,a.y-b.y)*0.13));}
     }
 
     // Mira sobre el patógeno que los pseudópodos tienen "fijado": deja claro qué se va a englobar.
@@ -1209,43 +1219,56 @@
       g.fillStyle(0x8fffd9,ready?0.12:0.06);g.fillCircle(target.x,target.y,r);
     }
 
-    // Pseudópodos: apuntan al patógeno fagocitable más cercano y lo siguen. Cada punta guarda su posición
-    // relativa a la célula y se acerca a la deseada con un suavizado exponencial (no salta de un lugar a otro).
-    //  - fagocitable al alcance: lo rodean (una punta a cada lado);
-    //  - fagocitable más lejos (hasta PHAGO_SEEK_RANGE): se estiran apuntándolo;
-    //  - ninguno: tantean alrededor de la membrana.
     updatePhagoTendrils(dt=1/60){
       if(!this.phagoTendrils?.active)return;
       const g=this.phagoTendrils;g.clear();
       if(!this.activeSkills.has('phagocytosis'))return;
+      dt=clamp(dt,0,0.05);
+      const px=this.player.x,py=this.player.y,t=this.elapsed,R=(this.playerRadius||27)*0.72;
+      // Hacia dónde avanza la célula (para los lóbulos en reposo), suavizado.
+      if(this.pseudopodLast){const mx=px-this.pseudopodLast.x,my=py-this.pseudopodLast.y;if(mx*mx+my*my>0.04){const a=Math.atan2(my,mx);this.pseudopodFacing+=Math.atan2(Math.sin(a-this.pseudopodFacing),Math.cos(a-this.pseudopodFacing))*(1-Math.exp(-dt*4));}}
+      else this.pseudopodFacing=-Math.PI/2;
+      this.pseudopodLast={x:px,y:py};
+      const engulf=this.phagoEngulf&&!this.phagoEngulf.target.dead?this.phagoEngulf:null;
       const reachRange=this.stats.phagoRadius+45,seekRange=reachRange+PHAGO_SEEK_RANGE;
-      const target=this.closestEnemy(seekRange,e=>!e.isBoss&&e.phagoEligible&&e.sizeTier<=this.stats.phagoMaxTier);
+      const target=engulf?engulf.target:this.closestEnemy(seekRange,e=>!e.isBoss&&e.phagoEligible&&e.sizeTier<=this.stats.phagoMaxTier);
       const ready=this.phagoClock<=0&&!this.phagoPending;
-      const px=this.player.x,py=this.player.y,t=this.elapsed;
-      const dist=target?Math.hypot(target.x-px,target.y-py):Infinity,inReach=dist<=reachRange;
-      if(!this.pseudopods)this.pseudopods=[-1,1].map(side=>({side,ox:Math.cos(side>0?0:Math.PI)*36,oy:0}));
-      const follow=1-Math.exp(-dt*(target?7:3.5));
+      const dist=target?Math.hypot(target.x-px,target.y-py):Infinity,inReach=!!engulf||dist<=reachRange;
+      if(!this.pseudopods)this.pseudopods=[-1,1].map(side=>{const a=this.pseudopodFacing+side*0.9;return {side,ox:Math.cos(a)*(R+23),oy:Math.sin(a)*(R+23),vx:0,vy:0,ba:a};});
+      const k=engulf?260:(target?(inReach?120:70):38),c=2*Math.sqrt(k)*(engulf?0.95:0.68);
+      const ux=target?(target.x-px)/(dist||1):Math.cos(this.pseudopodFacing),uy=target?(target.y-py)/(dist||1):Math.sin(this.pseudopodFacing);
+      const qx=-uy,qy=ux,tr=target?Math.max(10,(target.visualSize||40)*0.36):0;
       for(const p of this.pseudopods){
-        const side=p.side;let gx,gy;
-        if(target){
-          const dx=target.x-px,dy=target.y-py,d=dist||1,ux=dx/d,uy=dy/d;
-          if(inReach){
-            const tr=Math.max(10,(target.visualSize||40)*0.32);
-            gx=dx-ux*tr*0.25-uy*side*tr*0.85;gy=dy-uy*tr*0.25+ux*side*tr*0.85;
-          }else{
-            const reach=Math.max(34,this.stats.phagoRadius*0.9),a=Math.atan2(dy,dx)+side*0.26;
-            gx=Math.cos(a)*reach;gy=Math.sin(a)*reach;
-          }
-          const k=0.9+0.1*Math.sin(t*5+side);gx*=k;gy*=k;
+        const side=p.side;let gx,gy,bow;
+        if(engulf){
+          // se cierran por detrás del patógeno
+          const e=engulf.p||0,rx=target.x-px,ry=target.y-py;
+          gx=rx+ux*tr*(0.2+0.75*e)+qx*side*tr*(1.1*(1-e)+0.06);gy=ry+uy*tr*(0.2+0.75*e)+qy*side*tr*(1.1*(1-e)+0.06);bow=tr*(0.65-0.35*e);
+        }else if(target&&inReach){
+          // copa fagocítica: una punta a cada lado, un poco más allá del centro
+          const rx=target.x-px,ry=target.y-py,b=0.92+0.08*Math.sin(t*2.6+side);
+          gx=rx+ux*tr*0.18+qx*side*tr*1.15*b;gy=ry+uy*tr*0.18+qy*side*tr*1.15*b;bow=tr*0.6;
+        }else if(target){
+          // se estiran hacia el fagocitable a medida que se acerca
+          const close=clamp(1-(dist-reachRange)/PHAGO_SEEK_RANGE,0,1),L=R+26+Math.max(0,Math.min(dist-tr,reachRange)-R-26)*close*0.85;
+          gx=ux*L+qx*side*(7+5*close);gy=uy*L+qy*side*(7+5*close);bow=5+4*close;
         }else{
-          const a=t*0.9+(side>0?0:Math.PI)+Math.sin(t*1.3+side)*0.6,reach=48+10*Math.sin(t*1.7+side*1.9)+6*Math.sin(t*3.1+side);
-          gx=Math.cos(a)*reach;gy=Math.sin(a)*reach;
+          // reposo: dos lóbulos cortos que respiran hacia donde avanza la célula
+          const a=this.pseudopodFacing+side*(0.85+0.12*Math.sin(t*0.8+side*1.7)),L=R+23+3.5*Math.sin(t*1.25+side*2.1);
+          gx=Math.cos(a)*L;gy=Math.sin(a)*L;bow=2.5;
         }
-        p.ox+=(gx-p.ox)*follow;p.oy+=(gy-p.oy)*follow;
-        const a=Math.atan2(p.oy,p.ox)+(target?side*0.55:0),sx=px+Math.cos(a)*19,sy=py+Math.sin(a)*19;
-        this.drawPseudopod(g,sx,sy,px+p.ox,py+p.oy,{side,phase:side*1.7,amp:target?4.5:6.5,bend:target?14:8,alpha:target?(inReach?(ready?1:0.8):0.72):0.62});
+        p.vx+=(k*(gx-p.ox)-c*p.vx)*dt;p.vy+=(k*(gy-p.oy)-c*p.vy)*dt;
+        p.ox+=p.vx*dt;p.oy+=p.vy*dt;
+        // La base se apoya en la membrana del lado de su punta y se desliza despacio (no gira alrededor de la célula).
+        const ta=Math.atan2(p.oy,p.ox)-side*0.12;
+        p.ba+=Math.atan2(Math.sin(ta-p.ba),Math.cos(ta-p.ba))*(1-Math.exp(-dt*6));
+        const base={x:px+Math.cos(p.ba)*R,y:py+Math.sin(p.ba)*R},tip={x:px+p.ox,y:py+p.oy};
+        const cx=tip.x-base.x,cy=tip.y-base.y,cl=Math.hypot(cx,cy)||1;
+        const ctrl={x:(base.x+tip.x)/2-cy/cl*side*bow,y:(base.y+tip.y)/2+cx/cl*side*bow};
+        const len=Math.min(cl,140);
+        this.drawPseudopod(g,base,ctrl,tip,{phase:side*1.7,baseWidth:clamp(7+len*0.09,8,13),tipWidth:engulf?5.4:4.6,alpha:engulf?1:(target?(inReach?(ready?1:0.82):0.78):0.6)});
       }
-      if(target&&inReach){
+      if(target&&inReach&&!engulf){
         this.drawPhagoLock(g,target,ready);
         // Las primeras veces se nombra lo que pasa: el jugador aprende qué buscan los pseudópodos.
         if(this.phagoHintsLeft>0&&this.elapsed-(this.lastPhagoHintAt??-99)>4){
@@ -1260,22 +1283,11 @@
       const target = this.closestEnemy(this.stats.phagoRadius + 23, e => !e.isBoss&&e.phagoEligible&&e.sizeTier<=this.stats.phagoMaxTier);
       if (!target) return;
       this.phagoClock=this.stats.phagoInterval;this.phagoPending=true;
-      // Dos pseudópodos visibles convergen exclusivamente sobre el blanco seleccionado.
-      const tendrils=this.add.graphics().setDepth(61);
-      const drawTendrils=(progress)=>{
-        tendrils.clear();
-        if(!this.player?.active||target.dead)return;
-        const dx=target.x-this.player.x,dy=target.y-this.player.y,d=Math.hypot(dx,dy)||1,px=-dy/d,py=dx/d;
-        for(let side of [-1,1]){
-          const reach=Math.min(d,Math.max(18,this.stats.phagoRadius*progress));
-          const sx=this.player.x+px*side*9,sy=this.player.y+py*side*9,ex=this.player.x+dx/d*reach,ey=this.player.y+dy/d*reach;
-          const bend=12*side*Math.sin(progress*Math.PI);
-          this.drawPseudopod(tendrils,sx,sy,ex,ey,{side,phase:side*2.1,amp:3.5+progress*3,bend:bend*1.4,thick:9.5,tip:4+progress*2.5,speed:9,alpha:1});
-        }
-      };
-      const progress={value:0.05};drawTendrils(progress.value);
-      this.tweens.add({targets:progress,value:1,duration:230,ease:'Cubic.Out',onUpdate:()=>drawTendrils(progress.value),onComplete:()=>{
-        tendrils.destroy();this.phagoPending=false;
+      // El englobamiento lo dibujan los mismos dos pseudópodos (updatePhagoTendrils): se cierran detrás del blanco.
+      this.phagoEngulf={target,p:0};
+      const progress={value:0};
+      this.tweens.add({targets:progress,value:1,duration:260,ease:'Sine.InOut',onUpdate:()=>{if(this.phagoEngulf)this.phagoEngulf.p=progress.value;},onComplete:()=>{
+        this.phagoEngulf=null;this.phagoPending=false;
         if(!target.dead&&this.enemies.includes(target)&&this.distanceToEnemy(this.player,target)<=this.stats.phagoRadius+35){
           const ring=this.add.circle(target.x,target.y,5,0x8fffd9,0.20).setStrokeStyle(3,0xcaffed,1).setDepth(62);
           this.tweens.add({targets:ring,scale:4,alpha:0,duration:360,onComplete:()=>ring.destroy()});

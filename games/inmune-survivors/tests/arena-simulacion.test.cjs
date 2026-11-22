@@ -369,3 +369,44 @@ test('los pseudópodos giran de forma gradual hacia el fagocitable y terminan ap
   assert.ok(errorInicial.some((x) => x > 0.6), 'en el primer frame todavía no apuntan (no saltan)');
   for (const x of errorFinal) assert.ok(x < 0.45, `después de 1,5 s apuntan al blanco (error ${x.toFixed(2)} rad)`);
 });
+
+test('pseudópodos: al alcance abrazan al blanco por los dos lados y se mueven sin saltos', () => {
+  const { scene: s } = escenaConFagocitosis(22);
+  const e = ponerEnemigo(s, 55, 0, true);
+  let maxSalto = 0, prev = null;
+  for (let i = 0; i < 120; i++) {
+    s.updatePhagoTendrils(1 / 60);
+    const now = s.pseudopods.map((p) => ({ x: p.ox, y: p.oy }));
+    if (prev) for (let k = 0; k < 2; k++) maxSalto = Math.max(maxSalto, Math.hypot(now[k].x - prev[k].x, now[k].y - prev[k].y));
+    prev = now;
+  }
+  assert.equal(s.pseudopods.length, 2);
+  for (const p of s.pseudopods) assert.ok(Number.isFinite(p.ox) && Number.isFinite(p.oy));
+  // Lado de cada punta respecto de la recta célula → blanco (producto vectorial): una a cada lado.
+  const ux = e.x - s.player.x, uy = e.y - s.player.y;
+  const lados = s.pseudopods.map((p) => Math.sign(ux * p.oy - uy * p.ox));
+  assert.notEqual(lados[0], lados[1], 'una punta a cada lado del patógeno');
+  assert.ok(maxSalto < 20, `ninguna punta salta más de 20 px por cuadro (máx ${maxSalto.toFixed(1)})`);
+});
+
+test('englobar usa los mismos dos pseudópodos: se cierran detrás del blanco y no se crea otro dibujo', () => {
+  const h = escenaConFagocitosis(23);
+  const s = h.scene;
+  const e = ponerEnemigo(s, 50, 0, true);
+  for (let i = 0; i < 30; i++) s.updatePhagoTendrils(1 / 60);
+  let graficosNuevos = 0;
+  const original = s.add.graphics;
+  s.add.graphics = (...args) => { graficosNuevos++; return original(...args); };
+  s.phagoClock = 0;
+  s.doPhagocytosis();
+  assert.ok(s.phagoEngulf && s.phagoEngulf.target === e, 'arranca el englobamiento sobre el blanco');
+  assert.equal(graficosNuevos, 0, 'no dibuja pseudópodos aparte');
+  s.phagoEngulf.p = 1;
+  for (let i = 0; i < 40; i++) s.updatePhagoTendrils(1 / 60);
+  assert.equal(s.pseudopods.length, 2);
+  const ux = (e.x - s.player.x), uy = (e.y - s.player.y), d = Math.hypot(ux, uy);
+  for (const p of s.pseudopods) assert.ok((p.ox * ux + p.oy * uy) / d > d, 'las puntas terminan del otro lado del patógeno');
+  h.flushTweens();
+  assert.equal(s.phagoEngulf, null);
+  assert.ok(e.dead, 'el patógeno queda englobado');
+});

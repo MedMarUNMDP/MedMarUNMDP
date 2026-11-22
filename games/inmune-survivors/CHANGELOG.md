@@ -2,6 +2,14 @@
 
 Formato: la versión más nueva arriba. Al publicar una versión, agregá una sección nueva acá y subí `?build=` en index.html (ver CLAUDE.md del juego). El historial previo a v3.1 está en `README.txt`.
 
+## v3.8.1
+
+- **Pseudópodos de fagocitosis rehechos**: siempre son los mismos dos. Antes el englobamiento dibujaba otros aparte
+  y se veía un tercero. Ahora son lóbulos de membrana anchos en la base y de punta roma (curva de Bézier con ancho
+  variable), movidos por resortes amortiguados en vez de una onda continua. En reposo respiran hacia donde avanza la
+  célula, se estiran hacia el fagocitable más cercano, lo abrazan por los costados (copa fagocítica) y al englobar
+  se cierran detrás del patógeno. La base queda apoyada en la membrana y ya no gira alrededor de la célula.
+
 ## v3.8
 
 **Modos nuevos (reemplazan la elección de infección)**
