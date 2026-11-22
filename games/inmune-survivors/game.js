@@ -1,4 +1,4 @@
-  /* Inmune Survivors — v3.6
+  /* Inmune Survivors — v3.7
  * Phaser 3.90.0. Microbe sprites are simplified, cached procedural textures.
  * The question bank is provisional and must be cross-checked against the approved course bibliography
  * before this game is used as a formal educational resource.
@@ -284,6 +284,11 @@
   const fmtTime = seconds => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
   const GAME_BALANCE = InmuneGameBalance;
   const LAB_ACTIONS = InmuneLabActions;
+  // Catálogo de agentes por núcleo y sus fichas validadas (src/data). Si no cargaron, el juego sigue con las
+  // morfologías genéricas de antes.
+  const AGENTES_DATA = globalThis.InmuneAgentes || null;
+  const FICHAS_DATA = globalThis.InmuneFichas || null;
+  const SPECIES_TEXTURE_SIZE = 256;
   const randomItem = (rng, list) => rng.pick(list);
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
   const dist2 = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
@@ -347,6 +352,7 @@
       this.evolutionCounts={homeostasis:0,cytotoxicity:0,chemotaxis:0};
       this.activeSkills=new Set(['granules']);this.skillLevels={granules:1};this.skillEvolution={};this.skillTimers={};this.bMinions=[];this.macrophages=[];this.skillProjectiles=[];this.differentiationSpecies=null;this.differentiationStreak=0;this.patternBonus=0;this.minionMode='M1';this.debugSpawnLimit=140;
       this.lastStrategy=null;
+      this.speciesLog={};this.speciesOrder=[];
       this.phagoHintsLeft=3;this.lastPhagoHintAt=-99;
       this.progressionMilestone = 0;
       this.enemies = []; this.playerBullets = []; this.enemyProjectiles = []; this.helpers = []; this.nets = [];this.activeEnemyCount=0;
@@ -751,8 +757,89 @@
       return clamp(Math.log2(Math.max(1,offense)*0.55+Math.max(1,sustain)*0.28+Math.max(1,mobility)*0.17)*0.32,0,1.45);
     }
 
+    // ---------- Especies (catálogo ADN 2026) ----------
+
+    // Elige una especie de la familia del enemigo. Los gusanos solo toman especies con forma de gusano del mismo
+    // tipo (nematodo o cestodo); los demás, especies que no son gusanos. Solo agentes confirmados en algún núcleo.
+    pickAgente(type,morphology){
+      if(!AGENTES_DATA)return null;
+      const wormKind=morphology.worm?(morphology.wormKind==='cestode'?'tapeworm':'nematode'):null;
+      if(!this.speciesPool)this.speciesPool={};
+      const key=`${type}:${wormKind||'-'}`;
+      if(!this.speciesPool[key])this.speciesPool[key]=AGENTES_DATA.AGENTES.filter(a=>{
+        if(a.familia!==type||!a.nucleos.length)return false;
+        const gusano=AGENTES_DATA.MORFOLOGIAS[a.morfologia]?.gusano||null;
+        return wormKind?gusano===wormKind:!gusano;
+      });
+      const pool=this.speciesPool[key];
+      return pool.length?randomItem(this.rng,pool):null;
+    }
+
+    // Morfología del motor para una especie: misma forma de moverse (id de la morfología base), textura horneada
+    // de la especie, su color y su nombre.
+    morphologyForAgente(type,agente,fallback){
+      const morf=AGENTES_DATA.MORFOLOGIAS[agente.morfologia];
+      if(fallback.worm)return {...fallback,label:agente.nombre,color:agente.tinte??fallback.color,agente:agente.id};
+      const base=(MORPHOLOGY[type]||[]).find(m=>m.texture===morf.textura)||fallback;
+      return {...base,texture:this.getSpeciesTexture(agente),label:agente.nombre,color:agente.tinte??base.color,agente:agente.id};
+    }
+
+    // Hornea una vez la textura de la especie: pieza base + variación por código (tinte, estiramiento, copias en
+    // par/cadena/racimo, cápsula, espora). Queda cacheada: cada enemigo sigue siendo una sola imagen.
+    getSpeciesTexture(agente){
+      const key=`species-${agente.id}`;
+      if(this.textures.exists(key))return key;
+      const morf=AGENTES_DATA.MORFOLOGIAS[agente.morfologia],v=morf.variacion||{};
+      const src=this.textures.get(morf.textura)?.getSourceImage?.();
+      const probe=typeof document!=='undefined'?document.createElement('canvas'):null;
+      if(!src||!probe||typeof probe.getContext!=='function')return morf.textura;
+      const sw=src.width||src.naturalWidth||256,sh=src.height||src.naturalHeight||256;
+      // 1) copia teñida de la pieza base (el tinte solo cae sobre los píxeles opacos)
+      const tinted=probe;tinted.width=sw;tinted.height=sh;
+      const tc=tinted.getContext('2d');tc.drawImage(src,0,0);
+      if(agente.tinte!=null){
+        const r=(agente.tinte>>16)&255,g=(agente.tinte>>8)&255,b=agente.tinte&255;
+        tc.globalCompositeOperation='source-atop';tc.fillStyle=`rgba(${r},${g},${b},0.38)`;tc.fillRect(0,0,sw,sh);tc.globalCompositeOperation='source-over';
+      }
+      // 2) composición en la textura final
+      const S=SPECIES_TEXTURE_SIZE,tex=this.textures.createCanvas(key,S,S),ctx=tex.context;
+      const estirar=v.estirar||1,escala=v.escala||1,copias=v.copias||1,aspect=sh/sw;
+      const fit=S*0.86/Math.max(estirar,1)/Math.max(1,aspect);
+      const drawCopy=(cx,cy,size,rot=0)=>{ctx.save();ctx.translate(cx,cy);ctx.rotate(rot);ctx.scale(estirar,1);ctx.drawImage(tinted,-size/2,-size*aspect/2,size,size*aspect);ctx.restore();};
+      const capsula=v.capsula||agente.rasgos.includes('capsula');
+      if(capsula){ctx.save();ctx.translate(S/2,S/2);ctx.scale(Math.max(1,estirar),1);ctx.beginPath();ctx.arc(0,0,S*0.47/Math.max(1,estirar),0,Math.PI*2);ctx.fillStyle='rgba(235,255,250,0.16)';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle='rgba(235,255,250,0.42)';ctx.stroke();ctx.restore();}
+      const c=S/2,d=v.disposicion;
+      if(d==='par'){const sz=fit*(v.escala||0.55);drawCopy(c-sz*0.36,c,sz,-0.25);drawCopy(c+sz*0.36,c,sz,0.25);}
+      else if(d==='cadena'){const n=Math.max(2,copias),span=S*0.62,sz=Math.min(fit*(v.escala||0.42),span/(n-1)*1.15);for(let i=0;i<n;i++){const t=i/(n-1)-0.5;drawCopy(c+t*span,c+Math.sin(t*Math.PI*1.6)*S*0.09,sz,t*0.5);}}
+      else if(d==='racimo'){const sz=fit*(v.escala||0.45),n=Math.max(3,copias);for(let i=0;i<n;i++){const a=i/n*Math.PI*2+0.4;drawCopy(c+Math.cos(a)*sz*0.42,c+Math.sin(a)*sz*0.42,sz,a);}}
+      else if(d==='polimorfo'){[[0,0,0.62],[-0.28,0.22,0.4],[0.3,-0.2,0.34]].forEach(([dx,dy,k],i)=>drawCopy(c+dx*S,c+dy*S,fit*k,i*0.9));}
+      else if(d==='inclusion'){ctx.beginPath();ctx.arc(c,c,S*0.44,0,Math.PI*2);ctx.fillStyle='rgba(255,220,240,0.20)';ctx.fill();ctx.lineWidth=4;ctx.strokeStyle='rgba(255,220,240,0.55)';ctx.stroke();[[0,0],[-0.17,-0.12],[0.16,-0.1],[-0.1,0.17],[0.14,0.15]].forEach(([dx,dy],i)=>drawCopy(c+dx*S,c+dy*S,fit*0.3,i));}
+      else drawCopy(c,c,fit*escala);
+      if(v.espora==='terminal'){const ex=c+fit*escala*estirar*0.42;ctx.beginPath();ctx.ellipse(ex,c,S*0.07,S*0.055,0,0,Math.PI*2);ctx.fillStyle='rgba(255,252,225,0.95)';ctx.fill();ctx.lineWidth=2.5;ctx.strokeStyle='rgba(60,40,70,0.85)';ctx.stroke();}
+      tex.refresh();
+      return key;
+    }
+
+    // Primera vez que aparece una especie en la partida: se nombra (aviso + etiqueta sobre el enemigo).
+    registerSpecies(e){
+      const id=e.agente;let log=this.speciesLog[id];
+      if(!log){
+        log=this.speciesLog[id]={vistos:0,eliminados:0};this.speciesOrder.push(id);
+        const nombre=AGENTES_DATA?.agente(id)?.nombre||e.morphology.label;
+        this.showFloatingText(e.x,e.y-(e.visualSize||40)*0.7,nombre,'#e8fff6',11);
+        if(this.toastQueue.length<2)this.showToast(`NUEVO AGENTE · ${nombre}`);
+      }
+      log.vistos++;
+    }
+
+    // Agentes que aparecieron en la partida, con su ficha, en el orden en que se vieron.
+    getBestiary(){
+      if(!AGENTES_DATA||!this.speciesOrder)return [];
+      return this.speciesOrder.map(id=>{const a=AGENTES_DATA.agente(id),l=this.speciesLog[id];return a&&{id,nombre:a.nombre,familia:a.familia,vistos:l.vistos,eliminados:l.eliminados,ficha:FICHAS_DATA?.ficha(id)||null};}).filter(Boolean);
+    }
+
     getRunSummary() {
-      return {score:this.getScore(),elapsed:this.elapsed,damage:Math.round(this.damageTotal),dps:Math.round(this.damageTotal/Math.max(1,this.elapsed)),estimatedDps:Math.round(this.getPlayerDpsEstimate()),kills:this.kills,bossKills:this.bossKills,fociHealed:this.fociHealed,focusBreaches:this.focusBreaches,questionCount:this.questionCount,correctAnswers:this.correctAnswers,upgrades:this.upgradeHistory.slice()};
+      return {score:this.getScore(),elapsed:this.elapsed,damage:Math.round(this.damageTotal),dps:Math.round(this.damageTotal/Math.max(1,this.elapsed)),estimatedDps:Math.round(this.getPlayerDpsEstimate()),kills:this.kills,bossKills:this.bossKills,fociHealed:this.fociHealed,focusBreaches:this.focusBreaches,questionCount:this.questionCount,correctAnswers:this.correctAnswers,upgrades:this.upgradeHistory.slice(),bestiario:this.getBestiary()};
     }
 
     pauseGame() {
@@ -799,6 +886,8 @@
         morphology = randomItem(this.rng,MORPHOLOGY.parasite.filter(m => !m.worm));
       }
       if(spawnAt&&type==='parasite'&&morphology.worm&&!bossSpec)morphology=randomItem(this.rng,MORPHOLOGY.parasite.filter(m=>!m.worm));
+      // Identidad: cada enemigo común es una especie concreta del catálogo de su familia.
+      if(!bossSpec){const agente=this.pickAgente(type,morphology);if(agente)morphology=this.morphologyForAgente(type,agente,morphology);}
       const isWorm=morphology.worm===true;
       const p=spawnAt?this.constrainToArena(spawnAt.x,spawnAt.y,bossSpec?Math.max(160,this.playerRadius+20):150):(bossSpec?this.randomSpawnPoint(560,760):(isWorm?this.randomSpawnPoint(235,390):this.randomSpawnPoint()));
 
@@ -842,7 +931,7 @@
         sporeCooldown:this.rng.float(1300,3100), dead:false, hitFlash:0, heading, bossAttackClock:this.rng.float(2500,3500), biofilmClock:300, stationary:!!bossSpec?.stationary, minion:!!bossSpec?.minion,
         spawnAge:0, animPhase:this.rng.float(0,Math.PI*2), animFrequency:this.rng.float(2.2,4.7), animSquash:archetype==='runner'?0.13:archetype==='brute'?0.045:0.075, animBob:0,
         wanderClock:this.rng.float(400,1700), trail:[], trailAccumulator:0,
-        isWorm:morphology.worm === true,
+        isWorm:morphology.worm === true, agente:morphology.agente||null,
         wormWidth:morphology.worm?(archetype==='brute'?38:archetype==='runner'?26:archetype==='elite'?34:30)*(bossSpec?1.5:0.72):0,
         wormLength:morphology.worm?(bossSpec?(morphology.bodyLength||1500)*1.5:Math.min((morphology.bodyLength||720)*Math.sqrt(size),560)):0,
         wormMomentum:isWorm?0.40:0, wormDrift:0, wormHeadTexture:morphology.headTexture||null, wormEntryUntil:this.elapsed+(isWorm?1.35:0), wormEntryAnnounced:false,
@@ -874,7 +963,7 @@
         for (let i=0; i<samples; i++) e.trail.push({ x:e.x-Math.cos(heading)*i*e.trailStep, y:e.y-Math.sin(heading)*i*e.trailStep });
         this.drawWorm(e);
       }
-      this.enemies.push(e);this.activeEnemyCount++;
+      this.enemies.push(e);if(e.agente)this.registerSpecies(e);this.activeEnemyCount++;
       return e;
     }
 
@@ -1719,6 +1808,7 @@
 
     killEnemy(e,phagocytosed) {
       if(!e||e.dead)return;e.dead=true;
+      if(e.agente&&this.speciesLog?.[e.agente])this.speciesLog[e.agente].eliminados++;
       if(e.antibodyDots)for(const dot of e.antibodyDots)dot.obj?.destroy();
       if(e.outlineSprite?.active)e.outlineSprite.destroy();if(e.healthBar?.active)e.healthBar.destroy();
       if(e.phagoMarker?.active)e.phagoMarker.destroy();if(e.bossRing?.active)e.bossRing.destroy();
@@ -2141,10 +2231,25 @@
   });
   window.addEventListener('is:close-question',()=>closeLayer(questionLayer));
   window.addEventListener('is:close-upgrades',()=>closeLayer(upgradeLayer));
+  const FAMILIA_LABEL={bacteria:'Bacteria',virus:'Virus',parasite:'Parásito',fungus:'Hongo'};
+  function renderBestiary(box,count,items){
+    if(!box)return;box.replaceChildren();if(count)count.textContent=String(items.length);
+    if(!items.length){const p=document.createElement('p');p.className='bestiary-empty';p.textContent='Todavía no apareció ningún agente.';box.appendChild(p);return;}
+    for(const it of items){
+      const card=document.createElement('article');card.className='bestiary-card';
+      const head=document.createElement('div');head.className='bestiary-head';
+      const name=document.createElement('strong');name.className='bestiary-name';name.textContent=it.nombre;
+      const meta=document.createElement('span');meta.className=`bestiary-meta fam-${it.familia}`;meta.textContent=`${FAMILIA_LABEL[it.familia]||''} · ${it.eliminados}/${it.vistos} eliminados`;
+      head.append(name,meta);card.appendChild(head);
+      if(it.ficha){for(const [label,txt] of [['Qué es',it.ficha.clase],['Qué produce',it.ficha.cuadro],['Dato clave',it.ficha.clave]]){const p=document.createElement('p');const b=document.createElement('b');b.textContent=label+': ';p.append(b,document.createTextNode(txt));card.appendChild(p);}}
+      box.appendChild(card);
+    }
+  }
   function renderRunReport(prefix,d){
     const map=prefix==='pause'?{score:'pauseScore',time:'pauseTime',damage:'pauseDamage',dps:'pauseDps',kills:'pauseKills',boss:'pauseBossKills',foci:'pauseFoci',breaches:'pauseBreaches',correct:'pauseCorrect',list:'pauseUpgradeList'}:{score:'finalScore',time:'finalTime',damage:'finalDamage',dps:'finalDps',kills:'finalKills',boss:'finalBossKills',foci:'finalFoci',breaches:'finalBreaches',correct:'finalCorrect',list:'finalUpgradeList'};
     $(map.score).textContent=Number(d.score||0).toLocaleString('es-AR');$(map.time).textContent=fmtTime(d.elapsed||0);$(map.damage).textContent=Number(d.damage||0).toLocaleString('es-AR');$(map.dps).textContent=`${Number(d.dps||0).toLocaleString('es-AR')} / ${Number(d.estimatedDps||0).toLocaleString('es-AR')}`;
     $(map.kills).textContent=Number(d.kills||0).toLocaleString('es-AR');$(map.boss).textContent=Number(d.bossKills||0).toLocaleString('es-AR');$(map.foci).textContent=Number(d.fociHealed||0).toLocaleString('es-AR');$(map.breaches).textContent=Number(d.focusBreaches||0).toLocaleString('es-AR');$(map.correct).textContent=`${Number(d.correctAnswers||0).toLocaleString('es-AR')} / ${Number(d.questionCount||0).toLocaleString('es-AR')}`;
+    renderBestiary($(prefix==='pause'?'pauseBestiary':'finalBestiary'),$(prefix==='pause'?'pauseBestiaryCount':'finalBestiaryCount'),d.bestiario||[]);
     const list=$(map.list);list.replaceChildren();const records=d.upgrades||[];
     if(!records.length){const li=document.createElement('li');li.textContent='Todavía no hubo mejoras.';list.appendChild(li);}
     for(const item of records){const li=document.createElement('li'),strong=document.createElement('strong'),span=document.createElement('span');strong.textContent=`${item.time} · ${item.type}: ${item.name}`;span.textContent=` · ${item.detail||''}`;li.append(strong,span);list.appendChild(li);}

@@ -15,7 +15,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Inmune Survivors">
   <link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
-  <title>Inmune Survivors v3.6 — Pseudópodos, parallax y pantallas</title>
+  <title>Inmune Survivors v3.7 — Agentes de ADN</title>
   <style>
     :root {
       --bg: #07111f; --panel: #101f33; --panel2: #142942; --line: #29415b;
@@ -182,6 +182,15 @@
     .run-upgrade-log li { padding:4px 0; line-height:1.4; border-bottom:1px solid #223a50; }
     .run-upgrade-log li strong { color:#e4effa; }
     .run-upgrade-log li span { color:#90a9c0; }
+    .bestiary-list { display:grid; gap:9px; max-height:300px; overflow:auto; margin-top:10px; }
+    .bestiary-card { border:1px solid #223a50; border-radius:10px; padding:9px 11px; background:#081522; }
+    .bestiary-head { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:2px 10px; margin-bottom:4px; }
+    .bestiary-name { font-style:italic; color:#e8f3fb; font-size:13px; }
+    .bestiary-meta { font-size:10.5px; font-weight:800; letter-spacing:.04em; }
+    .fam-bacteria { color:#8cc4ff; } .fam-virus { color:#e2a3f0; } .fam-parasite { color:#f0bd8a; } .fam-fungus { color:#b8e08f; }
+    .bestiary-card p { margin:3px 0 0; color:#b9cde0; line-height:1.4; }
+    .bestiary-card b { color:#9fdcc6; font-weight:800; }
+    .bestiary-empty { margin:6px 0 0; color:#90a9c0; }
     .gameover-stat span { display:block; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; }
     .gameover-stat strong { display:block; font-size:24px; margin-top:3px; }
     footer { color:#728aa3; font-size:10px; line-height:1.5; text-align:center; margin:20px 0 0; }
@@ -210,7 +219,7 @@
         <div class="brand-mark" aria-hidden="true"></div>
         <div><div class="eyebrow">MedMar · Prototipo jugable</div><h1>INMUNE SURVIVORS</h1></div>
       </div>
-      <div class="top-tag">v3.6 · MOVIMIENTO Y NITIDEZ</div>
+      <div class="top-tag">v3.7 · AGENTES DE ADN</div>
     </header>
 
     <section id="menuScreen">
@@ -272,7 +281,7 @@
       <div id="gameFrame"><div id="gameContainer"></div><div id="debugPanel" class="compact"><strong>LABORATORIO</strong><button class="debug-toggle" id="debugToggle">Abrir</button><div class="debug-content"><div id="debugStatus" style="margin-top:5px;color:#b6f5d6">Solo desgranulación · nivel 1</div><div class="debug-heading">Habilidades</div><select id="debugSkillSelect"></select><div class="debug-row"><button data-debug="skill-add">Añadir / +nivel</button><button data-debug="skill-remove">Quitar</button></div><div class="debug-heading">Ajustar estadísticas</div><div id="debugStats"></div><div class="debug-heading">Atributos de habilidad</div><div id="debugSkillStats"></div><div class="debug-heading">Partida</div><div class="debug-row"><button data-debug="granules">Gránulos ON/OFF</button><button data-debug="invincible">Inmortalidad</button></div><div class="debug-row"><select id="debugQuestion"><option value="facil">Pregunta fácil</option><option value="normal">Pregunta normal</option><option value="dificil">Pregunta difícil</option></select><button data-debug="question">Probar</button></div><div class="debug-row"><button data-debug="primary-menu">Vía principal</button><button data-debug="evolution-menu">Evolutiva</button></div><div class="debug-heading">Aparición manual</div><label>Cantidad <input id="debugSpawnCount" type="number" min="1" max="100" value="1" style="width:58px"></label><select id="debugTypeSelect"><option value="bacteria">Bacterias</option><option value="virus">Virus</option><option value="fungus">Hongos</option><option value="parasite">Parásitos</option><option value="mixed">Mixto</option></select><div class="debug-row"><button data-debug="enemy">Enemigo</button><button data-debug="large">Grande</button><button data-debug="boss">Jefe</button></div><div class="debug-row"><button data-debug="focus">Foco</button><button data-debug="heal">Curar</button><button data-debug="clear">Limpiar</button></div></div></div><div class="crisis-banner" id="crisisBanner" style="display:none">MULTIRRESISTENCIA<small>EL TEJIDO HA PERDIDO EL CONTROL</small></div></div>
       <div class="game-controls"><span>PC: WASD / flechas o mantené apretado el mouse · ESC/P pausa</span><span>Móvil: tocá y arrastrá en cualquier parte para moverte · saná colonias al pisar el centro · acercate al ADN/ARN para recoger XP</span></div>
     </section>
-    <footer>INMUNE SURVIVORS · Prototipo v3.6 independiente para MedMar. Vista adaptable, evolución celular y combate optimizado. Banco de preguntas con repetición controlada si se agota antes de completar los cuatro jefes.</footer>
+    <footer>INMUNE SURVIVORS · Prototipo v3.7 independiente para MedMar. Vista adaptable, evolución celular y combate optimizado. Banco de preguntas con repetición controlada si se agota antes de completar los cuatro jefes.</footer>
   </div>
 
   <div class="modal-layer" id="questionLayer" role="dialog" aria-modal="true" aria-labelledby="questionHeading">
@@ -313,6 +322,7 @@
         <div class="gameover-stat"><span>Focos desatendidos</span><strong id="finalBreaches">0</strong></div>
         <div class="gameover-stat"><span>Preguntas correctas</span><strong id="finalCorrect">0</strong></div>
       </div>
+      <details class="run-upgrade-log bestiary" open><summary>Bestiario de la partida · <span id="finalBestiaryCount">0</span> agentes</summary><div id="finalBestiary" class="bestiary-list"></div></details>
       <details class="run-upgrade-log"><summary>Ver mejoras de la partida</summary><ol id="finalUpgradeList"></ol></details>
       <p id="bestScoreText" class="muted"></p>
       <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:18px"><button id="restartButton" class="btn-primary" style="flex:1">JUGAR OTRA VEZ</button><button type="button" class="btn-secondary report-open" hidden>Reportar o sugerir</button><button id="menuButton" class="btn-secondary">Menú</button></div>
@@ -334,6 +344,7 @@
         <div class="gameover-stat"><span>Focos desatendidos</span><strong id="pauseBreaches">0</strong></div>
         <div class="gameover-stat"><span>Preguntas correctas</span><strong id="pauseCorrect">0</strong></div>
       </div>
+      <details class="run-upgrade-log bestiary"><summary>Bestiario de la partida · <span id="pauseBestiaryCount">0</span> agentes</summary><div id="pauseBestiary" class="bestiary-list"></div></details>
       <details class="run-upgrade-log"><summary>Ver mejoras de la partida</summary><ol id="pauseUpgradeList"></ol></details>
       <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:18px"><button id="resumeButton" class="btn-primary" style="flex:1">SEGUIR JUGANDO</button><button type="button" class="btn-secondary report-open" hidden>Reportar o sugerir</button><button id="pauseMenuButton" class="btn-secondary">VOLVER AL MENÚ</button></div>
     </div>
@@ -365,10 +376,12 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js"
           integrity="sha512-/tJYyDCrI7hnHWp45P189aOwPa6lTREosRhlxEIqx8skB4A3a3rD3iz4o335SJd4sORqjVHw5y1S2hq4hciwLw=="
           crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="./src/core/runtime-services.js?build=3.6.0"></script>
-  <script src="./src/config/game-balance.js?build=3.6.0"></script>
-  <script src="./src/core/lab-actions.js?build=3.6.0"></script>
-  <script src="./game.js?build=3.6.0"></script>
+  <script src="./src/core/runtime-services.js?build=3.7.0"></script>
+  <script src="./src/config/game-balance.js?build=3.7.0"></script>
+  <script src="./src/core/lab-actions.js?build=3.7.0"></script>
+  <script src="./src/data/agentes.js?build=3.7.0"></script>
+  <script src="./src/data/fichas.js?build=3.7.0"></script>
+  <script src="./game.js?build=3.7.0"></script>
 </body>
 </html>
 

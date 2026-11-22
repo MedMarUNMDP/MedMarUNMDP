@@ -1,6 +1,6 @@
 # Plan: modo Sandbox y focos por núcleo de ADN
 
-Estado: **etapa 1 hecha** (2026-11-21). El catálogo de núcleos y agentes está en `src/data/agentes.js`, con
+Estado: **etapas 1 y 2 hechas** (2026-11-21). El catálogo de núcleos y agentes está en `src/data/agentes.js`, con
 tests en `tests/agentes-datos.test.cjs`. El juego todavía no lo usa.
 
 ## Decisiones tomadas
@@ -248,8 +248,8 @@ Todo en `src/data/` (UMD, con tests), separado del motor:
 1. ✅ **Datos**: `src/data/agentes.js` con núcleos, agentes, morfologías, rasgos y jefes, más tests de consistencia.
    Fichas de los 114 agentes en `src/data/fichas.js`, revisadas con `revisor-contenido-medico` y aprobadas por el
    autor el 2026-11-21.
-2. **Identidad con los sprites actuales**: horneado por especie (tinte y variaciones), nombre al aparecer y
-   bestiario con las fichas al terminar la partida.
+2. ✅ **Identidad con los sprites actuales** (v3.7): horneado por especie (tinte y variaciones), nombre al aparecer y
+   bestiario con las fichas en la pausa y al terminar la partida.
 3. **Modo Foco por núcleo**: selector en el menú, enemigos y preguntas filtrados, tejido y jefe del núcleo,
    récord por núcleo.
 4. **Sandbox**: Laboratorio para jugadores que mezcla todo, sin puntaje.

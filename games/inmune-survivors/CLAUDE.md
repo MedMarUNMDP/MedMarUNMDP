@@ -2,7 +2,7 @@
 
 Survivor de arena (estilo "bullet heaven") educativo: un progenitor hematopoyético defiende un tejido
 infectado. Ataque automático; el jugador solo se mueve. Subir de nivel = responder una pregunta de
-inmunología/microbiología (acierto → mejora de vía; error → oleada extra). Versión actual: **3.6**.
+inmunología/microbiología (acierto → mejora de vía; error → oleada extra). Versión actual: **3.7**.
 
 ## Archivos
 
@@ -13,6 +13,9 @@ inmunología/microbiología (acierto → mejora de vía; error → oleada extra)
 - `src/config/game-balance.js` — límites, multiplicadores y efectos por vía (fuente única de verdad de las tarjetas).
 - `src/core/runtime-services.js` — `Rng`, `Clock`, `Storage` inyectables (tests reproducibles).
 - `src/core/lab-actions.js` — acciones del modo Laboratorio.
+- `src/data/agentes.js` — catálogo ADN 2026: 114 agentes por núcleo, morfologías, rasgos y jefes. `src/data/fichas.js` —
+  fichas validadas (clase, cuadro, dato clave). Cambiar contenido médico → `revisor-contenido-medico` + validación del autor.
+  Cada enemigo común toma una especie de su familia y su textura se "hornea" una vez (`getSpeciesTexture`).
 - `tests/*.test.cjs` — `node:test` sobre los módulos de `src/` y sobre la escena completa.
 - `tests/helpers/arena-harness.cjs` — corre la escena `Arena` real en Node con Phaser simulado y RNG con semilla
   (`createScene({ seed })`, `flushTweens()`). Usalo para reproducir bugs y simular partidas sin navegador.

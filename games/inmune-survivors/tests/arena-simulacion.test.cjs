@@ -291,3 +291,35 @@ test('parallax: se crean las capas de ambiente y la cámara de HUD', () => {
   assert.ok(s.hudCam, 'debería existir la cámara de HUD');
   assert.doesNotThrow(() => s.updateAmbientLayers());
 });
+
+// ---------- v3.7: especies del catálogo ADN 2026 ----------
+
+test('especies: cada enemigo común es un agente del catálogo de su familia; los jefes no', () => {
+  const { scene: s, loaded } = createScene({ seed: 17 });
+  const { agente, MORFOLOGIAS } = loaded.context.InmuneAgentes;
+  for (const tipo of ['bacteria', 'virus', 'fungus', 'parasite']) for (let i = 0; i < 6; i++) s.spawnEnemy(tipo, false, { x: s.player.x + 400, y: s.player.y });
+  const comunes = s.enemies.filter((e) => !e.isBoss);
+  assert.ok(comunes.length >= 20);
+  for (const e of comunes) {
+    const a = agente(e.agente);
+    assert.ok(a, `enemigo sin especie (${e.type})`);
+    assert.equal(a.familia, e.type);
+    assert.ok(a.nucleos.length > 0, `${a.id} no está confirmado en ningún núcleo`);
+    const gusano = MORFOLOGIAS[a.morfologia].gusano || null;
+    assert.equal(!!gusano, e.isWorm, `${a.id}: gusano ${gusano} en enemigo ${e.isWorm ? 'gusano' : 'no gusano'}`);
+  }
+  s.spawnBoss();
+  assert.equal(s.enemies.find((e) => e.isBoss).agente, null);
+});
+
+test('bestiario: registra cada especie una vez, cuenta vistos y eliminados y trae la ficha', () => {
+  const { scene: s } = createScene({ seed: 18 });
+  for (let i = 0; i < 8; i++) s.spawnEnemy('bacteria', false, { x: s.player.x + 400, y: s.player.y });
+  const victima = s.enemies[0];
+  s.killEnemy(victima, false);
+  const b = s.getRunSummary().bestiario;
+  assert.equal(b.length, new Set(s.enemies.concat(victima).map((e) => e.agente)).size);
+  const fila = b.find((x) => x.id === victima.agente);
+  assert.ok(fila.eliminados >= 1 && fila.vistos >= fila.eliminados);
+  assert.ok(fila.ficha && fila.ficha.clase && fila.ficha.cuadro && fila.ficha.clave);
+});

@@ -2,6 +2,17 @@
 
 Formato: la versión más nueva arriba. Al publicar una versión, agregá una sección nueva acá y subí `?build=` en index.html (ver CLAUDE.md del juego). El historial previo a v3.1 está en `README.txt`.
 
+## v3.7
+
+**Agentes de ADN**
+- Cada enemigo común es una especie concreta del catálogo de la cátedra (114 agentes, `src/data/agentes.js`), elegida
+  dentro de su familia; los gusanos solo toman especies con forma de gusano.
+- Texturas por especie horneadas una sola vez a partir de la pieza base, con variación por código: tinte, estiramiento,
+  par/cadena/racimo, cápsula e inclusiones, espora terminal. En pantalla cada enemigo sigue siendo una sola imagen.
+- La primera vez que aparece una especie en la partida se muestra su nombre (etiqueta y aviso "NUEVO AGENTE").
+- Bestiario en la pausa y al terminar: agentes vistos, cuántos eliminaste y su ficha (qué es, qué produce, dato clave),
+  validada por el revisor médico y por el autor.
+
 ## v3.6
 
 **Fagocitosis**

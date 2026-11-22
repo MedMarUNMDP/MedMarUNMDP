@@ -149,7 +149,7 @@ function loadGame() {
   vm.createContext(context);
   context.globalThis = context;
 
-  for (const file of ['src/core/runtime-services.js', 'src/config/game-balance.js', 'src/core/lab-actions.js']) {
+  for (const file of ['src/core/runtime-services.js', 'src/config/game-balance.js', 'src/core/lab-actions.js', 'src/data/agentes.js', 'src/data/fichas.js']) {
     vm.runInContext(fs.readFileSync(path.join(ROOT, file), 'utf8'), context, { filename: file });
   }
 
