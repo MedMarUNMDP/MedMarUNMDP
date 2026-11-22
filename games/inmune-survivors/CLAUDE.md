@@ -2,7 +2,7 @@
 
 Survivor de arena (estilo "bullet heaven") educativo: un progenitor hematopoyético defiende un tejido
 infectado. Ataque automático; el jugador solo se mueve. Subir de nivel = responder una pregunta de
-inmunología/microbiología (acierto → mejora de vía; error → oleada extra). Versión actual: **3.9**. Modos: **Sandbox infinito** y **Foco por núcleo**,
+inmunología/microbiología (acierto → mejora de vía; error → oleada extra). Versión actual: **3.10**. Modos: **Sandbox infinito** y **Foco por núcleo**,
 con ranking en MedMar.
 
 ## Archivos
@@ -20,6 +20,9 @@ con ranking en MedMar.
 - `src/data/agentes.js` — catálogo ADN 2026: 114 agentes por núcleo, morfologías, rasgos y jefes. `src/data/fichas.js` —
   fichas validadas (clase, cuadro, dato clave). Cambiar contenido médico → `revisor-contenido-medico` + validación del autor.
   Cada enemigo común toma una especie de su familia y su textura se "hornea" una vez (`getSpeciesTexture`).
+- `src/data/preguntas-nucleos.js` — banco por núcleo (415). **Generado**: se edita `docs/preguntas-nucleos/nucleo-<id>.json`
+  y se corre `node scripts/armar-preguntas-nucleos.mjs` (valida y regenera también `docs/catalogo-preguntas-nucleos.md`).
+  Foco por núcleo usa solo las de su núcleo; Sandbox, el banco general más todas.
 - `tests/*.test.cjs` — `node:test` sobre los módulos de `src/` y sobre la escena completa.
 - `tests/helpers/arena-harness.cjs` — corre la escena `Arena` real en Node con Phaser simulado y RNG con semilla
   (`createScene({ seed })`, `flushTweens()`). Usalo para reproducir bugs y simular partidas sin navegador.

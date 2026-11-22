@@ -291,7 +291,8 @@
   const AGENTES_DATA = globalThis.InmuneAgentes || null;
   const FICHAS_DATA = globalThis.InmuneFichas || null;
   const MODOS_API = globalThis.InmuneModos || null;
-  const GAME_VERSION = '3.9.1';
+  const PREGUNTAS_DATA = globalThis.InmunePreguntasNucleos || null;
+  const GAME_VERSION = '3.10.0';
   // Arte propio de los jefes de núcleo (assets/boss_*.webp, recortados de docs/arte/jefes-nucleo-3x3.png).
   const BOSS_ART = {
     'escherichia-coli':'boss_stec', 'mycobacterium-tuberculosis':'boss_granuloma', 'neisseria-meningitidis':'boss_meningococo',
@@ -386,7 +387,7 @@
       this.phagoHintsLeft=3;this.lastPhagoHintAt=-99;this.pseudopods=null;this.phagoEngulf=null;this.pseudopodLast=null;this.playerSlow=1;this.auraSlowUntil=-1;this.forcedSpawnAgente=null;
       this.progressionMilestone = 0;
       this.enemies = []; this.playerBullets = []; this.enemyProjectiles = []; this.helpers = []; this.nets = [];this.activeEnemyCount=0;
-      this.usedQuestionIds = new Set(); this.currentQuestion = null; this.currentUpgrades = []; this.questionTopicCounts={}; this.lastQuestionTopic=null;
+      this.usedQuestionIds = new Set(); this.questionPoolCache = null; this.currentQuestion = null; this.currentUpgrades = []; this.questionTopicCounts={}; this.lastQuestionTopic=null;
       this.stats = { health:100, maxHealth:100, moveSpeed:190, attackDamage:21, attackInterval:520, attackRange:260, projectileSpeed:470, projectileCount:1, projectilePierce:0, blastRadius:0, blastDamage:0, swarmLevel:0, granuleLevel:0, defenseLevel:0, agilityLevel:0, dodgeWindow:620, phagoRadius:50, phagoInterval:800, phagoHeal:0, healingReceivedMultiplier:1, phagoMaxTier:0, xpPickupRadius:82, netCooldown:10800, netRadius:88, netDuration:7600, netDamage:5.5, netTickInterval:430, maxNetHelpers:2, netHelperDuration:4400, antibodyDamage:10, antibodyInterval:1900, antibodyCount:2, regulationDamage:4, regulationInterval:15000, cytokineDamage:6, cytokineInterval:5400, xpMultiplier:1 };
       this.createXpTexture(); this.createBackdrop(); this.createPlayer(); this.createCamera(); this.createHud(); this.createControls(); this.setupHudCamera();
       this.updateHud();
@@ -1109,7 +1110,9 @@
       for(let i=0;i<count&&this.enemyProjectiles.length<70;i++){
         const a=off+Math.PI*2*i/count,obj=this.add.container(e.x+Math.cos(a)*e.radius*0.6,e.y+Math.sin(a)*e.radius*0.6).setDepth(30);
         obj.add([this.add.circle(0,0,(o.size||6)+3,o.color,0.18),this.add.circle(0,0,o.size||6,o.color,1).setStrokeStyle(1.8,0x24113d,0.95),this.add.circle(-1.5,-1.5,1.6,0xffffff,0.9)]);
-        this.enemyProjectiles.push({obj,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,damage:o.damage,life:o.life||4200,radius:o.size||6,homing:!!o.homing});
+        // lifeVar/fadeVar: cada proyectil dura y se desvanece distinto (se ve más orgánico que una ráfaga que muere junta)
+        const life=(o.life||4200)+(o.lifeVar?this.rng.float(-o.lifeVar,o.lifeVar):0);
+        this.enemyProjectiles.push({obj,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,damage:o.damage,life,radius:o.size||6,homing:!!o.homing,fadeMs:o.fadeVar?this.rng.float(250,900):0});
       }
       this.burstEffect(e.x,e.y,o.color,Math.min(140,e.visualSize*0.5));
     }
@@ -1182,7 +1185,7 @@
           break;
         }
         case 'echinococcus-granulosus': // quiste fijo: protoescólices y rotura a mitad de vida
-          if(m.clock<=0){m.clock=6000*crisis;this.spawnBossBurst(e,8,{color:0xffe2a6,speed:85,damage:10+t*0.01,size:7,homing:true,life:12000});this.bossMechanicText(e,'PROTOESCÓLICES','#ffe7b5');}
+          if(m.clock<=0){m.clock=6000*crisis;this.spawnBossBurst(e,8,{color:0xffe2a6,speed:85,damage:10+t*0.01,size:7,homing:true,life:11000,lifeVar:4000,fadeVar:true});this.bossMechanicText(e,'PROTOESCÓLICES','#ffe7b5');}
           if(!m.ruptured&&e.hp<e.maxHp*0.5){
             m.ruptured=true;const radius=300;
             const wave=this.add.circle(e.x,e.y,20,0xffe2a6,0.12).setStrokeStyle(6,0xfff0c8,0.9).setDepth(29);
@@ -1822,7 +1825,7 @@
 
     // Los proyectiles que vencen o impactan se desvanecen (achicándose y siguiendo un poco su trayectoria)
     // en vez de desaparecer de golpe. Ya salieron de la lista: no dañan ni chocan durante el fundido.
-    fadeOutProjectile(b,ms=240){
+    fadeOutProjectile(b,ms=b.fadeMs||240){
       const o=b.obj;if(!o?.active)return;
       this.tweens.add({targets:o,alpha:0,scaleX:(o.scaleX||1)*0.55,scaleY:(o.scaleY||1)*0.55,x:o.x+(b.vx||0)*ms/2000,y:o.y+(b.vy||0)*ms/2000,duration:ms,ease:'Quad.Out',onComplete:()=>o.destroy()});
     }
@@ -2232,9 +2235,19 @@
       this.nets=this.nets.filter(n=>n.active);
     }
 
+    // Banco del modo. Foco por núcleo: solo las preguntas de ese núcleo (si todavía no tiene, el general).
+    // Sandbox: el general más las de todos los núcleos; con «No cursé» (nivel secundario) solo el general.
+    questionPool(){
+      if(this.questionPoolCache)return this.questionPoolCache;
+      const nucleos=PREGUNTAS_DATA?.PREGUNTAS||[];let pool=QUESTION_BANK;
+      if(this.modo?.id==='nucleo'){const propias=nucleos.filter(q=>q.nucleo===this.modo.nucleoId);if(propias.length)pool=propias;}
+      else if(this.modo&&this.evolutionDiff.category!=='facil')pool=QUESTION_BANK.concat(nucleos);
+      return this.questionPoolCache=pool;
+    }
+
     selectUnusedQuestion() {
       const category=this.evolutionDiff.category;
-      const candidates=QUESTION_BANK.filter(q=>!this.usedQuestionIds.has(q.id)&&q.difficulty===category);
+      const candidates=this.questionPool().filter(q=>!this.usedQuestionIds.has(q.id)&&q.difficulty===category);
       if(!candidates.length)return null;
       const topics=[...new Set(candidates.map(q=>q.topic))];
       const leastSeen=Math.min(...topics.map(topic=>this.questionTopicCounts[topic]||0));
@@ -2265,7 +2278,7 @@
       else {this.stats.netDamage+=0.5;this.stats.netRadius*=1.03;}
     }
 
-    debugOpenQuestion(category){if(!this.debugMode)return;const choices=QUESTION_BANK.filter(q=>q.difficulty===category);if(!choices.length)return;this.debugMode=false;this.evolutionDiff={...this.evolutionDiff,category};this.questionPaused=false;this.openQuestion();this.debugMode=true;}
+    debugOpenQuestion(category){if(!this.debugMode)return;const choices=this.questionPool().filter(q=>q.difficulty===category);if(!choices.length)return;this.debugMode=false;this.evolutionDiff={...this.evolutionDiff,category};this.questionPaused=false;this.openQuestion();this.debugMode=true;}
 
     openQuestion() {
       if(this.debugMode||this.questionPaused||this.gameEnded||this.multiResistance)return;
@@ -2392,7 +2405,8 @@
     const cantidad=globalThis.InmuneAgentes.agentesDeNucleo(n.id).length;
     const tag=document.createElement('b');tag.textContent=`Núcleo ${n.id}`;
     const name=document.createElement('span');name.textContent=shortName(n);
-    const meta=document.createElement('small');meta.textContent=`Jefe: ${n.jefe.titulo} · ${cantidad} agentes`;
+    const preguntas=globalThis.InmunePreguntasNucleos?.porNucleo(n.id).length||0;
+    const meta=document.createElement('small');meta.textContent=`Jefe: ${n.jefe.titulo} · ${cantidad} agentes${preguntas?` · ${preguntas} preguntas`:''}`;
     b.append(tag,name,meta);$('nucleoChoices').appendChild(b);
   }
   function syncMenu(){

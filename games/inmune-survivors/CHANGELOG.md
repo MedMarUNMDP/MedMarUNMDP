@@ -2,6 +2,24 @@
 
 Formato: la versión más nueva arriba. Al publicar una versión, agregá una sección nueva acá y subí `?build=` en index.html (ver CLAUDE.md del juego). El historial previo a v3.1 está en `README.txt`.
 
+## v3.10
+
+**Preguntas por núcleo** (415 en total: 55 del núcleo 6 y 45 de cada uno de los demás).
+- En Foco por núcleo aparecen **solo** las preguntas del núcleo elegido. En Sandbox se mezclan con el banco
+  general; con «No cursé» el Sandbox usa solo el general.
+- Redactadas a partir de los cuadernillos 2026 de la cátedra (seminarios, laboratorios y casos clínicos) y del
+  Compendio ADN, y revisadas por el revisor médico contra ese material y la bibliografía (Murray, Carballal).
+  Se corrigieron 54 puntos: datos desactualizados (OMS 2024, calendario de vacunación, ICTV), distractores que
+  también eran correctos y explicaciones imprecisas.
+- Fácil: lo central (agente, transmisión, prevención). Normal: nivel parcial (patogenia, clínica, laboratorio).
+  Difícil: casos clínicos, diagnóstico diferencial e interpretación de laboratorio.
+- La correcta ya no es sistemáticamente la opción más larga.
+- Fuentes en `docs/preguntas-nucleos/*.json`; el juego carga `src/data/preguntas-nucleos.js`, que genera
+  `node scripts/armar-preguntas-nucleos.mjs` junto con `docs/catalogo-preguntas-nucleos.md`.
+- El menú muestra cuántas preguntas tiene cada núcleo.
+
+**Quiste hidatídico**: los protoescólices duran y se desvanecen de forma variable (de 7 a 15 s).
+
 ## v3.9.1
 
 Ajustes de jefes tras probarlos en el Laboratorio:

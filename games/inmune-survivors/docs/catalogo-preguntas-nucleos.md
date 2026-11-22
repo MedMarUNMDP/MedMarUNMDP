@@ -1,0 +1,2593 @@
+# Catálogo de preguntas por núcleo
+
+Generado por `scripts/armar-preguntas-nucleos.mjs`. La opción correcta va primero (en el juego se mezclan).
+Total: **415** preguntas.
+
+## Núcleo 6 (55)
+
+### Fácil (12)
+
+- **¿Qué alimento se asocia con más frecuencia a los casos de síndrome urémico hemolítico en Argentina?** _(Escherichia coli enterohemorrágica)_
+  - ✔ La carne picada mal cocida
+  - ✘ El arroz cocido guardado a temperatura ambiente
+  - ✘ La miel en lactantes menores de un año
+  - ✘ El pescado crudo de agua dulce
+  - La carne picada se contamina durante el faenado y la bacteria queda distribuida en todo el producto: hay que cocinarla a 70 °C o más. El reservorio principal de ECEH es el ganado bovino. — *Cuadernillo Núcleo 6 Digestivo 2026 (TP 14, Actividad 5) · Compendio ADN (7.f.c)*
+- **¿A qué edades se aplican las dos dosis de la vacuna contra rotavirus en el calendario nacional argentino?** _(Rotavirus)_
+  - ✔ A los 2 y a los 4 meses de vida
+  - ✘ A los 2, 4 y 6 meses, con refuerzo a los 18 meses
+  - ✘ Dosis única a los 12 meses de vida
+  - ✘ Al nacer y a los 6 meses de vida
+  - La primera dosis va a los 2 meses (edad máxima 14 semanas y 6 días) y la segunda a los 4 meses, sin pasar las 24 semanas de vida. — *Compendio ADN (7.c.e) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Grupo 2f)*
+- **¿Cuál es la vía de transmisión del virus de la hepatitis A?** _(Virus de la hepatitis A)_
+  - ✔ Fecal-oral, por agua o alimentos contaminados
+  - ✘ Parenteral, por sangre, agujas o material contaminado
+  - ✘ Sexual y perinatal, igual que el VHB y el VHC
+  - ✘ Respiratoria, por gotitas y aerosoles
+  - El VHA y el VHE ingresan por vía digestiva (fecal-oral); los de ingreso parenteral son el B, el C y el D. Por eso en A y E la prevención es saneamiento, agua segura e higiene. — *Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 9, objetivos) · Compendio ADN (7.g)*
+- **¿Qué tipo de parásito es Giardia lamblia y cuál es su forma infectante?** _(Giardia lamblia)_
+  - ✔ Protozoo flagelado; el quiste es la forma infectante
+  - ✘ Protozoo flagelado; el trofozoíto es la forma infectante que se ingiere
+  - ✘ Nematode; el huevo larvado es la forma infectante
+  - ✘ Apicomplexa; el ooquiste es la forma infectante
+  - Giardia es un protozoo flagelado con dos formas: trofozoíto (vegetativa, en duodeno y yeyuno) y quiste, que es la forma infectante que se ingiere con agua o alimentos contaminados. — *Compendio ADN (7.a.a) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 2b)*
+- **¿Qué alimento se asocia clásicamente al botulismo del lactante?** _(Clostridium botulinum)_
+  - ✔ La miel
+  - ✘ El arroz cocido mal conservado
+  - ✘ La leche sin pasteurizar
+  - ✘ Los huevos crudos o mal cocidos
+  - La miel puede contener esporas de C. botulinum que germinan en el intestino del lactante y producen toxina in vivo; la tierra y el polvo contaminados son hoy la fuente más frecuente. — *Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 2) · Compendio ADN (7.e)*
+- **¿Qué características comparten las bacterias de la familia Enterobacteriaceae?** _(Enterobacterias)_
+  - ✔ Bacilos gramnegativos, anaerobios facultativos y oxidasa negativos
+  - ✘ Bacilos grampositivos esporulados y anaerobios estrictos
+  - ✘ Cocos gramnegativos aerobios estrictos y catalasa negativos
+  - ✘ Bacilos curvos microaerófilos que no fermentan hidratos de carbono
+  - Las enterobacterias son bacilos gramnegativos, anaerobios facultativos, fermentan glucosa, reducen nitratos a nitritos y son catalasa positivas y oxidasa negativas, lo que las separa de Pseudomonas y Vibrio. — *Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 1a) · Compendio ADN (7.e)*
+- **¿Cómo adquiere una persona la teniosis por Taenia solium?** _(Taenia solium)_
+  - ✔ Comiendo carne de cerdo cruda o mal cocida
+  - ✘ Ingiriendo los huevos del parásito con agua o verduras mal lavadas
+  - ✘ Por penetración activa de larvas filariformes en la piel
+  - ✘ Por la picadura de un insecto hematófago infectado
+  - La teniosis (tenia adulta en el intestino delgado) se adquiere al comer carne de cerdo con Cysticercus cellulosae. Si en cambio se ingieren los huevos, lo que se desarrolla es cisticercosis. — *Compendio ADN (7.a.f, 7.b caso 2) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 4)*
+- **¿Cómo son las heces típicas del cólera?** _(Vibrio cholerae)_
+  - ✔ Acuosas, en "agua de arroz", sin sangre
+  - ✘ Con sangre, moco y pus, con pujo y tenesmo
+  - ✘ Pastosas, de mal olor, con restos de alimentos
+  - ✘ Negras y alquitranadas, con melena
+  - V. cholerae no invade la mucosa: la toxina colérica provoca hipersecreción, con diarrea acuosa incolora e inodora ("agua de arroz") y pérdidas que llegan a un litro por hora. — *Compendio ADN (7.e.f) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 5)*
+- **¿Cuál es el síntoma más característico de la oxiurosis?** _(Enterobius vermicularis)_
+  - ✔ Prurito anal de predominio nocturno
+  - ✘ Diarrea con sangre, moco, pujo y tenesmo
+  - ✘ Ictericia con coluria y acolia
+  - ✘ Mialgias con edema periocular y fiebre alta
+  - Las hembras grávidas migran de noche a la región perianal a poner huevos; el prurito se origina por hipersensibilidad a las sustancias que el parásito excreta y secreta. — *Compendio ADN (7.a.d) · Cuadernillo Núcleo 6 Digestivo 2026 (TP 12, caso 4)*
+- **¿Quién es el hospedador definitivo de Echinococcus granulosus?** _(Echinococcus granulosus)_
+  - ✔ El perro
+  - ✘ La oveja
+  - ✘ El cerdo
+  - ✘ El ser humano
+  - El cestode adulto vive fijo a la mucosa del intestino delgado del perro, que elimina huevos con las heces. Los herbívoros y el humano (accidental) son intermediarios y alojan el quiste hidatídico. — *Compendio ADN (7.a.g, 7.b caso 1) · Cuadernillo Núcleo 6 Digestivo 2026 (TP 12, caso 1)*
+- **¿Cuál es el agente que se aísla con más frecuencia en las infecciones urinarias adquiridas en la comunidad?** _(Escherichia coli uropatógena)_
+  - ✔ Escherichia coli
+  - ✘ Proteus mirabilis
+  - ✘ Enterococcus faecalis
+  - ✘ Klebsiella pneumoniae
+  - En pacientes sin factores de riesgo ni enfermedad de base, E. coli se aísla en más del 70% de las ITU de la comunidad, seguida por Klebsiella spp., Proteus mirabilis y Enterococcus faecalis. — *Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (Introducción) · Compendio ADN (7.h)*
+- **¿Por qué las mujeres tienen mayor predisposición a las infecciones urinarias que los varones?** _(Infección del tracto urinario)_
+  - ✔ Por una uretra corta y cercana al introito vaginal y al ano
+  - ✘ Porque su orina tiene un pH más alcalino que la del varón
+  - ✘ Porque no producen proteína de Tamm-Horsfall en el asa de Henle
+  - ✘ Porque la vejiga femenina carece de urotelio estratificado
+  - La cortedad de la uretra femenina y su proximidad al ano y la vagina facilitan la colonización por uropatógenos intestinales; el coito "masajea" la uretra y favorece el ascenso a la vejiga. — *Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (Actividad 1B) · Compendio ADN (7.h)*
+
+### Normal (25)
+
+- **¿Cuál es el mecanismo de acción de la toxina colérica?** _(Vibrio cholerae)_
+  - ✔ Se une al gangliósido GM1 y activa la adenilato ciclasa
+  - ✘ Inactiva los ribosomas y detiene la síntesis de proteínas
+  - ✘ Inhibe la liberación de acetilcolina en las sinapsis colinérgicas
+  - ✘ Invade el enterocito, lisa la vacuola y se multiplica en el citoplasma
+  - Es una toxina A-B: la cadena B se une al gangliósido GM1 y la cadena A activa la adenilato ciclasa. El AMPc elevado provoca secreción de agua y electrolitos, con diarrea secretora. — *Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 3) · Compendio ADN (7.e.f)*
+- **¿Qué toxinas produce Escherichia coli enterotoxigénica (ECET) y qué cuadro causa?** _(Escherichia coli enterotoxigénica)_
+  - ✔ LT y ST, con diarrea acuosa profusa sin sangre
+  - ✘ Toxina Shiga, con colitis hemorrágica y riesgo de SUH
+  - ✘ Intimina y toxina Shiga, con lesión del colon y sangre
+  - ✘ Enterotoxina termoestable, con vómitos en las primeras horas
+  - ECET coloniza el intestino delgado y produce la toxina termolábil (LT, eleva el AMPc) y la termoestable (ST, eleva el GMPc): diarrea acuosa, la clásica "diarrea del viajero". — *Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 7) · Compendio ADN (7.e.g)*
+- **¿Cuál es el mecanismo de patogenia de Shigella spp.?** _(Shigella spp.)_
+  - ✔ Invade y se replica en las células del colon
+  - ✘ Produce una enterotoxina que eleva el AMPc sin invadir la mucosa
+  - ✘ Se adhiere al borde en cepillo del intestino delgado sin invadir
+  - ✘ Coloniza la mucosa gástrica protegida por su actividad ureasa
+  - Shigella usa un sistema de secreción tipo III (proteínas IpaA-D) para invadir el epitelio del colon, reorganiza la actina y se disemina de célula a célula; induce apoptosis de los macrófagos. — *Compendio ADN (7.e.b) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 5)*
+- **¿Cuál es el método de elección para diagnosticar una gastroenteritis por rotavirus?** _(Rotavirus)_
+  - ✔ Detección del antígeno viral en heces por ELISA o látex
+  - ✘ Cultivo celular con pretratamiento de la muestra con tripsina
+  - ✘ Serología con IgM específica en el suero del paciente
+  - ✘ Microscopía electrónica de la materia fecal
+  - La concentración de virus en heces es muy alta, así que la detección directa del antígeno (EIA o aglutinación de látex) es el método de elección; el cultivo no se usa para diagnóstico. — *Compendio ADN (7.c.e, 7.d) · Cuadernillo Núcleo 6 Digestivo 2026 (TP 13, Actividad 2)*
+- **¿Qué rasgo del norovirus explica los brotes explosivos en restaurantes y cruceros?** _(Norovirus)_
+  - ✔ Bastan unos 10 viriones y resiste el cloro del agua potable
+  - ✘ Tiene una envoltura lipídica que lo protege del ácido gástrico
+  - ✘ Se transmite por vía respiratoria además de la digestiva
+  - ✘ Su genoma segmentado permite reordenamientos frecuentes entre cepas
+  - Es un virus desnudo que resiste calor de 60 °C, pH 3, detergentes y el cloro del agua potable, y sólo 10 viriones inician la enfermedad; hasta el 30% de los infectados son asintomáticos y contagian. — *Compendio ADN (7.c.d) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Grupo 3)*
+- **Un lactante presenta diarrea acuosa, conjuntivitis y tos productiva con probable bronquiolitis. ¿Qué agente explica mejor ese cuadro?** _(Adenovirus)_
+  - ✔ Adenovirus
+  - ✘ Rotavirus
+  - ✘ Norovirus
+  - ✘ Poliovirus
+  - Adenovirus infecta a la vez el epitelio respiratorio, el digestivo y la conjuntiva, así que un mismo virus explica la diarrea, la conjuntivitis y el compromiso respiratorio. — *Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Grupo 1) · Compendio ADN (7.c.a)*
+- **¿Qué diferencia a Salmonella Typhi del resto de las salmonelas en cuanto al reservorio?** _(Salmonella spp.)_
+  - ✔ Su único reservorio es el ser humano
+  - ✘ Su reservorio son los reptiles y las aves de corral
+  - ✘ Vive en el ganado bovino y el resto, en el ser humano
+  - ✘ Comparte con el resto los mismos reservorios animales
+  - S. Typhi y Paratyphi están adaptadas al ser humano, único reservorio, y se contraen por agua o alimentos contaminados por un portador. El resto de las salmonelas viene de reservorios animales. — *Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 6b) · Compendio ADN (7.e.c)*
+- **¿Qué enzima le permite a Helicobacter pylori sobrevivir a la acidez gástrica?** _(Helicobacter pylori)_
+  - ✔ La ureasa
+  - ✘ La catalasa
+  - ✘ La coagulasa
+  - ✘ La fosfolipasa C
+  - La gran cantidad de ureasa neutraliza el ácido con el amoníaco que produce; eso mismo se aprovecha en el test del aliento con urea marcada, que detecta en el aire exhalado los productos de la hidrólisis de la urea. — *Cuadernillo Núcleo 6 Digestivo 2026 (TP 14, Actividad 2)*
+- **¿Qué particularidad del cultivo de Yersinia enterocolitica se aprovecha para aislarla de las heces?** _(Yersinia enterocolitica)_
+  - ✔ Crece a 4 °C: se usa enriquecimiento en frío
+  - ✘ Necesita atmósfera microaerófila con más CO2 a 42 °C
+  - ✘ Requiere medios con 10% de cloruro de sodio
+  - ✘ Sólo crece en cultivo celular pretratado con tripsina
+  - Crece lento a la temperatura habitual de incubación pero tolera los 4 °C: el almacenamiento prolongado en frío mejora selectivamente su aislamiento. Por eso también se multiplica en alimentos refrigerados. — *Compendio ADN (7.e.a) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 5)*
+- **¿Qué condiciones de cultivo necesita Campylobacter jejuni?** _(Campylobacter spp.)_
+  - ✔ Poco oxígeno, más CO2 y dos o más días de incubación
+  - ✘ Anaerobiosis estricta en jarra con generador de hidrógeno
+  - ✘ Medio con alta salinidad y pH alcalino sostenido
+  - ✘ Agar chocolate a temperatura ambiente durante siete días
+  - Son microaerófilos: necesitan 5-7% de oxígeno y 5-10% de CO2, medios selectivos y, en las especies termófilas, temperaturas elevadas, con dos o más días de incubación. — *Compendio ADN (7.e.d) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 5)*
+- **¿Qué distingue a las dos formas de intoxicación alimentaria por Bacillus cereus?** _(Bacillus cereus)_
+  - ✔ La toxina termoestable da vómitos y la termolábil, diarrea
+  - ✘ La toxina termoestable da diarrea y la termolábil, vómitos
+  - ✘ Una forma cursa con fiebre alta y la otra con hipotermia
+  - ✘ Una depende de la espora y la otra de la endotoxina
+  - La enterotoxina termoestable causa la forma emética (vómitos, náuseas y espasmos, 1 a 6 h) y la termolábil, parecida a la LT de E. coli y a la colérica, la forma diarreica. — *Compendio ADN (7.e.e) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 5)*
+- **¿Por qué recalentar un alimento no evita la intoxicación alimentaria por Staphylococcus aureus?** _(Staphylococcus aureus)_
+  - ✔ Las enterotoxinas resisten 100 °C por 30 minutos
+  - ✘ La bacteria forma esporas que germinan al enfriarse el alimento
+  - ✘ La endotoxina se libera cuando el calor lisa a la bacteria
+  - ✘ El estafilococo se multiplica a temperatura de refrigeración
+  - Las enterotoxinas estafilocócicas son superantígenos estables aunque se calienten a 100 °C durante 30 minutos: es una intoxicación por toxina preformada, no una infección. — *Compendio ADN (7.e.e) · Cuadernillo Núcleo 6 Digestivo 2026 (TP 14, Actividad 3)*
+- **¿Cuál es la diferencia entre infección e intoxicación alimentaria?** _(Enfermedades transmitidas por alimentos)_
+  - ✔ La infección es por microorganismos vivos y la intoxicación, por toxinas preformadas
+  - ✘ En la infección hay fiebre y en la intoxicación nunca aparece
+  - ✘ La infección la producen bacterias y la intoxicación, sólo hongos
+  - ✘ Un brote de intoxicación exige dos o más casos y la infección puede ser un caso aislado
+  - La infección resulta de ingerir patógenos vivos que se multiplican (Salmonella, Shigella, VHA, Trichinella); la intoxicación, de toxinas o químicos presentes en el alimento, aun sin microorganismo viable. — *Cuadernillo Núcleo 6 Digestivo 2026 (TP 14, Introducción y Actividad 3b) · Compendio ADN (7.f.b)*
+- **¿Qué hallazgo microscópico confirma que una ameba es Entamoeba histolytica?** _(Entamoeba histolytica)_
+  - ✔ Trofozoítos que fagocitan eritrocitos
+  - ✘ Quistes maduros con cuatro núcleos en el examen al fresco
+  - ✘ Trofozoítos adheridos por su disco suctor al epitelio
+  - ✘ Ooquistes con esporozoítos en su interior
+  - E. histolytica es la única ameba humana capaz de fagocitar eritrocitos: ver trofozoítos con seudópodos y eritrofagocitosis la confirma. El quiste tetranucleado es la forma infectante, pero no la distingue de E. dispar. — *Compendio ADN (7.a.b) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 2)*
+- **¿Qué es el ciclo de Loos en la infección por Ascaris lumbricoides?** _(Ascaris lumbricoides)_
+  - ✔ La migración de las larvas por hígado, corazón y pulmón
+  - ✘ El pasaje de los huevos desde el suelo al agua de riego y las verduras
+  - ✘ La autoinfección a partir de los huevos de la región perianal
+  - ✘ El ciclo entre el cerdo y el humano que cierra la transmisión
+  - Las larvas atraviesan la pared intestinal, llegan por vía porta al hígado, corazón derecho y pulmón, suben por bronquios y tráquea, se degluten y maduran en el intestino delgado. — *Compendio ADN (7.a.c y recuadro ciclo de Loos) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 3d)*
+- **¿Cuál es la forma infectante de Trichinella spiralis y cómo se adquiere?** _(Trichinella spiralis)_
+  - ✔ La larva muscular L1, al comer carne cruda o mal cocida
+  - ✘ El huevo larvado, ingerido con agua o verduras contaminadas
+  - ✘ El quiste, eliminado con las heces del cerdo infectado
+  - ✘ La larva filariforme, que penetra activamente la piel
+  - La larva muscular L1 está en el músculo de cerdo, jabalí u otros animales; se libera en el estómago por digestión, llega al duodeno, penetra las vellosidades y en dos días muda hasta adulto. — *Compendio ADN (7.a.e) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 3)*
+- **¿Cuál es el método diagnóstico de elección para la oxiurosis?** _(Diagnóstico de laboratorio)_
+  - ✔ El test de Graham seriado en la región perianal
+  - ✘ El coproparasitológico seriado de materia fecal
+  - ✘ La serología por ELISA para IgG específica
+  - ✘ La biopsia de apéndice cecal con cortes transversales
+  - Los huevos se depositan en los pliegues perianales, no en las heces (allí aparecen sólo en el 10% de los casos). Un Graham detecta el 60%; repetido 5 a 7 días llega al 100%. — *Compendio ADN (7.a.d) · Cuadernillo Núcleo 6 Digestivo 2026 (TP 12, caso 4)*
+- **¿Qué resultado serológico identifica a una persona vacunada contra hepatitis B?** _(Virus de la hepatitis B)_
+  - ✔ Anti-HBs positivo, con el resto de los marcadores negativos
+  - ✘ Anti-HBc IgG positivo con HBsAg negativo
+  - ✘ HBsAg positivo junto con anti-HBe positivo
+  - ✘ HBeAg positivo con anti-HBc IgM positivo
+  - La vacuna contiene HBsAg, así que genera sólo anti-HBs. Si además hay anti-HBc, hubo contacto con el virus: eso marca infección actual o antigua, no vacunación. — *Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 9, Actividad 2) · Compendio ADN (7.g)*
+- **¿Por qué se produce el daño hepático en la infección por el virus de la hepatitis B?** _(Virus de la hepatitis B)_
+  - ✔ Por la respuesta inmune celular contra los hepatocitos infectados
+  - ✘ Por el efecto citopático directo del virus sobre el hepatocito
+  - ✘ Por la endotoxina que se libera durante la replicación viral
+  - ✘ Por la obstrucción mecánica de los canalículos biliares intrahepáticos
+  - El VHB no tiene efecto citopático significativo: la inmunidad celular y la inflamación producen los síntomas y, cuando son eficaces, la resolución, al destruir los hepatocitos infectados. — *Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 9, Actividades 2c y 3) · Compendio ADN (7.g)*
+- **¿Por qué el virus de la hepatitis D no puede infectar por sí solo?** _(Virus de la hepatitis D)_
+  - ✔ Porque usa el HBsAg del virus de la hepatitis B como envoltura
+  - ✘ Porque carece de genoma propio y necesita el ADN del VHB
+  - ✘ Porque sólo se replica dentro de los linfocitos T del huésped
+  - ✘ Porque requiere una coinfección con el virus de la hepatitis C
+  - El VHD es un virus tipo viroide, con ARN monocatenario circular, que usa la envoltura de HBsAg del VHB para ensamblarse y salir: de ahí que la coinfección o sobreinfección con VHB sea obligada. — *Compendio ADN (7.g) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 9, Grupo 3)*
+- **¿Qué factor de virulencia de Proteus mirabilis favorece la formación de cálculos urinarios?** _(Proteus mirabilis)_
+  - ✔ La ureasa, que alcaliniza la orina
+  - ✘ La cápsula polisacárida, que inhibe la fagocitosis
+  - ✘ Las fimbrias tipo 1, que median la adherencia
+  - ✘ La toxina Shiga, que daña el endotelio renal
+  - La ureasa alcaliniza la orina y favorece la precipitación de sales con formación de cálculos de estruvita; además P. mirabilis tiene fimbrias y flagelos para la colonización ascendente. — *Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (Actividad 2) · Compendio ADN (7.h.b)*
+- **¿Qué rasgo de los micoplasmas explica que no respondan a los antibióticos que actúan sobre la pared celular?** _(Micoplasmas genitales)_
+  - ✔ No tienen pared celular
+  - ✘ Son intracelulares obligados
+  - ✘ Tienen una cápsula muy gruesa
+  - ✘ Forman esporas resistentes
+  - Son procariotas muy pequeños, pleomórficos y sin pared celular, por lo que resisten a los antibióticos dirigidos a ella; crecen en medios enriquecidos o asociados a membranas celulares. — *Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (Actividad 2) · Compendio ADN (7.h.b)*
+- **¿Qué mecanismo explica la mayor parte de las infecciones urinarias en el paciente sondado?** _(Infección del tracto urinario)_
+  - ✔ El biofilm en la sonda y el ascenso extraluminal
+  - ✘ La diseminación hematógena desde un foco infeccioso a distancia
+  - ✘ La contaminación de la orina ya emitida en la bolsa colectora
+  - ✘ El reflujo vesicoureteral por atonía progresiva del uréter
+  - Los uropatógenos forman un biofilm intra y extraluminal que los protege de los antimicrobianos y de la inmunidad; dos tercios ascienden por vía extratransluminal, entre la sonda y la mucosa uretral. — *Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (ITU en el paciente sondado) · Compendio ADN (7.h)*
+- **¿Cuál es el perfil de respuesta T helper que predomina frente a los helmintos?** _(Respuesta inmune)_
+  - ✔ Th2, con IL-4, IL-5 e IL-13
+  - ✘ Th1, con IL-12 e IFN-gamma, que activa macrófagos
+  - ✘ Th17, con IL-17 y reclutamiento de neutrófilos
+  - ✘ Treg, con IL-10 y supresión de la respuesta efectora
+  - Los helmintos inducen un perfil Th2: IL-4 e IL-13 activan macrófagos alternativos, IL-5 recluta eosinófilos y la IgE provoca desgranulación de mastocitos y citotoxicidad dependiente de anticuerpos. — *Compendio ADN (7.i.e)*
+- **Según el estudio de parasitosis intestinales en poblaciones infantiles de Argentina, ¿qué explica la tendencia descendente de norte a sur?** _(Epidemiología)_
+  - ✔ El clima cálido y húmedo del noreste favorece a los geohelmintos
+  - ✘ El norte tiene mayor cobertura de agua de red que el sur del país
+  - ✘ Los protozoos necesitan suelos áridos y fríos para enquistarse
+  - ✘ En el sur se concentran las poblaciones rurales y periurbanas
+  - Los geohelmintos necesitan suelos cálidos y húmedos para desarrollarse: de ahí su mayor prevalencia en Misiones y Formosa y su ausencia en zonas áridas o frías como La Pampa y Chubut. — *Cuadernillo Núcleo 6 Digestivo 2026 (TP 12, Actividad 1; Navone y col., 2017) · Compendio ADN (7.b)*
+
+### Difícil (18)
+
+- **Un nene de 5 años con convulsiones tiene en la resonancia lesiones quísticas con un escólex en su interior y ELISA para cisticercosis positivo. ¿Qué forma parasitaria ingirió?** _(Taenia solium)_
+  - ✔ Huevos eliminados en heces humanas
+  - ✘ Cisticercos de carne de cerdo mal cocida
+  - ✘ Quistes presentes en agua de pozo contaminada
+  - ✘ Larvas filariformes desarrolladas en el suelo
+  - La cisticercosis se adquiere al ingerir huevos de T. solium por vía fecal-oral, con el humano como hospedador intermediario accidental. Comer carne con cisticercos produce teniosis, no neurocisticercosis. — *Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 5a) · Compendio ADN (7.a.f, 7.b caso 2)*
+- **¿Por qué el coproparasitológico no sirve para diagnosticar hidatidosis en una persona?** _(Echinococcus granulosus)_
+  - ✔ Porque el humano no aloja el adulto y no elimina huevos
+  - ✘ Porque los huevos se destruyen al pasar por el jugo gástrico
+  - ✘ Porque el quiste libera escólices únicamente en la orina
+  - ✘ Porque el coproparasitológico solo detecta protozoos y no huevos de cestodes
+  - El humano es hospedador intermediario: aloja el quiste hidatídico, no el cestode adulto, así que no elimina huevos. Se diagnostica por imágenes (ecografía, TAC) y serología (ELISA IgG, HAI). — *Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 4b) · Compendio ADN (7.a.g)*
+- **Un paciente con VIH de larga evolución tiene diarrea acuosa, tos y sibilancias, y en el coproparasitológico se ven larvas rabditoides y filariformes. ¿Qué explica el cuadro?** _(Strongyloides stercoralis)_
+  - ✔ Autoinfección interna por Strongyloides stercoralis
+  - ✘ Ascariosis en fase pulmonar con síndrome de Loeffler
+  - ✘ Criptosporidiosis con compromiso biliar en inmunosuprimido
+  - ✘ Triquinosis en fase de invasión muscular
+  - En inmunocomprometidos las larvas rabditoides se vuelven filariformes en el lumen, penetran la pared intestinal o perianal y repiten el ciclo de Loos: hiperinfección con síntomas digestivos y pulmonares. — *Cuadernillo Núcleo 6 Digestivo 2026 (TP 12, caso 5) · Compendio ADN (7.b caso 5)*
+- **¿Cuál es la tríada que caracteriza al síndrome urémico hemolítico típico?** _(Escherichia coli enterohemorrágica)_
+  - ✔ Anemia hemolítica microangiopática, plaquetopenia e insuficiencia renal
+  - ✘ Fiebre, ictericia y hepatomegalia dolorosa
+  - ✘ Anemia, leucocitosis y eosinofilia marcada
+  - ✘ Diarrea sanguinolenta, fiebre alta y convulsiones con eosinófilos en el LCR
+  - Son anemia hemolítica microangiopática (hemoglobina baja, eritrocitos fragmentados, Coombs negativa), plaquetas por debajo de 150.000/mm3 y deterioro de la función renal con creatinina elevada para la edad. — *Cuadernillo Núcleo 6 Digestivo 2026 (TP 14, Actividad 5b) · Compendio ADN (7.f.c)*
+- **¿Cómo daña los tejidos la toxina Shiga?** _(Escherichia coli enterohemorrágica)_
+  - ✔ Inactiva los ribosomas y detiene la síntesis de proteínas
+  - ✘ Activa la adenilato ciclasa y eleva el AMPc del enterocito
+  - ✘ Degrada el peptidoglicano del endotelio vascular renal
+  - ✘ Activa de forma inespecífica a los linfocitos T como superantígeno
+  - La subunidad B se une al glucolípido Gb3 de células de riñón, cerebro, intestino y endotelio; la A inactiva los ribosomas y detiene la síntesis proteica, con muerte celular y microangiopatía. — *Cuadernillo Núcleo 6 Digestivo 2026 (TP 14, Actividad 5b) · Compendio ADN (7.f.c, 7.e.b)*
+- **¿Qué categoría de Escherichia coli tiene una patogenia prácticamente idéntica a la de Shigella?** _(Escherichia coli enteroinvasiva)_
+  - ✔ La enteroinvasiva (ECEI)
+  - ✘ La enterotoxigénica (ECET)
+  - ✘ La enteroagregativa (ECEA)
+  - ✘ La enteropatógena (ECEP)
+  - ECEI invade las células epiteliales del colon, lisa la vacuola fagocítica, se multiplica en el citoplasma y se propaga a las células vecinas, con una disentería indistinguible de la shigelosis. — *Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 7) · Compendio ADN (7.e.g)*
+- **¿En qué muestra esperaría recuperar Salmonella Enteritidis en un cuadro de gastroenteritis?** _(Salmonella spp.)_
+  - ✔ En materia fecal
+  - ✘ En hemocultivo con medio de enriquecimiento
+  - ✘ En orina recogida por chorro medio
+  - ✘ En líquido cefalorraquídeo
+  - La mayoría de las gastroenteritis por salmonelas no tifoideas queda limitada al intestino: se buscan en coprocultivo con medios selectivos. En lactantes, ancianos o inmunocomprometidos pueden dar bacteriemia; S. Typhi se busca en sangre. — *Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 6b) · Compendio ADN (7.e.c)*
+- **Un paciente tiene HBsAg y HBeAg positivos, anti-HBc IgM positivo y anti-HBs negativo. ¿Qué situación representa?** _(Virus de la hepatitis B)_
+  - ✔ Hepatitis B aguda en fase replicativa
+  - ✘ Hepatitis B crónica sin replicación activa
+  - ✘ Infección resuelta hace varios años
+  - ✘ Persona vacunada sin contacto previo con el virus
+  - La IgM anti-HBc es el mejor marcador de infección aguda reciente, y HBsAg junto con HBeAg indican replicación activa. En la infección crónica predomina la IgG anti-HBc. — *Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 9, Actividad 2) · Compendio ADN (7.g)*
+- **¿En qué grupo la hepatitis E tiene una evolución particularmente grave?** _(Virus de la hepatitis E)_
+  - ✔ En las embarazadas
+  - ✘ En los recién nacidos de madre portadora
+  - ✘ En los adultos mayores de 60 años
+  - ✘ En los pacientes en hemodiálisis crónica
+  - En pacientes sanos la mortalidad del VHE es de 1-2%, pero en embarazadas llega al 20%, posiblemente por una respuesta inmunitaria alterada. No deja estado de portador crónico. — *Compendio ADN (7.g, tabla comparativa) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 9, Grupo 1)*
+- **¿Cómo explica la toxina botulínica la parálisis flácida del lactante?** _(Clostridium botulinum)_
+  - ✔ Su endopeptidasa inactiva las proteínas que liberan acetilcolina
+  - ✘ Bloquea los receptores de glicina de las interneuronas medulares
+  - ✘ Inactiva los ribosomas de la neurona motora periférica
+  - ✘ Eleva el AMPc en la placa neuromuscular
+  - La cadena pesada se une a receptores de la neurona motora y promueve la endocitosis; la cadena ligera, endopeptidasa de zinc, inactiva las proteínas que regulan la liberación de acetilcolina. — *Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividades 2c y 2d) · Compendio ADN (7.e)*
+- **¿Para qué sirve el agar MacConkey en la identificación de enterobacterias?** _(Diagnóstico de laboratorio)_
+  - ✔ Es selectivo y diferencial: separa por fermentación de lactosa
+  - ✘ Es un medio de enriquecimiento para bacterias nutricionalmente exigentes
+  - ✘ Es un medio cromogénico que detecta la actividad de la ureasa
+  - ✘ Es un medio básico en el que crece casi cualquier bacteria
+  - Permite el crecimiento de bacilos gramnegativos y diferencia por color: las fermentadoras de lactosa dan colonias rosadas, mientras Shigella y Salmonella dan colonias incoloras. — *Cuadernillo Núcleo 6 Digestivo 2026 (TP 14, diagnóstico microbiológico) · Compendio ADN (7.e.b, 7.f.a)*
+- **¿Qué recuento en orina de micción espontánea define bacteriuria significativa en una embarazada?** _(Infección del tracto urinario)_
+  - ✔ Más de 100.000 UFC/ml de un único uropatógeno
+  - ✘ Más de 1.000 UFC/ml de un único uropatógeno
+  - ✘ Cualquier recuento, siempre que haya piuria en el sedimento
+  - ✘ Más de 10.000 UFC/ml de dos o más uropatógenos distintos
+  - Por micción espontánea se exige más de 100.000 UFC/ml de un único uropatógeno; por sondaje vesical, más de 1.000, y por punción suprapúbica cualquier cantidad. En el embarazo basta un urocultivo positivo. — *Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (ITU en la embarazada)*
+- **¿Qué mecanismo de Escherichia coli uropatógena explica las infecciones urinarias recurrentes?** _(Escherichia coli uropatógena)_
+  - ✔ Las comunidades bacterianas intracelulares en la vejiga
+  - ✘ La producción de toxina Shiga en el urotelio vesical
+  - ✘ La formación de esporas resistentes en la pared de la vejiga
+  - ✘ La variación de fase de los antígenos flagelares H y capsulares K
+  - Tras adherirse por fimbrias tipo 1, E. coli invade las células vesicales y forma comunidades bacterianas intracelulares ("pods"), reservorios desde los que luego sale como filamentos largos. — *Compendio ADN (7.h.a) · Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (Actividad 1C)*
+- **¿Cuál es la función de la proteína de Tamm-Horsfall (uromodulina) en la defensa urinaria?** _(Infección del tracto urinario)_
+  - ✔ Se une a las fimbrias bacterianas e impide la adherencia
+  - ✘ Secuestra los sideróforos para privar a la bacteria de hierro
+  - ✘ Opsoniza las bacterias para su fagocitosis por neutrófilos
+  - ✘ Forma poros en la membrana bacteriana, como la catelicidina
+  - La uromodulina, producida en el asa de Henle, se une a las bacterias por sus fimbrias tipo 1, les impide adherirse a la mucosa vesical y las agrega para eliminarlas con la orina. La NGAL es la que secuestra sideróforos. — *Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (Actividad 1A) · Compendio ADN (7.h)*
+- **Una paciente tuvo tres episodios de cistitis en un año, todos por E. coli pero con distinto genotipo y antibiograma. ¿Cómo se denomina cada episodio nuevo?** _(Infección del tracto urinario)_
+  - ✔ Reinfección
+  - ✘ Recidiva
+  - ✘ Bacteriuria asintomática
+  - ✘ ITU complicada
+  - La recidiva es un segundo episodio por el mismo microorganismo; la reinfección, por uno distinto, aunque ambos sean E. coli con distinto genotipo. Más de 3 episodios por año, o 2 en 6 meses, se llama recurrencia. — *Compendio ADN (7.h) · Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (Actividad 4)*
+- **En un sedimento de orina, ¿qué sugiere la presencia de cilindros leucocitarios?** _(Diagnóstico de laboratorio)_
+  - ✔ Que la infección compromete el parénquima renal
+  - ✘ Que la muestra se recogió de manera inadecuada
+  - ✘ Que hay bacterias ureolíticas en la orina fresca
+  - ✘ Que existe una fístula entre el intestino y la vía urinaria
+  - Los cilindros leucocitarios o bacterianos localizan la infección a nivel renal (parenquimatosa). Los cristales de fosfato amónico-magnésico, en cambio, orientan a bacterias ureolíticas. — *Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (Actividad 3a) · Compendio ADN (7.h)*
+- **Un bebé de 2 meses tiene fiebre, diarrea líquida e irritabilidad, y un hermanito empezó con el mismo cuadro. Entre los Picornaviridae, ¿qué agente es el más probable?** _(Echovirus)_
+  - ✔ Echovirus
+  - ✘ Rinovirus
+  - ✘ Poliovirus
+  - ✘ Coxsackie A
+  - El rinovirus no da diarrea, el poliovirus es neurotrópico y Coxsackie A causa herpangina y exantemas; el echovirus (por ejemplo el 11) coincide con fiebre, diarrea, irritabilidad y transmisión familiar. — *Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Grupo 4) · Compendio ADN (7.c.b, 7.c.c)*
+- **¿Qué consecuencia epidemiológica tiene la variación antigénica de los parásitos?** _(Respuesta inmune)_
+  - ✔ Permite reinfecciones y transmisión continua en zonas endémicas
+  - ✘ Genera inmunidad esterilizante tras el primer contacto con el parásito
+  - ✘ Impide la aparición de portadores sanos en la población
+  - ✘ Hace innecesaria la colaboración de los linfocitos T CD4
+  - Al variar sus antígenos, los parásitos evaden la inmunidad adquirida y el huésped se vuelve resistente sólo después de exponerse a numerosas cepas: hay reinfecciones, cronicidad y transmisión sostenida. — *Compendio ADN (7.i.f)*
+
+## Núcleo 7 (45)
+
+### Fácil (9)
+
+- **¿Con qué coloración se visualiza Mycobacterium tuberculosis en una muestra de esputo?** _(Mycobacterium tuberculosis)_
+  - ✔ Ziehl-Neelsen
+  - ✘ Gram
+  - ✘ Giemsa
+  - ✘ Grocott
+  - Por su pared rica en lípidos es un bacilo ácido-alcohol resistente: se tiñe con fucsina y resiste la decoloración alcohol-ácida (baciloscopia). Grocott tiñe hongos y Giemsa se usa para parásitos y para H. pylori. — *Cuadernillo Núcleo 7 Laboratorio 2026 (TP 16 y TP 17) · Compendio ADN (6.e.a)*
+- **¿Qué agente causa la tos convulsa o coqueluche?** _(Bordetella pertussis)_
+  - ✔ Bordetella pertussis
+  - ✘ Corynebacterium diphtheriae
+  - ✘ Haemophilus influenzae tipo b
+  - ✘ Mycoplasma pneumoniae
+  - La produce B. pertussis. Se previene con vacunas con componente pertussis: quíntuple (celular) a los 2, 4 y 6 meses, cuádruple a los 15-18 meses, triple bacteriana a los 5-6 años y dTpa (acelular) a los 11 años y en embarazadas. — *Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11) · Compendio ADN (6.c.e)*
+- **¿Cuál es la causa más habitual de infección aguda y grave de las vías aéreas inferiores en lactantes?** _(Virus sincicial respiratorio)_
+  - ✔ Virus sincicial respiratorio
+  - ✘ Rinovirus
+  - ✘ Virus parainfluenza
+  - ✘ Adenovirus
+  - El VSR es la causa más habitual de bronquiolitis y neumonía en lactantes y niños pequeños; casi todos se infectan antes de los 2 a 4 años y el mayor riesgo está entre las 6 y 12 semanas de vida. — *Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10) · Compendio ADN (6.a.b)*
+- **La mayoría de las infecciones de vías aéreas superiores son virales. ¿Qué virus es el principal responsable del resfrío común?** _(Rinovirus)_
+  - ✔ Rinovirus
+  - ✘ Virus de la influenza A
+  - ✘ Virus sincicial respiratorio
+  - ✘ Virus de Epstein-Barr
+  - Las IVAS (rinitis, faringitis, laringitis, otitis media) son en su mayoría virales, sobre todo por rinovirus, y suelen ser autolimitadas. Los coronavirus son la segunda causa de resfrío común. — *Cuadernillo Núcleo 7 Laboratorio 2026 (TP 15) · Compendio ADN (6.a.d)*
+- **¿Qué se observa al estudiar Streptococcus pyogenes en el laboratorio?** _(Streptococcus pyogenes)_
+  - ✔ Cocos gram positivos en cadenas, beta-hemolíticos
+  - ✘ Diplococos gram positivos encapsulados con alfa-hemólisis en agar sangre
+  - ✘ Cocobacilos gram negativos muy pequeños que necesitan agar chocolate
+  - ✘ Bacilos gram positivos pleomorfos con forma de garrote y tinción irregular
+  - S. pyogenes son cocos gram positivos en cadenas que en agar sangre dan colonias blancas de 1 a 2 mm con grandes zonas de beta-hemólisis a las 24 h de incubación. — *Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11) · Compendio ADN (6.c.a)*
+- **¿En base a qué proteínas de superficie se clasifican las cepas de influenza A, como H1N1 o H3N2?** _(Virus de la influenza)_
+  - ✔ Hemaglutinina y neuraminidasa
+  - ✘ Proteína F y proteína G
+  - ✘ Proteína spike y proteína N
+  - ✘ Proteínas VP1 a VP4
+  - La hemaglutinina (16 subtipos) se une al ácido siálico y la neuraminidasa (9 subtipos) facilita la liberación viral. Sus combinaciones definen las cepas de influenza A. — *Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 2) · Compendio ADN (6.a.c)*
+- **¿A quiénes se aplica la vacuna BCG en el Calendario Nacional argentino?** _(Prevención)_
+  - ✔ A todos los recién nacidos
+  - ✘ A los niños de 2, 4 y 6 meses
+  - ✘ A los contactos adultos de un caso de tuberculosis
+  - ✘ A los pacientes inmunodeprimidos con PPD negativa
+  - La BCG se da al recién nacido. Reduce mucho la incidencia en personas jóvenes, es menos eficaz en adultos y no se usa en inmunodeprimidos; deja la prueba de tuberculina positiva. — *Compendio ADN (6.e.a, vacunación) · Cuadernillo Núcleo 7 Laboratorio 2026 (TP 17)*
+- **¿Qué agente es un diplococo gram positivo encapsulado, alfa-hemolítico, que coloniza la orofaringe?** _(Streptococcus pneumoniae)_
+  - ✔ Streptococcus pneumoniae
+  - ✘ Streptococcus pyogenes
+  - ✘ Moraxella catarrhalis
+  - ✘ Bordetella pertussis
+  - El neumococo es un diplococo gram positivo encapsulado, aerobio y anaerobio facultativo, que coloniza la orofaringe y da colonias alfa-hemolíticas en agar sangre. — *Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, cuadro de IVAI) · Compendio ADN (6.c.b)*
+- **¿Qué mecanismo atrapa las partículas inhaladas en el moco y las transporta hacia la tráquea antes de que lleguen al alvéolo?** _(Respuesta inmune)_
+  - ✔ El sistema mucociliar
+  - ✘ La opsonización por IgG del alvéolo
+  - ✘ La citotoxicidad de las células NK
+  - ✘ La activación del complemento por la vía clásica
+  - Las secreciones mucosas más el batido de los cilios del epitelio respiratorio barren las partículas hacia la tráquea. Junto a las barreras anatómicas y el reflejo de la tos son la primera línea de defensa. — *Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 1) · Compendio ADN (6, inmunidad del sistema respiratorio)*
+
+### Normal (21)
+
+- **Un niño con vacunas incompletas presenta fiebre, odinofagia intensa y una seudomembrana adherente en las fauces. ¿Qué agente hay que sospechar?** _(Corynebacterium diphtheriae)_
+  - ✔ Corynebacterium diphtheriae
+  - ✘ Streptococcus pneumoniae
+  - ✘ Mycoplasma pneumoniae
+  - ✘ Klebsiella pneumoniae
+  - La difteria respiratoria forma una seudomembrana adherente de bacterias, fibrina, linfocitos y células muertas. Se previene con el toxoide diftérico (quíntuple, triple y doble bacteriana). — *Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, caso clínico 1) · Compendio ADN (6.c.h)*
+- **¿Cuál es el principal factor de virulencia de Streptococcus pneumoniae y cómo actúa?** _(Streptococcus pneumoniae)_
+  - ✔ La cápsula de polisacáridos, que inhibe la fagocitosis
+  - ✘ La neumolisina, que degrada la IgA secretora del moco
+  - ✘ La proteína M, que bloquea el depósito de C3b sobre la bacteria
+  - ✘ El lipopolisacárido, que induce la inflamación de las meninges
+  - La cápsula es el principal factor de virulencia: las cepas no encapsuladas no son virulentas. La neumolisina forma poros al unirse al colesterol y la proteasa de IgA es la que degrada la IgA secretora. — *Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, Actividad 2) · Compendio ADN (6.c.b)*
+- **¿Cómo se produce la mayor parte de las infecciones por Streptococcus pneumoniae?** _(Streptococcus pneumoniae)_
+  - ✔ Por diseminación endógena desde la nasofaringe colonizada
+  - ✘ Por gotitas respiratorias de persona a persona, con epidemias frecuentes
+  - ✘ Por vía fecal-oral a partir de agua o alimentos contaminados
+  - ✘ Por contacto con fómites e instrumental del ambiente hospitalario
+  - El neumococo coloniza la nasofaringe y llega por aspiración a los pulmones o por vía hematógena a senos, oído medio y meninges. La transmisión interpersonal por gotitas es rara. — *Compendio ADN (6.c.b, vías de transmisión) · Cuadernillo Núcleo 7 Seminario 2026 (cuadro de IVAI)*
+- **¿En qué medio se cultiva Haemophilus influenzae a partir de una muestra respiratoria?** _(Haemophilus influenzae)_
+  - ✔ Agar chocolate
+  - ✘ Agar sangre al 5%
+  - ✘ Löwenstein-Jensen
+  - ✘ Agar Sabouraud
+  - Necesita factores X (hemina) y V (NAD): al calentar el agar sangre se lisan los glóbulos rojos, se liberan ambos y se inactivan las NADasas; ese es el agar chocolate. Löwenstein-Jensen es para micobacterias y Sabouraud para hongos. — *Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, cuadro de IVAI) · Compendio ADN (6.c.d)*
+- **¿Cuál es el principal factor de virulencia de Haemophilus influenzae tipo b, que además es el antígeno de la vacuna conjugada?** _(Haemophilus influenzae)_
+  - ✔ La cápsula de fosfato de polirribitol (PRP)
+  - ✘ El lipopolisacárido con lípido A de su membrana externa
+  - ✘ La proteasa de IgA1 que facilita la colonización mucosa
+  - ✘ Las adhesinas no pilosas de la superficie bacteriana
+  - La cápsula de PRP es antifagocítica y define al serotipo b como el más virulento. La prevención es la inmunización activa con PRP purificado conjugado, que en el país va en la quíntuple. — *Compendio ADN (6.c.d) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11)*
+- **¿Qué efecto tiene la toxina pertussis sobre la célula del huésped?** _(Bordetella pertussis)_
+  - ✔ Aumenta el AMPc al inactivar la proteína Gi
+  - ✘ Produce ciliostasis al interferir la síntesis de ADN de la célula ciliada
+  - ✘ Inhibe la síntesis de proteínas y daña el corazón y los nervios
+  - ✘ Forma poros en la membrana al unirse al colesterol celular
+  - La toxina pertussis inactiva la proteína Gi y sube el AMPc, lo que aumenta las secreciones y la producción de mucosidad de la fase paroxística; además inhibe la fagocitosis y la migración de monocitos. — *Compendio ADN (6.c.e, factores de virulencia) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, Actividad 3)*
+- **¿Qué virus respiratorio es la causa más frecuente de laringotraqueobronquitis (crup) en lactantes?** _(Virus parainfluenza)_
+  - ✔ Virus parainfluenza
+  - ✘ Virus de Epstein-Barr
+  - ✘ Rinovirus
+  - ✘ Virus sincicial respiratorio
+  - Los parainfluenza (familia Paramyxoviridae, 4 serotipos) dan resfrío común, bronquitis y laringotraqueobronquitis o crup en lactantes; se diagnostican por aspirado nasal con inmunofluorescencia y PCR. — *Compendio ADN (6.a, cuadro de parainfluenza y metaneumovirus; el compendio aclara que viene del video seminario y no del cuadernillo)*
+- **¿De qué depende que una cepa de Corynebacterium diphtheriae produzca toxina diftérica?** _(Corynebacterium diphtheriae)_
+  - ✔ De la lisogenia por el fago beta, que aporta el gen tox
+  - ✘ De una cápsula de polisacáridos con más de 90 serotipos
+  - ✘ De un plásmido que se transfiere entre cepas por conjugación
+  - ✘ De los ácidos micólicos de cadena corta de su pared celular
+  - La toxina diftérica es una exotoxina A-B codificada por el gen tox, introducido por un bacteriófago lisogénico. La subunidad A inhibe la síntesis de proteínas y afecta sobre todo corazón y sistema nervioso. — *Compendio ADN (6.c.h) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, Actividad 3)*
+- **¿Por qué Mycoplasma pneumoniae es resistente a penicilinas, cefalosporinas y vancomicina?** _(Mycoplasma pneumoniae)_
+  - ✔ Porque carece de pared celular
+  - ✘ Porque produce una betalactamasa de amplio espectro
+  - ✘ Porque es un parásito intracelular obligado inaccesible al fármaco
+  - ✘ Porque su pared está formada por ácidos micólicos hidrofóbicos
+  - No tiene pared celular y su membrana contiene esteroles, así que los antibióticos que actúan sobre la pared no le hacen nada. Es pleomorfo y tan chico que atraviesa filtros de 0,45 µm. — *Compendio ADN (6.c.f) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, Actividad 4)*
+- **¿Cómo daña Mycoplasma pneumoniae el epitelio respiratorio?** _(Mycoplasma pneumoniae)_
+  - ✔ Se adhiere por la adhesina P1 y produce ciliostasis
+  - ✘ Invade los neumocitos y se replica dentro de fagosomas celulares
+  - ✘ Libera una exotoxina A-B que inhibe la síntesis proteica del epitelio
+  - ✘ Forma una seudomembrana de fibrina, bacterias y células muertas
+  - Se adhiere a los cilios por una estructura de anclaje con la adhesina P1, causa ciliostasis y destruye primero los cilios y después las células ciliadas: de ahí la tos seca persistente. — *Compendio ADN (6.c.f, factores de virulencia) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, Actividad 4)*
+- **En el ciclo de desarrollo de Chlamydophila pneumoniae, ¿cuál es la forma infecciosa?** _(Chlamydophila pneumoniae)_
+  - ✔ El cuerpo elemental
+  - ✘ El cuerpo reticulado
+  - ✘ El cuerpo de inclusión intranuclear
+  - ✘ La forma L sin pared celular
+  - El cuerpo elemental es infeccioso y metabólicamente inactivo, resistente como una espora; dentro del fagosoma se transforma en cuerpo reticulado, que se replica por fisión binaria pero no es infeccioso. — *Compendio ADN (6.c.g) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, Actividad 4)*
+- **¿Qué caracteriza a Klebsiella pneumoniae como agente de infección de la vía aérea inferior?** _(Klebsiella pneumoniae)_
+  - ✔ Bacilo gram negativo inmóvil y encapsulado, de epidemiología nosocomial
+  - ✘ Cocobacilo gram negativo aerobio estricto, que no fermenta carbohidratos
+  - ✘ Diplococo gram positivo encapsulado que coloniza la orofaringe del niño
+  - ✘ Bacilo ácido-alcohol resistente de crecimiento lento en medios sólidos
+  - Klebsiella es una enterobacteria gram negativa, no móvil, cuya cápsula es el determinante de virulencia; su epidemiología es nosocomial y se diagnostica por cultivo de secreciones respiratorias. — *Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, cuadro de IVAI) · Compendio ADN (6.c, cuadro de la cátedra)*
+- **¿Cómo contribuye la proteína M a la virulencia de Streptococcus pyogenes?** _(Streptococcus pyogenes)_
+  - ✔ Bloquea la unión de C3b e interfiere la fagocitosis
+  - ✘ Inactiva el C5a y así evita la llegada de los neutrófilos
+  - ✘ Degrada el plasminógeno y disuelve los coágulos de fibrina
+  - ✘ Lisa eritrocitos y leucocitos y genera anticuerpos ASLO
+  - La proteína M interfiere la fagocitosis al bloquear la unión de C3b y unirse al Fc de los anticuerpos o a la fibronectina. El C5a lo inactiva la peptidasa de C5a y la estreptocinasa degrada plasminógeno. — *Compendio ADN (6.c.a) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, Actividad 1)*
+- **En el virus influenza, ¿qué caracteriza al shift antigénico?** _(Virus de la influenza)_
+  - ✔ Son rearreglos génicos entre un virus aviar y uno humano, solo en influenza A
+  - ✘ Son mutaciones puntuales en HA y NA que ocurren solo en influenza B
+  - ✘ Ocurre en influenza A y B y explica las epidemias estacionales
+  - ✘ Cambia la polaridad del genoma viral y permite replicar en el citoplasma
+  - El shift es un cambio mayor por rearreglo de segmentos entre genomas de un virus aviar y uno humano: solo pasa en influenza A y puede dar pandemias. El drift son mutaciones puntuales y da epidemias. — *Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 2) · Compendio ADN (6.a.c)*
+- **¿Qué proteína del virus sincicial respiratorio permite la entrada a la célula y explica la formación de sincitios?** _(Virus sincicial respiratorio)_
+  - ✔ La proteína F, de fusión
+  - ✘ La proteína G, de adhesión al receptor
+  - ✘ La hemaglutinina-neuraminidasa (HN)
+  - ✘ La proteína M de la matriz viral
+  - La proteína F fusiona la envoltura con la membrana plasmática y fusiona las células infectadas entre sí, formando sincitios (masas multinucleadas). La G es la que se une al receptor celular. — *Compendio ADN (6.a.b y familia Paramyxoviridae) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 1)*
+- **¿Qué consecuencia tiene para el adenovirus el hecho de ser un virus desnudo, sin envoltura?** _(Adenovirus)_
+  - ✔ Resiste el pH ácido y la bilis, y se transmite también por vía fecal-oral
+  - ✘ Pierde rápido su infectividad sobre fómites y superficies secas del ambiente
+  - ✘ Sale de la célula por gemación y adquiere así una envoltura lipídica propia
+  - ✘ Replica su genoma en el citoplasma usando una polimerasa de la célula
+  - La ausencia de envoltura lo hace resistente a detergentes, desecación, pH ácido, bilis y cloro: sobrevive en el ambiente y se transmite por aerosoles, fómites, vía fecal-oral y agua mal clorada. — *Compendio ADN (6.a.a) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 1)*
+- **¿Qué receptor celular usa la mayoría de los serotipos de rinovirus para infectar el epitelio nasal?** _(Rinovirus)_
+  - ✔ ICAM-1
+  - ✘ El ácido siálico
+  - ✘ CD21
+  - ✘ La enzima convertidora de angiotensina 2
+  - Al menos el 80% de los serotipos usa ICAM-1. Su cultivo se hace en fibroblastos a 33 °C y no replica en el tubo digestivo porque es sensible al pH ácido. — *Compendio ADN (6.a.d) · Cuadernillo Núcleo 7 Laboratorio 2026 (TP 15)*
+- **¿Qué diferencia hay entre el genoma del virus influenza y el del SARS-CoV-2?** _(Coronavirus (SARS-CoV-2))_
+  - ✔ Influenza tiene ARN negativo segmentado y SARS-CoV-2 ARN positivo no segmentado
+  - ✘ Influenza tiene ARN positivo no segmentado y SARS-CoV-2 ARN negativo segmentado
+  - ✘ Influenza tiene ADN bicatenario nuclear y SARS-CoV-2 ARN positivo segmentado
+  - ✘ Los dos tienen ARN negativo segmentado, pero influenza replica en el citoplasma
+  - Influenza es ARN monocatenario negativo en 8 segmentos y replica en el núcleo; los coronavirus son ARN positivo no segmentado con replicación citoplasmática. Los dos son virus con envoltura. — *Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 3) · Compendio ADN (6.a.c y 6.a.g)*
+- **¿A través de qué receptor infecta el virus de Epstein-Barr a los linfocitos B?** _(Virus de Epstein-Barr)_
+  - ✔ CD21
+  - ✘ CD4
+  - ✘ ICAM-1
+  - ✘ El receptor de Coxsackie-adenovirus
+  - La glucoproteína gp350/220 se une a CD21 (receptor de C3d) en los linfocitos B, donde el virus persiste latente de por vida. Se transmite por saliva y causa mononucleosis infecciosa. — *Compendio ADN (6.a.f)*
+- **¿Cuál es el anticuerpo que constituye la principal defensa en la superficie de la mucosa respiratoria?** _(Respuesta inmune)_
+  - ✔ La IgA secretora
+  - ✘ La IgG4
+  - ✘ La IgE unida a mastocitos
+  - ✘ La IgM natural de los linfocitos B1
+  - La IgA secretora está en altas concentraciones en las secreciones bronquiales, neutraliza toxinas, virus y bacterias, y facilita su eliminación mucociliar. En el espacio alveolar la predominante es la IgG. — *Compendio ADN (6, inmunidad adaptativa del pulmón) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 1)*
+- **De estos estudios del laboratorio respiratorio, ¿cuál es un método diagnóstico indirecto?** _(Diagnóstico de laboratorio)_
+  - ✔ El enzimoinmunoensayo que detecta anticuerpos
+  - ✘ La inmunocromatografía lateral que detecta antígeno viral
+  - ✘ El cultivo viral en líneas celulares
+  - ✘ La RT-PCR en hisopado nasofaríngeo
+  - Los métodos indirectos evalúan la respuesta inmune del paciente, o sea los anticuerpos. Detectar antígeno, genoma o cultivar el agente son métodos directos. — *Cuadernillo Núcleo 7 Laboratorio 2026 (TP 15, Actividad 1) · Compendio ADN (6.b)*
+
+### Difícil (15)
+
+- **Alejandro, 68 años, sin vacunas desde la adolescencia, con fiebre, expectoración verdosa, dolor en punta de costado y rales en la base derecha. El hemocultivo es positivo a las 18 h con diplococos gram positivos. ¿Cuál es el agente más probable?** _(Streptococcus pneumoniae)_
+  - ✔ Streptococcus pneumoniae
+  - ✘ Klebsiella pneumoniae
+  - ✘ Haemophilus influenzae
+  - ✘ Mycobacterium tuberculosis
+  - Diplococos gram positivos en hemocultivo más neumonía de comienzo brusco con dolor pleurítico: neumococo. Conviene pedir esputo y, al alta, indicar la vacunación antineumocócica. — *Cuadernillo Núcleo 7 Laboratorio 2026 (TP 16, caso 1) · Compendio ADN (6.c.b)*
+- **Coty, 10 años, consulta por odinofagia, fiebre de 38 °C, adenopatía submentoniana y placas blanquecinas en ambas amígdalas. ¿Qué muestra y determinaciones corresponde pedir?** _(Diagnóstico de laboratorio)_
+  - ✔ Exudado de fauces con dos hisopos: test rápido de antígeno y cultivo en agar sangre
+  - ✘ Hisopado nasofaríngeo para RT-PCR múltiple de virus respiratorios
+  - ✘ Esputo seriado de tres días para baciloscopia de Ziehl-Neelsen
+  - ✘ Hemocultivos seriados antes de iniciar el tratamiento antibiótico
+  - La sospecha es faringitis por S. pyogenes: el test rápido por inmunocromatografía da resultado en minutos y el cultivo en agar sangre al 5% confirma o descarta a las 24-48 h, con hisopos distintos. — *Cuadernillo Núcleo 7 Laboratorio 2026 (TP 16, caso 3 y Actividad 2) · Compendio ADN (6.d, cuadro de muestras)*
+- **Varón de 22 años, sano, con fiebre de una semana, mialgias, cefalea y tos seca irritativa, sin disnea y con saturación normal. La Rx de tórax muestra infiltrados bilaterales intersticiales. ¿Cuál es el agente más probable?** _(Mycoplasma pneumoniae)_
+  - ✔ Mycoplasma pneumoniae
+  - ✘ Staphylococcus aureus
+  - ✘ Moraxella catarrhalis
+  - ✘ Mycobacterium tuberculosis
+  - Es una neumonía atípica o ambulatoria: poca semiología frente a una radiografía parcheada llamativa, tos seca y faringitis en un joven. Al no tener pared celular, no responde a betalactámicos. — *Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, caso clínico 2) · Compendio ADN (6.c.f)*
+- **¿Qué cuadros produce el virus Coxsackie del grupo A en niños pequeños?** _(Enterovirus (Coxsackie))_
+  - ✔ Herpangina y enfermedad de manos, pies y boca
+  - ✘ Crup y bronquiolitis con sibilancias en el lactante
+  - ✘ Queratoconjuntivitis epidémica y fiebre faringoconjuntival
+  - ✘ Mononucleosis infecciosa con linfocitos atípicos
+  - Coxsackie (Picornaviridae, Enterovirus) se transmite por vía fecal-oral y también por gotitas. El grupo A da herpangina y manos-pies-boca; el B, miocarditis, pleurodinia y meningitis aséptica. — *Compendio ADN (6.a.e)*
+- **Ante sospecha de tuberculosis pulmonar se piden tres esputos, a primera hora de la mañana y en días consecutivos. ¿Por qué se repite la muestra?** _(Mycobacterium tuberculosis)_
+  - ✔ Porque la eliminación de bacilos no es constante
+  - ✘ Porque recién en la tercera muestra se puede evaluar la resistencia a rifampicina
+  - ✘ Porque hacen falta tres cultivos para descartar la flora de las vías aéreas altas
+  - ✘ Porque el bacilo se multiplica en el frasco y la primera muestra da falsos negativos
+  - La eliminación de bacilos en el esputo es intermitente, así que se repite la toma tres días seguidos, con higiene bucal previa y esfuerzo de tos, para que la muestra represente la vía aérea inferior. — *Cuadernillo Núcleo 7 Laboratorio 2026 (TP 17, caso Emiliano y obtención de la muestra)*
+- **Julio, 48 años, con VIH y mala adherencia al tratamiento, tiene tos con expectoración, sudoración nocturna y chuchos de frío. ¿Por qué su baciloscopia de esputo puede ser negativa aun teniendo tuberculosis?** _(Mycobacterium tuberculosis)_
+  - ✔ Porque sin hipersensibilidad no hay cavitación y los bacilos no se eliminan
+  - ✘ Porque en el paciente con VIH la carga de bacilos en el pulmón es menor
+  - ✘ Porque en el VIH la tuberculosis es siempre extrapulmonar
+  - ✘ Porque el esputo de la mañana diluye los bacilos y da falsos negativos
+  - En el paciente VIH positivo hay más bacilos, pero sin respuesta de hipersensibilidad tipo IV no se destruye el parénquima ni se forman cavernas, por lo que el esputo puede resultar negativo. — *Cuadernillo Núcleo 7 Laboratorio 2026 (TP 16, caso 4 y TP 17, mecanismo de infección) · Compendio ADN (6.e.a)*
+- **¿Dónde se localizan la tuberculosis primaria y la reactivación del adulto?** _(Mycobacterium tuberculosis)_
+  - ✔ La primaria en el sector inferior del lóbulo superior o superior del inferior, y la reactivación en el ápice
+  - ✘ Las dos en los vértices pulmonares, porque son los sectores mejor ventilados
+  - ✘ La primaria en el ápice y la reactivación en las bases, por diseminación hematógena
+  - ✘ Las dos en la base derecha, siguiendo el trayecto del bronquio principal
+  - La primaria forma el complejo de Ghon (lesión subpleural más ganglio hiliar con necrosis caseosa). La reactivación se da en el ápice, el sector más oxigenado, con cavernas y fibrosis posterior. — *Cuadernillo Núcleo 7 Laboratorio 2026 (TP 17, mecanismo de infección) · Compendio ADN (6.e.a)*
+- **En un preparado de pulmón con tuberculosis teñido con hematoxilina-eosina, ¿qué se observa en el granuloma?** _(Mycobacterium tuberculosis)_
+  - ✔ Necrosis caseosa central rodeada de linfocitos, histiocitos y células de Langhans
+  - ✘ Un infiltrado de neutrófilos con abundantes bacilos rosados en el centro
+  - ✘ Alvéolos ocupados por exudado fibrinoso sin células inflamatorias
+  - ✘ Sincitios multinucleados con cuerpos de inclusión intranucleares
+  - El granuloma tiene necrosis caseosa central rodeada de linfocitos, histiocitos y células multinucleadas de Langhans; también hay granulomas sin necrosis. Es la expresión de la hipersensibilidad tipo IV. — *Cuadernillo Núcleo 7 Laboratorio 2026 (TP 17, Actividad 2) · Compendio ADN (6.e.a)*
+- **¿Qué información aporta el GeneXpert además de detectar Mycobacterium tuberculosis?** _(Diagnóstico de laboratorio)_
+  - ✔ Si la cepa tiene genes de resistencia a la rifampicina
+  - ✘ El recuento de bacilos ácido-alcohol resistentes por campo
+  - ✘ Si el paciente desarrolló hipersensibilidad tipo IV al bacilo
+  - ✘ Qué especie de micobacteria atípica acompaña a la infección
+  - El GeneXpert es una PCR en tiempo real que detecta específicamente M. tuberculosis y además busca genes de resistencia a la rifampicina, una de sus principales drogas. — *Cuadernillo Núcleo 7 Laboratorio 2026 (TP 17, diagnóstico) · Compendio ADN (6.e)*
+- **¿Cuánto se incuban los cultivos de micobacterias frente a los de bacterias comunes y hongos?** _(Diagnóstico de laboratorio)_
+  - ✔ Micobacterias 60 días, bacterias 24 a 72 h y hongos 21 a 28 días
+  - ✘ Micobacterias 21 a 28 días, bacterias 60 días y hongos 24 a 72 h
+  - ✘ Los tres grupos entre 24 y 72 h, con repiques semanales posteriores
+  - ✘ Micobacterias 7 días, bacterias 48 h y hongos 10 días
+  - Cada grupo tiene su velocidad de crecimiento: la mayoría de las bacterias desarrolla en 24 a 72 h, los hongos se incuban 21 a 28 días y las micobacterias 60 días, en medio de Löwenstein-Jensen. — *Cuadernillo Núcleo 7 Laboratorio 2026 (TP 16, introducción) · Compendio ADN (6.d)*
+- **¿Qué forma de lepra es multibacilar y muy infecciosa?** _(Mycobacterium leprae)_
+  - ✔ La lepromatosa, por el déficit de la respuesta celular específica
+  - ✘ La tuberculoide, con granulomas, pocos bacilos y máculas hipopigmentadas
+  - ✘ La lepromatosa, porque los granulomas limitan la proliferación bacteriana
+  - ✘ La tuberculoide, porque los bacilos se concentran en los nervios periféricos
+  - En la lepra lepromatosa hay un déficit específico de la respuesta celular frente a M. leprae, con muchos bacilos en macrófagos dérmicos, células de Schwann y secreciones nasales. No se cultiva in vitro. — *Compendio ADN (6.e.b) · Cuadernillo Núcleo 7 Laboratorio 2026 (TP 17, introducción)*
+- **Una paciente consulta en la tercera semana de un cuadro respiratorio viral, ya sin síntomas, y quiere saber si tuvo la infección. ¿Qué muestra y método conviene?** _(Diagnóstico de laboratorio)_
+  - ✔ Sangre periférica para detectar anticuerpos específicos
+  - ✘ Hisopado nasofaríngeo para test rápido de antígeno
+  - ✘ Hisopado nasofaríngeo para RT-PCR del genoma viral
+  - ✘ Lavado broncoalveolar para aislamiento en cultivo celular
+  - Los métodos directos rinden en la fase temprana, cuando el virus se está eliminando. Los anticuerpos aparecen varios días después del inicio, así que a las tres semanas sirve la serología. — *Cuadernillo Núcleo 7 Laboratorio 2026 (TP 15, Actividades 3 y 4) · Compendio ADN (6.b)*
+- **Llega al laboratorio una muestra de esputo de aspecto salivoso. ¿Cómo corresponde interpretarla?** _(Diagnóstico de laboratorio)_
+  - ✔ No es representativa de la vía aérea inferior
+  - ✘ Es apta si se procesa dentro de las dos horas de la toma
+  - ✘ Indica que la infección está en la vía aérea superior
+  - ✘ Sirve solo para baciloscopia, no para cultivo bacteriano
+  - Un esputo salivoso representa secreciones orales y no del tracto respiratorio inferior, así que no es confiable. La aptitud se evalúa con los criterios de Murray y Washington. — *Cuadernillo Núcleo 7 Laboratorio 2026 (TP 15, Actividad 1 y TP 16) · Compendio ADN (6.b y 6.d)*
+- **¿Qué subclase de IgG responde específicamente contra los polisacáridos capsulares de Streptococcus pneumoniae y Haemophilus influenzae?** _(Respuesta inmune)_
+  - ✔ IgG2
+  - ✘ IgG1
+  - ✘ IgG3
+  - ✘ IgG4
+  - La IgG2 es el anticuerpo específico frente a los polisacáridos capsulares de neumococo y Haemophilus. La IgG1 y la IgG3 son las únicas que fijan complemento y la IgG4 participa en respuestas alérgicas. — *Compendio ADN (6, inmunoglobulinas del espacio alveolar) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 1)*
+- **Entre adenovirus y virus sincicial respiratorio, ¿en cuál esperaría encontrar diarrea como parte del cuadro, y por qué?** _(Adenovirus)_
+  - ✔ En el adenovirus, por su tropismo gastrointestinal y su resistencia al pH ácido
+  - ✘ En el VSR, porque produce viremia y disemina al epitelio intestinal
+  - ✘ En el adenovirus, porque su envoltura lipídica lo protege de la bilis
+  - ✘ En el VSR, porque su proteína G se une a receptores del enterocito
+  - El adenovirus es desnudo, resiste pH ácido, bilis y enzimas digestivas, y además del epitelio respiratorio y conjuntival infecta el gastrointestinal. El VSR queda limitado a la vía aérea y no da viremia. — *Compendio ADN (6.a.a y 6.a.b) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 1.b)*
+
+## Núcleo 7.1 (45)
+
+### Fácil (10)
+
+- **¿Cuál de estas definiciones corresponde a un absceso cerebral?** _(Infecciones del SNC)_
+  - ✔ Una colección de pus dentro del encéfalo
+  - ✘ La inflamación de las leptomeninges
+  - ✘ La inflamación difusa del tejido encefálico
+  - ✘ La obstrucción de la circulación del LCR
+  - El absceso cerebral es una colección intracerebral de pus; la meningitis es inflamación de las meninges y la encefalitis, del encéfalo. — *Compendio ADN 6.1 (introducción, SNC)*
+- **¿En qué espacio circula el líquido cefalorraquídeo?** _(Anatomía del SNC y LCR)_
+  - ✔ En el espacio subaracnoideo
+  - ✘ Entre la duramadre y el hueso del cráneo
+  - ✘ Entre la duramadre y la aracnoides
+  - ✘ Dentro del espesor de la piamadre
+  - El LCR circula en el espacio subaracnoideo, entre aracnoides y piamadre, y ahí se generan las reacciones inflamatorias de la meningitis. — *Compendio ADN 6.1 (anatomía de las meninges)*
+- **¿Cómo se transmite Neisseria meningitidis y cuál es su reservorio?** _(Neisseria meningitidis)_
+  - ✔ Por gotas respiratorias, y el ser humano es el único reservorio
+  - ✘ Por vía fecal-oral, con el agua contaminada como reservorio
+  - ✘ Por heridas contaminadas con esporas presentes en el suelo
+  - ✘ Por picadura de mosquitos, con reservorio en aves silvestres
+  - Se propaga por gotas respiratorias en contactos cercanos y prolongados; los humanos son los únicos hospedadores naturales y los portadores asintomáticos mantienen la transmisión. — *Compendio ADN 6.1.a.e (Neisseria meningitidis)*
+- **¿Cuál es la puerta de entrada habitual de Clostridium tetani?** _(Clostridium tetani)_
+  - ✔ Heridas punzantes o abrasiones contaminadas con tierra
+  - ✘ El contacto estrecho con un enfermo de tétanos
+  - ✘ La ingesta de conservas caseras mal procesadas en el hogar
+  - ✘ La inhalación de esporas aerosolizadas
+  - Las esporas, ubicuas en el suelo fértil, entran por heridas punzantes, cortes o abrasiones y germinan en condiciones anaerobias. El tétanos no se transmite de persona a persona. — *Compendio ADN 6.1.a.g (Clostridium tetani) · Cuadernillo Núcleo 12 Agentes de Piel 2026 (Actividad 3)*
+- **¿Qué tipo de parálisis produce la toxina botulínica?** _(Clostridium botulinum)_
+  - ✔ Parálisis flácida descendente
+  - ✘ Parálisis espástica con trismo
+  - ✘ Parálisis ascendente con espasmos
+  - ✘ Hemiparesia de un solo lado
+  - La toxina botulínica bloquea la liberación de acetilcolina en la placa neuromuscular y causa parálisis flácida descendente; la tetánica bloquea la inhibición y causa parálisis espástica (trismo, opistótonos). — *Compendio ADN 6.1.a.f (prevención) · Cuadernillo Núcleo 6 Agentes con ingreso digestivo 2026 (Actividad 2)*
+- **¿Cuál es la vía de transmisión de los enterovirus, principales virus causantes de meningitis viral?** _(Enterovirus)_
+  - ✔ Fecal-oral, con alimentos y agua contaminados como fuente
+  - ✘ Respiratoria, por aerosoles generados al toser
+  - ✘ Sexual, por contacto con mucosa genital
+  - ✘ Vectorial, por la picadura de mosquitos
+  - Los enterovirus se transmiten por vía fecal-oral: se replican primero en bucofaringe y tubo digestivo y después alcanzan sus tejidos diana. Los alimentos, el agua y las superficies contaminadas son fuentes importantes. — *Compendio ADN 6.1.b.a (Enterovirus)*
+- **¿Qué vacuna antipoliomielítica se usa hoy en el calendario argentino?** _(Prevención)_
+  - ✔ La inactivada IPV/Salk: 2, 4 y 6 meses y refuerzo a los 5 años
+  - ✘ La oral atenuada OPV/Sabin, a los 2, 4 y 6 meses
+  - ✘ Una dosis única de vacuna atenuada a los 12 meses
+  - ✘ Una vacuna conjugada de polisacárido con proteína transportadora
+  - Se usa la vacuna inactivada contra la poliomielitis (IPV/Salk) a los 2, 4 y 6 meses con refuerzo a los 5 años; la oral atenuada (OPV/Sabin) ya no se utiliza. — *Compendio ADN 6.1.b.a (vacunación) · Cuadernillo Núcleo 3 Memoria inmune 2026 (vacunas inactivadas)*
+- **¿Qué morfología y comportamiento en agar sangre tiene Streptococcus pneumoniae?** _(Streptococcus pneumoniae)_
+  - ✔ Coco gram positivo encapsulado, en diplococos, alfa-hemolítico
+  - ✘ Coco gram positivo en racimos, beta-hemolítico
+  - ✘ Diplococo gram negativo con forma de grano de café, oxidasa positivo
+  - ✘ Bacilo gram negativo pequeño y pleomórfico
+  - S. pneumoniae es un coco gram positivo encapsulado que se dispone en diplococos o cadenas cortas y es alfa-hemolítico en agar sangre, con más de 90 serotipos capsulares. — *Compendio ADN 6.1.a.c (Streptococcus pneumoniae)*
+- **¿Qué tres manifestaciones definen al síndrome meníngeo?** _(Infecciones del SNC)_
+  - ✔ Fiebre, cefalea y rigidez de nuca
+  - ✘ Fiebre, convulsiones y deterioro de la conciencia
+  - ✘ Cefalea, afectación de pares craneales y signos focales
+  - ✘ Fiebre, vómitos y petequias en el tronco
+  - El síndrome meníngeo combina fiebre, cefalea y rigidez. Las convulsiones, el deterioro de conciencia y la focalización corresponden al síndrome encefalítico. — *Compendio ADN 6.1 (síndromes neurológicos)*
+- **¿A quiénes se les aplica la vacuna BCG y en quiénes está contraindicada?** _(Mycobacterium tuberculosis)_
+  - ✔ A los recién nacidos; contraindicada en inmunodeprimidos
+  - ✘ A los 11 años; está contraindicada en embarazadas
+  - ✘ A los adultos de riesgo, con refuerzo cada 10 años
+  - ✘ A los lactantes a los 2, 4 y 6 meses, sin contraindicaciones
+  - La BCG se aplica al recién nacido y es eficaz sobre todo en niños, con baja eficacia en adultos. Al ser una vacuna viva atenuada está contraindicada en inmunodeprimidos. — *Compendio ADN 6.1.a.a (Mycobacterium tuberculosis, vacunación)*
+
+### Normal (20)
+
+- **¿Cuál es el mecanismo de acción de la toxina botulínica?** _(Clostridium botulinum)_
+  - ✔ Impide la liberación de acetilcolina en las sinapsis colinérgicas periféricas
+  - ✘ Bloquea la liberación de los neurotransmisores inhibidores glicina y GABA
+  - ✘ Destruye la mielina de los nervios periféricos por acción enzimática
+  - ✘ Despolariza en forma sostenida la placa neuromuscular
+  - Su cadena ligera es una endopeptidasa de zinc que impide la liberación de acetilcolina y bloquea la neurotransmisión colinérgica periférica, lo que produce parálisis flácida. — *Compendio ADN 6.1.a.f (factores de virulencia) · Cuadernillo Núcleo 6 Agentes con ingreso digestivo 2026 (Actividad 2.c)*
+- **¿Por qué la tetanospasmina produce parálisis espástica y no flácida?** _(Clostridium tetani)_
+  - ✔ Porque inactiva la liberación de glicina y GABA
+  - ✘ Porque impide la liberación de acetilcolina en las sinapsis colinérgicas
+  - ✘ Porque aumenta la síntesis de acetilcolina en la placa neuromuscular
+  - ✘ Porque destruye las neuronas inhibidoras de la médula espinal
+  - Su cadena ligera, una endopeptidasa de zinc, inactiva las proteínas que regulan la liberación de glicina y GABA; sin esa inhibición, la actividad sináptica excitatoria queda sin control. — *Compendio ADN 6.1.a.g (factores de virulencia)*
+- **¿Cuál es el principal factor de virulencia de Neisseria meningitidis y qué permite además clasificarla?** _(Neisseria meningitidis)_
+  - ✔ La cápsula de polisacárido, que define 13 serogrupos
+  - ✘ El lipooligosacárido, que define los serogrupos A, C, Y y W135
+  - ✘ Las proteínas PorA y PorB, que forman poros en la membrana externa
+  - ✘ Los pili de tipo IV, que definen los serotipos capsulares
+  - La cápsula de polisacárido es el principal factor de virulencia: protege de la fagocitosis mediada por anticuerpos y permite clasificar al meningococo en 13 serogrupos. — *Compendio ADN 6.1.a.e (factores de virulencia)*
+- **¿Qué rasgos caracterizan a la meningococcemia?** _(Neisseria meningitidis)_
+  - ✔ Trombosis de pequeños vasos, petequias y afectación multiorgánica
+  - ✘ Tumefacción parotídea bilateral con fiebre y cefalea
+  - ✘ Parálisis flácida descendente con compromiso respiratorio
+  - ✘ Lesiones quísticas en el parénquima encefálico con eosinófilos en el LCR
+  - La meningococcemia es una septicemia con trombosis de los pequeños vasos y afectación multiorgánica; aparecen petequias que pueden evolucionar a lesiones hemorrágicas y hasta coagulación intravascular diseminada. — *Compendio ADN 6.1.a.e (cuadros clínicos)*
+- **En la enfermedad neonatal tardía por Streptococcus agalactiae, ¿cuál es la manifestación predominante y en qué momento aparece?** _(Streptococcus agalactiae)_
+  - ✔ Bacteriemia con meningitis, entre la semana y los 3 meses de vida
+  - ✘ Bacteriemia con neumonía, en las primeras 24 a 48 horas
+  - ✘ Meningitis con petequias, en la primera semana de vida
+  - ✘ Sepsis con compromiso osteoarticular, después de los 6 meses
+  - La enfermedad de comienzo tardío ocurre entre la primera semana y los 3 meses, se adquiere de fuentes exógenas, la causa predominantemente el serotipo III y predomina la bacteriemia con meningitis. — *Compendio ADN 6.1.a.d (cuadros clínicos y epidemiología)*
+- **¿Qué factores aumentan el riesgo de transmisión neonatal de Streptococcus agalactiae?** _(Streptococcus agalactiae)_
+  - ✔ Parto prematuro, rotura prematura de membranas y fiebre intraparto
+  - ✘ El parto por cesárea programada y la edad materna avanzada
+  - ✘ La lactancia materna prolongada y el antecedente de bajo peso al nacer
+  - ✘ El antecedente de vacunación materna incompleta
+  - La colonización vaginal materna es del 10-30% y alrededor del 60% de los hijos de madres colonizadas se coloniza; el riesgo sube con alta carga bacteriana, parto prematuro, rotura prematura de membranas y fiebre intraparto. — *Compendio ADN 6.1.a.d (vías de transmisión) · Cuadernillo Núcleo 9 Transmisión vertical 2026 (Actividad 3.a)*
+- **Además de la cápsula, ¿qué factor de virulencia de Streptococcus pneumoniae es citotóxico y proinflamatorio?** _(Streptococcus pneumoniae)_
+  - ✔ La neumolisina
+  - ✘ La tetanolisina
+  - ✘ El lipooligosacárido
+  - ✘ La proteína Opa de superficie
+  - La neumolisina es citotóxica e inflamatoria; la cápsula evita la fagocitosis, la proteasa de IgA permite evadir la mucosa y la fosforilcolina favorece la diseminación. — *Compendio ADN 6.1.a.c (factores de virulencia)*
+- **¿Qué explica que Haemophilus influenzae tipo b haya sido la causa más común de meningitis en niños antes de la vacunación?** _(Haemophilus influenzae)_
+  - ✔ Su cápsula PRP, antifagocítica, la más virulenta de los serotipos
+  - ✘ Su crecimiento rápido en agar sangre, que le permite invadir el LCR
+  - ✘ Produce una neurotoxina que viaja por los nervios periféricos
+  - ✘ Es el único serotipo capaz de colonizar la bucofaringe
+  - De los serotipos a-f, el b (cápsula PRP) es el más virulento por su acción antifagocítica; también aportan los pili, el LPS -que produce inflamación meníngea- y la proteasa de IgA1. Crece en agar chocolate. — *Compendio ADN 6.1.a.b (Haemophilus influenzae tipo B)*
+- **¿En qué contexto aparece la meningitis tuberculosa y qué muestra se usa para buscar el bacilo en el SNC?** _(Mycobacterium tuberculosis)_
+  - ✔ En formas extrapulmonares de pacientes inmunodeprimidos, con LCR como muestra no contaminada
+  - ✘ En la tuberculosis primaria de pacientes inmunocompetentes, con esputo seriado
+  - ✘ Como complicación de la vacunación con BCG, con biopsia de ganglio
+  - ✘ En la tuberculosis cavitada del ápice pulmonar, con lavado gástrico
+  - Las formas extrapulmonares (ganglios, huesos, meninges, miliar) se ven en inmunodeprimidos, y la diseminación hematógena o linfática puede complicarse con meningitis tuberculosa. El LCR es una muestra naturalmente estéril. — *Compendio ADN 6.1.a.a (cuadros clínicos) · Cuadernillo Núcleo 7 Laboratorio Respiratorio 2026 (mecanismo de infección y obtención de la muestra)*
+- **¿Cómo se caracterizan estructuralmente los enterovirus, de la familia Picornaviridae?** _(Enterovirus)_
+  - ✔ Virus desnudos, icosaédricos, con ARN de polaridad positiva
+  - ✘ Virus envueltos, helicoidales, con ARN de polaridad negativa
+  - ✘ Virus desnudos con ADN bicatenario y replicación nuclear
+  - ✘ Virus envueltos con ADN lineal de doble hebra y latencia neuronal
+  - Son los virus más pequeños: desnudos, icosaédricos, con ARN de polaridad positiva (su genoma alcanza para la infección) y replicación en el citoplasma; al ser desnudos producen lisis celular al liberarse. — *Compendio ADN 6.1.b.a (Enterovirus)*
+- **Según el material de la cátedra, ¿qué arbovirosis con compromiso neurológico se reportan con mayor frecuencia en el norte de la Argentina?** _(Arbovirus)_
+  - ✔ La encefalitis equina del oeste y el dengue
+  - ✘ La encefalitis japonesa y la fiebre del Nilo Occidental
+  - ✘ La rabia y la encefalitis por sarampión
+  - ✘ La fiebre amarilla y la fiebre de Oropouche
+  - En el norte del país hay casos esporádicos y brotes, y los más frecuentes son la encefalitis equina del oeste y el dengue; los otros arbovirus que producen encefalitis no son frecuentes en nuestro medio. Es el dato de la cátedra; en la vigilancia nacional también se reportan la encefalitis de San Luis y el virus del Nilo Occidental. — *Compendio ADN 6.1.b.b (Arbovirus) · Cuadernillo Núcleo 10 Vectores 2026 (tabla de ENO)*
+- **¿Cómo alcanza el encéfalo un arbovirus después de la viremia inicial?** _(Arbovirus)_
+  - ✔ Infectando las células endoteliales de los vasos encefálicos
+  - ✘ Viajando por transporte axonal retrógrado desde la picadura
+  - ✘ Atravesando la lámina cribosa desde el epitelio olfatorio
+  - ✘ Dentro de macrófagos infectados que cruzan los plexos coroides
+  - El virus infecta las células endoteliales de los vasos encefálicos y así accede al tejido; la respuesta inflamatoria que induce produce la destrucción tisular y la encefalitis. — *Compendio ADN 6.1.b.b (Arbovirus, patogenia)*
+- **Ante la sospecha de meningitis por enterovirus, ¿qué muestra y qué método indica el material de la cátedra?** _(Diagnóstico de laboratorio)_
+  - ✔ PCR en LCR obtenido por punción lumbar
+  - ✘ Serología de IgM en suero pareado
+  - ✘ Coprocultivo con aislamiento viral en materia fecal
+  - ✘ Hemocultivo seriado en medio enriquecido
+  - El diagnóstico se hace a partir del estudio del LCR, que se obtiene por punción lumbar, con pruebas de amplificación de ácidos nucleicos (PCR). — *Compendio ADN 6.1.b.a (método diagnóstico)*
+- **¿Dónde establece la latencia el virus herpes simplex?** _(Virus herpes simplex)_
+  - ✔ En ganglios sensoriales: trigémino en HSV-1 y sacro en HSV-2
+  - ✘ En los linfocitos B de memoria, como el virus de Epstein-Barr
+  - ✘ En las células mucoepiteliales donde se replica inicialmente
+  - ✘ En las neuronas motoras del asta anterior de la médula espinal
+  - Tras replicarse en células mucoepiteliales, el virus viaja en forma retrógrada a los ganglios sensoriales: trigémino en HSV-1 y sacro en HSV-2. En la latencia expresa los transcriptos asociados a latencia (LAT), que inhiben la apoptosis neuronal. — *Compendio ADN 6.1.b.c.c (Virus Herpes Simplex)*
+- **¿Por qué estructura llega el virus de la parotiditis al SNC durante su diseminación sistémica?** _(Virus de la parotiditis)_
+  - ✔ Por el plexo coroideo
+  - ✘ Por los nervios olfatorios
+  - ✘ Por las vellosidades aracnoideas
+  - ✘ Por los ganglios linfáticos cervicales profundos
+  - Tras replicarse en el epitelio respiratorio y producir una viremia fugaz, el virus llega al SNC a través del plexo coroideo, infecta células mononucleares y puede causar meningitis o encefalitis. — *Compendio ADN 6.1.b.c.b (parotiditis, células blanco)*
+- **¿Qué receptor usan las cepas salvajes del virus del sarampión para entrar a la célula?** _(Virus del sarampión)_
+  - ✔ CD150 o SLAM, expresada en algunas células T y B
+  - ✘ CD46, miembro de la superfamilia de las inmunoglobulinas
+  - ✘ CD21, el receptor de C3d
+  - ✘ El ácido siálico de la superficie del epitelio respiratorio
+  - La proteína H de las cepas salvajes se une a CD150/SLAM; CD46 es el receptor de las cepas vacunales y la nectina-4 funciona como receptor en células epiteliales polarizadas. A diferencia de otros paramixovirus, no usa ácido siálico. — *Compendio ADN 6.1.b.c.b (sarampión, células blanco)*
+- **¿Por qué se considera al SNC un sitio de privilegio inmunológico?** _(Respuesta inmune)_
+  - ✔ No tiene folículos linfoides ni CPA profesionales y expresa poco CMH
+  - ✘ La barrera hematoencefálica impide por completo el paso de linfocitos y anticuerpos
+  - ✘ Sus neuronas expresan altos niveles de CMH I, lo que bloquea la presentación antigénica
+  - ✘ Carece de complemento y de citoquinas proinflamatorias en todo momento
+  - En el encéfalo y la médula no hay folículos linfoides, ganglios ni células presentadoras profesionales, y la expresión de CMH I y II es muy baja para evitar autorreactividad. La protección depende de las meninges, el LCR y la barrera hematoencefálica. — *Compendio ADN 6.1 (privilegio inmunológico del SNC)*
+- **¿Cómo participa la inmunidad adaptativa en la defensa del SNC si el parénquima no tiene tejido linfoide?** _(Respuesta inmune)_
+  - ✔ El LCR drena por el sistema glinfático a los ganglios cervicales profundos
+  - ✘ Los linfocitos T vírgenes se activan directamente en el parénquima encefálico
+  - ✘ Los astrocitos actúan como células presentadoras de antígeno profesionales
+  - ✘ Los anticuerpos se producen en los plexos coroides y pasan al espacio subaracnoideo
+  - Parte del LCR drena por el sistema glinfático a los ganglios cervicales profundos llevando antígenos. Las dendríticas meníngeas los transportan allí y los linfocitos activados vuelven por homing, con las vitaminas A y D como factores clave. — *Compendio ADN 6.1 (inmunidad adaptativa en el SNC)*
+- **¿Cómo es el esquema de la vacuna antimeningocócica conjugada tetravalente en el calendario argentino?** _(Prevención)_
+  - ✔ Dosis a los 3 y 5 meses, refuerzo a los 15 meses y a los 11 años
+  - ✘ Dosis a los 2, 4 y 6 meses con un refuerzo a los 15-18 meses de vida
+  - ✘ Dosis única al año de vida y refuerzo cada 10 años
+  - ✘ Tres dosis en el primer año y una dosis en el embarazo
+  - En lactantes se aplica a los 3 y 5 meses con refuerzo a los 15 meses -el grupo con mayor riesgo de enfermar y morir- y una dosis única a los 11 años. Es la conjugada tetravalente ACYW. — *Compendio ADN 6.1.a.e (vacunación, esquema argentino)*
+- **¿Por qué hay que vacunar contra el tétanos incluso a alguien que ya tuvo la enfermedad?** _(Prevención)_
+  - ✔ Porque la infección natural no induce inmunidad
+  - ✘ Porque la inmunidad que deja la enfermedad dura solo un año
+  - ✘ Porque la toxina deja anticuerpos bloqueantes que hay que neutralizar
+  - ✘ Porque la enfermedad deja inmunidad celular pero no humoral
+  - La infección natural no confiere inmunidad: la prevención son tres dosis de toxoide tetánico con refuerzos cada 10 años (doble bacteriana en adultos), y el riesgo es mayor cuando la inmunización es inadecuada. — *Compendio ADN 6.1.a.g (vacunación) · Cuadernillo Núcleo 3 Memoria inmune 2026 (toxoides)*
+
+### Difícil (15)
+
+- **Una lactante de 3 meses llega con cinco días de hipoactividad, rechazo del alimento e irritabilidad, sin fiebre. La madre le dio miel por estreñimiento. ¿Qué explica el cuadro?** _(Clostridium botulinum)_
+  - ✔ La ingestión de esporas que colonizan el intestino
+  - ✘ La ingestión de toxina botulínica preformada en el alimento
+  - ✘ La germinación de esporas en una herida con tejido necrótico
+  - ✘ La inhalación de toxina en partículas aerosolizadas
+  - En el botulismo del lactante se ingieren esporas (miel, leche en polvo, tierra) que colonizan el intestino y producen la toxina ahí; el estreñimiento y el llanto débil evolucionan a parálisis flácida. La toxina preformada es el botulismo alimentario. — *Compendio ADN 6.1.a.f (vías de transmisión y cuadros clínicos) · Cuadernillo Núcleo 6 Agentes con ingreso digestivo 2026 (Actividad 2)*
+- **Un hombre de 60 años, con una herida punzante en el pie hace una semana, presenta trismus, sonrisa sardónica, espasmos de la espalda y sudoración profusa. ¿Qué cuadro es?** _(Clostridium tetani)_
+  - ✔ Tétanos generalizado
+  - ✘ Botulismo de las heridas
+  - ✘ Tétanos localizado
+  - ✘ Encefalitis herpética
+  - El tétanos generalizado empieza con trismus y sonrisa sardónica, sigue con opistótonos y suma afectación autonómica (arritmias, oscilaciones de la presión, sudoración, deshidratación). En el localizado los espasmos quedan limitados al área de la herida. — *Compendio ADN 6.1.a.g (cuadros clínicos)*
+- **¿De qué depende la duración del período de incubación del tétanos, que va de unos pocos días a semanas?** _(Clostridium tetani)_
+  - ✔ De la distancia entre la herida primaria y el SNC
+  - ✘ De la cantidad de esporas inoculadas en la herida
+  - ✘ Del estado de inmunidad celular del paciente
+  - ✘ Del tamaño y la profundidad del tejido necrótico
+  - El período de incubación se relaciona directamente con la distancia de la herida primaria al sistema nervioso central, porque la toxina tiene que llegar hasta ahí. — *Compendio ADN 6.1.a.g (período de incubación)*
+- **En el botulismo alimentario, ¿qué alimento y qué tipos de toxina están implicados con mayor frecuencia, y cuándo aparecen los síntomas?** _(Clostridium botulinum)_
+  - ✔ Conservas caseras, toxinas A y B, entre 1 y 3 días después del consumo
+  - ✘ Pescado en conserva, toxina E, a las pocas horas del consumo
+  - ✘ Miel contaminada, toxina C, luego de 4 días o más
+  - ✘ Carne mal cocida, toxinas E y F, entre 7 y 10 días después
+  - El botulismo alimentario se asocia a conservas preparadas en casa (toxinas A y B) y los síntomas aparecen entre 1 y 3 días después de consumir el alimento. El pescado en conserva se vincula a la toxina tipo E. — *Compendio ADN 6.1.a.f (período de incubación y vías de transmisión)*
+- **Dos pacientes tienen parálisis por toxinas de clostridios: uno con debilidad bilateral descendente y flácida, otro con espasmos y rigidez. ¿Qué distingue a los agentes?** _(Clostridium botulinum)_
+  - ✔ C. botulinum da parálisis flácida descendente y C. tetani, parálisis espástica
+  - ✘ C. botulinum da parálisis espástica y C. tetani, parálisis flácida ascendente
+  - ✘ Ambos dan parálisis flácida, pero la de C. tetani empieza por los pares craneales
+  - ✘ Ambos dan parálisis espástica, y se diferencian solo por la vía de entrada
+  - El botulismo cursa con visión borrosa, xerostomía y estreñimiento y evoluciona a debilidad bilateral descendente con parálisis flácida por bloqueo de la acetilcolina; el tétanos da parálisis espástica porque se pierde la inhibición por glicina y GABA. — *Compendio ADN 6.1.a.f y 6.1.a.g (cuadros clínicos) · Cuadernillo Núcleo 6 Agentes con ingreso digestivo 2026 (Actividad 2.e)*
+- **Una gestante portadora de EGB no recibe profilaxis intraparto y el recién nacido presenta dificultad respiratoria a las 34 horas de vida. ¿Qué corresponde esperar?** _(Streptococcus agalactiae)_
+  - ✔ Enfermedad de comienzo precoz, con bacteriemia, neumonía o meningitis
+  - ✘ Enfermedad de comienzo tardío por serotipo III adquirido de fuentes exógenas
+  - ✘ Una infección transplacentaria con malformaciones congénitas
+  - ✘ Una colonización asintomática sin riesgo de enfermedad invasiva
+  - La enfermedad precoz se presenta en los primeros 7 días -en general dentro de las 24-48 horas- con bacteriemia, neumonía o meningitis, y se asocia a los serotipos Ia, III y V. La meningitis puede no ser evidente al inicio y exige analizar el LCR. — *Compendio ADN 6.1.a.d (cuadros clínicos) · Cuadernillo Núcleo 9 Transmisión vertical 2026 (Actividad 3.a)*
+- **¿Qué grupo tiene un riesgo marcadamente mayor de enfermedad meningocócica invasiva por un defecto inmunitario puntual?** _(Neisseria meningitidis)_
+  - ✔ Los pacientes con deficiencias de C5 a C8 del complemento
+  - ✘ Los pacientes con neutropenia prolongada
+  - ✘ Los pacientes con déficit aislado de IgA secretoria
+  - ✘ Los pacientes esplenectomizados por trauma
+  - La incidencia más alta se da en menores de 5 años, personas institucionalizadas y pacientes con defectos de los últimos factores del complemento: los déficits de C5-C8 implican un riesgo significativamente mayor. — *Compendio ADN 6.1.a.e (epidemiología)*
+- **¿Por qué la vacuna antimeningocócica tetravalente no cubre el serogrupo B?** _(Prevención)_
+  - ✔ Porque su polisacárido capsular es un inmunógeno débil y no induce anticuerpos protectores
+  - ✘ Porque el serogrupo B no produce enfermedad invasiva en humanos
+  - ✘ Porque su cápsula cambia de antígeno con cada brote epidémico
+  - ✘ Porque el polisacárido B no puede conjugarse con proteínas transportadoras
+  - El polisacárido del grupo B es un inmunógeno débil y no induce respuesta de anticuerpos protectora; la inmunidad contra ese serogrupo depende de la exposición natural a antígenos con reactividad cruzada. Las tetravalentes cubren A, C, Y y W135. — *Compendio ADN 6.1.a.e (vacunación)*
+- **Según la cátedra, ¿qué define a un caso sospechoso de parálisis aguda fláccida (PAF)?** _(Enterovirus)_
+  - ✔ Parálisis aguda y fláccida en un menor de 15 años, salvo traumatismo grave
+  - ✘ Toda parálisis fláccida en un menor de 5 años con aislamiento de poliovirus en materia fecal
+  - ✘ Toda parálisis fláccida que aparezca entre 4 y 40 días después de recibir una vacuna
+  - ✘ Parálisis asimétrica con arreflexia confirmada por PCR en LCR
+  - Caso sospechoso: parálisis aguda y fláccida en un menor de 15 años por cualquier motivo que no sea un traumatismo grave. El caso confirmado exige aislar poliovirus salvaje en materia fecal. — *Compendio ADN 6.1.b.a (definiciones de caso de PAF, cátedra)*
+- **En una meningitis por virus de la parotiditis, ¿cuál es el método diagnóstico de elección y en qué ventana se puede aislar el virus del LCR?** _(Virus de la parotiditis)_
+  - ✔ RT-PCR en LCR, con aislamiento posible hasta los 8-9 días
+  - ✘ Fijación de complemento en suero, útil desde el día 14
+  - ✘ Aislamiento en cultivo de saliva, posible hasta 2 semanas
+  - ✘ Detección de IgG en LCR, a partir de los 30 días
+  - La RT-PCR en LCR es el método de elección en la meningitis por parotiditis. Del LCR el virus se aísla dentro de los 8-9 días del inicio de los síntomas y de orina hasta 2 semanas. — *Compendio ADN 6.1.b.c.b (parotiditis, método diagnóstico)*
+- **Ante la sospecha de encefalitis herpética, ¿qué técnica conviene usar sobre el LCR y con qué rendimiento?** _(Virus herpes simplex)_
+  - ✔ PCR, con sensibilidad de 98-100% y especificidad del 94%
+  - ✘ Inmunofluorescencia directa con monoclonales anti-glicoproteína G
+  - ✘ Aislamiento en fibroblastos humanos, que informa en 2-7 días
+  - ✘ Serología para distinguir HSV-1 de HSV-2
+  - La PCR es la técnica de elección en encefalitis o meningitis herpética, con sensibilidad de 98-100% y especificidad del 94% en LCR. La serología no sirve para infecciones agudas y la tinción de Tzanck tiene baja sensibilidad (40-50%). — *Compendio ADN 6.1.b.c.c (HSV, método diagnóstico)*
+- **¿Qué distingue el síndrome de una meningitis aséptica del de una meningitis bacteriana aguda?** _(Infecciones del SNC)_
+  - ✔ En la aséptica suele haber solo síndrome meníngeo
+  - ✘ En la aséptica predomina la focalización neurológica
+  - ✘ En la bacteriana no hay rigidez de nuca ni fiebre
+  - ✘ En la bacteriana el compromiso se limita al parénquima encefálico
+  - En la meningitis bacteriana aguda predomina el síndrome meníngeo, que puede acompañarse de encefalopatía; en la aséptica suele observarse únicamente el síndrome meníngeo. La focalización es propia de las lesiones focales como los abscesos. — *Compendio ADN 6.1 (síndromes neurológicos)*
+- **¿Qué pruebas bioquímicas permiten diferenciar a Neisseria meningitidis de otras especies del género?** _(Diagnóstico de laboratorio)_
+  - ✔ Produce ácido por oxidación de glucosa y maltosa
+  - ✘ Es catalasa negativa y fermenta carbohidratos con producción de ácido láctico
+  - ✘ Es oxidasa negativa y ureasa positiva
+  - ✘ Oxida solo la glucosa y no la maltosa
+  - N. meningitidis es oxidasa y catalasa positiva y produce ácido por oxidación de glucosa y maltosa, lo que la distingue de otras Neisserias. Crece a 35-37 °C en atmósfera húmeda con 5% de CO2 y medios enriquecidos como agar chocolate. — *Compendio ADN 6.1.a.e (características y estructura)*
+- **¿Por qué la barrera hematoencefálica representa un desafío en el tratamiento de la meningitis?** _(Anatomía del SNC y LCR)_
+  - ✔ Porque su permeabilidad selectiva obliga a elegir fármacos capaces de atravesarla
+  - ✘ Porque se vuelve impermeable a toda molécula durante la inflamación
+  - ✘ Porque impide que el LCR distribuya los fármacos por el espacio subaracnoideo
+  - ✘ Porque los plexos coroides eliminan los antibióticos antes de que actúen
+  - La barrera, formada por endotelio con uniones estrechas, membrana basal y astrocitos, solo deja pasar agua y moléculas pequeñas: hay que elegir fármacos capaces de atravesarla para alcanzar concentraciones efectivas en el SNC. — *Compendio ADN 6.1 (barrera hematoencefálica y funciones del LCR)*
+- **Un paciente desarrolla un absceso cerebral luego de una sinusitis prolongada. ¿Qué mecanismo de acceso al SNC explica mejor el cuadro?** _(Infecciones del SNC)_
+  - ✔ Contigüidad desde un sitio vecino
+  - ✘ Vía hematógena a partir de una bacteriemia
+  - ✘ Inóculo directo por un procedimiento quirúrgico
+  - ✘ Acceso por los nervios periféricos
+  - Un agente puede llegar al SNC por vía hematógena, por contigüidad desde sitios vecinos como los senos paranasales o el oído medio, por inóculo directo (traumatismos, cirugía, derivaciones) o por los nervios periféricos. — *Compendio ADN 6.1 (vías de acceso al SNC)*
+
+## Núcleo 8 (45)
+
+### Fácil (10)
+
+- **¿A qué familia pertenece el virus de la inmunodeficiencia humana (VIH)?** _(VIH)_
+  - ✔ Retroviridae
+  - ✘ Herpesviridae
+  - ✘ Hepadnaviridae
+  - ✘ Flaviviridae
+  - El VIH es un retrovirus (Retroviridae): genoma de ARN monocatenario que se retrotranscribe a ADN y se integra como provirus. — *Cuadernillo Núcleo 8 2026 (tabla de agentes) · Compendio ADN (8.a)*
+- **¿Cuál es el receptor principal que usa la gp120 del VIH para unirse a la célula?** _(VIH)_
+  - ✔ CD4
+  - ✘ CD8
+  - ✘ CD21
+  - ✘ CD81
+  - La gp120 se une a CD4 y a un correceptor de quimiocinas (CCR5 o CXCR4); la gp41 media la fusión de membranas. — *Compendio ADN (8.a, replicación)*
+- **¿Contra qué dos ITS virales hay vacunas en el Calendario Nacional de Vacunación argentino?** _(Prevención)_
+  - ✔ Hepatitis B y VPH
+  - ✘ VIH y hepatitis C
+  - ✘ VHS-2 y hepatitis B
+  - ✘ VPH y VHS-2
+  - El calendario incluye la vacuna contra la hepatitis B para toda la población y contra el VPH a los 11 años. — *Cuadernillo Núcleo 8 2026 (Introducción)*
+- **¿Cuál es la medida de prevención que reduce el riesgo de la mayoría de las ITS durante las relaciones sexuales?** _(Prevención)_
+  - ✔ El uso consistente de preservativo
+  - ✘ La higiene genital posterior
+  - ✘ Los antibióticos preventivos
+  - ✘ La vacuna antitetánica
+  - El preservativo (de látex, poliuretano o nitrilo) usado en forma consistente cubre mucosas y secreciones y reduce mucho el riesgo. — *Cuadernillo Núcleo 8 2026 · Compendio ADN (8.g)*
+- **¿Qué enfermedad causa Treponema pallidum subsp. pallidum?** _(Treponema pallidum)_
+  - ✔ Sífilis
+  - ✘ Gonorrea
+  - ✘ Linfogranuloma venéreo
+  - ✘ Chancroide
+  - T. pallidum subsp. pallidum es el agente de la sífilis venérea, que evoluciona en fases primaria, secundaria y terciaria. — *Compendio ADN (8.e) · Cuadernillo Núcleo 8 2026*
+- **¿Cómo se ve Neisseria gonorrhoeae en una tinción de Gram?** _(Neisseria gonorrhoeae)_
+  - ✔ Diplococos gramnegativos
+  - ✘ Cocos grampositivos en cadena
+  - ✘ Bacilos gramnegativos curvos
+  - ✘ Espiroquetas finas
+  - Son diplococos gramnegativos con lados adyacentes aplanados, en «grano de café». — *Compendio ADN (8.g)*
+- **¿Qué lesión benigna anogenital producen los tipos 6 y 11 del VPH?** _(Virus del papiloma humano)_
+  - ✔ Condilomas acuminados
+  - ✘ Chancro duro
+  - ✘ Vesículas agrupadas
+  - ✘ Bubón inguinal
+  - Los VPH 6 y 11 causan condilomas acuminados: verrugas anogenitales, proliferaciones benignas del epitelio escamoso. — *Cuadernillo Núcleo 8 2026 (galería de lesiones) · Compendio ADN (8.g)*
+- **¿Qué tipo de agente es Trichomonas vaginalis?** _(Trichomonas vaginalis)_
+  - ✔ Un protozoo flagelado
+  - ✘ Un hongo levaduriforme
+  - ✘ Una bacteria sin pared
+  - ✘ Un virus envuelto
+  - T. vaginalis es un protozoo flagelado de transmisión sexual; en la mujer produce flujo y en el hombre suele ser asintomático. — *Cuadernillo Núcleo 8 2026 (TP 19) · Compendio ADN (8.h)*
+- **¿Por qué el término «enfermedad de transmisión sexual» se reemplazó por «infección de transmisión sexual»?** _(Epidemiología)_
+  - ✔ Porque muchas cursan sin síntomas
+  - ✘ Porque ya no se transmiten por vía sexual
+  - ✘ Porque todas tienen cura
+  - ✘ Porque solo afectan a los genitales
+  - Gran parte de las ITS son asintomáticas: la persona puede transmitirlas sin saber que está infectada. — *Compendio ADN (Núcleo 8, introducción)*
+- **¿Cuál de estas ITS se puede curar con tratamiento?** _(Epidemiología)_
+  - ✔ Sífilis
+  - ✘ Infección por VIH
+  - ✘ Infección por VHS-2
+  - ✘ Infección por VPH
+  - La sífilis, la gonorrea, la clamidiasis y la tricomoniasis se curan con antimicrobianos; la infección por VIH, VHS o VPH no tiene tratamiento curativo y la hepatitis B crónica se controla, pero no se cura. — *Cuadernillo Núcleo 8 2026 (Introducción)*
+
+### Normal (20)
+
+- **¿Qué función cumple la gp41 en la envoltura del VIH?** _(VIH)_
+  - ✔ Media la fusión de las membranas
+  - ✘ Une el virus al receptor CD4
+  - ✘ Retrotranscribe el genoma
+  - ✘ Integra el ADN proviral
+  - La gp120 se une a CD4 y al correceptor; después la gp41 favorece la fusión de la envoltura con la membrana celular. — *Compendio ADN (8.a)*
+- **¿Qué correceptor usan los virus M-trópicos que predominan al inicio de la infección por VIH?** _(VIH)_
+  - ✔ CCR5
+  - ✘ CXCR4
+  - ✘ CD21
+  - ✘ DC-SIGN
+  - Las cepas M-trópicas iniciales usan CD4 y CCR5; las T-trópicas, más tardías, usan CXCR4. — *Compendio ADN (8.a, replicación)*
+- **¿Qué enzima del VIH inserta el ADN viral en el cromosoma de la célula y forma el provirus?** _(VIH)_
+  - ✔ Integrasa
+  - ✘ Retrotranscriptasa
+  - ✘ Proteasa
+  - ✘ ARN polimerasa celular
+  - La integrasa inserta el ADNc en el genoma del huésped; la proteasa actúa después, en la maduración tras la gemación. — *Compendio ADN (8.a)*
+- **¿Por qué el VIH acumula tantas variantes durante la infección?** _(VIH)_
+  - ✔ Su retrotranscriptasa comete muchos errores
+  - ✘ Tiene un genoma segmentado
+  - ✘ Su ADN se recombina con el celular
+  - ✘ Cambia de familia viral
+  - La retrotranscriptasa del VIH tiene una tasa de error alta (cerca de 1 cada 2.000 bases), lo que genera variación antigénica de la gp120. — *Compendio ADN (8.a)*
+- **¿Qué tipo y grupo de VIH es el más frecuente en Argentina?** _(VIH)_
+  - ✔ VIH-1, grupo M
+  - ✘ VIH-2, grupo A
+  - ✘ VIH-1, grupo O
+  - ✘ VIH-2, grupo M
+  - El VIH-1 causa la pandemia y en Argentina predomina el grupo M; el VIH-2, menos virulento, se asocia a África occidental. — *Compendio ADN (8.a, tipos y subtipos)*
+- **¿Qué tejido linfoide se agota temprano de linfocitos T CD4 con CCR5 después de la transmisión sexual del VIH?** _(VIH)_
+  - ✔ El tejido linfoide asociado al intestino
+  - ✘ La médula ósea
+  - ✘ El timo
+  - ✘ Las amígdalas palatinas
+  - Poco después de la transmisión, el VIH infecta y agota los linfocitos CD4 con CCR5 del GALT. — *Compendio ADN (8.a) · Cuadernillo Núcleo 8 2026 (Actividad 1)*
+- **¿Qué recuento de linfocitos T CD4 define el estadio SIDA?** _(VIH)_
+  - ✔ Menos de 200/µl
+  - ✘ Menos de 500/µl
+  - ✘ Menos de 1.000/µl
+  - ✘ Menos de 50/µl
+  - El SIDA aparece con CD4 por debajo de 200/µl, con infecciones oportunistas, neoplasias, síndrome caquectizante o demencia. — *Compendio ADN (8.a) · Cuadernillo Núcleo 8 2026 (evolución y CD4)*
+- **Confirmado el diagnóstico de VIH, ¿qué dos parámetros se miden para seguir la infección y el tratamiento antirretroviral?** _(VIH)_
+  - ✔ Recuento de CD4 y carga viral
+  - ✘ Western blot y antígeno p24
+  - ✘ Anti-VIH y VDRL
+  - ✘ Hemograma y hepatograma
+  - El recuento de CD4 refleja la inmunosupresión y la carga viral (ARN por PCR), la replicación y la respuesta al tratamiento. — *Cuadernillo Núcleo 8 2026 (Actividad 1 i) · Compendio ADN (8.a)*
+- **¿Qué detectan los ensayos de cuarta generación para VIH que se usan en el laboratorio clínico?** _(VIH)_
+  - ✔ Antígeno p24 y anticuerpos anti-VIH
+  - ✘ Solo el ARN viral
+  - ✘ Solo anticuerpos IgG
+  - ✘ El ADN proviral integrado
+  - Los inmunoensayos de 4.ª generación detectan a la vez el antígeno p24 y los anticuerpos, lo que acorta el período ventana. — *Cuadernillo Núcleo 8 2026 (Anexo, VIH)*
+- **¿Cuál es la característica estructural del virus del papiloma humano?** _(Virus del papiloma humano)_
+  - ✔ ADN circular bicatenario sin envoltura
+  - ✘ ARN monocatenario con envoltura
+  - ✘ ADN parcialmente bicatenario envuelto
+  - ✘ ARN segmentado sin envoltura
+  - El VPH (Papillomaviridae) es pequeño, sin envoltura, de cápside icosaédrica y genoma de ADN circular bicatenario. — *Compendio ADN (8.b) · Cuadernillo Núcleo 8 2026*
+- **¿Qué proteínas del VPH de alto riesgo actúan como oncogenes?** _(Virus del papiloma humano)_
+  - ✔ E5, E6 y E7
+  - ✘ L1 y L2
+  - ✘ E1 y E2
+  - ✘ gp120 y gp41
+  - En los tipos de alto riesgo (16 y 18), E5, E6 y E7 estimulan la proliferación y la transformación; L1 y L2 son estructurales. — *Compendio ADN (8.b, factores de virulencia)*
+- **¿Qué célula característica del Papanicolaou orienta a infección por VPH?** _(Virus del papiloma humano)_
+  - ✔ El coilocito
+  - ✘ La célula guía
+  - ✘ La célula de Tzanck
+  - ✘ La célula de Reed-Sternberg
+  - El coilocito es la célula epitelial alterada típica del VPH; la lesión coilocitótica puede evolucionar a displasia. — *Compendio ADN (8.b) · Cuadernillo Núcleo 8 2026 (TP 19)*
+- **¿Dónde establece latencia el virus del herpes simple tipo 2?** _(Virus del herpes simple tipo 2)_
+  - ✔ En neuronas sensitivas
+  - ✘ En linfocitos B
+  - ✘ En hepatocitos
+  - ✘ En queratinocitos basales
+  - El VHS-2 se replica en células mucoepiteliales y queda latente en las neuronas que las inervan; la reactivación causa recurrencias. — *Compendio ADN (8.c)*
+- **¿Qué lesión genital es típica de la infección por VHS-2?** _(Virus del herpes simple tipo 2)_
+  - ✔ Vesículas dolorosas sobre base eritematosa
+  - ✘ Una úlcera única e indolora de fondo duro
+  - ✘ Verrugas indoloras en los pliegues
+  - ✘ Una úlcera mínima con bubón inguinal
+  - Las vesículas sobre base eritematosa progresan a pústulas, úlceras y costras, con dolor, ardor y recurrencias. — *Cuadernillo Núcleo 8 2026 (galería de lesiones) · Compendio ADN (8.c)*
+- **¿Por qué Treponema pallidum no se ve con la tinción de Gram?** _(Treponema pallidum)_
+  - ✔ Es demasiado fino
+  - ✘ No tiene pared celular
+  - ✘ Es ácido-alcohol resistente
+  - ✘ Vive solo dentro de células
+  - Es una espiroqueta demasiado fina para el Gram o el Giemsa: se observa con microscopía de campo oscuro o inmunofluorescencia. — *Compendio ADN (8.e)*
+- **¿Qué detectan las pruebas no treponémicas como la VDRL?** _(Treponema pallidum)_
+  - ✔ Anticuerpos reagínicos contra lípidos
+  - ✘ Antígenos de la pared del treponema
+  - ✘ Anticuerpos específicos anti-T. pallidum
+  - ✘ ADN del treponema
+  - La VDRL detecta reaginas (IgG e IgM) contra antígenos lipoidales liberados por el daño celular; por eso puede dar falsos positivos. — *Cuadernillo Núcleo 8 2026 (Anexo) · Compendio ADN (8.e)*
+- **¿Cuál es la forma infecciosa de Chlamydia trachomatis?** _(Chlamydia trachomatis)_
+  - ✔ El cuerpo elemental
+  - ✘ El cuerpo reticulado
+  - ✘ La inclusión con glucógeno
+  - ✘ La espora
+  - El cuerpo elemental es infeccioso y metabólicamente inactivo; dentro de la célula se convierte en cuerpo reticulado, que se replica. — *Compendio ADN (8.f) · Cuadernillo Núcleo 8 2026 (Actividad 3 b)*
+- **¿Cuál es el método de elección para diagnosticar una infección genital por Chlamydia trachomatis?** _(Chlamydia trachomatis)_
+  - ✔ Amplificación de ácidos nucleicos
+  - ✘ Cultivo en agar chocolate
+  - ✘ Serología con anticuerpos IgG
+  - ✘ Tinción de Gram del flujo
+  - Las pruebas moleculares (NAAT/PCR) son sensibles y específicas y son las de elección (SADI 2025); la serología no distingue infección actual de previa. — *Cuadernillo Núcleo 8 2026 (TP 19) · Compendio ADN (8.f)*
+- **¿Qué factor de virulencia de Neisseria gonorrhoeae permite la adhesión inicial y resiste a los neutrófilos?** _(Neisseria gonorrhoeae)_
+  - ✔ Los pili
+  - ✘ La cápsula de ácido siálico
+  - ✘ La toxina tipo AB
+  - ✘ El flagelo polar
+  - Los pili median la adhesión a células mucosas no ciliadas y resisten a los neutrófilos; Opa y PorB completan la adhesión. — *Compendio ADN (8.g)*
+- **¿Qué examen rápido permite ver Trichomonas vaginalis en el flujo vaginal?** _(Trichomonas vaginalis)_
+  - ✔ El examen en fresco
+  - ✘ La tinción de Ziehl-Neelsen
+  - ✘ El campo oscuro
+  - ✘ La tinta china
+  - En el examen en fresco de fondo de saco posterior se ve su motilidad; también se observa en el Papanicolaou o con Giemsa. — *Cuadernillo Núcleo 8 2026 (TP 19) · Compendio ADN (8.h)*
+
+### Difícil (15)
+
+- **Una persona tuvo una exposición sexual de alto riesgo hace pocos días. ¿Qué estudio es más útil por el período ventana?** _(VIH)_
+  - ✔ Antígeno o ARN del VIH
+  - ✘ Western blot
+  - ✘ VDRL
+  - ✘ Cultivo viral
+  - Por el período ventana, los anticuerpos pueden faltar; la detección de antígeno o ARN viral identifica antes la infección. En los primeros ~10 días incluso el ARN puede ser indetectable, por eso se repite el estudio. — *Cuadernillo Núcleo 8 2026 (Actividad 2 f y Anexo VIH)*
+- **¿Por qué el diagnóstico de VIH en menores de 18 meses no se basa en anticuerpos?** _(VIH)_
+  - ✔ Pueden tener anticuerpos maternos
+  - ✘ Todavía no tienen linfocitos CD4
+  - ✘ El virus no se replica en lactantes
+  - ✘ La carga viral siempre es indetectable
+  - La IgG materna atraviesa la placenta y puede persistir hasta los 18 meses, así que el diagnóstico se hace con métodos directos (PCR de ADN proviral o carga viral). — *Cuadernillo Núcleo 8 2026 (Actividad 1 h)*
+- **¿Qué perfil de laboratorio corresponde a la fase de latencia clínica del VIH?** _(VIH)_
+  - ✔ Carga viral baja y CD4 en descenso
+  - ✘ Carga viral alta y CD4 normales
+  - ✘ Carga viral alta y CD4 bajo 200/µl
+  - ✘ Carga viral nula y CD4 estables
+  - En la latencia la replicación es baja (sobre todo en ganglios) y los CD4 bajan gradualmente; en el SIDA la carga sube y los CD4 caen bajo 200/µl. — *Compendio ADN (8.a, evolución)*
+- **¿Por qué los anticuerpos neutralizantes contra la gp120 no alcanzan para controlar el VIH?** _(Respuesta inmune)_
+  - ✔ La gp120 cambia por mutación
+  - ✘ No se generan anticuerpos contra la gp120
+  - ✘ El virus no circula en la sangre
+  - ✘ Los anticuerpos destruyen los CD4
+  - El VIH escapa por variación antigénica de la gp120 y por la latencia en reservorios; el virus recubierto de anticuerpos sigue siendo infeccioso. — *Compendio ADN (8.a, rol del sistema inmune)*
+- **Mujer de 32 años con exantema palmoplantar no pruriginoso y una lesión cicatrizal en un labio menor. ¿Qué agente y estudio corresponden?** _(Diagnóstico de laboratorio)_
+  - ✔ T. pallidum; prueba no treponémica y treponémica
+  - ✘ VHS-2; PCR de la lesión
+  - ✘ C. trachomatis; NAAT de endocérvix
+  - ✘ VPH; Papanicolaou
+  - El exantema palmoplantar tras un chancro sugiere sífilis secundaria; se estudia con serología no treponémica y treponémica. — *Cuadernillo Núcleo 8 2026 (TP 19, caso 3)*
+- **¿Con qué prueba se sigue la respuesta al tratamiento de la sífilis?** _(Treponema pallidum)_
+  - ✔ Con títulos de la prueba no treponémica
+  - ✘ Con la prueba treponémica
+  - ✘ Con campo oscuro mensual
+  - ✘ Con PCR en sangre
+  - Las treponémicas quedan positivas toda la vida; la respuesta se evalúa con la caída de la no treponémica (cuatro veces o dos diluciones). — *Cuadernillo Núcleo 8 2026 (Anexo, sífilis)*
+- **Después de tratar una sífilis, la VDRL sube de 1/8 a 1/32. ¿Cómo se interpreta?** _(Treponema pallidum)_
+  - ✔ Falla del tratamiento o reinfección
+  - ✘ Respuesta adecuada al tratamiento
+  - ✘ Cicatriz serológica sin importancia
+  - ✘ Falso positivo por la vacuna
+  - Cuadruplicar los títulos (subir dos diluciones) es significativo: falla del tratamiento o reinfección, según el antecedente. — *Cuadernillo Núcleo 8 2026 (Anexo, sífilis)*
+- **¿Qué lesión describe un linfogranuloma venéreo por Chlamydia trachomatis?** _(Chlamydia trachomatis)_
+  - ✔ Úlcera mínima y bubón inguinal que supura
+  - ✘ Úlcera única, dura e indolora
+  - ✘ Úlceras indoloras confluentes sin adenopatías
+  - ✘ Úlceras múltiples dolorosas de base blanda
+  - El LGV empieza con una úlcera mínima y sigue con un bubón fluctuante y doloroso que puede supurar y causar linfedema. — *Cuadernillo Núcleo 8 2026 (galería de lesiones)*
+- **Un paciente tiene úlceras genitales indoloras que confluyen y deforman los genitales, sin adenopatías. ¿Qué cuadro sugiere?** _(Klebsiella granulomatis)_
+  - ✔ Granuloma inguinal
+  - ✘ Chancroide
+  - ✘ Linfogranuloma venéreo
+  - ✘ Herpes genital recurrente
+  - El granuloma inguinal (Klebsiella granulomatis) da úlceras no dolorosas que confluyen y deforman, sin adenopatías. — *Cuadernillo Núcleo 8 2026 (galería de lesiones)*
+- **¿Qué lesión corresponde al chancroide por Haemophilus ducreyi?** _(Haemophilus ducreyi)_
+  - ✔ Úlcera blanda, purulenta y muy dolorosa
+  - ✘ Úlcera dura, única e indolora
+  - ✘ Placas elevadas en pliegues macerados
+  - ✘ Vesículas agrupadas que ulceran
+  - El chancro blando es una úlcera de base no indurada, purulenta, rodeada de úlceras dolorosas, con adenopatía que fluctúa y se rompe. — *Cuadernillo Núcleo 8 2026 (galería de lesiones)*
+- **Varón de 25 años con disuria y secreción uretral purulenta. ¿Qué hallazgo del Gram de la secreción orienta a gonorrea?** _(Neisseria gonorrhoeae)_
+  - ✔ Diplococos gramnegativos intracelulares en polimorfonucleares
+  - ✘ Cocos grampositivos en racimos dentro de neutrófilos
+  - ✘ Bacilos gramnegativos extracelulares abundantes
+  - ✘ Levaduras con seudohifas sin reacción inflamatoria
+  - En el hombre sintomático, los diplococos gramnegativos intracelulares en la secreción uretral son confiables para gonorrea; en mujeres y asintomáticos se usa NAAT o cultivo. — *Compendio ADN (8.g) · Cuadernillo Núcleo 8 2026 (TP 19, caso 1)*
+- **Un hombre tiene uretritis persistente con estudios negativos para gonococo y Chlamydia. ¿Qué agente conviene buscar?** _(Mycoplasma genitalium)_
+  - ✔ Mycoplasma genitalium
+  - ✘ Treponema pallidum
+  - ✘ Virus del papiloma humano
+  - ✘ Phthirus pubis
+  - M. genitalium (grupo Mollicutes) causa uretritis no gonocócica; se busca con métodos moleculares. — *Cuadernillo Núcleo 8 2026 (TP 19, caso 6)*
+- **¿Qué marcador de hepatitis B indica inmunidad por vacunación o por infección pasada?** _(Virus de la hepatitis B)_
+  - ✔ Anti-HBs
+  - ✘ HBsAg
+  - ✘ Anti-HBc IgM
+  - ✘ HBeAg
+  - El anti-HBs indica inmunidad; el HBsAg, infección actual; el anti-HBc IgM, infección aguda o reciente; el HBeAg, replicación. — *Cuadernillo Núcleo 8 2026 (Anexo, hepatitis B)*
+- **Un control de rutina da anti-VHC reactivo. ¿Qué estudio confirma si la infección está activa?** _(Virus de la hepatitis C)_
+  - ✔ ARN del VHC por PCR
+  - ✘ Un segundo anti-VHC
+  - ✘ Anti-VHC de tipo IgM
+  - ✘ Hepatograma completo
+  - El anti-VHC no distingue infección activa de resuelta: ARN detectable confirma infección activa; no detectable sugiere resuelta o falso positivo. — *Cuadernillo Núcleo 8 2026 (Anexo, hepatitis C)*
+- **¿Qué rasgo distingue la inmunidad de la mucosa uterina del resto de las mucosas?** _(Respuesta inmune)_
+  - ✔ Predomina la IgG, no la IgA secretora
+  - ✘ No tiene microbiota
+  - ✘ Carece de linfocitos T CD8
+  - ✘ Predomina la IgE
+  - En la mucosa uterina la principal inmunoglobulina es la IgG; además la vagina tiene abundantes Lactobacillus y el endometrio agregados linfoides. — *Cuadernillo Núcleo 8 2026 (TP 19, microbiota del tracto reproductor)*
+
+## Núcleo 9 (45)
+
+### Fácil (10)
+
+- **En el perfil TORCHS, ¿qué infección representa la letra S agregada al final de la sigla?** _(Perfil TORCHS)_
+  - ✔ Sífilis
+  - ✘ Sarampión
+  - ✘ Streptococcus agalactiae
+  - ✘ Shigelosis
+  - TORCH es la sigla de toxoplasmosis, otras, rubéola, citomegalovirus y herpes simple (el material suma VIH y Chagas); cuando se escribe TORCHS, la S adicional representa la sífilis. — *Cuadernillo Núcleo 9 Seminario 2026 (Introducción, perfil TORCHS) · Compendio ADN (9)*
+- **La transmisión de un microorganismo de la madre al hijo mediante la lactancia materna se clasifica como transmisión:** _(Vías de transmisión vertical)_
+  - ✔ Posnatal
+  - ✘ Perinatal
+  - ✘ Congénita (intraútero)
+  - ✘ Ascendente transcervical
+  - La transmisión vertical puede ser intraútero (congénita), en el momento del parto o alrededor de él (perinatal) o posterior (posnatal), como la que ocurre por lactancia materna. — *Cuadernillo Núcleo 9 Seminario 2026 (Introducción) · Compendio ADN (9)*
+- **¿Con qué vacuna y esquema del Calendario Nacional se previene la rubéola congénita?** _(Virus de la rubéola)_
+  - ✔ Triple viral a los 12 meses y a los 5 años
+  - ✘ Gammaglobulina específica a la gestante expuesta
+  - ✘ Doble viral durante el segundo trimestre
+  - ✘ Lavado de manos tras contacto con secreciones
+  - La vacuna antirrubeólica (virus vivo atenuado) va en la triple viral: 1.ª dosis a los 12 meses y 2.ª a los 5 años. El objetivo es que la mujer llegue al embarazo con anticuerpos. — *Compendio ADN (9.a, pregunta c) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5d, tabla de prevención)*
+- **Un recién nacido es hijo de una madre con serología reactiva para Chagas. ¿Qué se indica respecto de la lactancia materna?** _(Trypanosoma cruzi)_
+  - ✔ No está contraindicada
+  - ✘ Se suspende hasta los 10 meses de vida
+  - ✘ Solo se permite con leche extraída y hervida
+  - ✘ Está contraindicada, igual que en el VIH
+  - En hijos de madres con serología reactiva para Chagas la lactancia no está contraindicada (a diferencia del VIH, donde sí lo está). — *Compendio ADN (9.j) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 4c)*
+- **Una gestante con herpes genital tiene lesiones activas al comenzar el trabajo de parto. ¿Qué medida reduce el riesgo de herpes neonatal?** _(Virus herpes simple 1 y 2)_
+  - ✔ Cesárea electiva
+  - ✘ Vacunar al recién nacido al nacer
+  - ✘ Gammaglobulina hiperinmune a la madre
+  - ✘ Penicilina G intravenosa intraparto
+  - El VHS se adquiere sobre todo al pasar por el canal de parto con lesiones genitales activas; por eso se indica cesárea electiva si hay lesiones al momento del parto. — *Compendio ADN (9.f y tabla de agentes) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5a y 5d)*
+- **¿Qué se le indica al recién nacido de una madre HBsAg positiva para prevenir la hepatitis B?** _(Virus de la hepatitis B)_
+  - ✔ Vacuna y gammaglobulina en las primeras 12 h de vida
+  - ✘ Solo la vacuna a los 2 meses, con el resto del calendario
+  - ✘ Tenofovir oral al recién nacido durante 6 meses
+  - ✘ Cesárea electiva y suspensión de la lactancia
+  - La prevención en el RN es la vacuna más la inmunización pasiva (gammaglobulina) en las primeras 12 horas de vida. La dosis neonatal está en el Calendario Nacional desde 2000. — *Compendio ADN (tabla de agentes, VHB) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5d)*
+- **En una gestante con VIH, ¿qué indica el material de la cátedra respecto de la lactancia materna?** _(Virus de la inmunodeficiencia humana (VIH))_
+  - ✔ Está contraindicada
+  - ✘ Se recomienda exclusiva hasta los 6 meses
+  - ✘ Se permite si la madre no tiene síntomas
+  - ✘ Solo se suspende si aparece mastitis
+  - La lactancia es una vía posnatal de transmisión del VIH. La prevención combina TARV efectiva en la gestante, profilaxis antirretroviral al RN y contraindicación de la lactancia. — *Compendio ADN (tabla de agentes, VIH) · Cuadernillo Núcleo 9 Seminario 2026 (Prevención; Actividad 5a)*
+- **¿Cuál es la morfología de Streptococcus agalactiae (estreptococo del grupo B)?** _(Streptococcus agalactiae)_
+  - ✔ Coco grampositivo en cadenas, beta-hemolítico
+  - ✘ Coco grampositivo en racimos, coagulasa positivo
+  - ✘ Diplococo gramnegativo, oxidasa positivo
+  - ✘ Bacilo grampositivo corto, beta-hemolítico
+  - EGB es un coco grampositivo que forma cadenas cortas en muestras clínicas y más largas en cultivo, con colonias mantecosas y una estrecha zona de beta-hemólisis; grupo B de Lancefield. — *Compendio ADN (9.g) · Cuadernillo Núcleo 9 Seminario 2026 (tabla Agentes vistos en este núcleo)*
+- **¿En qué hospedador completa Toxoplasma gondii su ciclo sexual?** _(Toxoplasma gondii)_
+  - ✔ Gato y otros felinos
+  - ✘ Roedores silvestres
+  - ✘ Ser humano
+  - ✘ Aves y ganado
+  - El gato doméstico y otros felinos son el reservorio: el ciclo sexual ocurre en sus células intestinales y eliminan ovoquistes por heces, que maduran en el ambiente. Otros animales son hospedadores intermediarios. — *Compendio ADN (9.i, cadena epidemiológica) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 3)*
+- **¿Qué medida de prevención de la toxoplasmosis se le recomienda a una gestante?** _(Toxoplasma gondii)_
+  - ✔ Evitar carne cruda o poco cocida y heces de gato
+  - ✘ Vacunarse antes de buscar el embarazo
+  - ✘ Usar repelente y mosquitero en zonas endémicas
+  - ✘ Evitar el contacto con niños menores de 5 años
+  - Las vías principales son la ingesta de carne poco cocida y de ovoquistes de heces de gato; por eso se indica evitar consumir y manipular carne cruda y el contacto con heces de gato. No hay vacuna. — *Compendio ADN (9.i, prevención en embarazadas) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 3)*
+
+### Normal (20)
+
+- **Cuando una infección materna llega al feto por vía ascendente (de la vagina al líquido amniótico por el cuello uterino), ¿qué consecuencias son más frecuentes?** _(Vías de transmisión vertical)_
+  - ✔ Corioamnionitis, funisitis y parto pretérmino
+  - ✘ Villitis y deciduitis por viremia materna
+  - ✘ Latencia del agente en ganglios neuronales fetales
+  - ✘ Cataratas, sordera y cardiopatía congénita
+  - La vía ascendente causa con más frecuencia funisitis y corioamnionitis, con rotura prematura de membranas y parto pretérmino. Villitis y deciduitis son propias de la vía hematógena (sobre todo virus). — *Cuadernillo Núcleo 9 Seminario 2026 (Introducción) · Compendio ADN (9)*
+- **La iniciativa ETMI-plus de la OPS/OMS busca eliminar la transmisión maternoinfantil de:** _(Prevención)_
+  - ✔ VIH, sífilis, hepatitis B y Chagas
+  - ✘ VIH, rubéola, toxoplasmosis y CMV
+  - ✘ Sífilis, EGB, herpes simple y varicela
+  - ✘ Hepatitis B y C, CMV y toxoplasmosis
+  - ETMI-plus es la eliminación de la transmisión maternoinfantil de VIH, sífilis, hepatitis B y Chagas; organiza tamizaje prenatal, tratamiento oportuno y manejo neonatal. — *Cuadernillo Núcleo 9 Seminario 2026 (Prevención de infecciones de transmisión vertical) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Ley 27.675)*
+- **¿Por qué el virus de la rubéola implica riesgo fetal solo ante una infección primaria materna?** _(Respuesta inmune)_
+  - ✔ La inmunidad previa (infección o vacuna) impide en la práctica el pasaje al feto
+  - ✘ El virus no atraviesa la placenta en ninguna etapa del embarazo
+  - ✘ Solo se transmite al hijo por la lactancia materna
+  - ✘ Hace latencia en ganglios y solo reactiva en inmunodeprimidas
+  - Si la madre no tiene anticuerpos, el virus se replica en la placenta y pasa a la sangre fetal; la inmunidad por exposición previa o vacunación lo impide. Tiene un único serotipo y la inmunidad es duradera. — *Compendio ADN (9.a, preguntas a y d) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5a y 5b)*
+- **Un RN cuya madre tuvo exantema maculopapular con adenopatías en el 1.er trimestre presenta cataratas, sordera neurosensorial y ductus persistente. ¿Agente más probable?** _(Virus de la rubéola)_
+  - ✔ Virus de la rubéola
+  - ✘ Citomegalovirus
+  - ✘ Virus varicela-zóster
+  - ✘ Toxoplasma gondii
+  - Es el síndrome de rubéola congénita: cataratas, sordera neurosensorial y cardiopatía (ductus). El riesgo y la gravedad son máximos si la infección materna ocurre en el primer trimestre. — *Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5a y 5c) · Compendio ADN (9.a)*
+- **¿Qué explica que el CMV pueda transmitirse al feto aun sin infección primaria materna durante el embarazo?** _(Citomegalovirus (CMV))_
+  - ✔ Latencia con reactivación, o reinfección por otra cepa, en el embarazo
+  - ✘ Que tiene un único serotipo y no deja inmunidad duradera
+  - ✘ Que se transmite solo por vía transplacentaria en el 1.er trimestre
+  - ✘ Que la IgG materna favorece el pasaje placentario
+  - Como herpesvirus, el CMV queda latente (células mieloides, monocitos): puede reactivarse o la gestante puede reinfectarse con otra cepa, y el virus llega al feto, sobre todo por vía transplacentaria. En madres seropositivas suele ser menos grave. — *Compendio ADN (9.b, pregunta a) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5a y 5b)*
+- **Sobre la infección congénita por citomegalovirus, ¿cuál de estas afirmaciones es correcta?** _(Citomegalovirus (CMV))_
+  - ✔ Es la causa viral más frecuente de anomalías congénitas
+  - ✘ La mayoría de los RN infectados son sintomáticos al nacer
+  - ✘ Solo se transmite si la madre cursa infección primaria
+  - ✘ Se previene con una vacuna del Calendario Nacional
+  - El CMV es la causa vírica más frecuente de anomalías congénitas; el 85-90% de los RN infectados es asintomático al nacer y las secuelas habituales son pérdida auditiva y retraso mental. Se previene con lavado de manos. — *Compendio ADN (9.b y tabla de agentes) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5c)*
+- **Según el cuadernillo, ¿cuál es la vía principal de transmisión vertical del VIH?** _(Virus de la inmunodeficiencia humana (VIH))_
+  - ✔ Perinatal y posnatal (lactancia)
+  - ✘ Transplacentaria en el primer trimestre
+  - ✘ Transplacentaria en cualquier momento del embarazo
+  - ✘ Ascendente, con corioamnionitis temprana
+  - El VIH se transmite principalmente en el período perinatal y posnatal (lactancia); la vía transplacentaria es posible pero menos frecuente. El riesgo se reduce con tratamiento antirretroviral materno. — *Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5a) · Compendio ADN (9.c)*
+- **¿Cómo se diagnostica la infección por VIH en una gestante según el material de la cátedra?** _(Diagnóstico de laboratorio)_
+  - ✔ Prueba rápida o ELISA 4.ª gen. y confirmación por carga viral
+  - ✘ PCR de ADN proviral como tamizaje inicial en el primer control
+  - ✘ Recuento de linfocitos T CD4 como prueba diagnóstica única
+  - ✘ Detección aislada de antígeno p24, sin prueba confirmatoria
+  - En la gestante se tamiza con prueba rápida o ELISA de 4.ª generación y se confirma con carga viral. La Ley 25.543 establece la oferta obligatoria del diagnóstico de VIH en el embarazo. — *Compendio ADN (tabla de agentes, VIH) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Introducción y Grupo 5)*
+- **¿Por qué hasta el 90% de los lactantes infectados con VHB en forma perinatal evoluciona a portación crónica?** _(Respuesta inmune)_
+  - ✔ Por la inmadurez de su respuesta inmune celular
+  - ✘ Por el pasaje transplacentario de anti-HBs materno
+  - ✘ Porque el virus no expresa HBsAg en el lactante
+  - ✘ Porque el virus hace latencia en ganglios neuronales
+  - La respuesta celular inmadura reduce la capacidad de eliminar el virus: hay menos lesión y síntomas, pero alta cronificación, con riesgo de cirrosis o carcinoma hepatocelular (latencia de 9 a 35 años). — *Compendio ADN (9.e) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5a)*
+- **¿Qué rasgo del virus de la hepatitis B resulta llamativo para un virus de ADN?** _(Virus de la hepatitis B)_
+  - ✔ Se replica vía un intermediario de ARN (retrotranscriptasa)
+  - ✘ Su genoma es ADN bicatenario lineal, el mayor de los herpesvirus
+  - ✘ Carece de envoltura, lo que lo hace resistente a la desecación
+  - ✘ Hace latencia en ganglios sensitivos y se reactiva
+  - El VHB (Hepadnaviridae) tiene ADN circular parcialmente bicatenario, pero codifica una retrotranscriptasa y se replica mediante un intermediario de ARN. Tiene envoltura con HBsAg y tropismo hepático estricto. — *Compendio ADN (9.e) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5a)*
+- **Una gestante presenta varicela en los días cercanos al parto. ¿Cuál es el principal riesgo para el recién nacido?** _(Virus varicela-zóster)_
+  - ✔ Varicela diseminada grave, con neumonía o encefalitis
+  - ✘ Síndrome de varicela congénita con hipoplasia de miembros
+  - ✘ Portación crónica asintomática del virus
+  - ✘ Cataratas y sordera neurosensorial tardías
+  - La exposición periparto puede causar varicela neonatal grave, con diseminación a pulmón, cerebro e hígado por la inmadurez de la inmunidad celular. El síndrome de varicela congénita corresponde a la vía transplacentaria. — *Compendio ADN (9.d) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5a y 5c)*
+- **Una gestante seronegativa para varicela tuvo contacto con un caso activo. ¿Qué se indica según el cuadernillo?** _(Virus varicela-zóster)_
+  - ✔ IGVZ (gammaglobulina hiperinmune) lo antes posible, idealmente en 96 h
+  - ✘ Vacuna antivaricela en forma inmediata a la gestante
+  - ✘ Aciclovir solo al recién nacido, al nacer
+  - ✘ Serología a las 4 semanas y conducta expectante
+  - En la gestante susceptible expuesta se indica gammaglobulina hiperinmune (IGVZ) dentro de las 96 horas y evitar contacto con casos activos. La vacunación de mujeres susceptibles se hace en el posparto. (El CDC la acepta hasta 10 días después del contacto.) — *Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5d, tabla de prevención; Prevención primaria) · Compendio ADN (tabla de agentes)*
+- **¿Cuáles son las formas clínicas del herpes simple neonatal descriptas en el cuadernillo?** _(Virus herpes simple 1 y 2)_
+  - ✔ Piel-ojos-boca (SEM), SNC y diseminada
+  - ✘ Cataratas, sordera y cardiopatía congénita
+  - ✘ Rinitis, exantema y lesiones óseas
+  - ✘ Hepatitis aguda, ictericia y coluria
+  - El herpes neonatal suele ser sintomático: forma SEM (piel, ojos, boca), forma con compromiso del SNC (letargo, convulsiones) o forma diseminada (coagulopatía, falla multiorgánica). — *Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5c, neonato) · Compendio ADN (9.f)*
+- **¿Dónde coloniza Streptococcus agalactiae (EGB) a la persona gestante portadora asintomática?** _(Streptococcus agalactiae)_
+  - ✔ Tracto digestivo inferior y aparato genitourinario
+  - ✘ Nasofaringe y piel, de donde pasa al RN por contacto
+  - ✘ Glándula mamaria, con pasaje al RN por la lactancia
+  - ✘ Placenta, con transmisión transplacentaria temprana
+  - EGB coloniza el aparato digestivo inferior y el genitourinario; entre el 10% y el 30% de las embarazadas son portadoras vaginales transitorias, y cerca del 60% de los hijos de madres colonizadas se colonizan. — *Compendio ADN (9.g) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 3a)*
+- **¿Cuándo y cómo se pesquisa la portación de Streptococcus agalactiae en el embarazo?** _(Diagnóstico de laboratorio)_
+  - ✔ Semanas 35-37: hisopado vaginal y rectal, cultivo selectivo
+  - ✘ Primer trimestre: urocultivo convencional y antibiograma
+  - ✘ Al ingresar en trabajo de parto: hemocultivo materno
+  - ✘ Semana 24: serología IgG e IgM contra el antígeno B
+  - Se recomienda estudiar a todas las gestantes entre las semanas 35 y 37 con cultivo en medio selectivo con antibióticos (o PCR) de muestras vaginales y rectales. — *Compendio ADN (9.g) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 1)*
+- **Una gestante con cultivo positivo para EGB inicia trabajo de parto. ¿Qué profilaxis corresponde?** _(Streptococcus agalactiae)_
+  - ✔ Penicilina G intravenosa al menos 4 h antes del parto
+  - ✘ Vacuna anti-EGB a la gestante durante el tercer trimestre
+  - ✘ Penicilina benzatínica IM en dosis única al RN
+  - ✘ Ninguna: es colonización y no causa enfermedad
+  - La quimioprofilaxis intraparto es con penicilina G intravenosa al menos 4 horas antes del parto. No hay vacunas disponibles contra EGB. — *Compendio ADN (9.g) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 1)*
+- **Según el cuadernillo, ¿en qué momentos se tamiza sífilis (VDRL/RPR) durante el embarazo?** _(Treponema pallidum)_
+  - ✔ 1.er trimestre, 3.er trimestre y parto o aborto
+  - ✘ Solo en el primer control prenatal
+  - ✘ Solo si la pareja tiene diagnóstico de sífilis
+  - ✘ Entre las semanas 35 y 37, junto con la pesquisa de EGB
+  - El tamizaje prenatal de sífilis es universal y seriado: VDRL/RPR en el primer trimestre, en el tercer trimestre y al momento del parto o aborto. — *Cuadernillo Núcleo 9 Seminario 2026 (Prevención, tamizaje prenatal universal y seriado)*
+- **¿Cuál es el tratamiento de la sífilis en la persona gestante según el cuadernillo?** _(Treponema pallidum)_
+  - ✔ Penicilina benzatínica y tratamiento de la pareja sexual
+  - ✘ Penicilina benzatínica a la gestante, sin tratar a la pareja
+  - ✘ Espiramicina hasta el final del embarazo
+  - ✘ Penicilina G IV solo durante el trabajo de parto
+  - Se indica penicilina benzatínica según el estadio clínico materno, con tratamiento simultáneo de la pareja sexual. La penicilina es de elección; no existe vacuna. — *Cuadernillo Núcleo 9 Seminario 2026 (Tratamiento materno oportuno) · Compendio ADN (9.h)*
+- **¿Qué cuadro es característico de la sífilis congénita en el recién nacido que manifiesta la enfermedad?** _(Treponema pallidum)_
+  - ✔ Rinitis seguida de exantema maculopapular descamativo
+  - ✘ Vesículas en piel, ojos y boca, con compromiso del SNC
+  - ✘ Cataratas, sordera neurosensorial y ductus persistente
+  - ✘ Calcificaciones periventriculares y petequias
+  - La mayoría nace sin signos, pero puede aparecer rinitis seguida de un exantema maculopapular generalizado y descamativo. En no tratados son frecuentes malformaciones dentales y óseas, ceguera y sordera. — *Compendio ADN (9.h) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 3b)*
+- **¿Cómo se diagnostica la infección por Trypanosoma cruzi en una persona gestante?** _(Trypanosoma cruzi)_
+  - ✔ Dos técnicas serológicas diferentes reactivas
+  - ✘ Micrométodo en sangre periférica antes del parto
+  - ✘ PCR en sangre materna como única prueba
+  - ✘ Una sola ELISA reactiva en el primer trimestre
+  - La gestante suele estar en fase crónica indeterminada con baja parasitemia, por eso se buscan anticuerpos: dos pruebas serológicas de métodos distintos (ELISA, IFI, HAI, CMIA); si discordan, se hace una tercera. — *Compendio ADN (9.j) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 4 y Anexo)*
+
+### Difícil (15)
+
+- **Gestante de 14 semanas: IgG e IgM anti-Toxoplasma no reactivas. En la semana 24: IgG e IgM reactivas. ¿Cómo se interpreta?** _(Toxoplasma gondii)_
+  - ✔ Seroconversión: infección aguda adquirida en el embarazo
+  - ✘ Infección crónica previa al embarazo, sin riesgo fetal
+  - ✘ Reactivación de una infección latente materna
+  - ✘ Falso positivo por IgM persistente de años previos
+  - En la semana 14 era susceptible (sin exposición previa); el paso de negativo a positivo es una seroconversión e indica infección aguda entre las semanas 14 y 24, con riesgo de transmisión fetal. — *Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 3, caso Agustina) · Compendio ADN (9.i)*
+- **¿Por qué el diagnóstico de sífilis en la gestante se apoya en pruebas serológicas y no en el cultivo del agente?** _(Treponema pallidum)_
+  - ✔ T. pallidum no se desarrolla en cultivos acelulares
+  - ✘ El cultivo solo es positivo en la sífilis terciaria
+  - ✘ El cultivo no distingue T. pallidum de Leptospira
+  - ✘ T. pallidum es aerobio estricto y crece en días
+  - T. pallidum es una espiroqueta fina, microaerófila o anaerobia, muy sensible al oxígeno e incapaz de desarrollarse en cultivos acelulares. Se usa VDRL (no treponémica) y una prueba treponémica confirmatoria. — *Compendio ADN (9.h) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 2)*
+- **Una gestante tiene IgG e IgM anti-Toxoplasma reactivas en una única muestra. ¿Por qué eso no alcanza para afirmar una infección aguda?** _(Diagnóstico de laboratorio)_
+  - ✔ La IgM puede persistir más de 12 meses tras la infección
+  - ✘ En la toxoplasmosis la IgG aparece siempre antes que la IgM
+  - ✘ La IgM materna también se detecta en el feto
+  - ✘ La IgG reactiva siempre indica reactivación
+  - La IgM anti-T. gondii puede persistir más de 12 meses y dar un falso positivo de agudeza. La infección aguda se demuestra por seroconversión o aumento al doble de títulos en muestras seriadas con 3 semanas de separación. — *Compendio ADN (9.i, métodos diagnósticos) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 3)*
+- **Se confirma una toxoplasmosis aguda en una gestante. ¿Qué estudio prenatal permite evaluar si hubo infección fetal?** _(Toxoplasma gondii)_
+  - ✔ PCR en líquido amniótico
+  - ✘ IgM anti-Toxoplasma en suero materno
+  - ✘ Micrométodo en sangre materna
+  - ✘ Búsqueda de ovoquistes en heces maternas
+  - El diagnóstico prenatal se hace con ecografía y amniocentesis: la PCR del líquido amniótico para T. gondii tiene excelentes valores predictivos positivo y negativo. — *Compendio ADN (9.i, métodos diagnósticos) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 3, pregunta 3)*
+- **Ante un lactante con sospecha de rubéola congénita, ¿qué hallazgo serológico apoya la infección congénita?** _(Diagnóstico de laboratorio)_
+  - ✔ IgM específica e IgG persistente más allá de 6-12 meses
+  - ✘ IgG al nacer con el mismo título que la madre
+  - ✘ IgG que cae hasta negativizarse hacia los 6 meses de vida
+  - ✘ IgG e IgM negativas al nacer y a los 6 meses
+  - En el neonato el cuadernillo indica IgM específica más persistencia de IgG más allá de los 6-12 meses (producción propia, no materna); también RT-PCR en orina o hisopado nasofaríngeo. — *Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5c, neonato)*
+- **Un RN hijo de madre con Chagas crónico nace sin signos clínicos. ¿Qué estudio corresponde antes del egreso hospitalario?** _(Trypanosoma cruzi)_
+  - ✔ Micrométodo o PCR en sangre del RN
+  - ✘ ELISA y HAI en sangre del recién nacido
+  - ✘ Ninguno, porque está asintomático
+  - ✘ Repetir la serología materna en el parto
+  - Antes de los 10 meses se usan métodos directos: la IgG del RN puede ser materna pasiva y cerca del 10% de los RN infectados tiene IgG negativa. Entre el 60% y el 90% de los infectados es asintomático al nacer. — *Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 4 y Anexo) · Compendio ADN (9.j)*
+- **Un RN hijo de madre con Chagas tiene un micrométodo negativo antes del egreso. ¿Qué conducta corresponde?** _(Trypanosoma cruzi)_
+  - ✔ Seguimiento y serología a partir de los 10 meses de vida
+  - ✘ Alta definitiva: el micrométodo negativo descarta la infección
+  - ✘ Serología al mes de vida para confirmar o descartar
+  - ✘ Iniciar benznidazol sin más estudios
+  - Un micrométodo negativo no descarta la infección. Hasta los 10 meses la IgG del niño puede ser materna, por eso el diagnóstico final se hace con serología (dos técnicas) a partir de los 10 meses. — *Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 4, pregunta 5 y Anexo)*
+- **RN por parto vaginal, de madre portadora de EGB sin profilaxis intraparto, presenta a las 34 h dificultad respiratoria y sospecha de sepsis. ¿Cómo se clasifica?** _(Streptococcus agalactiae)_
+  - ✔ Enfermedad de comienzo precoz por EGB
+  - ✘ Enfermedad de comienzo tardío por EGB
+  - ✘ Infección transplacentaria con malformaciones
+  - ✘ Colonización benigna sin enfermedad invasiva
+  - La enfermedad de comienzo precoz se presenta con bacteriemia, neumonía o meningitis; la tardía, con bacteriemia con meningitis. EGB es la causa más frecuente de septicemia y meningitis en el recién nacido. — *Cuadernillo Núcleo 9 Seminario 2026 (Actividad 3a, caso clínico) · Compendio ADN (9.g)*
+- **RN con letargo y convulsiones; su madre tenía lesiones vesiculares genitales al parto. Ante sospecha de herpes neonatal con compromiso del SNC, ¿qué estudio corresponde?** _(Virus herpes simple 1 y 2)_
+  - ✔ PCR para VHS en LCR
+  - ✘ IgG anti-VHS en suero del recién nacido
+  - ✘ Test de Tzanck en LCR
+  - ✘ Cultivo de LCR en medio selectivo para EGB
+  - En el neonato se usa PCR o cultivo viral de hisopado de vesículas o mucosas y, si hay compromiso del SNC, PCR en LCR. — *Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5c, neonato) · Compendio ADN (tabla de agentes, HSV)*
+- **Gestante con VDRL reactiva 1/32 y prueba treponémica positiva llega al parto sin tratamiento completo documentado. El RN está asintomático. ¿Qué conducta corresponde?** _(Treponema pallidum)_
+  - ✔ Evaluar LCR (VDRL), Rx de huesos largos y laboratorio
+  - ✘ Alta sin estudios, porque está asintomático al nacer
+  - ✘ Solo una prueba treponémica en sangre del RN y alta
+  - ✘ Comparar VDRL con la madre y dar el alta si es menor
+  - Sin tratamiento materno adecuado, el RN asintomático se evalúa para definir el esquema de tratamiento: LCR (células, proteínas y VDRL), Rx de huesos largos, hemograma, hepatograma y ecografías. — *Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 2, caso Sofía y algoritmo) · Compendio ADN (9.h, punto 2)*
+- **Gestante con sífilis tratada en forma adecuada y con tiempo antes del parto; RN asintomático. ¿Qué comparación puntual se realiza?** _(Diagnóstico de laboratorio)_
+  - ✔ Títulos de VDRL del RN frente a los de la madre
+  - ✘ Prueba treponémica del RN frente a la materna
+  - ✘ IgM del RN frente a la IgG de la madre
+  - ✘ VDRL del RN al nacer frente a la del mes de vida
+  - En el RN asintomático de una gestante adecuadamente tratada se comparan los títulos de la prueba no treponémica (VDRL) del neonato con los maternos para definir la conducta. — *Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 2, pregunta 4) · Compendio ADN (9.h, punto 1)*
+- **Un recién nacido presenta cicatrices cutáneas, hipoplasia de miembros y microoftalmia. ¿Qué agente de transmisión vertical es el más probable?** _(Virus varicela-zóster)_
+  - ✔ Virus varicela-zóster
+  - ✘ Virus de la rubéola
+  - ✘ Citomegalovirus
+  - ✘ Treponema pallidum
+  - Es el síndrome de varicela congénita: lesiones cutáneas cicatrizales, hipoplasia de miembros y alteraciones oculares (microoftalmia) o del SNC. El diagnóstico se apoya en PCR del líquido vesicular y el antecedente materno. — *Compendio ADN (tabla de agentes, varicela) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5c)*
+- **RN con hepatoesplenomegalia, petequias, microcefalia y calcificaciones periventriculares; la madre tuvo un cuadro mononucleosiforme leve. ¿Agente más probable?** _(Citomegalovirus (CMV))_
+  - ✔ Citomegalovirus
+  - ✘ Virus de la rubéola
+  - ✘ Virus varicela-zóster
+  - ✘ Virus de la hepatitis B
+  - El 10-15% de los RN con CMV congénito es sintomático: hepatoesplenomegalia, petequias, microcefalia, calcificaciones periventriculares y coriorretinitis. En la gestante suele ser asintomático o mononucleosiforme. — *Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5c) · Compendio ADN (9.b)*
+- **Una gestante tiene IgG positiva e IgM negativa para CMV y para rubéola. ¿Qué implica para el riesgo fetal en el embarazo actual?** _(Diagnóstico de laboratorio)_
+  - ✔ Rubéola: riesgo prácticamente nulo; CMV: bajo pero no nulo
+  - ✘ Ambos sin riesgo, porque la IgG materna protege
+  - ✘ Ambos con alto riesgo: IgM negativa indica susceptibilidad
+  - ✘ Rubéola: riesgo por reactivación; CMV: sin riesgo
+  - Ambos patrones indican infección pasada. En rubéola la inmunidad materna impide en la práctica la transmisión; en CMV el riesgo es bajo pero persiste por reactivación o reinfección por otra cepa. — *Compendio ADN (9.b, pregunta d) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 2d y 5b)*
+- **Gestante de 17 años sin controles en trabajo de parto; a ella se la estudia con prueba rápida para VIH. ¿Qué método corresponde para diagnosticar VIH en el RN?** _(Virus de la inmunodeficiencia humana (VIH))_
+  - ✔ PCR de ADN proviral (método directo)
+  - ✘ La misma prueba rápida de anticuerpos
+  - ✘ ELISA de 4.ª generación al nacer
+  - ✘ Recuento de CD4 en sangre de cordón
+  - La madre se estudia con métodos indirectos (prueba rápida o ELISA), pero en el RN el cuadernillo indica pruebas virológicas o moleculares: PCR de ADN proviral. Además se indica profilaxis antirretroviral al RN. — *Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 5) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5c; Manejo neonatal)*
+
+## Núcleo 10 (45)
+
+### Fácil (10)
+
+- **¿Cuál es el principal vector del dengue en los ciclos urbanos de nuestro país?** _(Aedes aegypti)_
+  - ✔ Aedes aegypti
+  - ✘ Anopheles hembra, de picadura nocturna
+  - ✘ Flebótomos de la subfamilia Phlebotominae
+  - ✘ Triatominos domiciliarios como la vinchuca
+  - Aedes aegypti es una especie introducida e invasora que se volvió la principal de importancia sanitaria en Argentina: transmite dengue, Zika, chikungunya y fiebre amarilla urbana. — *Cuadernillo Núcleo 10 Vectores 2026 (Seminario e Introducción) · Compendio ADN (10)*
+- **¿A qué familia pertenece el virus del dengue y cuántas variantes circulan?** _(Virus del dengue)_
+  - ✔ Flaviviridae (Flavivirus), con cuatro serotipos
+  - ✘ Togaviridae (Alphavirus), con cuatro serotipos
+  - ✘ Peribunyaviridae, con dos serotipos descriptos
+  - ✘ Flaviviridae, pero con un único serotipo circulante
+  - El virus del dengue es un Flavivirus de la familia Flaviviridae y existen cuatro variantes: DENV 1, 2, 3 y 4. — *Cuadernillo Núcleo 10 Vectores 2026 (Introducción) · Compendio ADN (10.a)*
+- **¿Cuál es el vector principal de Trypanosoma cruzi en la enfermedad de Chagas-Mazza?** _(Trypanosoma cruzi)_
+  - ✔ Los triatominos, como la vinchuca (Triatoma infestans)
+  - ✘ El mosquito Aedes aegypti, de hábitos diurnos y urbanos
+  - ✘ Los flebótomos de zonas rurales y peridomiciliarias
+  - ✘ Los mosquitos Culex que crían en grandes humedales
+  - El vector del Chagas son los triatominos; en Argentina Triatoma infestans, antropófila, de hábitos nocturnos y que vuela poco, coloniza la vivienda precaria. — *Cuadernillo Núcleo 10 Vectores 2026 (Actividad 5 y TP 21) · Compendio ADN (10.g)*
+- **¿Qué insecto transmite el paludismo y qué hábito de picadura tiene?** _(Plasmodium spp.)_
+  - ✔ El mosquito Anopheles hembra, de picadura nocturna
+  - ✘ El mosquito Aedes aegypti, de picadura diurna
+  - ✘ El flebótomo hembra, que pica al atardecer
+  - ✘ El triatomino, que pica de noche y defeca al alimentarse
+  - El vector del paludismo es la hembra de Anopheles, que cría en pantanos y agua estancada, pica de noche y es antropofílica. — *Cuadernillo Núcleo 10 Vectores 2026 (TP 21, Actividad 2) · Compendio ADN (10.e)*
+- **¿Qué insectos transmiten la leishmaniasis?** _(Leishmania spp.)_
+  - ✔ Dípteros flebótomos de la subfamilia Phlebotominae
+  - ✘ Mosquitos del género Anopheles, de actividad nocturna
+  - ✘ Mosquitos Aedes que crían en recipientes artificiales
+  - ✘ Chinches triatominas que colonizan el intradomicilio
+  - Leishmania se transmite por la picadura de dípteros flebótomos (familia Psychodidae, subfamilia Phlebotominae), de hábitat rural y peridomiciliario y mayor actividad al atardecer y de noche. — *Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4 y TP 21) · Compendio ADN (10.f)*
+- **¿Con qué cepa se prepara la vacuna contra la fiebre amarilla y qué duración de inmunidad genera?** _(Virus de la fiebre amarilla)_
+  - ✔ Cepa 17D, con inmunidad para toda la vida
+  - ✘ Cepa 17D, pero exige un refuerzo anual
+  - ✘ Cepa TAK-003, con dos dosis separadas por tres meses
+  - ✘ No hay vacuna: solo se hace control vectorial
+  - La vacuna se prepara con la cepa 17D (virus vivo atenuado) y, según la OMS, una dosis protege de por vida. En Argentina el calendario la indica a los 18 meses, con refuerzo a los 11 años, en zonas de riesgo. — *Compendio ADN (10.b, punto 4) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 2)*
+- **En el ambiente urbano, ¿dónde pone sus huevos Aedes aegypti?** _(Aedes aegypti)_
+  - ✔ En recipientes artificiales con agua limpia y estancada
+  - ✘ En pantanos y charcas con abundante vegetación
+  - ✘ En grietas de paredes de barro y techos de paja
+  - ✘ En materia orgánica sombreada del peridomicilio rural
+  - Aedes aegypti usa cualquier contenedor que acumule agua (macetas, cubetas, botellas). Por eso la medida central es eliminar criaderos; los pantanos son el criadero de Anopheles. — *Cuadernillo Núcleo 10 Vectores 2026 (TP 21, Actividad 1) · Compendio ADN (10)*
+- **¿A qué familia pertenece el virus chikungunya?** _(Virus chikungunya)_
+  - ✔ Togaviridae, es un alphavirus
+  - ✘ Flaviviridae, igual que dengue y Zika
+  - ✘ Peribunyaviridae, igual que el virus Oropouche
+  - ✘ Flaviviridae, aunque sin reactividad cruzada
+  - Chikungunya es un alphavirus de la familia Togaviridae, a diferencia de dengue, Zika y fiebre amarilla, que son Flaviviridae. Comparte con ellos el vector Aedes. — *Cuadernillo Núcleo 10 Vectores 2026 (cuadro de agentes) · Compendio ADN (10.d)*
+- **Entre los tres protozoos del núcleo, ¿cuál es el apicomplexa?** _(Plasmodium spp.)_
+  - ✔ Plasmodium spp.
+  - ✘ Trypanosoma cruzi
+  - ✘ Leishmania spp.
+  - ✘ Ninguno: los tres son protozoos flagelados
+  - Plasmodium es un protozoo apicomplexa (esporozoario); Trypanosoma cruzi y Leishmania son protozoos flagelados. — *Cuadernillo Núcleo 10 Vectores 2026 (cuadro de agentes) · Compendio ADN (10)*
+- **¿En qué se basa la prevención del paludismo en la mayoría de los países?** _(Prevención)_
+  - ✔ En el rociado residual intradomiciliario y los mosquiteros con insecticida
+  - ✘ En la vacunación masiva y gratuita de toda la población de las zonas endémicas
+  - ✘ En el control de los bancos de sangre y el tamizaje de donantes
+  - ✘ En el mejoramiento habitacional con revoque y pisos de madera
+  - La prevención del paludismo se apoya en el rociado residual intradomiciliario (RRI) y en la distribución de mosquiteros tratados con insecticida (MTI). — *Cuadernillo Núcleo 10 Vectores 2026 (Introducción) · Compendio ADN (10)*
+
+### Normal (20)
+
+- **¿Qué significa que un virus sea un arbovirus?** _(Arbovirus)_
+  - ✔ Que se agrupa por su transmisión vectorial por artrópodos, no por su taxonomía
+  - ✘ Que pertenece a la familia Flaviviridae y tiene ARN de polaridad positiva
+  - ✘ Que es un género viral definido por la secuencia de su glucoproteína E
+  - ✘ Que solo puede replicarse en células de invertebrados, nunca de vertebrados
+  - Arbovirus (arthropod borne viral diseases) no es una clasificación taxonómica sino un agrupamiento ecológico basado en la transmisión por artrópodos; incluye varias familias virales. — *Cuadernillo Núcleo 10 Vectores 2026 (Introducción) · Compendio ADN (10)*
+- **Una vez que el mosquito ingiere sangre virémica, ¿cuál es el recorrido del arbovirus dentro del vector?** _(Arbovirus)_
+  - ✔ Epitelio intestinal, lámina basal, hemolinfa y glándulas salivales
+  - ✘ Glándulas salivales, hemolinfa y después epitelio intestinal
+  - ✘ Hemolinfa, ovarios y transmisión exclusivamente a la descendencia
+  - ✘ Epitelio intestinal y luego eliminación en las deyecciones del insecto
+  - El virus replica en el epitelio intestinal, atraviesa la lámina basal, viaja por la hemolinfa y se acumula en las glándulas salivales, desde donde se inocula con la saliva. — *Cuadernillo Núcleo 10 Vectores 2026 (Introducción, Figura 1) · Compendio ADN (10)*
+- **¿Cuáles son las características estructurales del virus del dengue?** _(Virus del dengue)_
+  - ✔ ARN monocatenario positivo, envuelto, con glucoproteína E externa
+  - ✘ ADN bicatenario desnudo, con cápside icosaédrica y replicación nuclear
+  - ✘ ARN segmentado de polaridad negativa, envuelto
+  - ✘ ARN monocatenario positivo pero sin envoltura lipídica
+  - Los cuatro serotipos son ARN monocatenario positivo con envoltura, donde la glucoproteína E forma la capa externa y expresa determinantes antigénicos compartidos entre flavivirus. — *Compendio ADN (10.a, punto 1) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 2)*
+- **¿Qué combinación de vector y hábitat de cría o refugio es correcta?** _(Vectores)_
+  - ✔ Triatoma, grietas de paredes rústicas; Anopheles, cuerpos de agua con vegetación
+  - ✘ Triatoma, microcontenedores urbanos; Anopheles, grietas de paredes de barro
+  - ✘ Lutzomyia, agua limpia de macetas; Aedes, materia orgánica sombreada
+  - ✘ Los cuatro usan los mismos microhábitats urbanos con agua estancada
+  - Los vectores de parásitos piden nichos rústicos (grietas para Triatoma, materia orgánica sombreada para Lutzomyia, agua con vegetación para Anopheles); Aedes aegypti usa microcontenedores artificiales urbanos. — *Cuadernillo Núcleo 10 Vectores 2026 (TP 21, Introducción)*
+- **En la primoinfección por dengue, ¿cuándo ocurre la etapa crítica y con qué signo coincide?** _(Virus del dengue)_
+  - ✔ Entre los días 4 y 7, al caer la fiebre (defervescencia)
+  - ✘ En los primeros dos días, con el pico febril de 40 °C
+  - ✘ Después del día 10, cuando la IgM alcanza su máximo
+  - ✘ Durante la etapa de recuperación, con la reabsorción del líquido
+  - La etapa crítica va aproximadamente del día 4 al 7 y coincide con la defervescencia: es el período de mayor riesgo por extravasación de plasma, hemorragias y daño de órganos. — *Compendio ADN (10.a, etapas) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 1.b.I)*
+- **¿Qué integra la tríada ecoepidemiológica de las infecciones de transmisión vectorial?** _(Epidemiología)_
+  - ✔ Patógeno, vector y hospedador
+  - ✘ Vector, reservorio y vacuna disponible
+  - ✘ Clima, insecticida y vivienda precaria
+  - ✘ Patógeno, hospedador intermedio y hospedador definitivo
+  - La tríada es patógeno + vector + hospedador, modulada por la matriz ambiental y socioeconómica: la temperatura, la humedad y el régimen hídrico regulan la competencia vectorial. — *Cuadernillo Núcleo 10 Vectores 2026 (TP 21, Introducción)*
+- **¿Cuál es el mecanismo del fenómeno de amplificación dependiente de anticuerpos (ADA) en el dengue?** _(Virus del dengue)_
+  - ✔ Anticuerpos no neutralizantes facilitan la entrada del virus a células mononucleares
+  - ✘ Anticuerpos neutralizantes bloquean la glucoproteína E y lisan los hepatocitos
+  - ✘ Los linfocitos T citotóxicos destruyen las plaquetas por reconocimiento directo del virus
+  - ✘ El interferón inducido por el virus produce la extravasación de plasma
+  - Los anticuerpos producidos contra un serotipo no son necesariamente neutralizantes frente a otro: al unirse al virus favorecen su entrada en macrófagos y monocitos vía receptores Fc y amplifican la infección. — *Cuadernillo Núcleo 10 Vectores 2026 (Actividad 1.b.IV) · Compendio ADN (10.a, punto 2)*
+- **En la inmunopatogenia del dengue, ¿qué citocina se relaciona con las manifestaciones hemorrágicas?** _(Respuesta inmune)_
+  - ✔ TNF-α
+  - ✘ IL-4
+  - ✘ IL-10
+  - ✘ Interferón gamma producido por linfocitos B
+  - Los macrófagos producen citocinas proinflamatorias (IL-1β, IL-2, IL-6, IL-8 y TNF-α); el TNF-α se vincula con las hemorragias al favorecer la trombocitopenia y la disfunción endotelial. — *Cuadernillo Núcleo 10 Vectores 2026 (Actividad 1.b.II y III) · Compendio ADN (10, respuesta inmune)*
+- **Un paciente con sospecha de dengue consulta en el segundo día de fiebre. ¿Qué método diagnóstico corresponde?** _(Diagnóstico de laboratorio)_
+  - ✔ RT-PCR para el ARN viral o ELISA de antígeno
+  - ✘ IgM específica por ELISA de captura
+  - ✘ Comparar títulos de IgG de fase aguda y convaleciente
+  - ✘ Inmunofluorescencia indirecta sobre biopsia hepática
+  - En la viremia temprana se usa aislamiento viral, RT-PCR o ELISA de antígeno; la IgM recién se hace detectable en la etapa crítica, cuando la viremia desaparece. — *Compendio ADN (10.a, punto 5) · Cuadernillo Núcleo 10 Vectores 2026 (TP 21, Actividad 1.d)*
+- **¿Cómo es la patogenia de la fiebre amarilla en su forma grave?** _(Virus de la fiebre amarilla)_
+  - ✔ Enfermedad bifásica con tropismo hepático y renal, ictericia y hemorragias
+  - ✘ Enfermedad monofásica con artritis paralizante persistente
+  - ✘ Infección leve con sarpullido, conjuntivitis no purulenta y dolor en manos y pies
+  - ✘ Accesos febriles periódicos por ruptura sincronizada de eritrocitos
+  - Es bifásica: una fase febril inicial y, tras una breve remisión, la forma grave por localización hepática y renal, con ictericia, hemorragias digestivas (vómito negro) y letalidad de hasta 50% en epidemias. — *Compendio ADN (10.b, punto 2) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 2)*
+- **Según el Ministerio de Salud, ¿qué signo acompaña al sarpullido en el cuadro sintomático del Zika?** _(Virus del Zika)_
+  - ✔ Conjuntivitis no purulenta
+  - ✘ Ictericia con vómito negro
+  - ✘ Esplenomegalia con pancitopenia
+  - ✘ Úlcera indolora de fondo granuloso en el sitio de la picadura
+  - El cuadro incluye sarpullido más fiebre, conjuntivitis no purulenta, cefalea, dolor corporal y articular (manos y pies), decaimiento e inflamación de miembros inferiores; puede dar problemas neurológicos. — *Compendio ADN (10.c, punto 2, sintomatología del Ministerio de Salud)*
+- **¿Qué manifestación clínica le da el nombre a la enfermedad por virus chikungunya?** _(Virus chikungunya)_
+  - ✔ Las artralgias intensas que hacen caminar encorvado
+  - ✘ La ictericia de la forma grave
+  - ✘ El shock por extravasación de plasma
+  - ✘ La microcefalia de la infección congénita
+  - El nombre, en lengua makonde, alude a la postura encorvada por las artralgias intensas (el material habla de «artritis paralizante»). No hay antiviral específico ni vacuna en el Calendario Nacional. — *Compendio ADN (10.d, puntos 2 y 4) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 2)*
+- **En el ciclo de Plasmodium, ¿qué papel cumple el mosquito Anopheles?** _(Plasmodium spp.)_
+  - ✔ Es el hospedador definitivo, donde ocurre la fase sexual o esporogónica
+  - ✘ Es el hospedador intermedio, donde ocurre la fase eritrocítica
+  - ✘ Es solo un transportador mecánico, sin replicación del parásito
+  - ✘ Es el reservorio donde el parásito persiste como hipnozoíto
+  - El ciclo es heteroxénico: el humano es el hospedador intermedio (fases exoeritrocítica y eritrocítica) y el Anopheles hembra el definitivo, donde se da la fase sexual o esporogónica. — *Compendio ADN (10.e, cadena epidemiológica) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 3)*
+- **¿Qué estadio de Plasmodium entra al ser humano con la picadura y hacia dónde se dirige?** _(Plasmodium spp.)_
+  - ✔ El esporozoíto, que viaja al hígado
+  - ✘ El gametocito, que queda en sangre periférica
+  - ✘ El merozoíto, que va directo al eritrocito
+  - ✘ El tripomastigote metacíclico, que penetra en la dermis
+  - El Anopheles inocula esporozoítos maduros de sus glándulas salivales en la dermis y el torrente sanguíneo; los esporozoítos viajan al hígado para la fase preeritrocítica o exoeritrocítica. — *Compendio ADN (10.e, puerta de entrada) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 3)*
+- **¿Cuál es la puerta de salida de Plasmodium desde el hospedador humano?** _(Plasmodium spp.)_
+  - ✔ Los gametocitos de la sangre periférica, ingeridos por el mosquito
+  - ✘ Los esporozoítos liberados por el hígado hacia la bilis
+  - ✘ Los merozoítos eliminados por orina durante los accesos febriles
+  - ✘ Los trofozoítos que salen por las lesiones cutáneas de la picadura
+  - El mosquito ingiere micro y macrogametocitos al alimentarse; estos resisten la digestión en el estómago del vector e inician la esporogonia. — *Compendio ADN (10.e, puerta de salida) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 3)*
+- **¿Qué formas presenta Leishmania en el mamífero y en el vector, y cuál es su tropismo celular?** _(Leishmania spp.)_
+  - ✔ Amastigote intracelular en el mamífero y promastigote flagelado en el vector
+  - ✘ Promastigote intracelular en el mamífero y amastigote flagelado en el vector
+  - ✘ Epimastigote en el mamífero y tripomastigote metacíclico en el vector
+  - ✘ Esporozoíto en el mamífero y gametocito en el intestino del vector
+  - Es un parásito dimorfo: promastigote flagelado en el vector y amastigote intracelular obligado en las células del sistema fagocítico mononuclear (macrófagos y monocitos) del mamífero. — *Compendio ADN (10.f, puntos 1 y I) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4.b.I)*
+- **¿Qué cuadro clínico define a la leishmaniasis visceral o kala-azar?** _(Leishmania spp.)_
+  - ✔ Fiebre, esplenomegalia, caquexia y pancitopenia
+  - ✘ Úlceras cutáneas indoloras con fondo granuloso
+  - ✘ Destrucción del tabique nasal con disfonía
+  - ✘ Infiltrados nodulares difusos de aspecto leprómico, sin úlcera
+  - La forma visceral (kala-azar) cursa con fiebre, esplenomegalia, caquexia y pancitopenia por compromiso del sistema fagocítico mononuclear: bazo, hígado, médula ósea y ganglios. — *Compendio ADN (10.f, punto II) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4.b.II y III)*
+- **¿Cómo ingresa Trypanosoma cruzi al ser humano en la transmisión vectorial?** _(Trypanosoma cruzi)_
+  - ✔ Por los tripomastigotes metacíclicos de las deyecciones del triatomino
+  - ✘ Por los tripomastigotes inoculados con la saliva del triatomino
+  - ✘ Por los amastigotes que el vector regurgita mientras se alimenta
+  - ✘ Por los epimastigotes que atraviesan la piel intacta del hospedador
+  - La vía vectorial es por las deyecciones del triatomino infectado al picar: los tripomastigotes metacíclicos penetran las células en el sitio de la picadura y se transforman en amastigotes. — *Compendio ADN (10.g, vías de transmisión y formas) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 5)*
+- **¿Qué forma de Trypanosoma cruzi se multiplica en el intestino medio del triatomino?** _(Trypanosoma cruzi)_
+  - ✔ El epimastigote
+  - ✘ El amastigote
+  - ✘ El tripomastigote metacíclico
+  - ✘ El promastigote procíclico, que después hace metaciclogénesis
+  - En el vector, los tripomastigotes pasan a esferomastigotes en el estómago y luego a epimastigotes fusiformes y móviles que se reproducen en el intestino medio; en el intestino posterior se forman los metacíclicos. — *Compendio ADN (10.g, formas del parásito)*
+- **Además de la vectorial, ¿cuáles son otras vías de transmisión de la enfermedad de Chagas-Mazza?** _(Trypanosoma cruzi)_
+  - ✔ Transfusional, congénita, oral, accidental y por trasplantes
+  - ✘ Respiratoria por aerosoles y contacto interhumano casual
+  - ✘ Sexual y por fómites contaminados con deyecciones secas
+  - ✘ Solo la congénita, porque las demás fueron descartadas
+  - La vectorial es la principal en la naturaleza, pero también se transmite por sangre o plasma contaminados, por vía transplacentaria (alrededor del 5 % de los hijos de madres infectadas), oral, accidental y por trasplantes. — *Compendio ADN (10.g, vías de transmisión) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4, casos clínicos)*
+
+### Difícil (15)
+
+- **Un nene de 6 años de una región subtropical tiene fiebre, escalofríos y sudoración cada 48 h. La gota gruesa muestra eritrocitos con trofozoítos y gametocitos. ¿Qué explica la periodicidad?** _(Plasmodium spp.)_
+  - ✔ La esquizogonia eritrocítica sincronizada, que rompe los glóbulos rojos cada 48 h
+  - ✘ La esquizogonia exoeritrocítica hepática, que libera merozoítos cada 48 h
+  - ✘ La fase esporogónica del mosquito, que dura entre 8 y 12 días
+  - ✘ La activación periódica de hipnozoítos latentes en el hepatocito
+  - La fiebre terciana corresponde a accesos cada 48 h por el ciclo esquizogónico eritrocítico, cuya ruptura sincronizada libera merozoítos y pigmento y produce las etapas fría, caliente y de sudoración. — *Cuadernillo Núcleo 10 Vectores 2026 (Actividad 3.c y casos clínicos, Caso 1) · Compendio ADN (10.e)*
+- **¿Qué especie de Plasmodium produce fiebre cuartana y qué la caracteriza?** _(Plasmodium spp.)_
+  - ✔ P. malariae, con ciclo de 72 h y persistencia crónica
+  - ✘ P. falciparum, con ciclo de 72 h y alta letalidad
+  - ✘ P. vivax, con ciclo de 48 h y recaídas por hipnozoítos
+  - ✘ P. ovale, con ciclo de 72 h y accesos cada dos días
+  - P. malariae da fiebre cuartana (cada 72 h) y persistencia crónica por su tropismo eritrocítico estable sin hipnozoítos. La terciana la causan P. falciparum (maligna), P. vivax y P. ovale. — *Compendio ADN (10.e, fiebre terciana y cuartana) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 3.c)*
+- **¿Qué ocurre durante la fase esporogónica en el Anopheles y cuánto dura?** _(Plasmodium spp.)_
+  - ✔ Los gametocitos forman ooquistes que liberan miles de esporozoítos en 1-2 semanas
+  - ✘ Los esporozoítos se transforman en gametocitos en 18-25 días
+  - ✘ Los merozoítos invaden el epitelio intestinal y se replican en 48 h
+  - ✘ Los trofozoítos maduran a esquizontes en las glándulas salivales en 72 h
+  - Los gametocitos forman gametos, cigoto, oocineto y ooquiste, que libera miles de esporozoítos en 1 a 2 semanas (8-12 días según el material; depende de la temperatura); migran a las glándulas salivales. — *Compendio ADN (10.e, modo de transmisión y ciclo en el vector)*
+- **¿Cuál es la situación de Argentina respecto del paludismo según la OMS?** _(Epidemiología)_
+  - ✔ Está certificada libre de malaria, pero sigue vigilando casos importados
+  - ✘ Es endémica en el NOA, con transmisión autóctona sostenida durante todo el año
+  - ✘ Nunca tuvo transmisión autóctona, así que no requiere vigilancia
+  - ✘ Está en fase de preeliminación, junto con Paraguay y El Salvador
+  - Argentina fue certificada libre de malaria por la OMS en 2019 (Paraguay en 2018, El Salvador en 2021, Belice en 2023), pero los sistemas sanitarios siguen vigilando eventuales casos importados. — *Cuadernillo Núcleo 10 Vectores 2026 (Introducción) · Cuadernillo TP 21 (Actividad 2.c)*
+- **¿Qué resultado serológico indica infección reciente por dengue?** _(Diagnóstico de laboratorio)_
+  - ✔ IgM específica en suero agudo o aumento al cuádruple del título de IgG
+  - ✘ IgG positiva en una única muestra de la fase convaleciente
+  - ✘ IgM negativa con IgG positiva en el primer día de fiebre
+  - ✘ Cualquier título de IgG, porque no hay reactividad cruzada entre flavivirus
+  - La presencia de IgM específica o un incremento al cuádruple del título entre el suero agudo y el convaleciente indican infección reciente. Hay que considerar la reactividad cruzada entre flavivirus. — *Compendio ADN (10.a, punto 5) · Cuadernillo Núcleo 10 Vectores 2026 (TP 21, Actividad 1.d)*
+- **¿Qué par de hallazgos de laboratorio define la etapa crítica del dengue?** _(Virus del dengue)_
+  - ✔ Plaquetas en su punto más bajo y pico de hematocrito
+  - ✘ Plaquetas en su punto más bajo y hematocrito descendido
+  - ✘ Plaquetas en recuperación y hematocrito en su valor basal
+  - ✘ Viremia alta con IgM e IgG todavía indetectables
+  - En la etapa crítica el recuento de plaquetas toca su mínimo y el hematocrito su máximo, por la hemoconcentración que produce la extravasación de plasma. En la recuperación el riesgo es la sobrecarga de líquidos. — *Compendio ADN (10.a, etapas) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 1.b.I)*
+- **¿Cómo contribuye el complemento al aumento de la permeabilidad vascular en el dengue grave?** _(Respuesta inmune)_
+  - ✔ Los inmunocomplejos activan la vía clásica y aumentan las anafilotoxinas C3a/C5a
+  - ✘ La vía de las lectinas lisa de forma directa las plaquetas y el endotelio vascular
+  - ✘ El complejo de ataque a la membrana destruye los hepatocitos infectados
+  - ✘ La vía alternativa neutraliza la glucoproteína E y bloquea la viremia
+  - Los anticuerpos heterólogos no neutralizantes activan el complemento por la vía clásica, con aumento de las anafilotoxinas C3a y C5a, que incrementan la permeabilidad vascular. — *Cuadernillo Núcleo 10 Vectores 2026 (Actividad 1.b.III) · Compendio ADN (10, complicaciones)*
+- **¿Cómo recomienda el Ministerio de Salud la vacuna contra el dengue en Argentina?** _(Prevención)_
+  - ✔ De 15 a 39 años en departamentos priorizados, dos dosis separadas por tres meses
+  - ✘ A toda la población de las zonas endémicas del NEA y NOA, en dosis única anual
+  - ✘ A los menores de 15 años del NEA y del NOA, con un esquema de tres dosis
+  - ✘ De 15 a 39 años en zonas endémicas, y ya integra el Calendario Nacional
+  - Es una estrategia focalizada con Qdenga (TAK-003) en departamentos priorizados por carga de dengue del NOA, el NEA y el Centro, con dos dosis separadas por tres meses; no integra el Calendario Nacional. — *Compendio ADN (10.a, punto 4) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 1.c)*
+- **Un maderero de Puerto Iguazú tiene lesiones nodulares en tórax de un año de evolución; la biopsia muestra amastigotes dentro de macrófagos. ¿Cuál es el diagnóstico?** _(Leishmania spp.)_
+  - ✔ Leishmaniasis tegumentaria
+  - ✘ Enfermedad de Chagas-Mazza en fase aguda
+  - ✘ Paludismo por P. vivax
+  - ✘ Forma cutánea diseminada de la fiebre amarilla
+  - Los amastigotes dentro de macrófagos dérmicos confirman leishmaniasis tegumentaria, con especies dermatotrópicas como L. braziliensis y L. guyanensis; la exposición laboral en monte es el antecedente clave. — *Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4, casos clínicos, Caso 2) · Compendio ADN (10.f)*
+- **En la leishmaniasis tegumentaria, ¿qué caracteriza al polo anérgico del espectro clínico?** _(Leishmania spp.)_
+  - ✔ Alta carga parasitaria con respuesta Th2 e infiltrados nodulares sin úlcera
+  - ✘ Baja carga parasitaria con respuesta Th1 exagerada y destrucción mucosa
+  - ✘ Carga parasitaria intermedia con úlcera que cura de forma espontánea
+  - ✘ Ausencia de parásitos con granulomas bien formados y curación rápida
+  - El polo anérgico (cutánea difusa) tiene alta carga parasitaria, predominio Th2 con IL-4 e IL-10 y anergia celular, con infiltrados nodulares no ulcerativos y sin granulomas. — *Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4.c) · Compendio ADN (10.f, espectro tegumentario)*
+- **¿Por qué la leishmaniasis mucocutánea destruye tejido aunque haya pocos parásitos en las lesiones?** _(Leishmania spp.)_
+  - ✔ Por una respuesta Th1 exagerada, con IFN-γ y TNF-α
+  - ✘ Por la multiplicación masiva de amastigotes en la mucosa
+  - ✘ Por la anergia inmune específica con déficit de Th1
+  - ✘ Por la acción directa de los promastigotes metacíclicos inoculados
+  - La forma mucocutánea, causada principalmente por L. braziliensis, cursa con respuesta hiperinmune (Th1 exagerada, IFN-γ y TNF-α) que produce destrucción necrotizante granulomatosa pese al pausiparasitismo. — *Compendio ADN (10.f, cuadro de manifestaciones) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4.b.III)*
+- **¿Qué especies causan la leishmaniasis visceral y qué órganos compromete?** _(Leishmania spp.)_
+  - ✔ L. donovani y L. infantum/chagasi: bazo, hígado, médula ósea y ganglios
+  - ✘ L. braziliensis: tabique nasal, orofaringe y epiglotis
+  - ✘ L. mexicana y L. amazonensis: macrófagos cutáneos y subcutáneos
+  - ✘ L. guyanensis: macrófagos dérmicos, con úlcera única autolimitada
+  - La visceral la causan L. donovani y L. infantum/chagasi, con tropismo por el sistema fagocítico mononuclear (bazo, hígado, médula ósea, ganglios); sin tratamiento es mortal en más del 95 % de los casos (OMS). — *Compendio ADN (10.f, cuadro de manifestaciones) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4.b.III)*
+- **Un hombre de un barrio de Santiago del Estero refiere disnea de esfuerzo, palpitaciones y edema de tobillos de meses de evolución. ¿Qué forma de Chagas corresponde?** _(Trypanosoma cruzi)_
+  - ✔ La crónica determinada, con cardiopatía chagásica
+  - ✘ La aguda, con miocarditis difusa y alta parasitemia
+  - ✘ La crónica indeterminada, asintomática y con anatomía normal
+  - ✘ La congénita reactivada, con hepatoesplenomegalia
+  - La forma crónica determinada (más de 10 años, 30-40% de los infectados) da cardiopatía por inflamación, miocitólisis y fibrosis del miocardio y del sistema excitoconductor, con arritmias y tromboembolismo. — *Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4, casos clínicos, Caso 3) · Compendio ADN (10.g, tropismo y fases)*
+- **¿Qué caracteriza a la fase crónica indeterminada de la enfermedad de Chagas-Mazza?** _(Trypanosoma cruzi)_
+  - ✔ Baja parasitemia con títulos altos de anticuerpos y anatomía normal
+  - ✘ Alta parasitemia con tripomastigotes abundantes en sangre y linfa
+  - ✘ Megaformaciones digestivas por denervación del esófago y el colon
+  - ✘ Fibrosis del sistema excitoconductor con arritmias y tromboembolismo
+  - El 60-70 % de los infectados permanece en la forma indeterminada, asintomática: baja parasitemia, títulos elevados de anticuerpos y anatomía normal. Evoluciona 1-2 % por año a formas determinadas. — *Compendio ADN (10.g, evolución de las formas) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 5)*
+- **Dentro de las medidas de control del Chagas, ¿cuál corresponde a la prevención secundaria?** _(Prevención)_
+  - ✔ Detectar y tratar a tiempo la infección en embarazadas y recién nacidos
+  - ✘ Rociar las viviendas con insecticidas y mejorar la vivienda
+  - ✘ Colocar marcapasos en la cardiopatía chagásica establecida
+  - ✘ Dar educación sanitaria para la participación comunitaria y la vigilancia
+  - La prevención secundaria busca detectar y tratar temprano: control de embarazadas y recién nacidos (sangre de cordón y serología a los 10 meses). El control vectorial es primaria y el manejo de la cardiopatía, terciaria. — *Compendio ADN (10.g, medidas de control) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4, casos clínicos)*
+
+## Núcleo 11 (45)
+
+### Fácil (10)
+
+- **Según la cátedra, ¿qué es una zoonosis?** _(Zoonosis (concepto))_
+  - ✔ Una enfermedad transmisible entre animales vertebrados y el ser humano
+  - ✘ Una infección que se transmite sólo por la picadura de un artrópodo vector
+  - ✘ Una infección que el paciente adquiere durante una internación
+  - ✘ Una enfermedad que pasa de la madre al feto durante el embarazo
+  - Las zoonosis son las enfermedades e infecciones transmisibles entre animales vertebrados y el ser humano, de manera directa o a través del ambiente. De los 1.415 patógenos humanos conocidos, el 61% es zoonótico. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Introducción) · Compendio ADN (11, introducción)*
+- **¿A qué se refiere el concepto de Una Salud?** _(Una Salud)_
+  - ✔ A la conexión entre la salud humana, la animal y la del ambiente
+  - ✘ A la cobertura universal de salud para toda la población
+  - ✘ A unificar los calendarios de vacunación humana y veterinaria
+  - ✘ A tratar a todos los convivientes de un caso confirmado de zoonosis
+  - Una Salud reconoce que la salud humana, la animal y la ambiental están conectadas y que el bienestar de cada componente afecta a los otros; por eso las zoonosis se abordan de manera conjunta y multidisciplinaria. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 1) · Compendio ADN (11.e)*
+- **¿Cuál es el agente causal de la rabia humana?** _(Virus de la rabia (Lyssavirus))_
+  - ✔ El virus de la rabia, género Lyssavirus, familia Rhabdoviridae
+  - ✘ Un arenavirus de la familia Arenaviridae, igual que el virus Junín
+  - ✘ Un hantavirus de la familia Bunyaviridae, eliminado por roedores
+  - ✘ Una espiroqueta del género Leptospira
+  - La rabia humana la produce el virus de la rabia, de la familia Rhabdoviridae, género Lyssavirus. Es un virus con envoltura y neurotropismo marcado. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3) · Compendio ADN (11.a)*
+- **¿Cuál es el reservorio principal del virus Junín, agente de la fiebre hemorrágica argentina?** _(Virus Junín (fiebre hemorrágica argentina))_
+  - ✔ Calomys musculinus, el ratón maicero
+  - ✘ El perro doméstico sin vacunar
+  - ✘ Los murciélagos insectívoros
+  - ✘ Las aves psitácidas, como loros y cotorras
+  - El reservorio principal es Calomys musculinus (ratón maicero); en menor proporción participan Calomys laucha, Akodon azarae y Mus musculus. El virus se elimina con la orina y la saliva de roedores persistentemente infectados. — *Cuadernillo Núcleo 11 Zoonosis 2026 (cuadro ENO, Actividad 4) · Compendio ADN (11.b)*
+- **¿Cuál es el principal mecanismo de transmisión de los hantavirus al ser humano?** _(Hantavirus)_
+  - ✔ La inhalación de aerosoles de excretas de roedores infectados
+  - ✘ La picadura de mosquitos del género Aedes
+  - ✘ La ingestión de carne de cerdo mal cocida
+  - ✘ El contacto de la piel sana con el agua de red durante el baño diario
+  - El virus es eliminado por los roedores infectados en sangre, secreciones y excretas, y se transmite sobre todo por inhalación de aerosoles. También puede haber contagio por contacto con excrementos o secreciones y, raramente, por mordedura del roedor. — *Cuadernillo Núcleo 11 Zoonosis 2026 (cuadro ENO) · Compendio ADN (11.b)*
+- **¿Cómo se infectan habitualmente las personas con Leptospira?** _(Leptospira interrogans)_
+  - ✔ Por contacto de mucosas o piel lesionada con agua o barro con orina animal
+  - ✘ Por inhalar el polvo de excrementos secos de aves enjauladas o de gallineros
+  - ✘ Por consumir quesos elaborados con leche sin pasteurizar
+  - ✘ Por la mordedura de un perro no vacunado
+  - Las personas son hospedadores accidentales y se infectan por contacto directo con orina de animales infectados o indirecto a través de suelo, agua o materiales contaminados, a través de mucosas o piel lesionada. — *Cuadernillo Núcleo 11 Zoonosis 2026 (cuadro ENO, Leptospirosis) · Compendio ADN (11.g)*
+- **¿Cuál es el reservorio principal de Chlamydophila psittaci?** _(Chlamydophila psittaci)_
+  - ✔ Las aves psitácidas: loros, cotorras y guacamayos
+  - ✘ Los roedores silvestres de los géneros Oligoryzomys y Calomys
+  - ✘ El ganado caprino y ovino
+  - ✘ Los perros y gatos callejeros
+  - El reservorio son las aves psitácidas (loros, cotorras, guacamayos); menos frecuente es el contagio desde palomas y aves de corral. Los grupos de riesgo incluyen veterinarios, cuidadores de zoológico y trabajadores de plantas avícolas. — *Cuadernillo Núcleo 11 Zoonosis 2026 (cuadro ENO, Actividad 5) · Compendio ADN (11.h)*
+- **Además del contacto con tejidos de animales infectados, ¿cuál es la otra vía clásica de transmisión de la brucelosis?** _(Brucella spp.)_
+  - ✔ La ingestión de alimentos no pasteurizados
+  - ✘ La picadura de flebótomos infectados
+  - ✘ La inhalación de aerosoles de orina de roedor
+  - ✘ La ingestión de huevos del parásito en verduras mal lavadas
+  - La brucelosis se adquiere por contacto de piel o mucosas con tejidos de animales infectados y por ingestión de alimentos no pasteurizados; también por inhalación. Los grupos de riesgo son quienes consumen lácteos crudos, trabajan con animales o en laboratorio. — *Cuadernillo Núcleo 11 Zoonosis 2026 (cuadro ENO, Actividad 5) · Compendio ADN (11.f)*
+- **En el ciclo de Echinococcus granulosus, ¿cuál es el hospedador definitivo?** _(Echinococcus granulosus)_
+  - ✔ El perro
+  - ✘ La oveja
+  - ✘ El cerdo
+  - ✘ El ser humano
+  - El adulto de E. granulosus vive fijo a la mucosa del intestino delgado del perro, el hospedador definitivo. Ovinos, bovinos, caprinos y porcinos son intermediarios y el ser humano es un intermediario accidental. — *Cuadernillo Núcleo 11 Zoonosis 2026 (cuadro ENO, Actividad 3) · Compendio ADN (11.d)*
+- **¿Cómo adquiere el ser humano la triquinosis?** _(Trichinella spiralis)_
+  - ✔ Al comer carne cruda o mal cocida de cerdo o de animales de caza
+  - ✘ Al ingerir huevos del parásito presentes en el pelaje del perro o en el suelo
+  - ✘ Al inhalar aerosoles de excretas de roedores silvestres
+  - ✘ Al tomar leche de vaca sin pasteurizar
+  - La infección se produce al ingerir carne cruda o poco cocida con larvas musculares, sobre todo de cerdo, jabalí, oso o caballo. En Argentina pesan la faena domiciliaria y los chacinados caseros o de circuitos informales. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 2, laboratorio) · Compendio ADN (11.d)*
+
+### Normal (20)
+
+- **¿Cómo es el genoma del virus de la rabia?** _(Virus de la rabia (Lyssavirus))_
+  - ✔ ARN monocatenario no segmentado de polaridad negativa, con cinco proteínas
+  - ✘ ARN monocatenario de polaridad negativa, segmentado en ocho fragmentos distintos
+  - ✘ ADN bicatenario circular que se replica en el núcleo
+  - ✘ ARN bicatenario segmentado, en un virus sin envoltura
+  - El genoma es una única molécula de ARN no segmentado de polaridad negativa que codifica cinco proteínas: N, P, M, G y L. El genoma segmentado en ocho fragmentos corresponde a los virus influenza. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3.a) · Compendio ADN (11.a)*
+- **¿Qué explica el neurotropismo del virus de la rabia?** _(Virus de la rabia (Lyssavirus))_
+  - ✔ Que su proteína G interactúa con el receptor nicotínico de acetilcolina y gangliósidos
+  - ✘ Que su neuraminidasa se une al ácido siálico del epitelio respiratorio
+  - ✘ Que su proteína N se une al receptor CD4 de los linfocitos T
+  - ✘ Que el lipopolisacárido de su pared se adhiere al endotelio de los vasos sanguíneos
+  - La proteína G interactúa con receptores como el nicotínico de acetilcolina y gangliósidos: el virus penetra en las terminales nerviosas o se replica en el músculo antes de ascender al sistema nervioso central. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3.a) · Compendio ADN (11.a)*
+- **¿Cuál es el mecanismo de transmisión más frecuente de la rabia al ser humano?** _(Virus de la rabia (Lyssavirus))_
+  - ✔ La inoculación de saliva infectada por mordedura o en una herida preexistente
+  - ✘ La inhalación de aerosoles en cuevas con grandes colonias de murciélagos hematófagos
+  - ✘ El trasplante de córnea de un donante infectado
+  - ✘ El contacto de saliva del animal con piel sana
+  - La transmisión principal es la inoculación de saliva infectada por mordedura o herida preexistente, y también a través de mucosas. Los aerosoles y el trasplante de córnea son excepcionales; la saliva sobre piel sana es un accidente no significativo. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3.c) · Compendio ADN (11.a)*
+- **Ante un accidente potencialmente rábico, ¿cuál es la primera medida sobre la herida?** _(Virus de la rabia (Lyssavirus))_
+  - ✔ Lavarla a chorro con agua y jabón lo antes posible
+  - ✘ Suturarla de inmediato con la mayor cantidad de puntos
+  - ✘ Infiltrar la vacuna antirrábica alrededor de la herida
+  - ✘ Esperar los diez días de observación del animal agresor
+  - Primero el lavado inmediato y a chorro con agua y jabón: el agua arrastra el virus y el jabón altera su capa lipídica. Después se usan antisépticos, se infiltra el suero antirrábico en la herida y se aplica la vacuna. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3.f) · Compendio ADN (11.a)*
+- **¿Qué estudios permiten confirmar una rabia humana en vida del paciente?** _(Virus de la rabia (Lyssavirus))_
+  - ✔ Inmunofluorescencia directa en saliva o piel de nuca, y RT-PCR
+  - ✘ Hemocultivos seriados incubados durante dos semanas y serología pareada
+  - ✘ Cultivo en medios con vitaminas B2 y B12 a 28-30 °C
+  - ✘ Hemaglutinación indirecta en líquido del quiste
+  - El diagnóstico antemortem se basa en la detección de antígeno rábico por inmunofluorescencia directa en saliva o biopsia de piel de nuca; también se usa RT-PCR en saliva, LCR o tejidos y ELISA para anticuerpos. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3.e y 3.g) · Compendio ADN (11.a)*
+- **¿Cómo ingresa el virus Junín al organismo de los trabajadores rurales de la pampa húmeda?** _(Virus Junín (fiebre hemorrágica argentina))_
+  - ✔ Por vía cutáneo-mucosa: escoriaciones de la piel o inhalación de aerosoles
+  - ✘ Por la picadura de la hembra de los flebótomos infectados durante la cosecha
+  - ✘ Por ingestión de agua con huevos del parásito
+  - ✘ Por mordedura directa del roedor reservorio
+  - El virus Junín penetra por vía cutáneo-mucosa, a través de escoriaciones frecuentes en trabajadores rurales o por mucosa conjuntival, oral o nasal al inhalar aerosoles contaminados que se producen durante la cosecha. La incubación es de 6 a 14 días. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4) · Compendio ADN (11.b)*
+- **¿En qué consiste el tratamiento específico de la fiebre hemorrágica argentina?** _(Virus Junín (fiebre hemorrágica argentina))_
+  - ✔ En administrar plasma inmune de convalecientes, con anticuerpos anti-virus Junín
+  - ✘ En aplicar la vacuna Candid#1 en cuanto se sospecha el caso
+  - ✘ En administrar corticoides en altas dosis durante la fase hemorrágica-neurológica
+  - ✘ En dar antibióticos por vía parenteral durante dos semanas
+  - El tratamiento específico es la administración de anticuerpos anti-virus Junín obtenidos de plasma inmune de personas convalecientes de FHA. Sin tratamiento específico, la mortalidad de la fase hemorrágica-neurológica es alta. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4) · Compendio ADN (11.b)*
+- **Entre las zoonosis de este núcleo, ¿cuál cuenta con vacuna para uso humano?** _(Prevención)_
+  - ✔ La fiebre hemorrágica argentina, con la vacuna Candid#1
+  - ✘ La leptospirosis, con una vacuna indicada a trabajadores rurales
+  - ✘ La brucelosis, con la misma vacuna que se aplica al ganado
+  - ✘ El síndrome pulmonar por hantavirus, con una vacuna a virus inactivado
+  - Candid#1 se aplica a quienes residen o trabajan en el área endémica de FHA. No hay vacuna humana para hantavirosis, leptospirosis, brucelosis, psitacosis ni triquinosis; en leptospirosis y brucelosis sí existen vacunas veterinarias. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividades 2, 4 y 5) · Compendio ADN (11.b, 11.f, 11.g, 11.h)*
+- **¿A qué familia pertenecen los hantavirus y cómo evoluciona el síndrome pulmonar por hantavirus?** _(Hantavirus)_
+  - ✔ Bunyaviridae; en cuatro fases: febril o prodrómica, cardiopulmonar, diurética y de convalecencia
+  - ✘ Arenaviridae; en dos fases: prodrómica y hemorrágica-neurológica
+  - ✘ Orthomyxoviridae; en una única fase febril autolimitada
+  - ✘ Rhabdoviridae; en tres fases: prodrómica, de excitación y paralítica
+  - Los hantavirus son Bunyaviridae con ARN monocatenario negativo y envoltura. El SPH evoluciona en cuatro fases: prodrómica (3-5 días, fiebre y mialgias), cardiopulmonar, diurética y de convalecencia. La incubación va de 4 a 42 días. La cátedra los ubica en Bunyaviridae; en la clasificación actual del ICTV integran la familia Hantaviridae (orden Bunyavirales). — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4) · Compendio ADN (11.b)*
+- **Entre las zoonosis por roedores de este núcleo, ¿en cuál se demostró transmisión de persona a persona?** _(Hantavirus)_
+  - ✔ El virus Andes
+  - ✘ El virus Junín
+  - ✘ El virus de la rabia
+  - ✘ La influenza aviar H5N1
+  - Entre las zoonosis por roedores, la transmisión persona a persona sólo se demostró para el virus Andes; en la FHA no ocurre. Para H5N1 no hay, hasta el momento, evidencia de propagación entre humanos. — *Cuadernillo Núcleo 11 Zoonosis 2026 (cuadro ENO, Actividades 4 y 5) · Compendio ADN (11.b)*
+- **¿Cuál es el ensayo de elección para el diagnóstico de hantavirosis?** _(Hantavirus)_
+  - ✔ La detección de anticuerpos IgM por ELISA
+  - ✘ El aislamiento del virus en cultivo celular
+  - ✘ La inmunofluorescencia directa en biopsia de piel de nuca
+  - ✘ La hemaglutinación indirecta en líquido pleural
+  - El ELISA para IgM es el ensayo de elección. La RT-PCR permite detectar ARN viral en sangre entera, coágulo o tejidos obtenidos en los primeros 10 días de enfermedad. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4.c) · Compendio ADN (11.b)*
+- **¿Qué característica del genoma de influenza A le permite el salto de especie y dar pandemias?** _(Virus de la influenza)_
+  - ✔ Está segmentado en ocho fragmentos de ARN, lo que permite el reordenamiento
+  - ✘ Es un ARN no segmentado que sólo acumula mutaciones puntuales en la hemaglutinina
+  - ✘ Es un ADN bicatenario que se integra al genoma de la célula
+  - ✘ Es un ARN de polaridad positiva que actúa como ARN mensajero
+  - El genoma es ARN monocatenario negativo segmentado en ocho fragmentos: cuando dos cepas coinfectan una célula puede haber reordenamiento (shift) y surgir combinaciones nuevas de HA y NA frente a las que la población no tiene inmunidad. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5.1) · Compendio ADN (11.c)*
+- **¿Por qué el cerdo es clave en la ecología zoonótica de la influenza A?** _(Virus de la influenza)_
+  - ✔ Porque se infecta con cepas aviares y humanas y favorece los virus híbridos
+  - ✘ Porque es el reservorio natural del virus en todo el mundo
+  - ✘ Porque elimina el virus por la orina y contamina el agua de bebida
+  - ✘ Porque es el único mamífero en el que el virus se replica en el núcleo celular
+  - Las aves acuáticas son el reservorio natural y el cerdo es hospedador intermediario: puede infectarse con cepas aviares y humanas, y esa mezcla de genes facilita la aparición de virus híbridos capaces de adaptarse al hombre. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5.2) · Compendio ADN (11.c)*
+- **¿Cuál es la forma infectante de Toxocara canis para el ser humano y cómo se adquiere?** _(Toxocara canis)_
+  - ✔ El huevo larvado del suelo, ingerido por manos, alimentos o pelaje del perro
+  - ✘ La larva L1 presente en la carne de cerdo o de jabalí cruda o mal cocida
+  - ✘ El protoescólex liberado al romperse un quiste
+  - ✘ La larva que penetra activamente la piel descalza
+  - El huevo eliminado con las heces del perro se vuelve larvado (L2) en el suelo en 2-3 semanas y sobrevive meses. Se ingiere por manos contaminadas, suelo, agua, alimentos o pelaje de la mascota; el grupo de riesgo son niños con geofagia u onicofagia. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4, laboratorio) · Compendio ADN (caso 6, Toxocara canis)*
+- **¿Cuál es la forma infectante de Trichinella spiralis y qué tipo de ciclo tiene?** _(Trichinella spiralis)_
+  - ✔ La larva muscular L1; ciclo directo, con dos generaciones en el mismo hospedador
+  - ✘ El huevo larvado del suelo; ciclo indirecto, con un hospedador intermediario
+  - ✘ El quiste con vesículas hijas; ciclo indirecto entre perro y herbívoros
+  - ✘ El cisticerco de la carne de vaca; ciclo con el humano como único definitivo
+  - La forma infectante es la larva muscular L1 presente en la carne. El ciclo es directo: no necesita hospedador intermediario y en el mismo hospedador se desarrollan dos generaciones, adultos en el intestino y larvas en el músculo estriado. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividades 1 y 2, laboratorio) · Compendio ADN (11.d; 7.a.e)*
+- **¿Cuáles son las manifestaciones principales de la etapa de invasión muscular de la triquinosis?** _(Trichinella spiralis)_
+  - ✔ Fiebre, edema palpebral y mialgias
+  - ✘ Ictericia, hepatomegalia y hemorragias en piel y mucosas
+  - ✘ Tos, hemoptisis, dolor torácico y disnea de esfuerzo
+  - ✘ Hidrofobia, espasmos musculares generalizados y fonofobia
+  - Las manifestaciones principales son fiebre, edema de párpados y periocular, y dolor muscular, con eosinofilia y leucocitosis. Antes puede haber una etapa intestinal con diarrea, dolor abdominal y vómitos. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 2, laboratorio) · Compendio ADN (11.d; 7.a.e)*
+- **¿Qué forma de Echinococcus granulosus infecta al ser humano y dónde se localiza con más frecuencia el quiste?** _(Echinococcus granulosus)_
+  - ✔ El huevo con embrión hexacanto u oncosfera; en el hígado, en el 60-70% de los casos
+  - ✘ La larva muscular L1; en los músculos estriados, sobre todo del diafragma
+  - ✘ El protoescólex del quiste fértil; en el intestino delgado
+  - ✘ El cisticerco presente en la carne; en el sistema nervioso central
+  - El humano ingiere accidentalmente huevos con oncosfera o embrión hexacanto; estos penetran la mucosa intestinal, pasan a la circulación portal y forman el quiste hidatídico, sobre todo en hígado (60-70%) y en segundo lugar en pulmón. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3, laboratorio) · Compendio ADN (11.d; 7.a.g)*
+- **¿Cómo son las bacterias del género Brucella?** _(Brucella spp.)_
+  - ✔ Cocobacilos gramnegativos pequeños, inmóviles y de crecimiento lento
+  - ✘ Espiroquetas finas y enroscadas, con un gancho en uno o ambos extremos
+  - ✘ Bacilos grampositivos esporulados y aerobios
+  - ✘ Bacterias intracelulares obligadas con cuerpos elementales y reticulados
+  - Brucella es un cocobacilo gramnegativo pequeño, inmóvil y no encapsulado, aerobio estricto y de crecimiento lento (una semana o más): los hemocultivos se incuban dos semanas antes de informarse negativos. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5.1) · Compendio ADN (11.f)*
+- **¿Qué característica de Leptospira explica que atraviese mucosas intactas o pequeñas abrasiones de la piel?** _(Leptospira interrogans)_
+  - ✔ Que es una espiroqueta fina y muy móvil, con flagelos periplásmicos
+  - ✘ Que forma esporas resistentes a la desecación
+  - ✘ Que produce una exotoxina que lisa el epitelio
+  - ✘ Que es un parásito intracelular obligado del sistema reticuloendotelial
+  - Las leptospiras son espiroquetas finas y enroscadas, con un gancho en los extremos y dos flagelos periplásmicos que les dan movilidad: por eso penetran mucosas intactas o piel con cortes y se diseminan por sangre a todos los tejidos. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5.6) · Compendio ADN (11.g)*
+- **¿Cómo se transmite la psitacosis y qué forma del agente es la infectante?** _(Chlamydophila psittaci)_
+  - ✔ Por inhalación de excrementos secos o secreciones de aves; el cuerpo elemental
+  - ✘ Por mordedura del ave infectada; el cuerpo reticulado
+  - ✘ Por ingestión de huevos presentes en el plumaje; la oncosfera hexacanto
+  - ✘ Por contacto de la piel con agua con orina de ave; el cuerpo reticulado
+  - C. psittaci ingresa por el aparato respiratorio al inhalar excrementos secos, orina o secreciones de aves. El cuerpo elemental es la forma infectante, metabólicamente inactiva y resistente al ambiente; el reticulado es el que se multiplica. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5, Psitacosis) · Compendio ADN (11.h)*
+
+### Difícil (15)
+
+- **Un paciente con fiebre, cefalea, mareos y dolor ocular durmió en el galpón de una casa quinta donde había problemas con el control de roedores de los campos vecinos. ¿Qué agente sospechás?** _(Virus Junín (fiebre hemorrágica argentina))_
+  - ✔ Virus Junín (Arenaviridae)
+  - ✘ Hantavirus (familia Bunyaviridae)
+  - ✘ Leptospira interrogans (leptospirosis)
+  - ✘ Chlamydophila psittaci (psitacosis)
+  - El síndrome febril con cefalea, mareos y dolor retroorbitario más exposición a roedores en un área posiblemente endémica orienta a fiebre hemorrágica argentina por virus Junín, un arenavirus con envoltura y ARN de cadena simple. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4, caso 1) · Compendio ADN (11.b)*
+- **Un trabajador del Parque Nacional Los Alerces ingresa a Esquel por insuficiencia respiratoria grave tras tres días de fiebre y mialgias; a los 7 días su esposa inicia síntomas similares. ¿Qué sospechás?** _(Hantavirus)_
+  - ✔ Síndrome pulmonar por hantavirus, probablemente por virus Andes
+  - ✘ Fiebre hemorrágica argentina por virus Junín
+  - ✘ Leptospirosis en su forma ictérica o síndrome de Weil
+  - ✘ Psitacosis con compromiso pulmonar y del sistema nervioso central
+  - La progresión rápida a insuficiencia respiratoria en la región surandina y el contagio a la esposa orientan a SPH: la transmisión interhumana sólo se demostró para el virus Andes. No hay tratamiento específico ni vacuna. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4, caso 2) · Compendio ADN (11.b)*
+- **¿Cuál es la diferencia correcta entre reservorios y áreas de riesgo de la FHA y de la hantavirosis en Argentina?** _(Hantavirus)_
+  - ✔ La FHA tiene a Calomys musculinus en la pampa húmeda; el hantavirus, a Oligoryzomys
+  - ✘ Ambas comparten el mismo reservorio roedor, pero la FHA sólo aparece en la región surandina
+  - ✘ La FHA tiene reservorio en roedores urbanos y la hantavirosis en aves acuáticas
+  - ✘ La hantavirosis se limita a Buenos Aires, Córdoba y Santa Fe, y la FHA a la Patagonia
+  - El área endémica de FHA es la pampa húmeda (Buenos Aires, Córdoba, Santa Fe y La Pampa), con Calomys musculinus como reservorio principal. El SPH se distribuye en NOA, NEA, Centro y surandina, con roedores del género Oligoryzomys. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4.b) · Compendio ADN (11.b)*
+- **Confirmás una triquinosis en un paciente que comió ahumado de jabalí en una reunión familiar. ¿Cuál es la conducta correcta del equipo de salud?** _(Trichinella spiralis)_
+  - ✔ Notificar el caso e investigar a los comensales y el alimento
+  - ✘ Aislar al paciente en habitación individual durante diez días
+  - ✘ Indicar profilaxis a los convivientes con gammaglobulina específica
+  - ✘ Pedir coproparasitológico seriado a toda la familia
+  - La triquinosis es un evento de notificación obligatoria: hay que notificar, identificar a los contactos que pudieron comer la misma carne, intervenir sobre el alimento y el establecimiento, tratar al paciente y educar sobre la cocción. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 2, laboratorio, consignas 2 y 3) · Compendio ADN (11.d)*
+- **¿Qué hallazgos de laboratorio y qué estudio confirman una sospecha de triquinosis?** _(Diagnóstico de laboratorio)_
+  - ✔ Eosinofilia con CPK y LDH elevadas, y ELISA IgG para Trichinella
+  - ✘ Leucopenia con plaquetopenia, y RT-PCR en sangre del período agudo
+  - ✘ Eosinofilia con anemia ferropénica, y coproparasitológico seriado
+  - ✘ Bilirrubina y creatinina elevadas, y hemaglutinación indirecta
+  - El hemograma muestra eosinofilia y leucocitosis, con CK y LDH elevadas por el daño muscular. La confirmación es serológica (ELISA IgG, detectable entre 12 y 60 días) y, si hace falta, digestión artificial de músculo. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 2, laboratorio) · Compendio ADN (11.d; 7.a.e)*
+- **Un nene de 10 años con perros sin desparasitar tiene disminución de la agudeza visual, granuloma macular en el fondo de ojo y eosinofilia. ¿Qué parásito y qué estadio explican el cuadro?** _(Toxocara canis)_
+  - ✔ Toxocara canis; la larva L2 encapsulada en un granuloma
+  - ✘ Echinococcus granulosus; el quiste hidatídico con vesículas hijas
+  - ✘ Trichinella spiralis; la larva L1 enquistada en el músculo
+  - ✘ Taenia solium; el cisticerco en el tejido ocular
+  - En la toxocariasis el humano es hospedador accidental: las larvas L2 migran por la circulación sistémica y quedan encapsuladas en granulomas (larva migrans visceral u ocular). El diagnóstico es serológico, no coproparasitológico. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4, laboratorio) · Compendio ADN (caso 6, Toxocara canis)*
+- **¿Por qué no se usa materia fecal como muestra para diagnosticar hidatidosis en el ser humano?** _(Echinococcus granulosus)_
+  - ✔ Porque el humano no alberga el parásito adulto y no elimina huevos
+  - ✘ Porque los huevos se destruyen al pasar por el intestino humano
+  - ✘ Porque los huevos de Echinococcus no se distinguen de los de Taenia
+  - ✘ Porque el quiste se calcifica y deja de liberar material al intestino
+  - El humano es hospedador intermediario accidental: desarrolla el quiste pero no el adulto intestinal, así que no elimina huevos por heces. El coproparasitológico y el ELISA de coproantígenos sí son útiles en el perro. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3, laboratorio) · Compendio ADN (11.d; 7.a.g)*
+- **¿Con qué método de imagen se busca el quiste hidatídico hepático y en qué regiones del país es endémica la enfermedad?** _(Echinococcus granulosus)_
+  - ✔ Ecotomografía; en la Patagonia y sectores de la región Centro
+  - ✘ Radiografía simple de abdomen; sólo en las provincias del NOA y el NEA
+  - ✘ Resonancia magnética; exclusivamente en la pampa húmeda
+  - ✘ Centellograma hepático; sólo en el NEA
+  - La ecotomografía muestra el quiste y sus vesículas hijas y es de gran utilidad en el hígado; TC y RM aportan detalle anatómico. Las áreas endémicas son la Patagonia y sectores de Buenos Aires, La Pampa, sur de Santa Fe y Córdoba. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3, laboratorio) · Compendio ADN (11.d; 7.a.g)*
+- **¿Qué resultado serológico se considera diagnóstico de brucelosis?** _(Brucella spp.)_
+  - ✔ Un aumento de cuatro veces del título o un único título de 1:160 o mayor
+  - ✘ Cualquier título de IgG positivo, por bajo que sea
+  - ✘ La detección de IgM, que desaparece en la primera semana
+  - ✘ La presencia de IgA en orina durante la convalecencia
+  - Los anticuerpos anti-Brucella pueden persistir mucho tiempo, así que el diagnóstico exige un aumento de cuatro veces del título o un único título igual o mayor a 1:160. Puede haber reactividad cruzada con otras bacterias. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5.2) · Compendio ADN (11.f)*
+- **¿Cómo sobrevive Brucella dentro de los macrófagos que la fagocitan?** _(Respuesta inmune)_
+  - ✔ Inhibe la fusión fagosoma-lisosoma, suprime el TNF-alfa y produce catalasa
+  - ✘ Libera una exotoxina potente que lisa al fagocito desde adentro
+  - ✘ Se recubre de una cápsula que impide el reconocimiento por las opsoninas
+  - ✘ Escapa al citoplasma gracias a la cadena O rugosa de su lipopolisacárido
+  - Brucella es un parásito intracelular del sistema reticuloendotelial: inhibe la fusión fagosoma-lisosoma, suprime el TNF-alfa e inactiva el peróxido de hidrógeno y el superóxido con catalasa y superóxido dismutasa. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5.1) · Compendio ADN (11.f)*
+- **¿Cómo se manifiesta la psitacosis y cuánto dura su período de incubación?** _(Chlamydophila psittaci)_
+  - ✔ Fiebre alta, cefalea y tos no productiva, tras 5 a 14 días
+  - ✘ Diarrea acuosa y vómitos, tras 24 a 48 horas de incubación
+  - ✘ Edema facial y mialgias con eosinofilia, tras 1 a 2 semanas
+  - ✘ Ictericia con insuficiencia renal y hemorragias, tras 6 a 14 días
+  - Tras 5 a 14 días de incubación aparecen cefalea, fiebre alta, escalofríos, mialgias y tos no productiva con crepitantes y consolidación. Es frecuente el compromiso del sistema nervioso central y puede haber hepatomegalia y esplenomegalia. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5, Psitacosis) · Compendio ADN (11.h)*
+- **¿Qué es el síndrome de Weil y qué papel tiene la respuesta inmune en la leptospirosis?** _(Respuesta inmune)_
+  - ✔ Es la forma ictérica grave; parte del daño, como la meningitis y la nefropatía, es inmunológico
+  - ✘ Es la forma leve seudogripal; la respuesta inmune no participa del daño
+  - ✘ Es una reacción anafiláctica por rotura de un quiste, mediada por IgE
+  - ✘ Es la fase convaleciente con eliminación urinaria prolongada de la bacteria
+  - El síndrome de Weil es la forma ictérica grave (cerca del 10% de las infecciones sintomáticas), con insuficiencia hepática y renal, vasculitis, miocarditis y mortalidad del 10-15%. La meningitis y la nefropatía por inmunocomplejos son inmunológicas. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5.7) · Compendio ADN (11.g)*
+- **¿Qué afirmación sobre la profilaxis post-exposición antirrábica es correcta?** _(Virus de la rabia (Lyssavirus))_
+  - ✔ Se prefiere el esquema de Zagreb: 4 dosis en 3 visitas, con dos dosis el día 0
+  - ✘ El esquema de Essen se reserva para pacientes inmunocomprometidos
+  - ✘ El embarazo contraindica la vacunación antirrábica
+  - ✘ Las dosis son menores en niños que en adultos
+  - Zagreb (día 0 con dos dosis, una en cada brazo, día 7 y día 21) se prefiere porque reduce una visita y el abandono. Essen modificado son 4 dosis en 4 visitas y no se usa en inmunocomprometidos; el embarazo no contraindica la vacuna. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3.f) · Compendio ADN (11.a)*
+- **El único caso confirmado de rabia humana desde 2021 fue una mujer mordida por un gato callejero al que había contagiado un murciélago. ¿Qué muestra este caso?** _(Epidemiología argentina)_
+  - ✔ Un spillover: la vigilancia animal sigue siendo clave aunque no haya casos humanos
+  - ✘ Que el ciclo doméstico canino es hoy la principal fuente de rabia humana
+  - ✘ Que la profilaxis post-exposición perdió eficacia frente a variantes de murciélago
+  - ✘ Que la rabia dejó de ser un problema de salud pública en el país
+  - El caso (Buenos Aires, 2021) es un ejemplo de spillover: un murciélago Tadarida brasiliensis contagió al gato y este a la mujer, que no consultó ni recibió PPE. La ausencia de casos humanos no implica ausencia de circulación viral. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3, BEN N.º 799 SE 9 2026)*
+- **¿Por qué la triquinosis y la hantavirosis tienen estacionalidades opuestas en Argentina?** _(Epidemiología argentina)_
+  - ✔ La triquinosis sube en los meses fríos y la hantavirosis, en los cálidos
+  - ✘ Las dos suben en invierno, cuando los roedores se refugian en las viviendas
+  - ✘ La triquinosis sube en verano por el consumo de carne al aire libre
+  - ✘ La hantavirosis sube en invierno porque el virus resiste mejor el frío
+  - La triquinosis se concentra en los meses fríos, asociada a la faena domiciliaria de cerdos y animales silvestres y a chacinados caseros o de circuitos informales; la hantavirosis concentra sus casos en los meses cálidos. — *Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 2.b del seminario y Actividad 2 del laboratorio)*
+
+## Núcleo 12 (45)
+
+### Fácil (10)
+
+- **¿Cómo se describe la morfología y la tinción de Gram de Staphylococcus aureus?** _(Staphylococcus aureus)_
+  - ✔ Coco grampositivo agrupado en racimos
+  - ✘ Coco grampositivo agrupado en cadenas
+  - ✘ Bacilo grampositivo esporulado
+  - ✘ Bacilo ácido alcohol resistente
+  - S. aureus es un coco grampositivo en racimos, de la familia Staphylococcaceae; las cadenas corresponden a Streptococcus. — *Cuadernillo Núcleo 12 Seminario 2026 (cuadro de agentes) · Compendio ADN (12.2.b)*
+- **¿Qué patrón de hemólisis en agar sangre y qué grupo de Lancefield corresponden a Streptococcus pyogenes?** _(Streptococcus pyogenes)_
+  - ✔ Beta hemólisis, grupo A
+  - ✘ Alfa hemólisis, grupo A
+  - ✘ Beta hemólisis estrecha, grupo B
+  - ✘ Alfa hemólisis, sin grupo de Lancefield
+  - S. pyogenes es beta hemolítico del grupo A; S. agalactiae es beta estrecha grupo B y S. pneumoniae es alfa hemolítico. — *Cuadernillo Núcleo 12 Laboratorio 2026 (cuadro de Streptococcus) · Compendio ADN (12.2.a)*
+- **¿Cuál es la vía de transmisión de Clostridium tetani?** _(Clostridium tetani)_
+  - ✔ Herida contaminada con esporas del suelo
+  - ✘ Gotitas respiratorias de persona a persona
+  - ✘ Picadura de un artrópodo vector
+  - ✘ Ingesta de carne mal refrigerada
+  - El tétanos se adquiere por heridas contaminadas con esporas presentes en la mayoría de los suelos; en el recién nacido, la puerta de entrada es el muñón umbilical. — *Cuadernillo Núcleo 12 Seminario 2026 (Actividad 3) · Compendio ADN (12.2.b Clostridium tetani)*
+- **¿Dónde se encuentra habitualmente Clostridium perfringens?** _(Clostridium perfringens)_
+  - ✔ En la tierra, el agua y el tracto intestinal
+  - ✘ Solo en las fosas nasales humanas
+  - ✘ En suelos arenosos de playas tropicales
+  - ✘ En el excremento de murciélagos
+  - C. perfringens es ubicuo: está en tierra, agua y tracto intestinal, y llega a los tejidos blandos por contaminación de heridas y traumatismos. — *Cuadernillo Núcleo 12 Seminario 2026 (Actividad 3) · Compendio ADN (12.2.b Clostridium perfringens)*
+- **¿Qué característica de tinción define a Mycobacterium leprae?** _(Mycobacterium leprae)_
+  - ✔ Bacilo ácido alcohol resistente
+  - ✘ Coco grampositivo en racimos
+  - ✘ Bacilo gramnegativo curvo
+  - ✘ Bacilo grampositivo esporulado
+  - M. leprae es un bacilo débilmente grampositivo y fuertemente ácido alcohol resistente (BAAR), con pared rica en lípidos. — *Cuadernillo Núcleo 12 Seminario 2026 (cuadro de agentes) · Compendio ADN (12.2.c)*
+- **¿Qué agente produce la escabiosis o sarna?** _(Sarcoptes scabiei)_
+  - ✔ Sarcoptes scabiei
+  - ✘ Pediculus humanus capitis
+  - ✘ Tunga penetrans
+  - ✘ Dermatobia hominis
+  - La escabiosis la produce el ácaro Sarcoptes scabiei variedad hominis, que cava túneles en el estrato córneo de la epidermis. — *Cuadernillo Núcleo 12 Laboratorio 2026 (TP 25) · Compendio ADN (12.3.a)*
+- **¿Cómo adquiere una persona la larva migrans cutánea?** _(Ancylostoma braziliense / caninum)_
+  - ✔ Por larvas que penetran la piel desde el suelo
+  - ✘ Por ingesta de huevos en agua contaminada
+  - ✘ Por contacto directo piel a piel con un enfermo
+  - ✘ Por picadura de una mosca hematófaga
+  - Las larvas filariformes de Ancylostoma de perros y gatos están en la arena o el suelo húmedo y penetran la piel, con frecuencia en pies descalzos. — *Cuadernillo Núcleo 12 Laboratorio 2026 (TP 25, Actividad 1) · Compendio ADN (12.3.e)*
+- **¿Qué tejidos afectan los hongos dermatofitos?** _(Dermatofitos)_
+  - ✔ Piel y faneras (pelos y uñas)
+  - ✘ Tejido celular subcutáneo profundo
+  - ✘ Pulmón y sistema nervioso central
+  - ✘ Endotelio vascular y médula ósea
+  - Los dermatofitos son queratinofílicos: invaden la queratina de piel, pelo y uñas, sin llegar a los tejidos profundos. — *Cuadernillo Núcleo 12 Seminario 2026 (micosis superficiales) · Compendio ADN (12.6.a)*
+- **¿Qué célula de la epidermis capta antígenos y los presenta a los linfocitos en los ganglios linfáticos?** _(Respuesta inmune)_
+  - ✔ La célula de Langerhans
+  - ✘ El melanocito
+  - ✘ La célula de Merkel
+  - ✘ El queratinocito basal
+  - Las células de Langerhans son las dendríticas de la epidermis: captan, procesan y presentan antígenos para iniciar la respuesta adaptativa. — *Cuadernillo Núcleo 12 Seminario 2026 (Actividad 1) · Compendio ADN (12.1)*
+- **¿Contra qué agentes protege la vacuna triple viral del calendario argentino?** _(Prevención)_
+  - ✔ Sarampión, rubéola y paperas
+  - ✘ Sarampión, rubéola y varicela
+  - ✘ Sarampión, parvovirus B19 y paperas
+  - ✘ Rubéola, paperas y herpes zóster
+  - La triple viral cubre sarampión, rubéola/síndrome de rubéola congénita y paperas; se aplica a los 12 meses y a los 5 años. — *Compendio ADN (12.5.a y 12.5.b, calendario nacional)*
+
+### Normal (20)
+
+- **¿Cuál es el mecanismo de acción de la proteína A de Staphylococcus aureus?** _(Staphylococcus aureus)_
+  - ✔ Se une al Fc de las inmunoglobulinas e impide la opsonización
+  - ✘ Convierte el fibrinógeno en fibrina formando un coágulo protector
+  - ✘ Separa las capas superficiales de la epidermis
+  - ✘ Estimula la proliferación de linfocitos T como superantígeno
+  - La proteína A es un factor de superficie que une el fragmento Fc de la IgG y bloquea la eliminación mediada por anticuerpos. — *Cuadernillo Núcleo 12 Seminario 2026 (Actividad 2.b) · Compendio ADN (12.2.b)*
+- **¿Qué toxinas de Staphylococcus aureus producen el síndrome de la piel escaldada?** _(Staphylococcus aureus)_
+  - ✔ Las toxinas exfoliativas
+  - ✘ Las enterotoxinas A-R
+  - ✘ La toxina del síndrome del shock tóxico-1
+  - ✘ La coagulasa
+  - Las toxinas exfoliativas ETA/ETB rompen los puentes intercelulares del estrato granuloso y causan el síndrome de la piel escaldada o enfermedad de Ritter. — *Cuadernillo Núcleo 12 Seminario 2026 (Actividad 2.b) · Compendio ADN (12.2.b)*
+- **¿Qué factor de virulencia de Streptococcus pyogenes inactiva un quimioatrayente de neutrófilos?** _(Streptococcus pyogenes)_
+  - ✔ La peptidasa de C5a
+  - ✘ La estreptoquinasa
+  - ✘ La hialuronidasa
+  - ✘ La estreptolisina S
+  - La peptidasa de C5a inactiva el C5a y evita el reclutamiento temprano de neutrófilos; las otras degradan tejidos o lisan células. — *Cuadernillo Núcleo 12 Seminario 2026 (Actividad 2.c) · Compendio ADN (12.2.a)*
+- **¿Qué función cumplen las exotoxinas pirógenas estreptocócicas como SpeA y SpeC?** _(Streptococcus pyogenes)_
+  - ✔ Actúan como superantígenos y liberan citocinas proinflamatorias
+  - ✘ Degradan el ácido hialurónico y facilitan el pasaje por los tejidos
+  - ✘ Lisan eritrocitos, leucocitos y plaquetas
+  - ✘ Bloquean la unión de C3b a la pared bacteriana
+  - SpeA y SpeC actúan como superantígenos que estimulan macrófagos y linfocitos T cooperadores (escarlatina, shock tóxico, fascitis necrosante); SpeB es además una proteasa que degrada tejido. — *Cuadernillo Núcleo 12 Seminario 2026 (Actividad 2.c) · Compendio ADN (12.2.a)*
+- **Dentro de las infecciones por Streptococcus pyogenes, ¿cómo se clasifican la fiebre reumática y la glomerulonefritis aguda?** _(Streptococcus pyogenes)_
+  - ✔ Complicaciones no supurativas
+  - ✘ Infecciones supurativas profundas
+  - ✘ Cuadros mediados por toxinas
+  - ✘ Infecciones localizadas superficiales
+  - Son complicaciones posestreptocócicas no supurativas, mediadas por la respuesta inmune (reacción cruzada y depósito de complejos inmunes). — *Cuadernillo Núcleo 12 Seminario 2026 (Actividad 2.c.2) · Compendio ADN (12.2.a)*
+- **¿Cuál es la toxina más importante de Clostridium perfringens y qué actividad tiene?** _(Clostridium perfringens)_
+  - ✔ La toxina alfa, una lecitinasa que lisa eritrocitos y endotelio
+  - ✘ La tetanospasmina, que bloquea la liberación de neurotransmisores inhibidores
+  - ✘ Una enterotoxina termoestable que produce vómitos precoces
+  - ✘ Una toxina exfoliativa que separa el estrato granuloso
+  - La toxina alfa es una lecitinasa (fosfolipasa C) responsable del daño tisular de la mionecrosis o gangrena gaseosa. — *Cuadernillo Núcleo 12 Seminario 2026 (Actividad 3) · Compendio ADN (12.2.b Clostridium perfringens)*
+- **¿Cómo actúa la tetanospasmina de Clostridium tetani?** _(Clostridium tetani)_
+  - ✔ Bloquea la liberación de GABA y glicina en las sinapsis inhibidoras
+  - ✘ Inhibe la liberación de acetilcolina en la placa motora
+  - ✘ Lisa las membranas de los eritrocitos y los leucocitos
+  - ✘ Activa de forma masiva a los linfocitos T como superantígeno
+  - La tetanospasmina es una neurotoxina que impide la liberación de neurotransmisores inhibidores, de ahí la hipertonía y los espasmos. — *Cuadernillo Núcleo 12 Seminario 2026 (Actividad 3) · Compendio ADN (12.2.b Clostridium tetani)*
+- **¿Cómo se previene el tétanos según el material de la cátedra?** _(Clostridium tetani)_
+  - ✔ Con tres dosis de toxoide tetánico y refuerzos cada 10 años
+  - ✘ Con una sola dosis de toxoide que deja inmunidad de por vida
+  - ✘ Con la inmunidad que deja haber padecido la enfermedad
+  - ✘ Con profilaxis antibiótica prolongada después de cualquier herida
+  - La prevención es la vacunación con tres dosis de toxoide y refuerzos cada 10 años; la infección no induce inmunidad. En el Calendario Nacional el esquema primario se da con quíntuple (2, 4 y 6 meses), refuerzos a los 15-18 meses y al ingreso escolar, y después dT cada 10 años. — *Compendio ADN (12.2.b, prevención) · Cuadernillo Núcleo 12 Seminario 2026 (Actividad 3.b)*
+- **¿Dónde establece latencia el virus herpes simple tipo 1?** _(Virus herpes simple 1 y 2)_
+  - ✔ En los cuerpos neuronales del ganglio del trigémino
+  - ✘ En los ganglios sacros
+  - ✘ En los linfocitos B de memoria de los ganglios linfáticos
+  - ✘ En las células basales de la epidermis
+  - El HSV-1 llega por transporte axonal retrógrado al ganglio trigémino, donde queda latente; el HSV-2 lo hace en el ganglio sacro. — *Compendio ADN (12.4.a.a y 12.4.a.b)*
+- **¿Qué estructura y material genético tienen los virus de la familia Herpesviridae?** _(Virus herpes simple 1 y 2)_
+  - ✔ ADN bicatenario lineal, cápside icosaédrica con envoltura
+  - ✘ ARN monocatenario negativo con nucleocápside helicoidal
+  - ✘ ADN bicatenario circular sin envoltura
+  - ✘ ARN monocatenario positivo con envoltura
+  - Los herpesvirus tienen genoma de ADN lineal de doble hebra, cápside icosaédrica, tegumento y envoltura lipídica, y establecen latencia. — *Cuadernillo Núcleo 12 Laboratorio 2026 (cuadro de virus) · Compendio ADN (12.4.a)*
+- **¿Dónde permanece latente el virus varicela-zóster después de la varicela?** _(Virus varicela-zóster)_
+  - ✔ En las células neurales de los ganglios sensitivos
+  - ✘ En los linfocitos B y los monocitos de la sangre periférica
+  - ✘ En las células basales de la epidermis
+  - ✘ En los macrófagos del tejido reticuloendotelial
+  - La latencia del VVZ se establece en células neuronales y gliales de los ganglios sensoriales; su reactivación produce el herpes zóster. — *Compendio ADN (12.4.a.c y 12.5.c)*
+- **¿A qué familia pertenece el virus del molusco contagioso y qué material genético tiene?** _(Virus del molusco contagioso)_
+  - ✔ Poxviridae, ADN bicatenario
+  - ✘ Papillomaviridae, ADN bicatenario circular
+  - ✘ Herpesviridae, ADN bicatenario lineal
+  - ✘ Parvoviridae, ADN monocatenario
+  - El molusco contagioso es un Poxviridae (género Molluscipoxvirus) con ADN lineal bicatenario; los poxvirus son los virus más grandes conocidos. — *Cuadernillo Núcleo 12 Laboratorio 2026 (TP 23, caso 5) · Compendio ADN (12.4.b)*
+- **¿Qué características estructurales tiene el virus del papiloma humano?** _(Virus del papiloma humano (VPH))_
+  - ✔ Virus desnudo, cápside icosaédrica, ADN bicatenario circular
+  - ✘ Virus con envoltura, cápside icosaédrica, ADN bicatenario lineal
+  - ✘ Virus desnudo con ARN monocatenario positivo
+  - ✘ Virus con envoltura y nucleocápside helicoidal
+  - El HPV es un virus sin envoltura, de cápside icosaédrica, con genoma de ADN doble cadena circular cerrado (episoma). — *Compendio ADN (12.4.c) · Cuadernillo Núcleo 12 Laboratorio 2026 (TP 23, caso 6)*
+- **¿Qué enfermedad exantemática producen el HHV-6B y, a veces, el HHV-7?** _(Herpesvirus humanos 6 y 7)_
+  - ✔ El exantema súbito o sexta enfermedad
+  - ✘ El eritema infeccioso o quinta enfermedad
+  - ✘ La escarlatina
+  - ✘ La rubéola
+  - El exantema súbito o roséola cursa con fiebre alta de 3-5 días y después exantema maculopapular rosado en cara y tronco que dura 24-48 horas. — *Compendio ADN (12.5.f)*
+- **¿Cuáles son las características clínicas principales de la mononucleosis infecciosa por virus de Epstein-Barr?** _(Virus de Epstein-Barr)_
+  - ✔ Faringitis, fiebre, adenopatías y esplenomegalia
+  - ✘ Fiebre alta de 3 días y después exantema rosado en tronco
+  - ✘ Exantema en mejillas con aspecto de cachetada
+  - ✘ Trismo, risa sardónica y espasmos generalizados
+  - La primoinfección por EBV cursa con faringitis, fiebre, adenopatías y esplenomegalia; suele ser benigna y resuelve en 3 a 6 semanas. — *Compendio ADN (12.5.d)*
+- **En el examen directo con KOH de una muestra de piel, ¿cómo se observan los dermatofitos?** _(Diagnóstico de laboratorio)_
+  - ✔ Como hifas hialinas tabicadas y ramificadas
+  - ✘ Como levaduras con pseudohifas y blastoconidios
+  - ✘ Como hifas cortas mezcladas con cúmulos de levaduras
+  - ✘ Como esférulas de doble pared con endosporas
+  - El KOH digiere la queratina y deja ver hifas hialinas, tabicadas y ramificadas de 4 a 6 micrones, propias de los dermatofitos. — *Cuadernillo Núcleo 12 Laboratorio 2026 (anexo de técnicas, KOH) · Compendio ADN (12.6.a)*
+- **¿Qué estructuras de Candida se observan en un raspado tratado con KOH o en una tinción de PAS?** _(Candida spp.)_
+  - ✔ Pseudohifas y blastoconidios
+  - ✘ Artroconidios dentro del tallo piloso
+  - ✘ Hifas no tabicadas de diámetro irregular
+  - ✘ Esférulas con endosporas
+  - Candida se ve como levaduras ovaladas en gemación (blastoconidios) con pseudohifas; la PAS las resalta por su contenido de carbohidratos. — *Cuadernillo Núcleo 12 Laboratorio 2026 (TP 24, casos 2 y 4) · Compendio ADN (12.6.a)*
+- **¿Cuál es el perfil de respuesta inmune que predomina frente a los parásitos en la piel?** _(Respuesta inmune)_
+  - ✔ Th2, con eosinófilos, mastocitos e IgE
+  - ✘ Th1, con macrófagos activados y granulomas
+  - ✘ Th17, con reclutamiento masivo de neutrófilos
+  - ✘ Citotóxica CD8 con interferón tipo I
+  - La respuesta antiparasitaria cutánea es Th2: IL-4, IL-5 e IL-13, IgE, eosinófilos, mastocitos y basófilos. — *Cuadernillo Núcleo 12 Laboratorio 2026 (TP 25, Actividad 3)*
+- **¿Dónde deposita sus huevos (liendres) el piojo de la cabeza?** _(Pediculus humanus capitis)_
+  - ✔ Adheridos al tallo del pelo
+  - ✘ En los surcos que cava en el estrato córneo
+  - ✘ En las costuras de la ropa
+  - ✘ Libres sobre la superficie del cuero cabelludo
+  - Las liendres quedan fuertemente adheridas al tallo piloso a 1-2 mm del cuero cabelludo por una sustancia quitinosa; son ovoides y operculadas. — *Cuadernillo Núcleo 12 Laboratorio 2026 (TP 25, Actividad 2.D) · Compendio ADN (12.3.b)*
+- **¿Cuál es la puerta de entrada habitual de Histoplasma capsulatum, Coccidioides spp. y Paracoccidioides brasiliensis?** _(Micosis sistémicas endémicas)_
+  - ✔ Inhalatoria, por esporas del ambiente
+  - ✘ Traumatismo cutáneo con material contaminado
+  - ✘ Endógena, desde la microbiota de la piel
+  - ✘ Digestiva, por alimentos contaminados
+  - Las micosis sistémicas endémicas se inician por inhalación de esporas ambientales y luego se diseminan por vía hematógena o linfática, incluso a la piel. — *Cuadernillo Núcleo 12 Seminario 2026 (micosis sistémicas 5.1) · Compendio ADN (12.6.b)*
+
+### Difícil (15)
+
+- **Un nene de 8 años tiene costras melicéricas con ampollas rotas alrededor de la boca, sin fiebre, y tuvo un furúnculo axilar hace dos semanas. ¿Cuál es el diagnóstico más probable?** _(Staphylococcus aureus)_
+  - ✔ Impétigo
+  - ✘ Erisipela
+  - ✘ Fascitis necrosante
+  - ✘ Síndrome de la piel escaldada
+  - Las costras color miel con ampollas y autoinoculación por rascado, sin compromiso sistémico, definen el impétigo, con S. aureus como agente más frecuente. — *Cuadernillo Núcleo 12 Laboratorio 2026 (TP 23, caso clínico 1)*
+- **De una lesión cutánea se informan cocos grampositivos en racimos y prueba de coagulasa positiva. ¿Qué permite concluir ese resultado?** _(Diagnóstico de laboratorio)_
+  - ✔ Se trata de Staphylococcus aureus
+  - ✘ Se trata de un estafilococo coagulasa negativo
+  - ✘ Se trata de Streptococcus pyogenes
+  - ✘ Se trata de Clostridium perfringens
+  - La coagulasa separa S. aureus (positiva) de los estafilococos coagulasa negativos; es la prueba de identificación principal de S. aureus. — *Cuadernillo Núcleo 12 Laboratorio 2026 (TP 23, caso 1, puntos 3 y 4) · Compendio ADN (12.2.b)*
+- **Una nena de 6 años tiene fiebre y, tras un raspón, una placa eritematosa caliente de bordes netos y sobreelevados con piel de naranja y adenopatía inguinal. ¿Qué cuadro es?** _(Streptococcus pyogenes)_
+  - ✔ Erisipela
+  - ✘ Impétigo
+  - ✘ Celulitis por Clostridium perfringens
+  - ✘ Pitiriasis versicolor inflamatoria
+  - La placa de bordes netos y sobreelevados, con fiebre y adenopatía, es una erisipela, cuyo agente típico es S. pyogenes, que entró por el raspón. — *Cuadernillo Núcleo 12 Laboratorio 2026 (TP 23, caso clínico 2)*
+- **Un hombre de 62 años tiene trismo, risa sardónica y espasmos ante estímulos, 10 días después de una herida punzante con tierra. ¿Qué espera ver en el Gram de esa herida?** _(Clostridium tetani)_
+  - ✔ Bacilos grampositivos con esporas terminales redondeadas
+  - ✘ Cocos grampositivos en racimos
+  - ✘ Bacilos grandes grampositivos sin esporas ni leucocitos
+  - ✘ Bacilos ácido alcohol resistentes
+  - C. tetani es un bacilo grampositivo esporulado con esporas terminales en palillo de tambor; el diagnóstico sigue siendo clínico porque el cultivo es positivo solo en el 30%. — *Cuadernillo Núcleo 12 Laboratorio 2026 (TP 23, caso clínico 3) · Compendio ADN (12.2.b)*
+- **Ante una herida tetanígena en una persona con esquema de vacunación desconocido, ¿qué corresponde según la pauta del material?** _(Prevención)_
+  - ✔ Una dosis de Td más inmunoglobulina antitetánica
+  - ✘ Solo una dosis de Td, sin inmunoglobulina antitetánica
+  - ✘ Solo inmunoglobulina antitetánica
+  - ✘ Nada, porque la herida ya cerró
+  - Con menos de 3 dosis o situación desconocida y herida tetanígena se indica vacuna Td (completando el esquema) más IGT en otro sitio de aplicación. — *Compendio ADN (12.2.b, tabla de inmunoprofilaxis) · Cuadernillo Núcleo 12 Seminario 2026 (Actividad 3.b)*
+- **En la lepra tuberculoide, ¿qué combinación de respuesta inmune y hallazgos corresponde?** _(Mycobacterium leprae)_
+  - ✔ Perfil Th1, granulomas con escasos bacilos y lepromina fuertemente positiva
+  - ✘ Perfil Th2, macrófagos repletos de bacilos y lepromina negativa
+  - ✘ Perfil Th2, lesiones escasas y lepromina positiva
+  - ✘ Perfil Th1, carga bacilar altísima y compromiso multiorgánico
+  - La lepra tuberculoide es paucibacilar: respuesta Th1 con granulomas y lepromina muy positiva, a diferencia de la lepromatosa, Th2 y multibacilar. — *Cuadernillo Núcleo 12 Seminario 2026 (Actividad 4.b) · Compendio ADN (12.2.c)*
+- **Una mujer de 20 años tiene vesículas agrupadas y dolorosas en el labio que reaparecen en el mismo lugar antes de cada examen. En el raspado de la lesión, ¿qué se observa?** _(Virus herpes simple 1 y 2)_
+  - ✔ Células multinucleadas o sincicios
+  - ✘ Cuerpos de inclusión eosinofílicos intracitoplasmáticos
+  - ✘ Coilocitos con gránulos de queratohialina prominentes
+  - ✘ Artroconidios rodeando el tallo piloso
+  - El efecto citopático del HSV-1 es la formación de sincicios con núcleos claros y cromatina marginada, además de cuerpos de Cowdry tipo A. — *Cuadernillo Núcleo 12 Laboratorio 2026 (TP 23, caso 4, Herpes tipo I)*
+- **¿Qué perfil serológico confirma una primoinfección por virus de Epstein-Barr?** _(Virus de Epstein-Barr)_
+  - ✔ IgM anti-VCA presente y anticuerpos anti-EBNA ausentes
+  - ✘ IgG anti-VCA y anti-EBNA presentes
+  - ✘ Altos títulos de anticuerpos contra antígenos tempranos
+  - ✘ IgG anti-EBNA aislada sin anticuerpos anti-VCA
+  - La infección aguda se confirma con IgM contra la cápside viral en ausencia de anti-EBNA; el portador sano tiene IgG anti-VCA y anti-EBNA. — *Compendio ADN (12.5.d, métodos indirectos)*
+- **¿Cuándo se produce el síndrome de rubéola congénita y qué defectos incluye?** _(Virus de la rubéola)_
+  - ✔ Por infección materna en el primer trimestre; da cataratas y sordera
+  - ✘ Por infección materna en el último mes, con neumonía neonatal grave
+  - ✘ Por infección perinatal en el canal de parto, con meningitis y sepsis
+  - ✘ Por reactivación materna del virus latente, con anemia fetal
+  - El SRC aparece cuando la infección materna ocurre en el primer trimestre y puede dar cardiopatías, cataratas y sordera; se previene con la vacunación. — *Compendio ADN (12.5.b)*
+- **¿Qué complicación produce el parvovirus B19 en un paciente con anemia hemolítica crónica?** _(Parvovirus B19)_
+  - ✔ Crisis aplásica transitoria con reticulocitopenia
+  - ✘ Hydrops fetalis
+  - ✘ Poliartritis de manos y muñecas
+  - ✘ Púrpura trombocitopénica por complejos inmunes
+  - Al lisar los precursores eritroides, el B19 provoca crisis aplásica transitoria con reticulocitopenia de 7-10 días y caída de la hemoglobina. — *Compendio ADN (12.5.e, complicaciones hematológicas)*
+- **¿Qué forma clínica de escabiosis corresponde a un paciente inmunodeprimido con escasa respuesta frente al ácaro?** _(Sarcoptes scabiei)_
+  - ✔ Sarna costrosa o noruega
+  - ✘ Sarna nodular o hiperérgica
+  - ✘ Sarna clásica
+  - ✘ Larva migrans cutánea
+  - La sarna anérgica (costrosa o noruega) aparece en inmunodeprimidos; la nodular es la forma hiperérgica y la clásica, la del huésped inmunocompetente. — *Cuadernillo Núcleo 12 Laboratorio 2026 (TP 25, Actividad 1.B) · Compendio ADN (12.3.a)*
+- **Un paciente de 20 años tiene máculas hipopigmentadas con descamación furfurácea en dorso y pecho, más notorias tras el verano. ¿Qué imagen microscópica se espera?** _(Malassezia furfur)_
+  - ✔ Hifas cortas y cúmulos de levaduras
+  - ✘ Hifas hialinas tabicadas y ramificadas
+  - ✘ Pseudohifas con blastoconidios en gemación
+  - ✘ Artroconidios en el interior del tallo piloso
+  - La pitiriasis versicolor por Malassezia muestra levaduras esféricas u ovaladas de pared gruesa mezcladas con hifas cortas poco ramificadas. — *Cuadernillo Núcleo 12 Laboratorio 2026 (TP 24, caso 1) · Compendio ADN (12.6.a)*
+- **Un nene de 7 años tiene una placa alopécica con descamación grisácea y pelos fracturados; en el tallo piloso se ven artroconidios. ¿Qué agente es el más probable en nuestro medio?** _(Dermatofitos)_
+  - ✔ Microsporum canis
+  - ✘ Malassezia furfur
+  - ✘ Candida albicans
+  - ✘ Histoplasma capsulatum
+  - Es una tiña capitis por dermatofitos y en nuestro medio el agente aislado con mayor frecuencia es M. canis, de origen zoófilo. — *Cuadernillo Núcleo 12 Laboratorio 2026 (TP 24, caso 3) · Compendio ADN (12.6.a)*
+- **Un paciente inmunocomprometido con tos y lesiones papulares en tronco trabajó en el norte del país con excremento de murciélago. En la biopsia de piel, ¿qué forma del hongo espera?** _(Histoplasma capsulatum)_
+  - ✔ Levaduras
+  - ✘ Hifas tabicadas
+  - ✘ Hifas no tabicadas
+  - ✘ Esférulas con endosporas
+  - Histoplasma es dimórfico: en los tejidos a 37 grados se presenta como levaduras, mientras que la forma filamentosa corresponde al ambiente. — *Cuadernillo Núcleo 12 Laboratorio 2026 (TP 24, Actividad 2, caso 2) · Compendio ADN (12.6.b)*
+- **En una biopsia de piel con Grocott de un trasplantado oriundo de una zona árida del norte argentino se ven esférulas de doble pared con endosporas. ¿Qué agente es?** _(Coccidioides spp.)_
+  - ✔ Coccidioides spp.
+  - ✘ Histoplasma capsulatum
+  - ✘ Paracoccidioides brasiliensis
+  - ✘ Mucor sp.
+  - Las esférulas de doble pared con endosporas son típicas de Coccidioides; la zona árida y la inmunosupresión orientan a coccidioidomicosis diseminada. — *Cuadernillo Núcleo 12 Laboratorio 2026 (TP 24, Actividad 2, caso 3)*
+
+## Núcleo 13-14 (45)
+
+### Fácil (10)
+
+- **¿Qué define a un microorganismo como "oportunista"?** _(Infecciones oportunistas)_
+  - ✔ Causa infecciones más frecuentes o graves en inmunocomprometidos
+  - ✘ Solo causa enfermedad en personas con inmunidad conservada
+  - ✘ Proviene siempre de la microbiota y nunca del ambiente
+  - ✘ Se adquiere exclusivamente durante una internación
+  - Son oportunistas los que causan infecciones con mayor frecuencia o gravedad en inmunodeficientes o inmunosuprimidos. Pueden venir de la microbiota o del ambiente y dar cuadros atípicos o generalizados. — *Cuadernillo Núcleo 13 2026 (Seminario, Introducción) · Compendio ADN (Núcleo 13)*
+- **En una persona con VIH, ¿qué recuento de linfocitos T CD4+ alcanza por sí solo para clasificarla como caso de SIDA?** _(Virus de la inmunodeficiencia humana (VIH))_
+  - ✔ Menor de 200/mm³
+  - ✘ Menor de 500/mm³
+  - ✘ Menor de 350/mm³
+  - ✘ Menor de 1000/mm³
+  - Según el CDC, toda persona con VIH y CD4 < 200/mm³ es caso de SIDA, tenga o no eventos definidores (infecciones oportunistas, neoplasias, etc.). — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 2a) · Compendio ADN (13.a.a)*
+- **¿Para cuál de estos herpesvirus oportunistas se cuenta con una vacuna?** _(Virus varicela-zóster)_
+  - ✔ Virus varicela-zóster
+  - ✘ Citomegalovirus
+  - ✘ Virus herpes simple 1
+  - ✘ Virus de Epstein-Barr
+  - El VVZ tiene vacuna a virus vivo atenuado contra la varicela (calendario: 15 meses y refuerzo) y una vacuna recombinante contra el herpes zóster; para CMV, VHS y EBV no hay vacunas en uso. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 4b) · Compendio ADN (13.a.c)*
+- **¿Qué herpesvirus se asocia al sarcoma de Kaposi epidémico de los pacientes con SIDA?** _(Herpesvirus humano 8)_
+  - ✔ Herpesvirus humano 8
+  - ✘ Virus de Epstein-Barr
+  - ✘ Citomegalovirus
+  - ✘ Virus herpes simple 2
+  - El HHV-8 causa el sarcoma de Kaposi (forma epidémica asociada al SIDA), el linfoma primario de efusiones y la enfermedad multicéntrica de Castleman. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 4a) · Compendio ADN (13.a.c)*
+- **¿Cuál es la fuente ambiental típica de Cryptococcus neoformans / gattii?** _(Cryptococcus neoformans)_
+  - ✔ Excretas de palomas y eucaliptos
+  - ✘ Bambú y roedores del sudeste asiático
+  - ✘ Zonas áridas del continente americano
+  - ✘ Microbiota de piel y tracto digestivo
+  - Cryptococcus se asocia a excretas de palomas y a eucaliptos, y se adquiere por inhalación. Bambú y roedores corresponde a Talaromyces; las zonas áridas, a Coccidioides. — *Cuadernillo Núcleo 13 2026 (Laboratorio, Introducción) · Compendio ADN (Micosis oportunistas, cuadro)*
+- **¿Qué hongo dimórfico vive en suelos con excretas de aves y murciélagos y a 37 °C se ve como levadura dentro de macrófagos?** _(Histoplasma capsulatum)_
+  - ✔ Histoplasma capsulatum
+  - ✘ Coccidioides posadasii
+  - ✘ Paracoccidioides brasiliensis
+  - ✘ Blastomyces dermatitidis
+  - Histoplasma es micelial a 25 °C (macroconidios tuberculados) y levadura intracelular a 37 °C. Da lesiones pulmonares parecidas a la TBC y se disemina en inmunocomprometidos. — *Cuadernillo Núcleo 13 2026 (listado de agentes) · Compendio ADN (Micosis sistémicas primarias, cuadro)*
+- **¿Cómo se infecta habitualmente una persona con Cryptosporidium?** _(Cryptosporidium spp.)_
+  - ✔ Agua o alimentos con ooquistes
+  - ✘ Penetración de larvas a través de la piel
+  - ✘ Picadura de un triatomino
+  - ✘ Inhalación de esporas del suelo
+  - El estadio infectante es el ooquiste maduro y la transmisión es sobre todo por agua o alimentos contaminados. El ooquiste eliminado en heces es también el estadio diagnóstico. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 5a) · Compendio ADN (13.b)*
+- **Un bacilo gramnegativo no fermentador, oxidasa positiva, que produce pigmento azul-verdoso y coloniza jabones y tubos de PVC. ¿Qué agente es?** _(Pseudomonas aeruginosa)_
+  - ✔ Pseudomonas aeruginosa
+  - ✘ Acinetobacter baumannii
+  - ✘ Stenotrophomonas maltophilia
+  - ✘ Klebsiella pneumoniae
+  - Pseudomonas: BGN no fermentador, aerobio estricto, oxidasa positivo y con pigmentos. Se disemina por las manos y es oportunista en usuarios de catéteres y lentes de contacto. — *Cuadernillo Núcleo 13 2026 (Laboratorio, Introducción y Act. 1c) · Compendio ADN (13.c.a)*
+- **Según la clasificación de situaciones de compromiso inmune, ¿cuál de estas es un defecto de barrera?** _(Situaciones de compromiso inmune)_
+  - ✔ Quemaduras extensas
+  - ✘ Trasplante con inmunosupresores
+  - ✘ Error innato de la inmunidad
+  - ✘ VIH avanzado
+  - Son defectos de barrera las quemaduras, las prótesis y catéteres y la fibrosis quística. El trasplante y el VIH son defectos secundarios de la inmunidad; el error innato es un defecto primario. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 1c) · Compendio ADN (Núcleo 13, cuadro de compromiso inmune)*
+- **¿Cuál es la infección oportunista más frecuente en pacientes con SIDA?** _(Pneumocystis jirovecii)_
+  - ✔ Neumonía por Pneumocystis jirovecii
+  - ✘ Meningitis por Cryptococcus neoformans
+  - ✘ Retinitis por citomegalovirus
+  - ✘ Toxoplasmosis cerebral
+  - La neumocistosis es la infección oportunista más frecuente en SIDA, típicamente con CD4 < 200: neumonía intersticial con disnea progresiva, tos seca y fiebre. — *Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 2) · Compendio ADN (13.c.b, cuadro y ficha de neumocistosis)*
+
+### Normal (20)
+
+- **¿Cómo se define la neutropenia según el material de la cátedra?** _(Neutropenia)_
+  - ✔ PMN ≤ 500/mm³, o ≤ 1000/mm³ si se prevé caída a < 500 en 48 h
+  - ✘ PMN ≤ 1500/mm³ sostenido durante más de 48 horas
+  - ✘ Leucocitos totales < 4000/mm³, sin importar la fórmula
+  - ✘ PMN ≤ 100/mm³ mantenido durante 7 días o más
+  - Neutropenia: PMN ≤ 500/mm³, o ≤ 1000/mm³ con descenso previsto a < 500 en 48 h. Con ≤ 100/mm³ es profunda, y si dura ≥ 7 días, prolongada. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 3a) · Compendio ADN (13.a.b)*
+- **En un paciente con neutropenia febril post quimioterapia, ¿qué tipo de infecciones son las más prevalentes?** _(Neutropenia)_
+  - ✔ Bacterianas
+  - ✘ Fúngicas invasivas desde el inicio
+  - ✘ Virales
+  - ✘ Parasitarias intestinales
+  - Predominan las bacterianas, con focos digestivo, respiratorio, catéteres y piel. También hay virales, y las fúngicas invasivas suelen aparecer más tarde. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 3c) · Compendio ADN (13.a.b)*
+- **¿Qué recomendación le darías a un paciente neutropénico para ayudarlo a evitar infecciones?** _(Prevención)_
+  - ✔ Evitar plantas en el ambiente y la exposición a obras
+  - ✘ Tener plantas en la habitación para mejorar el aire
+  - ✘ No usar barbijo para no alterar la microbiota
+  - ✘ Suspender todas las vacunas hasta recuperarse
+  - Se recomienda mantener las vacunas al día, evitar plantas, obras en construcción, revistas, diarios y mate (dispersión de hongos ambientales) y usar barbijo durante la atención. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 3d) · Compendio ADN (13.a.b)*
+- **¿Qué falla permite que los herpesvirus latentes se reactiven y den cuadros graves en inmunocomprometidos?** _(Herpesviridae)_
+  - ✔ Falla de la vigilancia por inmunidad celular
+  - ✘ Déficit aislado de IgA secretoria en las mucosas
+  - ✘ Neutropenia funcional
+  - ✘ Rotura de barreras por catéteres
+  - Todos los Herpesviridae quedan latentes tras la primoinfección, controlados por la inmunidad celular. Su falla (SIDA, trasplante, corticoides) permite la reactivación. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 4a) · Compendio ADN (13.a.c)*
+- **En pacientes con SIDA, ¿cuál es la manifestación más frecuente de la infección por citomegalovirus?** _(Citomegalovirus (CMV))_
+  - ✔ Retinitis
+  - ✘ Leucoplasia oral vellosa
+  - ✘ Linfoma primario de efusiones
+  - ✘ Hepatitis aislada
+  - En inmunodeprimidos el CMV da enfermedad diseminada (neumonitis, esofagitis, colitis, hepatitis, encefalitis); en SIDA, la retinitis es la manifestación más frecuente. — *Compendio ADN (13.a.c, cuadro de virus oportunistas) · Cuadernillo Núcleo 13 2026 (Seminario, Act. 4a)*
+- **¿Qué lesión oral de un paciente con SIDA se asocia al virus de Epstein-Barr?** _(Virus de Epstein-Barr)_
+  - ✔ Leucoplasia oral vellosa
+  - ✘ Candidiasis orofaríngea (muguet)
+  - ✘ Úlceras herpéticas crónicas
+  - ✘ Sarcoma de Kaposi en paladar
+  - En inmunosuprimidos el EBV causa leucoplasia oral vellosa y diversos linfomas, incluidos los asociados al SIDA. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 4a) · Compendio ADN (13.a.c)*
+- **Un paciente trasplantado se expone a la varicela. ¿Por qué no se lo vacuna y qué se le indica?** _(Virus varicela-zóster)_
+  - ✔ La vacuna es a virus vivo; se indica VZIG o antiviral profiláctico
+  - ✘ La vacuna es inactivada y no protege; se lo aísla sin tratamiento
+  - ✘ La vacuna es a subunidades; se aplica un refuerzo inmediato
+  - ✘ La vacuna es a virus vivo; se aplica igual, en doble dosis
+  - La vacuna contra VVZ es a virus vivo atenuado y está contraindicada en inmunocomprometidos; ante una exposición se usa inmunoglobulina hiperinmune (VZIG) o antivirales profilácticos. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 4b) · Compendio ADN (13.a.c)*
+- **¿Cómo se produce la toxoplasmosis cerebral en un paciente con SIDA?** _(Toxoplasma gondii)_
+  - ✔ Por reactivación: se rompen quistes y los bradizoítos pasan a taquizoítos
+  - ✘ Por primoinfección con ooquistes que se enquistan directo en el SNC
+  - ✘ Por taquizoítos de origen congénito que nunca se enquistaron
+  - ✘ Por larvas que migran desde el intestino hacia el cerebro
+  - Es la reactivación de una toxoplasmosis crónica por caída de la inmunidad celular: los quistes se rompen, los bradizoítos se convierten en taquizoítos y causan lesiones cerebrales focales. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 5b) · Compendio ADN (13.b)*
+- **¿Qué tinción se usa en materia fecal para observar ooquistes de Cryptosporidium?** _(Cryptosporidium spp.)_
+  - ✔ Ziehl-Neelsen modificada o Kinyoun
+  - ✘ Tinta china en examen en fresco
+  - ✘ Grocott con metenamina de plata
+  - ✘ PAS (ácido peryódico de Schiff)
+  - Los ooquistes son ácido-alcohol resistentes: se ven con Ziehl-Neelsen modificada o Kinyoun. La IFD con anticuerpos monoclonales es el estándar de oro de rutina y la PCR es más sensible. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 5a) · Compendio ADN (13.b)*
+- **¿Qué mecanismo explica el síndrome de hiperinfección por Strongyloides stercoralis?** _(Strongyloides stercoralis)_
+  - ✔ Autoinfección acelerada sin control inmune
+  - ✘ Reinfección masiva por agua contaminada
+  - ✘ Ruptura de quistes tisulares con bradizoítos
+  - ✘ Multiplicación de ooquistes en el intestino
+  - En el inmunocompetente la autoinfección está controlada. Con la inmunidad disminuida el ciclo se acorta y acelera, sube mucho la carga parasitaria y se exacerban los síntomas pulmonares y digestivos. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 5c) · Compendio ADN (13.b)*
+- **¿En cuál de estos pacientes sospecharías un síndrome de hiperinfección por Strongyloides stercoralis?** _(Strongyloides stercoralis)_
+  - ✔ Tratamiento prolongado con glucocorticoides
+  - ✘ Fibrosis quística con colonización bronquial
+  - ✘ Quemaduras extensas
+  - ✘ Uso de lentes de contacto
+  - Se sospecha con inmunosupresores (glucocorticoides, antineoplásicos), trasplante de riñón o médula, infección por VIH o HTLV-1, hipogammaglobulinemia o malnutrición severa. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 5c) · Compendio ADN (13.b)*
+- **¿Qué caracteriza a la tuberculosis en pacientes con VIH e inmunodepresión severa?** _(Mycobacterium tuberculosis)_
+  - ✔ Formas extrapulmonares y diseminadas, con cavitación infrecuente
+  - ✘ Cavitaciones apicales en la gran mayoría de los casos
+  - ✘ Localización exclusivamente pulmonar y focal
+  - ✘ Curso asintomático hasta que aparece la cavitación
+  - Predominan las formas extrapulmonares y diseminadas; con CD4 < 200 suele verse fiebre sin foco, y la Rx muestra infiltrados intersticiales difusos o es normal. Las cavitaciones son muy infrecuentes. — *Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 1a) · Compendio ADN (13.c.a)*
+- **¿Cuál es la presentación más frecuente de Mycobacterium kansasii en inmunocomprometidos?** _(Micobacterias atípicas (MAC))_
+  - ✔ Cuadro pulmonar con infiltrados, a veces cavitados
+  - ✘ Úlceras cutáneas, sinovitis y osteomielitis
+  - ✘ Enfermedad diseminada con diarrea crónica y adenopatías
+  - ✘ Linfadenitis cervical aislada
+  - M. kansasii es la segunda micobacteria atípica en frecuencia: puede diseminarse, pero lo más común es un cuadro pulmonar con tos, fiebre e infiltrados. Úlceras y sinovitis son de M. haemophilum. — *Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 1b) · Compendio ADN (13.c.a)*
+- **¿Qué descripción corresponde a Nocardia spp.?** _(Nocardia spp.)_
+  - ✔ Bacilo grampositivo filamentoso, aerobio y ácido resistente
+  - ✘ Bacilo grampositivo ramificado, anaerobio, con gránulos de azufre
+  - ✘ Cocobacilo gramnegativo inmóvil y aerobio
+  - ✘ Bacilo gramnegativo no fermentador, oxidasa positiva
+  - Nocardia es un bacilo grampositivo aerobio, filamentoso, ácido resistente y de crecimiento lento. Se adquiere por inhalación o heridas y no se transmite de persona a persona. — *Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 1c) · Compendio ADN (13.c.a, cuadros)*
+- **En el pus de un absceso cervicofacial de un paciente con mala higiene bucal, ¿qué hallazgo orienta a actinomicosis?** _(Actinomyces spp.)_
+  - ✔ Gránulos de azufre
+  - ✘ Cápsula visible con tinta china
+  - ✘ Hifas ramificadas a 45°
+  - ✘ Esférulas con endosporas
+  - Actinomyces (bacilo grampositivo anaerobio, de la flora de la boca) da infección endógena cuando se rompen las barreras mucosas y forma "gránulos de azufre" en los abscesos. — *Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 1c) · Compendio ADN (13.c.a, cuadro comparativo)*
+- **¿Qué bacteria ESKAPE es un cocobacilo gramnegativo inmóvil, sobrevive en superficies secas y se asocia a heridas, quemaduras y UCI?** _(Acinetobacter baumannii)_
+  - ✔ Acinetobacter baumannii
+  - ✘ Pseudomonas aeruginosa
+  - ✘ Stenotrophomonas maltophilia
+  - ✘ Klebsiella pneumoniae
+  - Acinetobacter es no fermentador, vive en agua y suelo y sobrevive en superficies húmedas y secas. Los brotes son hospitalarios y las infecciones se asocian a heridas, quemaduras y catéteres. — *Cuadernillo Núcleo 13 2026 (Laboratorio, Introducción y Act. 1c) · Compendio ADN (13.c.a)*
+- **En pacientes oncohematológicos, ¿qué factores predisponen a la colitis pseudomembranosa por Clostridioides difficile?** _(Clostridioides difficile)_
+  - ✔ Antibióticos, antineoplásicos e internación prolongada
+  - ✘ Uso de lentes de contacto y sondas urinarias permanentes
+  - ✘ Déficit de IgA y fibrosis quística
+  - ✘ Exposición a excretas de aves
+  - C. difficile (bacilo grampositivo esporulado, anaerobio estricto) es emergente en oncohematología. Además de los antibióticos, muchas drogas antineoplásicas y la internación prolongada predisponen; puede dar megacolon tóxico. — *Cuadernillo Núcleo 13 2026 (Laboratorio, Introducción y Act. 1d) · Compendio ADN (13.c)*
+- **¿Qué se observa en una biopsia de pulmón con aspergilosis invasiva?** _(Aspergillus spp.)_
+  - ✔ Hifas hialinas septadas que se ramifican en ángulo agudo
+  - ✘ Hifas anchas no septadas con esporangios
+  - ✘ Levaduras con gemación de base estrecha y cápsula gruesa
+  - ✘ Quistes en forma de taza teñidos de negro
+  - Aspergillus: hifas hialinas tabicadas, de grosor uniforme, con ramificación dicotómica en ángulo agudo (~45°). Son angioinvasivas: provocan trombosis e infartos necróticos. — *Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 3) · Compendio ADN (13.c.b, ficha de aspergilosis)*
+- **¿Qué morfología caracteriza a los Mucorales (Rhizopus, Mucor, Lichtheimia) en el laboratorio?** _(Mucorales)_
+  - ✔ Hifas no septadas, esporangios grandes y crecimiento rápido
+  - ✘ Hifas septadas con macroconidios en forma de banana
+  - ✘ Levaduras con pseudohifas y tubo germinativo
+  - ✘ Levaduras con artroconidios
+  - Los Mucorales son filamentosos no septados, con esporangios grandes y crecimiento rápido; causan mucormicosis rinoorbitocerebral, pulmonar o diseminada. Los macroconidios en banana son de Fusarium. — *Cuadernillo Núcleo 13 2026 (listado de agentes) · Compendio ADN (Micosis oportunistas, cuadros)*
+- **Para evaluar el estado inmune de una persona con VIH, ¿qué estudios se piden?** _(Virus de la inmunodeficiencia humana (VIH))_
+  - ✔ Recuento de linfocitos T CD4 y carga viral
+  - ✘ Hemograma con recuento de neutrófilos solamente
+  - ✘ Dosaje de IgA e IgG séricas
+  - ✘ Western blot y prueba de Sabin-Feldman
+  - El equilibrio entre la replicación viral (carga viral) y el sistema inmune se mide con el recuento de CD4. Sin tratamiento, la carga viral sube y los CD4 caen progresivamente hasta el SIDA. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 2b) · Compendio ADN (13.a.a)*
+
+### Difícil (15)
+
+- **Varón de 28 años sin antecedentes, con disnea de 2 semanas, tos seca, saturación 88%, TC con vidrio esmerilado bilateral que respeta la periferia y LDH 850. ¿Qué agente sospechás?** _(Pneumocystis jirovecii)_
+  - ✔ Pneumocystis jirovecii
+  - ✘ Aspergillus fumigatus
+  - ✘ Cryptococcus neoformans
+  - ✘ Mycobacterium kansasii
+  - Neumonía intersticial insidiosa con vidrio esmerilado bilateral e hipoxemia sugiere neumocistosis, típica del SIDA con CD4 < 200: obliga a pensar en un VIH no diagnosticado. — *Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 2, caso 1) · Compendio ADN (13.c.b)*
+- **Para confirmar una neumonía por Pneumocystis jirovecii, ¿qué estudio corresponde?** _(Pneumocystis jirovecii)_
+  - ✔ Grocott en lavado broncoalveolar
+  - ✘ Cultivo de esputo en medio para hongos
+  - ✘ Galactomanano en suero
+  - ✘ Antígeno capsular en suero
+  - Pneumocystis no se cultiva: se diagnostica por microscopía de LBA, esputo inducido o biopsia, con GMS/Grocott (pared del quiste, en negro), Giemsa (formas tróficas) o inmunofluorescencia. — *Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 2 y 3) · Compendio ADN (13.c.b)*
+- **Varón de 48 años con LMA en inducción, neutropénico hace 7 días, con fiebre, puntada de costado y hemoptisis. TC: cavitación con signo del halo; galactomanano sérico positivo. ¿Diagnóstico?** _(Aspergillus spp.)_
+  - ✔ Aspergilosis pulmonar invasiva
+  - ✘ Neumonía por Pneumocystis jirovecii
+  - ✘ Criptococosis pulmonar
+  - ✘ Tuberculosis cavitaria
+  - La aspergilosis pulmonar invasiva es devastadora en neutropénicos (< 500/mm³): fiebre, infiltrados, dolor pleurítico y hemoptisis por angioinvasión. El galactomanano sérico positivo apoya el diagnóstico. — *Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 2, caso 2) · Compendio ADN (13.c.b)*
+- **Sobre el diagnóstico de laboratorio de la aspergilosis invasiva, ¿qué afirmación es correcta?** _(Aspergillus spp.)_
+  - ✔ Los hemocultivos rara vez son positivos
+  - ✘ El antígeno capsular en LCR es de elección
+  - ✘ No se cultiva: requiere tinción de Grocott
+  - ✘ La prueba del tubo germinativo lo confirma
+  - Se diagnostica por anatomía patológica (hifas en tejido), cultivo y detección de galactomanano en suero; los hemocultivos rara vez dan positivo. — *Compendio ADN (13.c.b, cuadro de micosis) · Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 2)*
+- **Mujer de 35 años con VIH (CD4 152), cefalea de 10 días, vómitos en escopeta, presión de apertura del LCR de 40 cmH2O y tinta china positiva. ¿Qué otro estudio en LCR es rápido y sensible?** _(Cryptococcus neoformans)_
+  - ✔ Antígeno capsular polisacárido
+  - ✘ Galactomanano
+  - ✘ Ziehl-Neelsen del sedimento centrifugado
+  - ✘ IgM anti-Toxoplasma
+  - Es una meningitis criptocócica. La cápsula polisacárida es su marcador: detectar el antígeno capsular en LCR o suero es rápido y sensible; se complementa con tinta china y cultivo. — *Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 2, caso 3) · Compendio ADN (13.c.b)*
+- **Paciente en UCI con catéter venoso central hace 21 días, nutrición parenteral y antibióticos, febril sin foco. Hemocultivos y cultivo del catéter desarrollan levaduras. ¿Agente más probable?** _(Candida spp.)_
+  - ✔ Candida spp.
+  - ✘ Aspergillus fumigatus
+  - ✘ Pneumocystis jirovecii
+  - ✘ Mucorales
+  - Candida da infección endógena en pacientes con catéteres, antibióticos, neutropenia o cirugía. La candidemia es una causa frecuente de infección nosocomial, con mortalidad atribuible cercana al 50%. — *Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 2, caso 4) · Compendio ADN (13.c.b)*
+- **En un paciente con SIDA y sospecha de toxoplasmosis cerebral, ¿qué particularidad tiene el diagnóstico?** _(Toxoplasma gondii)_
+  - ✔ Suele no haber IgM; puede requerir RNM, biopsia y PCR
+  - ✘ La IgM siempre es positiva y confirma la reactivación
+  - ✘ Se confirma al ver ooquistes en materia fecal
+  - ✘ El método directo en sangre tiene alto rendimiento
+  - En el inmunocomprometido casi nunca hay IgM y los títulos de IgG e IgA son bajos: el diagnóstico suele requerir RNM o biopsia cerebral con PCR. La IgM sirve en el inmunocompetente. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 5b) · Compendio ADN (13.b, cuadro comparativo)*
+- **¿Qué define a la estrongiloidosis diseminada, a diferencia del síndrome de hiperinfección?** _(Strongyloides stercoralis)_
+  - ✔ Larvas en órganos que el parásito normalmente no alcanza
+  - ✘ Mayor carga de larvas, pero limitada a pulmón e intestino
+  - ✘ Quistes en músculo estriado
+  - ✘ Ooquistes en heces por más de 1 mes
+  - La hiperinfección exacerba el ciclo habitual (pulmón e intestino). La diseminación es el hallazgo de larvas en casi todos los órganos que normalmente no alcanza, y suele ser fatal. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 5c) · Compendio ADN (13.b)*
+- **¿Cuál de estas situaciones es un evento definidor de SIDA?** _(Eventos definidores de SIDA)_
+  - ✔ Sarcoma de Kaposi en un paciente de 45 años
+  - ✘ Candidiasis orofaríngea
+  - ✘ Citomegalovirosis limitada al hígado y los ganglios
+  - ✘ Criptosporidiosis con diarrea de 2 semanas
+  - El Kaposi en menores de 60 años es definidor. La candidiasis tiene que ser esofágica o respiratoria, el CMV fuera de hígado y ganglios, y la criptosporidiosis con diarrea de más de 1 mes. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 2) · Compendio ADN (13.a.a)*
+- **¿Qué manifestación de la infección por Trypanosoma cruzi se considera evento definidor de SIDA?** _(Trypanosoma cruzi)_
+  - ✔ Encefalopatía chagásica
+  - ✘ Miocardiopatía dilatada
+  - ✘ Megaesófago
+  - ✘ Chagoma de inoculación
+  - La encefalopatía chagásica figura entre los eventos definidores: es una manifestación no habitual de una enfermedad frecuente, que aparece por el deterioro inmune del SIDA. — *Cuadernillo Núcleo 13 2026 (Seminario, Act. 2) · Compendio ADN (13.a.a)*
+- **Paciente con SIDA muy avanzado, con fiebre persistente, sudoración nocturna, diarrea crónica, hepatoesplenomegalia y adenopatías mesentéricas. ¿Qué sospechás?** _(Micobacterias atípicas (MAC))_
+  - ✔ Micobacteriosis diseminada por MAC
+  - ✘ Neumonía por Mycobacterium kansasii
+  - ✘ Úlceras por Mycobacterium haemophilum
+  - ✘ Nocardiosis cutánea localizada
+  - M. avium-intracellulare es la micobacteria atípica principal: aparece en fases muy avanzadas del SIDA, con CD4 muy bajos, como enfermedad diseminada. La micobacteriosis diseminada por M. avium es definidora. — *Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 1b; Seminario, Act. 2) · Compendio ADN (13.c.a)*
+- **Un niño tiene giardiasis a repetición. Según el cuadro de compromiso inmune del material, ¿qué defecto primario sugiere este agente?** _(Giardia lamblia)_
+  - ✔ Déficit de IgA o de anticuerpos
+  - ✘ Enfermedad granulomatosa crónica
+  - ✘ Falla de linfocitos T por VIH
+  - ✘ Neutropenia post quimioterapia
+  - Algunos agentes son indicadores de inmunodeficiencias primarias: Giardia sugiere déficit de IgA o de anticuerpos; Nocardia y S. aureus, enfermedad granulomatosa crónica. — *Compendio ADN (Núcleo 13, aclaración del cuadro de compromiso inmune) · Cuadernillo Núcleo 13 2026 (Seminario, Act. 1c)*
+- **Un paciente en quimioterapia tiene 80 neutrófilos/mm³ desde hace 9 días. ¿Cómo se clasifica su neutropenia?** _(Neutropenia)_
+  - ✔ Profunda y prolongada
+  - ✘ Funcional y transitoria
+  - ✘ Leve pero prolongada
+  - ✘ Profunda pero no prolongada
+  - Neutropenia profunda o severa: PMN ≤ 100/mm³; prolongada: dura ≥ 7 días. La funcional es la de neutrófilos defectuosos con recuento normal o aumentado. — *Compendio ADN (13.a.b) · Cuadernillo Núcleo 13 2026 (Seminario, Act. 3a)*
+- **Paciente neutropénico con fungemia. En el cultivo crece un hongo filamentoso hialino con macroconidios en forma de banana. ¿Qué agente es?** _(Fusarium spp.)_
+  - ✔ Fusarium spp.
+  - ✘ Aspergillus fumigatus
+  - ✘ Mucorales
+  - ✘ Trichosporon spp.
+  - Fusarium es un filamentoso hialino con macroconidios en banana, del suelo y las plantas; causa infección cutánea, queratitis y fungemia en neutropénicos. — *Cuadernillo Núcleo 13 2026 (listado de agentes) · Compendio ADN (Micosis oportunistas, cuadros)*
+- **Del grupo ESKAPE, ¿cuál clasifica la OMS como de prioridad "alta" y no "crítica" para la investigación de nuevos fármacos?** _(ESKAPE)_
+  - ✔ Staphylococcus aureus
+  - ✘ Acinetobacter baumannii
+  - ✘ Enterobacter spp.
+  - ✘ Klebsiella pneumoniae
+  - En las listas de la OMS, A. baumannii y las enterobacterias resistentes (K. pneumoniae, Enterobacter) son de prioridad crítica; S. aureus resistente a meticilina es de prioridad alta. Son multirresistentes y los colonizados actúan como reservorio. — *Compendio ADN (13.c.a, siglas ESKAPE)*

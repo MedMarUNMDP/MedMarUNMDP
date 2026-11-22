@@ -54,8 +54,8 @@ Los bugs JUEGO-01 a 14 se corrigieron en v3.5. Queda pendiente:
 
 **Inmune Survivors — modos por núcleo de ADN** (plan en `games/inmune-survivors/docs/plan-modos-nucleos.md`)
 - [x] Etapas 1 a 4 (v3.7–v3.8): catálogo, especies, bestiario, Sandbox infinito y Foco por núcleo con ranking.
-- [ ] Etapa 7: preguntas por núcleo (etiquetar el banco y sumar ~15 por núcleo y dificultad con `revisor-contenido-medico`)
-      para que el Foco por núcleo también filtre las preguntas.
+- [x] Etapa 7 (v3.10): 415 preguntas por núcleo, revisadas. Pendiente: que el autor o alumnos que cursan las
+      prueben y reporten errores; sumar preguntas de defensa contra agentes (núcleos 1-5) al banco general.
 - [ ] 12 piezas de sprite nuevas (bacilo ácido-alcohol resistente, retrovirus, *Plasmodium*, *Pneumocystis*…) y un
       (los 9 jefes de núcleo ya tienen arte y mecánica propios desde v3.9).
 - [ ] Rasgos de comportamiento (cápsula, toxina, intracelular…), uno por vez con tests.

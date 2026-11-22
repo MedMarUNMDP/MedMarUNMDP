@@ -1,0 +1,767 @@
+[
+ {
+  "id": "n13_14-f-01",
+  "nucleo": "13-14",
+  "difficulty": "facil",
+  "topic": "Infecciones oportunistas",
+  "q": "¿Qué define a un microorganismo como \"oportunista\"?",
+  "a": [
+   "Causa infecciones más frecuentes o graves en inmunocomprometidos",
+   "Solo causa enfermedad en personas con inmunidad conservada",
+   "Proviene siempre de la microbiota y nunca del ambiente",
+   "Se adquiere exclusivamente durante una internación"
+  ],
+  "c": 0,
+  "exp": "Son oportunistas los que causan infecciones con mayor frecuencia o gravedad en inmunodeficientes o inmunosuprimidos. Pueden venir de la microbiota o del ambiente y dar cuadros atípicos o generalizados.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Introducción) · Compendio ADN (Núcleo 13)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-f-02",
+  "nucleo": "13-14",
+  "difficulty": "facil",
+  "topic": "Virus de la inmunodeficiencia humana (VIH)",
+  "q": "En una persona con VIH, ¿qué recuento de linfocitos T CD4+ alcanza por sí solo para clasificarla como caso de SIDA?",
+  "a": [
+   "Menor de 200/mm³",
+   "Menor de 500/mm³",
+   "Menor de 350/mm³",
+   "Menor de 1000/mm³"
+  ],
+  "c": 0,
+  "exp": "Según el CDC, toda persona con VIH y CD4 < 200/mm³ es caso de SIDA, tenga o no eventos definidores (infecciones oportunistas, neoplasias, etc.).",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 2a) · Compendio ADN (13.a.a)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-f-03",
+  "nucleo": "13-14",
+  "difficulty": "facil",
+  "topic": "Virus varicela-zóster",
+  "q": "¿Para cuál de estos herpesvirus oportunistas se cuenta con una vacuna?",
+  "a": [
+   "Virus varicela-zóster",
+   "Citomegalovirus",
+   "Virus herpes simple 1",
+   "Virus de Epstein-Barr"
+  ],
+  "c": 0,
+  "exp": "El VVZ tiene vacuna a virus vivo atenuado contra la varicela (calendario: 15 meses y refuerzo) y una vacuna recombinante contra el herpes zóster; para CMV, VHS y EBV no hay vacunas en uso.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 4b) · Compendio ADN (13.a.c)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-f-04",
+  "nucleo": "13-14",
+  "difficulty": "facil",
+  "topic": "Herpesvirus humano 8",
+  "q": "¿Qué herpesvirus se asocia al sarcoma de Kaposi epidémico de los pacientes con SIDA?",
+  "a": [
+   "Herpesvirus humano 8",
+   "Virus de Epstein-Barr",
+   "Citomegalovirus",
+   "Virus herpes simple 2"
+  ],
+  "c": 0,
+  "exp": "El HHV-8 causa el sarcoma de Kaposi (forma epidémica asociada al SIDA), el linfoma primario de efusiones y la enfermedad multicéntrica de Castleman.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 4a) · Compendio ADN (13.a.c)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-f-05",
+  "nucleo": "13-14",
+  "difficulty": "facil",
+  "topic": "Cryptococcus neoformans",
+  "q": "¿Cuál es la fuente ambiental típica de Cryptococcus neoformans / gattii?",
+  "a": [
+   "Excretas de palomas y eucaliptos",
+   "Bambú y roedores del sudeste asiático",
+   "Zonas áridas del continente americano",
+   "Microbiota de piel y tracto digestivo"
+  ],
+  "c": 0,
+  "exp": "Cryptococcus se asocia a excretas de palomas y a eucaliptos, y se adquiere por inhalación. Bambú y roedores corresponde a Talaromyces; las zonas áridas, a Coccidioides.",
+  "source": "Cuadernillo Núcleo 13 2026 (Laboratorio, Introducción) · Compendio ADN (Micosis oportunistas, cuadro)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-f-06",
+  "nucleo": "13-14",
+  "difficulty": "facil",
+  "topic": "Histoplasma capsulatum",
+  "q": "¿Qué hongo dimórfico vive en suelos con excretas de aves y murciélagos y a 37 °C se ve como levadura dentro de macrófagos?",
+  "a": [
+   "Histoplasma capsulatum",
+   "Coccidioides posadasii",
+   "Paracoccidioides brasiliensis",
+   "Blastomyces dermatitidis"
+  ],
+  "c": 0,
+  "exp": "Histoplasma es micelial a 25 °C (macroconidios tuberculados) y levadura intracelular a 37 °C. Da lesiones pulmonares parecidas a la TBC y se disemina en inmunocomprometidos.",
+  "source": "Cuadernillo Núcleo 13 2026 (listado de agentes) · Compendio ADN (Micosis sistémicas primarias, cuadro)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-f-07",
+  "nucleo": "13-14",
+  "difficulty": "facil",
+  "topic": "Cryptosporidium spp.",
+  "q": "¿Cómo se infecta habitualmente una persona con Cryptosporidium?",
+  "a": [
+   "Agua o alimentos con ooquistes",
+   "Penetración de larvas a través de la piel",
+   "Picadura de un triatomino",
+   "Inhalación de esporas del suelo"
+  ],
+  "c": 0,
+  "exp": "El estadio infectante es el ooquiste maduro y la transmisión es sobre todo por agua o alimentos contaminados. El ooquiste eliminado en heces es también el estadio diagnóstico.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 5a) · Compendio ADN (13.b)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-f-08",
+  "nucleo": "13-14",
+  "difficulty": "facil",
+  "topic": "Pseudomonas aeruginosa",
+  "q": "Un bacilo gramnegativo no fermentador, oxidasa positiva, que produce pigmento azul-verdoso y coloniza jabones y tubos de PVC. ¿Qué agente es?",
+  "a": [
+   "Pseudomonas aeruginosa",
+   "Acinetobacter baumannii",
+   "Stenotrophomonas maltophilia",
+   "Klebsiella pneumoniae"
+  ],
+  "c": 0,
+  "exp": "Pseudomonas: BGN no fermentador, aerobio estricto, oxidasa positivo y con pigmentos. Se disemina por las manos y es oportunista en usuarios de catéteres y lentes de contacto.",
+  "source": "Cuadernillo Núcleo 13 2026 (Laboratorio, Introducción y Act. 1c) · Compendio ADN (13.c.a)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-f-09",
+  "nucleo": "13-14",
+  "difficulty": "facil",
+  "topic": "Situaciones de compromiso inmune",
+  "q": "Según la clasificación de situaciones de compromiso inmune, ¿cuál de estas es un defecto de barrera?",
+  "a": [
+   "Quemaduras extensas",
+   "Trasplante con inmunosupresores",
+   "Error innato de la inmunidad",
+   "VIH avanzado"
+  ],
+  "c": 0,
+  "exp": "Son defectos de barrera las quemaduras, las prótesis y catéteres y la fibrosis quística. El trasplante y el VIH son defectos secundarios de la inmunidad; el error innato es un defecto primario.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 1c) · Compendio ADN (Núcleo 13, cuadro de compromiso inmune)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-f-10",
+  "nucleo": "13-14",
+  "difficulty": "facil",
+  "topic": "Pneumocystis jirovecii",
+  "q": "¿Cuál es la infección oportunista más frecuente en pacientes con SIDA?",
+  "a": [
+   "Neumonía por Pneumocystis jirovecii",
+   "Meningitis por Cryptococcus neoformans",
+   "Retinitis por citomegalovirus",
+   "Toxoplasmosis cerebral"
+  ],
+  "c": 0,
+  "exp": "La neumocistosis es la infección oportunista más frecuente en SIDA, típicamente con CD4 < 200: neumonía intersticial con disnea progresiva, tos seca y fiebre.",
+  "source": "Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 2) · Compendio ADN (13.c.b, cuadro y ficha de neumocistosis)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-01",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Neutropenia",
+  "q": "¿Cómo se define la neutropenia según el material de la cátedra?",
+  "a": [
+   "PMN ≤ 500/mm³, o ≤ 1000/mm³ si se prevé caída a < 500 en 48 h",
+   "PMN ≤ 1500/mm³ sostenido durante más de 48 horas",
+   "Leucocitos totales < 4000/mm³, sin importar la fórmula",
+   "PMN ≤ 100/mm³ mantenido durante 7 días o más"
+  ],
+  "c": 0,
+  "exp": "Neutropenia: PMN ≤ 500/mm³, o ≤ 1000/mm³ con descenso previsto a < 500 en 48 h. Con ≤ 100/mm³ es profunda, y si dura ≥ 7 días, prolongada.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 3a) · Compendio ADN (13.a.b)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-02",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Neutropenia",
+  "q": "En un paciente con neutropenia febril post quimioterapia, ¿qué tipo de infecciones son las más prevalentes?",
+  "a": [
+   "Bacterianas",
+   "Fúngicas invasivas desde el inicio",
+   "Virales",
+   "Parasitarias intestinales"
+  ],
+  "c": 0,
+  "exp": "Predominan las bacterianas, con focos digestivo, respiratorio, catéteres y piel. También hay virales, y las fúngicas invasivas suelen aparecer más tarde.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 3c) · Compendio ADN (13.a.b)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-03",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Prevención",
+  "q": "¿Qué recomendación le darías a un paciente neutropénico para ayudarlo a evitar infecciones?",
+  "a": [
+   "Evitar plantas en el ambiente y la exposición a obras",
+   "Tener plantas en la habitación para mejorar el aire",
+   "No usar barbijo para no alterar la microbiota",
+   "Suspender todas las vacunas hasta recuperarse"
+  ],
+  "c": 0,
+  "exp": "Se recomienda mantener las vacunas al día, evitar plantas, obras en construcción, revistas, diarios y mate (dispersión de hongos ambientales) y usar barbijo durante la atención.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 3d) · Compendio ADN (13.a.b)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-04",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Herpesviridae",
+  "q": "¿Qué falla permite que los herpesvirus latentes se reactiven y den cuadros graves en inmunocomprometidos?",
+  "a": [
+   "Falla de la vigilancia por inmunidad celular",
+   "Déficit aislado de IgA secretoria en las mucosas",
+   "Neutropenia funcional",
+   "Rotura de barreras por catéteres"
+  ],
+  "c": 0,
+  "exp": "Todos los Herpesviridae quedan latentes tras la primoinfección, controlados por la inmunidad celular. Su falla (SIDA, trasplante, corticoides) permite la reactivación.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 4a) · Compendio ADN (13.a.c)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-05",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Citomegalovirus (CMV)",
+  "q": "En pacientes con SIDA, ¿cuál es la manifestación más frecuente de la infección por citomegalovirus?",
+  "a": [
+   "Retinitis",
+   "Leucoplasia oral vellosa",
+   "Linfoma primario de efusiones",
+   "Hepatitis aislada"
+  ],
+  "c": 0,
+  "exp": "En inmunodeprimidos el CMV da enfermedad diseminada (neumonitis, esofagitis, colitis, hepatitis, encefalitis); en SIDA, la retinitis es la manifestación más frecuente.",
+  "source": "Compendio ADN (13.a.c, cuadro de virus oportunistas) · Cuadernillo Núcleo 13 2026 (Seminario, Act. 4a)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-06",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Virus de Epstein-Barr",
+  "q": "¿Qué lesión oral de un paciente con SIDA se asocia al virus de Epstein-Barr?",
+  "a": [
+   "Leucoplasia oral vellosa",
+   "Candidiasis orofaríngea (muguet)",
+   "Úlceras herpéticas crónicas",
+   "Sarcoma de Kaposi en paladar"
+  ],
+  "c": 0,
+  "exp": "En inmunosuprimidos el EBV causa leucoplasia oral vellosa y diversos linfomas, incluidos los asociados al SIDA.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 4a) · Compendio ADN (13.a.c)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-07",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Virus varicela-zóster",
+  "q": "Un paciente trasplantado se expone a la varicela. ¿Por qué no se lo vacuna y qué se le indica?",
+  "a": [
+   "La vacuna es a virus vivo; se indica VZIG o antiviral profiláctico",
+   "La vacuna es inactivada y no protege; se lo aísla sin tratamiento",
+   "La vacuna es a subunidades; se aplica un refuerzo inmediato",
+   "La vacuna es a virus vivo; se aplica igual, en doble dosis"
+  ],
+  "c": 0,
+  "exp": "La vacuna contra VVZ es a virus vivo atenuado y está contraindicada en inmunocomprometidos; ante una exposición se usa inmunoglobulina hiperinmune (VZIG) o antivirales profilácticos.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 4b) · Compendio ADN (13.a.c)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-08",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Toxoplasma gondii",
+  "q": "¿Cómo se produce la toxoplasmosis cerebral en un paciente con SIDA?",
+  "a": [
+   "Por reactivación: se rompen quistes y los bradizoítos pasan a taquizoítos",
+   "Por primoinfección con ooquistes que se enquistan directo en el SNC",
+   "Por taquizoítos de origen congénito que nunca se enquistaron",
+   "Por larvas que migran desde el intestino hacia el cerebro"
+  ],
+  "c": 0,
+  "exp": "Es la reactivación de una toxoplasmosis crónica por caída de la inmunidad celular: los quistes se rompen, los bradizoítos se convierten en taquizoítos y causan lesiones cerebrales focales.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 5b) · Compendio ADN (13.b)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-09",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Cryptosporidium spp.",
+  "q": "¿Qué tinción se usa en materia fecal para observar ooquistes de Cryptosporidium?",
+  "a": [
+   "Ziehl-Neelsen modificada o Kinyoun",
+   "Tinta china en examen en fresco",
+   "Grocott con metenamina de plata",
+   "PAS (ácido peryódico de Schiff)"
+  ],
+  "c": 0,
+  "exp": "Los ooquistes son ácido-alcohol resistentes: se ven con Ziehl-Neelsen modificada o Kinyoun. La IFD con anticuerpos monoclonales es el estándar de oro de rutina y la PCR es más sensible.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 5a) · Compendio ADN (13.b)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-10",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Strongyloides stercoralis",
+  "q": "¿Qué mecanismo explica el síndrome de hiperinfección por Strongyloides stercoralis?",
+  "a": [
+   "Autoinfección acelerada sin control inmune",
+   "Reinfección masiva por agua contaminada",
+   "Ruptura de quistes tisulares con bradizoítos",
+   "Multiplicación de ooquistes en el intestino"
+  ],
+  "c": 0,
+  "exp": "En el inmunocompetente la autoinfección está controlada. Con la inmunidad disminuida el ciclo se acorta y acelera, sube mucho la carga parasitaria y se exacerban los síntomas pulmonares y digestivos.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 5c) · Compendio ADN (13.b)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-11",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Strongyloides stercoralis",
+  "q": "¿En cuál de estos pacientes sospecharías un síndrome de hiperinfección por Strongyloides stercoralis?",
+  "a": [
+   "Tratamiento prolongado con glucocorticoides",
+   "Fibrosis quística con colonización bronquial",
+   "Quemaduras extensas",
+   "Uso de lentes de contacto"
+  ],
+  "c": 0,
+  "exp": "Se sospecha con inmunosupresores (glucocorticoides, antineoplásicos), trasplante de riñón o médula, infección por VIH o HTLV-1, hipogammaglobulinemia o malnutrición severa.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 5c) · Compendio ADN (13.b)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-12",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Mycobacterium tuberculosis",
+  "q": "¿Qué caracteriza a la tuberculosis en pacientes con VIH e inmunodepresión severa?",
+  "a": [
+   "Formas extrapulmonares y diseminadas, con cavitación infrecuente",
+   "Cavitaciones apicales en la gran mayoría de los casos",
+   "Localización exclusivamente pulmonar y focal",
+   "Curso asintomático hasta que aparece la cavitación"
+  ],
+  "c": 0,
+  "exp": "Predominan las formas extrapulmonares y diseminadas; con CD4 < 200 suele verse fiebre sin foco, y la Rx muestra infiltrados intersticiales difusos o es normal. Las cavitaciones son muy infrecuentes.",
+  "source": "Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 1a) · Compendio ADN (13.c.a)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-13",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Micobacterias atípicas (MAC)",
+  "q": "¿Cuál es la presentación más frecuente de Mycobacterium kansasii en inmunocomprometidos?",
+  "a": [
+   "Cuadro pulmonar con infiltrados, a veces cavitados",
+   "Úlceras cutáneas, sinovitis y osteomielitis",
+   "Enfermedad diseminada con diarrea crónica y adenopatías",
+   "Linfadenitis cervical aislada"
+  ],
+  "c": 0,
+  "exp": "M. kansasii es la segunda micobacteria atípica en frecuencia: puede diseminarse, pero lo más común es un cuadro pulmonar con tos, fiebre e infiltrados. Úlceras y sinovitis son de M. haemophilum.",
+  "source": "Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 1b) · Compendio ADN (13.c.a)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-14",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Nocardia spp.",
+  "q": "¿Qué descripción corresponde a Nocardia spp.?",
+  "a": [
+   "Bacilo grampositivo filamentoso, aerobio y ácido resistente",
+   "Bacilo grampositivo ramificado, anaerobio, con gránulos de azufre",
+   "Cocobacilo gramnegativo inmóvil y aerobio",
+   "Bacilo gramnegativo no fermentador, oxidasa positiva"
+  ],
+  "c": 0,
+  "exp": "Nocardia es un bacilo grampositivo aerobio, filamentoso, ácido resistente y de crecimiento lento. Se adquiere por inhalación o heridas y no se transmite de persona a persona.",
+  "source": "Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 1c) · Compendio ADN (13.c.a, cuadros)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-15",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Actinomyces spp.",
+  "q": "En el pus de un absceso cervicofacial de un paciente con mala higiene bucal, ¿qué hallazgo orienta a actinomicosis?",
+  "a": [
+   "Gránulos de azufre",
+   "Cápsula visible con tinta china",
+   "Hifas ramificadas a 45°",
+   "Esférulas con endosporas"
+  ],
+  "c": 0,
+  "exp": "Actinomyces (bacilo grampositivo anaerobio, de la flora de la boca) da infección endógena cuando se rompen las barreras mucosas y forma \"gránulos de azufre\" en los abscesos.",
+  "source": "Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 1c) · Compendio ADN (13.c.a, cuadro comparativo)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-16",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Acinetobacter baumannii",
+  "q": "¿Qué bacteria ESKAPE es un cocobacilo gramnegativo inmóvil, sobrevive en superficies secas y se asocia a heridas, quemaduras y UCI?",
+  "a": [
+   "Acinetobacter baumannii",
+   "Pseudomonas aeruginosa",
+   "Stenotrophomonas maltophilia",
+   "Klebsiella pneumoniae"
+  ],
+  "c": 0,
+  "exp": "Acinetobacter es no fermentador, vive en agua y suelo y sobrevive en superficies húmedas y secas. Los brotes son hospitalarios y las infecciones se asocian a heridas, quemaduras y catéteres.",
+  "source": "Cuadernillo Núcleo 13 2026 (Laboratorio, Introducción y Act. 1c) · Compendio ADN (13.c.a)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-17",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Clostridioides difficile",
+  "q": "En pacientes oncohematológicos, ¿qué factores predisponen a la colitis pseudomembranosa por Clostridioides difficile?",
+  "a": [
+   "Antibióticos, antineoplásicos e internación prolongada",
+   "Uso de lentes de contacto y sondas urinarias permanentes",
+   "Déficit de IgA y fibrosis quística",
+   "Exposición a excretas de aves"
+  ],
+  "c": 0,
+  "exp": "C. difficile (bacilo grampositivo esporulado, anaerobio estricto) es emergente en oncohematología. Además de los antibióticos, muchas drogas antineoplásicas y la internación prolongada predisponen; puede dar megacolon tóxico.",
+  "source": "Cuadernillo Núcleo 13 2026 (Laboratorio, Introducción y Act. 1d) · Compendio ADN (13.c)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-18",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Aspergillus spp.",
+  "q": "¿Qué se observa en una biopsia de pulmón con aspergilosis invasiva?",
+  "a": [
+   "Hifas hialinas septadas que se ramifican en ángulo agudo",
+   "Hifas anchas no septadas con esporangios",
+   "Levaduras con gemación de base estrecha y cápsula gruesa",
+   "Quistes en forma de taza teñidos de negro"
+  ],
+  "c": 0,
+  "exp": "Aspergillus: hifas hialinas tabicadas, de grosor uniforme, con ramificación dicotómica en ángulo agudo (~45°). Son angioinvasivas: provocan trombosis e infartos necróticos.",
+  "source": "Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 3) · Compendio ADN (13.c.b, ficha de aspergilosis)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-19",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Mucorales",
+  "q": "¿Qué morfología caracteriza a los Mucorales (Rhizopus, Mucor, Lichtheimia) en el laboratorio?",
+  "a": [
+   "Hifas no septadas, esporangios grandes y crecimiento rápido",
+   "Hifas septadas con macroconidios en forma de banana",
+   "Levaduras con pseudohifas y tubo germinativo",
+   "Levaduras con artroconidios"
+  ],
+  "c": 0,
+  "exp": "Los Mucorales son filamentosos no septados, con esporangios grandes y crecimiento rápido; causan mucormicosis rinoorbitocerebral, pulmonar o diseminada. Los macroconidios en banana son de Fusarium.",
+  "source": "Cuadernillo Núcleo 13 2026 (listado de agentes) · Compendio ADN (Micosis oportunistas, cuadros)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-n-20",
+  "nucleo": "13-14",
+  "difficulty": "normal",
+  "topic": "Virus de la inmunodeficiencia humana (VIH)",
+  "q": "Para evaluar el estado inmune de una persona con VIH, ¿qué estudios se piden?",
+  "a": [
+   "Recuento de linfocitos T CD4 y carga viral",
+   "Hemograma con recuento de neutrófilos solamente",
+   "Dosaje de IgA e IgG séricas",
+   "Western blot y prueba de Sabin-Feldman"
+  ],
+  "c": 0,
+  "exp": "El equilibrio entre la replicación viral (carga viral) y el sistema inmune se mide con el recuento de CD4. Sin tratamiento, la carga viral sube y los CD4 caen progresivamente hasta el SIDA.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 2b) · Compendio ADN (13.a.a)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-d-01",
+  "nucleo": "13-14",
+  "difficulty": "dificil",
+  "topic": "Pneumocystis jirovecii",
+  "q": "Varón de 28 años sin antecedentes, con disnea de 2 semanas, tos seca, saturación 88%, TC con vidrio esmerilado bilateral que respeta la periferia y LDH 850. ¿Qué agente sospechás?",
+  "a": [
+   "Pneumocystis jirovecii",
+   "Aspergillus fumigatus",
+   "Cryptococcus neoformans",
+   "Mycobacterium kansasii"
+  ],
+  "c": 0,
+  "exp": "Neumonía intersticial insidiosa con vidrio esmerilado bilateral e hipoxemia sugiere neumocistosis, típica del SIDA con CD4 < 200: obliga a pensar en un VIH no diagnosticado.",
+  "source": "Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 2, caso 1) · Compendio ADN (13.c.b)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-d-02",
+  "nucleo": "13-14",
+  "difficulty": "dificil",
+  "topic": "Pneumocystis jirovecii",
+  "q": "Para confirmar una neumonía por Pneumocystis jirovecii, ¿qué estudio corresponde?",
+  "a": [
+   "Grocott en lavado broncoalveolar",
+   "Cultivo de esputo en medio para hongos",
+   "Galactomanano en suero",
+   "Antígeno capsular en suero"
+  ],
+  "c": 0,
+  "exp": "Pneumocystis no se cultiva: se diagnostica por microscopía de LBA, esputo inducido o biopsia, con GMS/Grocott (pared del quiste, en negro), Giemsa (formas tróficas) o inmunofluorescencia.",
+  "source": "Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 2 y 3) · Compendio ADN (13.c.b)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-d-03",
+  "nucleo": "13-14",
+  "difficulty": "dificil",
+  "topic": "Aspergillus spp.",
+  "q": "Varón de 48 años con LMA en inducción, neutropénico hace 7 días, con fiebre, puntada de costado y hemoptisis. TC: cavitación con signo del halo; galactomanano sérico positivo. ¿Diagnóstico?",
+  "a": [
+   "Aspergilosis pulmonar invasiva",
+   "Neumonía por Pneumocystis jirovecii",
+   "Criptococosis pulmonar",
+   "Tuberculosis cavitaria"
+  ],
+  "c": 0,
+  "exp": "La aspergilosis pulmonar invasiva es devastadora en neutropénicos (< 500/mm³): fiebre, infiltrados, dolor pleurítico y hemoptisis por angioinvasión. El galactomanano sérico positivo apoya el diagnóstico.",
+  "source": "Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 2, caso 2) · Compendio ADN (13.c.b)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-d-04",
+  "nucleo": "13-14",
+  "difficulty": "dificil",
+  "topic": "Aspergillus spp.",
+  "q": "Sobre el diagnóstico de laboratorio de la aspergilosis invasiva, ¿qué afirmación es correcta?",
+  "a": [
+   "Los hemocultivos rara vez son positivos",
+   "El antígeno capsular en LCR es de elección",
+   "No se cultiva: requiere tinción de Grocott",
+   "La prueba del tubo germinativo lo confirma"
+  ],
+  "c": 0,
+  "exp": "Se diagnostica por anatomía patológica (hifas en tejido), cultivo y detección de galactomanano en suero; los hemocultivos rara vez dan positivo.",
+  "source": "Compendio ADN (13.c.b, cuadro de micosis) · Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 2)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-d-05",
+  "nucleo": "13-14",
+  "difficulty": "dificil",
+  "topic": "Cryptococcus neoformans",
+  "q": "Mujer de 35 años con VIH (CD4 152), cefalea de 10 días, vómitos en escopeta, presión de apertura del LCR de 40 cmH2O y tinta china positiva. ¿Qué otro estudio en LCR es rápido y sensible?",
+  "a": [
+   "Antígeno capsular polisacárido",
+   "Galactomanano",
+   "Ziehl-Neelsen del sedimento centrifugado",
+   "IgM anti-Toxoplasma"
+  ],
+  "c": 0,
+  "exp": "Es una meningitis criptocócica. La cápsula polisacárida es su marcador: detectar el antígeno capsular en LCR o suero es rápido y sensible; se complementa con tinta china y cultivo.",
+  "source": "Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 2, caso 3) · Compendio ADN (13.c.b)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-d-06",
+  "nucleo": "13-14",
+  "difficulty": "dificil",
+  "topic": "Candida spp.",
+  "q": "Paciente en UCI con catéter venoso central hace 21 días, nutrición parenteral y antibióticos, febril sin foco. Hemocultivos y cultivo del catéter desarrollan levaduras. ¿Agente más probable?",
+  "a": [
+   "Candida spp.",
+   "Aspergillus fumigatus",
+   "Pneumocystis jirovecii",
+   "Mucorales"
+  ],
+  "c": 0,
+  "exp": "Candida da infección endógena en pacientes con catéteres, antibióticos, neutropenia o cirugía. La candidemia es una causa frecuente de infección nosocomial, con mortalidad atribuible cercana al 50%.",
+  "source": "Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 2, caso 4) · Compendio ADN (13.c.b)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-d-07",
+  "nucleo": "13-14",
+  "difficulty": "dificil",
+  "topic": "Toxoplasma gondii",
+  "q": "En un paciente con SIDA y sospecha de toxoplasmosis cerebral, ¿qué particularidad tiene el diagnóstico?",
+  "a": [
+   "Suele no haber IgM; puede requerir RNM, biopsia y PCR",
+   "La IgM siempre es positiva y confirma la reactivación",
+   "Se confirma al ver ooquistes en materia fecal",
+   "El método directo en sangre tiene alto rendimiento"
+  ],
+  "c": 0,
+  "exp": "En el inmunocomprometido casi nunca hay IgM y los títulos de IgG e IgA son bajos: el diagnóstico suele requerir RNM o biopsia cerebral con PCR. La IgM sirve en el inmunocompetente.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 5b) · Compendio ADN (13.b, cuadro comparativo)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-d-08",
+  "nucleo": "13-14",
+  "difficulty": "dificil",
+  "topic": "Strongyloides stercoralis",
+  "q": "¿Qué define a la estrongiloidosis diseminada, a diferencia del síndrome de hiperinfección?",
+  "a": [
+   "Larvas en órganos que el parásito normalmente no alcanza",
+   "Mayor carga de larvas, pero limitada a pulmón e intestino",
+   "Quistes en músculo estriado",
+   "Ooquistes en heces por más de 1 mes"
+  ],
+  "c": 0,
+  "exp": "La hiperinfección exacerba el ciclo habitual (pulmón e intestino). La diseminación es el hallazgo de larvas en casi todos los órganos que normalmente no alcanza, y suele ser fatal.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 5c) · Compendio ADN (13.b)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-d-09",
+  "nucleo": "13-14",
+  "difficulty": "dificil",
+  "topic": "Eventos definidores de SIDA",
+  "q": "¿Cuál de estas situaciones es un evento definidor de SIDA?",
+  "a": [
+   "Sarcoma de Kaposi en un paciente de 45 años",
+   "Candidiasis orofaríngea",
+   "Citomegalovirosis limitada al hígado y los ganglios",
+   "Criptosporidiosis con diarrea de 2 semanas"
+  ],
+  "c": 0,
+  "exp": "El Kaposi en menores de 60 años es definidor. La candidiasis tiene que ser esofágica o respiratoria, el CMV fuera de hígado y ganglios, y la criptosporidiosis con diarrea de más de 1 mes.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 2) · Compendio ADN (13.a.a)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-d-10",
+  "nucleo": "13-14",
+  "difficulty": "dificil",
+  "topic": "Trypanosoma cruzi",
+  "q": "¿Qué manifestación de la infección por Trypanosoma cruzi se considera evento definidor de SIDA?",
+  "a": [
+   "Encefalopatía chagásica",
+   "Miocardiopatía dilatada",
+   "Megaesófago",
+   "Chagoma de inoculación"
+  ],
+  "c": 0,
+  "exp": "La encefalopatía chagásica figura entre los eventos definidores: es una manifestación no habitual de una enfermedad frecuente, que aparece por el deterioro inmune del SIDA.",
+  "source": "Cuadernillo Núcleo 13 2026 (Seminario, Act. 2) · Compendio ADN (13.a.a)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-d-11",
+  "nucleo": "13-14",
+  "difficulty": "dificil",
+  "topic": "Micobacterias atípicas (MAC)",
+  "q": "Paciente con SIDA muy avanzado, con fiebre persistente, sudoración nocturna, diarrea crónica, hepatoesplenomegalia y adenopatías mesentéricas. ¿Qué sospechás?",
+  "a": [
+   "Micobacteriosis diseminada por MAC",
+   "Neumonía por Mycobacterium kansasii",
+   "Úlceras por Mycobacterium haemophilum",
+   "Nocardiosis cutánea localizada"
+  ],
+  "c": 0,
+  "exp": "M. avium-intracellulare es la micobacteria atípica principal: aparece en fases muy avanzadas del SIDA, con CD4 muy bajos, como enfermedad diseminada. La micobacteriosis diseminada por M. avium es definidora.",
+  "source": "Cuadernillo Núcleo 13 2026 (Laboratorio, Act. 1b; Seminario, Act. 2) · Compendio ADN (13.c.a)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-d-12",
+  "nucleo": "13-14",
+  "difficulty": "dificil",
+  "topic": "Giardia lamblia",
+  "q": "Un niño tiene giardiasis a repetición. Según el cuadro de compromiso inmune del material, ¿qué defecto primario sugiere este agente?",
+  "a": [
+   "Déficit de IgA o de anticuerpos",
+   "Enfermedad granulomatosa crónica",
+   "Falla de linfocitos T por VIH",
+   "Neutropenia post quimioterapia"
+  ],
+  "c": 0,
+  "exp": "Algunos agentes son indicadores de inmunodeficiencias primarias: Giardia sugiere déficit de IgA o de anticuerpos; Nocardia y S. aureus, enfermedad granulomatosa crónica.",
+  "source": "Compendio ADN (Núcleo 13, aclaración del cuadro de compromiso inmune) · Cuadernillo Núcleo 13 2026 (Seminario, Act. 1c)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-d-13",
+  "nucleo": "13-14",
+  "difficulty": "dificil",
+  "topic": "Neutropenia",
+  "q": "Un paciente en quimioterapia tiene 80 neutrófilos/mm³ desde hace 9 días. ¿Cómo se clasifica su neutropenia?",
+  "a": [
+   "Profunda y prolongada",
+   "Funcional y transitoria",
+   "Leve pero prolongada",
+   "Profunda pero no prolongada"
+  ],
+  "c": 0,
+  "exp": "Neutropenia profunda o severa: PMN ≤ 100/mm³; prolongada: dura ≥ 7 días. La funcional es la de neutrófilos defectuosos con recuento normal o aumentado.",
+  "source": "Compendio ADN (13.a.b) · Cuadernillo Núcleo 13 2026 (Seminario, Act. 3a)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-d-14",
+  "nucleo": "13-14",
+  "difficulty": "dificil",
+  "topic": "Fusarium spp.",
+  "q": "Paciente neutropénico con fungemia. En el cultivo crece un hongo filamentoso hialino con macroconidios en forma de banana. ¿Qué agente es?",
+  "a": [
+   "Fusarium spp.",
+   "Aspergillus fumigatus",
+   "Mucorales",
+   "Trichosporon spp."
+  ],
+  "c": 0,
+  "exp": "Fusarium es un filamentoso hialino con macroconidios en banana, del suelo y las plantas; causa infección cutánea, queratitis y fungemia en neutropénicos.",
+  "source": "Cuadernillo Núcleo 13 2026 (listado de agentes) · Compendio ADN (Micosis oportunistas, cuadros)",
+  "verificar": false
+ },
+ {
+  "id": "n13_14-d-15",
+  "nucleo": "13-14",
+  "difficulty": "dificil",
+  "topic": "ESKAPE",
+  "q": "Del grupo ESKAPE, ¿cuál clasifica la OMS como de prioridad \"alta\" y no \"crítica\" para la investigación de nuevos fármacos?",
+  "a": [
+   "Staphylococcus aureus",
+   "Acinetobacter baumannii",
+   "Enterobacter spp.",
+   "Klebsiella pneumoniae"
+  ],
+  "c": 0,
+  "exp": "En las listas de la OMS, A. baumannii y las enterobacterias resistentes (K. pneumoniae, Enterobacter) son de prioridad crítica; S. aureus resistente a meticilina es de prioridad alta. Son multirresistentes y los colonizados actúan como reservorio.",
+  "source": "Compendio ADN (13.c.a, siglas ESKAPE)",
+  "verificar": false
+ }
+]

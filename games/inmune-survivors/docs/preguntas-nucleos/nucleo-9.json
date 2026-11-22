@@ -1,0 +1,767 @@
+[
+ {
+  "id": "n9-f-01",
+  "nucleo": "9",
+  "difficulty": "facil",
+  "topic": "Perfil TORCHS",
+  "q": "En el perfil TORCHS, ¿qué infección representa la letra S agregada al final de la sigla?",
+  "a": [
+   "Sífilis",
+   "Sarampión",
+   "Streptococcus agalactiae",
+   "Shigelosis"
+  ],
+  "c": 0,
+  "exp": "TORCH es la sigla de toxoplasmosis, otras, rubéola, citomegalovirus y herpes simple (el material suma VIH y Chagas); cuando se escribe TORCHS, la S adicional representa la sífilis.",
+  "source": "Cuadernillo Núcleo 9 Seminario 2026 (Introducción, perfil TORCHS) · Compendio ADN (9)",
+  "verificar": false
+ },
+ {
+  "id": "n9-f-02",
+  "nucleo": "9",
+  "difficulty": "facil",
+  "topic": "Vías de transmisión vertical",
+  "q": "La transmisión de un microorganismo de la madre al hijo mediante la lactancia materna se clasifica como transmisión:",
+  "a": [
+   "Posnatal",
+   "Perinatal",
+   "Congénita (intraútero)",
+   "Ascendente transcervical"
+  ],
+  "c": 0,
+  "exp": "La transmisión vertical puede ser intraútero (congénita), en el momento del parto o alrededor de él (perinatal) o posterior (posnatal), como la que ocurre por lactancia materna.",
+  "source": "Cuadernillo Núcleo 9 Seminario 2026 (Introducción) · Compendio ADN (9)",
+  "verificar": false
+ },
+ {
+  "id": "n9-f-03",
+  "nucleo": "9",
+  "difficulty": "facil",
+  "topic": "Virus de la rubéola",
+  "q": "¿Con qué vacuna y esquema del Calendario Nacional se previene la rubéola congénita?",
+  "a": [
+   "Triple viral a los 12 meses y a los 5 años",
+   "Gammaglobulina específica a la gestante expuesta",
+   "Doble viral durante el segundo trimestre",
+   "Lavado de manos tras contacto con secreciones"
+  ],
+  "c": 0,
+  "exp": "La vacuna antirrubeólica (virus vivo atenuado) va en la triple viral: 1.ª dosis a los 12 meses y 2.ª a los 5 años. El objetivo es que la mujer llegue al embarazo con anticuerpos.",
+  "source": "Compendio ADN (9.a, pregunta c) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5d, tabla de prevención)",
+  "verificar": false
+ },
+ {
+  "id": "n9-f-04",
+  "nucleo": "9",
+  "difficulty": "facil",
+  "topic": "Trypanosoma cruzi",
+  "q": "Un recién nacido es hijo de una madre con serología reactiva para Chagas. ¿Qué se indica respecto de la lactancia materna?",
+  "a": [
+   "No está contraindicada",
+   "Se suspende hasta los 10 meses de vida",
+   "Solo se permite con leche extraída y hervida",
+   "Está contraindicada, igual que en el VIH"
+  ],
+  "c": 0,
+  "exp": "En hijos de madres con serología reactiva para Chagas la lactancia no está contraindicada (a diferencia del VIH, donde sí lo está).",
+  "source": "Compendio ADN (9.j) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 4c)",
+  "verificar": false
+ },
+ {
+  "id": "n9-f-05",
+  "nucleo": "9",
+  "difficulty": "facil",
+  "topic": "Virus herpes simple 1 y 2",
+  "q": "Una gestante con herpes genital tiene lesiones activas al comenzar el trabajo de parto. ¿Qué medida reduce el riesgo de herpes neonatal?",
+  "a": [
+   "Cesárea electiva",
+   "Vacunar al recién nacido al nacer",
+   "Gammaglobulina hiperinmune a la madre",
+   "Penicilina G intravenosa intraparto"
+  ],
+  "c": 0,
+  "exp": "El VHS se adquiere sobre todo al pasar por el canal de parto con lesiones genitales activas; por eso se indica cesárea electiva si hay lesiones al momento del parto.",
+  "source": "Compendio ADN (9.f y tabla de agentes) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5a y 5d)",
+  "verificar": false
+ },
+ {
+  "id": "n9-f-06",
+  "nucleo": "9",
+  "difficulty": "facil",
+  "topic": "Virus de la hepatitis B",
+  "q": "¿Qué se le indica al recién nacido de una madre HBsAg positiva para prevenir la hepatitis B?",
+  "a": [
+   "Vacuna y gammaglobulina en las primeras 12 h de vida",
+   "Solo la vacuna a los 2 meses, con el resto del calendario",
+   "Tenofovir oral al recién nacido durante 6 meses",
+   "Cesárea electiva y suspensión de la lactancia"
+  ],
+  "c": 0,
+  "exp": "La prevención en el RN es la vacuna más la inmunización pasiva (gammaglobulina) en las primeras 12 horas de vida. La dosis neonatal está en el Calendario Nacional desde 2000.",
+  "source": "Compendio ADN (tabla de agentes, VHB) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5d)",
+  "verificar": false
+ },
+ {
+  "id": "n9-f-07",
+  "nucleo": "9",
+  "difficulty": "facil",
+  "topic": "Virus de la inmunodeficiencia humana (VIH)",
+  "q": "En una gestante con VIH, ¿qué indica el material de la cátedra respecto de la lactancia materna?",
+  "a": [
+   "Está contraindicada",
+   "Se recomienda exclusiva hasta los 6 meses",
+   "Se permite si la madre no tiene síntomas",
+   "Solo se suspende si aparece mastitis"
+  ],
+  "c": 0,
+  "exp": "La lactancia es una vía posnatal de transmisión del VIH. La prevención combina TARV efectiva en la gestante, profilaxis antirretroviral al RN y contraindicación de la lactancia.",
+  "source": "Compendio ADN (tabla de agentes, VIH) · Cuadernillo Núcleo 9 Seminario 2026 (Prevención; Actividad 5a)",
+  "verificar": false
+ },
+ {
+  "id": "n9-f-08",
+  "nucleo": "9",
+  "difficulty": "facil",
+  "topic": "Streptococcus agalactiae",
+  "q": "¿Cuál es la morfología de Streptococcus agalactiae (estreptococo del grupo B)?",
+  "a": [
+   "Coco grampositivo en cadenas, beta-hemolítico",
+   "Coco grampositivo en racimos, coagulasa positivo",
+   "Diplococo gramnegativo, oxidasa positivo",
+   "Bacilo grampositivo corto, beta-hemolítico"
+  ],
+  "c": 0,
+  "exp": "EGB es un coco grampositivo que forma cadenas cortas en muestras clínicas y más largas en cultivo, con colonias mantecosas y una estrecha zona de beta-hemólisis; grupo B de Lancefield.",
+  "source": "Compendio ADN (9.g) · Cuadernillo Núcleo 9 Seminario 2026 (tabla Agentes vistos en este núcleo)",
+  "verificar": false
+ },
+ {
+  "id": "n9-f-09",
+  "nucleo": "9",
+  "difficulty": "facil",
+  "topic": "Toxoplasma gondii",
+  "q": "¿En qué hospedador completa Toxoplasma gondii su ciclo sexual?",
+  "a": [
+   "Gato y otros felinos",
+   "Roedores silvestres",
+   "Ser humano",
+   "Aves y ganado"
+  ],
+  "c": 0,
+  "exp": "El gato doméstico y otros felinos son el reservorio: el ciclo sexual ocurre en sus células intestinales y eliminan ovoquistes por heces, que maduran en el ambiente. Otros animales son hospedadores intermediarios.",
+  "source": "Compendio ADN (9.i, cadena epidemiológica) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 3)",
+  "verificar": false
+ },
+ {
+  "id": "n9-f-10",
+  "nucleo": "9",
+  "difficulty": "facil",
+  "topic": "Toxoplasma gondii",
+  "q": "¿Qué medida de prevención de la toxoplasmosis se le recomienda a una gestante?",
+  "a": [
+   "Evitar carne cruda o poco cocida y heces de gato",
+   "Vacunarse antes de buscar el embarazo",
+   "Usar repelente y mosquitero en zonas endémicas",
+   "Evitar el contacto con niños menores de 5 años"
+  ],
+  "c": 0,
+  "exp": "Las vías principales son la ingesta de carne poco cocida y de ovoquistes de heces de gato; por eso se indica evitar consumir y manipular carne cruda y el contacto con heces de gato. No hay vacuna.",
+  "source": "Compendio ADN (9.i, prevención en embarazadas) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 3)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-01",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Vías de transmisión vertical",
+  "q": "Cuando una infección materna llega al feto por vía ascendente (de la vagina al líquido amniótico por el cuello uterino), ¿qué consecuencias son más frecuentes?",
+  "a": [
+   "Corioamnionitis, funisitis y parto pretérmino",
+   "Villitis y deciduitis por viremia materna",
+   "Latencia del agente en ganglios neuronales fetales",
+   "Cataratas, sordera y cardiopatía congénita"
+  ],
+  "c": 0,
+  "exp": "La vía ascendente causa con más frecuencia funisitis y corioamnionitis, con rotura prematura de membranas y parto pretérmino. Villitis y deciduitis son propias de la vía hematógena (sobre todo virus).",
+  "source": "Cuadernillo Núcleo 9 Seminario 2026 (Introducción) · Compendio ADN (9)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-02",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Prevención",
+  "q": "La iniciativa ETMI-plus de la OPS/OMS busca eliminar la transmisión maternoinfantil de:",
+  "a": [
+   "VIH, sífilis, hepatitis B y Chagas",
+   "VIH, rubéola, toxoplasmosis y CMV",
+   "Sífilis, EGB, herpes simple y varicela",
+   "Hepatitis B y C, CMV y toxoplasmosis"
+  ],
+  "c": 0,
+  "exp": "ETMI-plus es la eliminación de la transmisión maternoinfantil de VIH, sífilis, hepatitis B y Chagas; organiza tamizaje prenatal, tratamiento oportuno y manejo neonatal.",
+  "source": "Cuadernillo Núcleo 9 Seminario 2026 (Prevención de infecciones de transmisión vertical) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Ley 27.675)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-03",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Respuesta inmune",
+  "q": "¿Por qué el virus de la rubéola implica riesgo fetal solo ante una infección primaria materna?",
+  "a": [
+   "La inmunidad previa (infección o vacuna) impide en la práctica el pasaje al feto",
+   "El virus no atraviesa la placenta en ninguna etapa del embarazo",
+   "Solo se transmite al hijo por la lactancia materna",
+   "Hace latencia en ganglios y solo reactiva en inmunodeprimidas"
+  ],
+  "c": 0,
+  "exp": "Si la madre no tiene anticuerpos, el virus se replica en la placenta y pasa a la sangre fetal; la inmunidad por exposición previa o vacunación lo impide. Tiene un único serotipo y la inmunidad es duradera.",
+  "source": "Compendio ADN (9.a, preguntas a y d) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5a y 5b)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-04",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Virus de la rubéola",
+  "q": "Un RN cuya madre tuvo exantema maculopapular con adenopatías en el 1.er trimestre presenta cataratas, sordera neurosensorial y ductus persistente. ¿Agente más probable?",
+  "a": [
+   "Virus de la rubéola",
+   "Citomegalovirus",
+   "Virus varicela-zóster",
+   "Toxoplasma gondii"
+  ],
+  "c": 0,
+  "exp": "Es el síndrome de rubéola congénita: cataratas, sordera neurosensorial y cardiopatía (ductus). El riesgo y la gravedad son máximos si la infección materna ocurre en el primer trimestre.",
+  "source": "Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5a y 5c) · Compendio ADN (9.a)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-05",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Citomegalovirus (CMV)",
+  "q": "¿Qué explica que el CMV pueda transmitirse al feto aun sin infección primaria materna durante el embarazo?",
+  "a": [
+   "Latencia con reactivación, o reinfección por otra cepa, en el embarazo",
+   "Que tiene un único serotipo y no deja inmunidad duradera",
+   "Que se transmite solo por vía transplacentaria en el 1.er trimestre",
+   "Que la IgG materna favorece el pasaje placentario"
+  ],
+  "c": 0,
+  "exp": "Como herpesvirus, el CMV queda latente (células mieloides, monocitos): puede reactivarse o la gestante puede reinfectarse con otra cepa, y el virus llega al feto, sobre todo por vía transplacentaria. En madres seropositivas suele ser menos grave.",
+  "source": "Compendio ADN (9.b, pregunta a) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5a y 5b)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-06",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Citomegalovirus (CMV)",
+  "q": "Sobre la infección congénita por citomegalovirus, ¿cuál de estas afirmaciones es correcta?",
+  "a": [
+   "Es la causa viral más frecuente de anomalías congénitas",
+   "La mayoría de los RN infectados son sintomáticos al nacer",
+   "Solo se transmite si la madre cursa infección primaria",
+   "Se previene con una vacuna del Calendario Nacional"
+  ],
+  "c": 0,
+  "exp": "El CMV es la causa vírica más frecuente de anomalías congénitas; el 85-90% de los RN infectados es asintomático al nacer y las secuelas habituales son pérdida auditiva y retraso mental. Se previene con lavado de manos.",
+  "source": "Compendio ADN (9.b y tabla de agentes) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5c)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-07",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Virus de la inmunodeficiencia humana (VIH)",
+  "q": "Según el cuadernillo, ¿cuál es la vía principal de transmisión vertical del VIH?",
+  "a": [
+   "Perinatal y posnatal (lactancia)",
+   "Transplacentaria en el primer trimestre",
+   "Transplacentaria en cualquier momento del embarazo",
+   "Ascendente, con corioamnionitis temprana"
+  ],
+  "c": 0,
+  "exp": "El VIH se transmite principalmente en el período perinatal y posnatal (lactancia); la vía transplacentaria es posible pero menos frecuente. El riesgo se reduce con tratamiento antirretroviral materno.",
+  "source": "Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5a) · Compendio ADN (9.c)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-08",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "¿Cómo se diagnostica la infección por VIH en una gestante según el material de la cátedra?",
+  "a": [
+   "Prueba rápida o ELISA 4.ª gen. y confirmación por carga viral",
+   "PCR de ADN proviral como tamizaje inicial en el primer control",
+   "Recuento de linfocitos T CD4 como prueba diagnóstica única",
+   "Detección aislada de antígeno p24, sin prueba confirmatoria"
+  ],
+  "c": 0,
+  "exp": "En la gestante se tamiza con prueba rápida o ELISA de 4.ª generación y se confirma con carga viral. La Ley 25.543 establece la oferta obligatoria del diagnóstico de VIH en el embarazo.",
+  "source": "Compendio ADN (tabla de agentes, VIH) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Introducción y Grupo 5)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-09",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Respuesta inmune",
+  "q": "¿Por qué hasta el 90% de los lactantes infectados con VHB en forma perinatal evoluciona a portación crónica?",
+  "a": [
+   "Por la inmadurez de su respuesta inmune celular",
+   "Por el pasaje transplacentario de anti-HBs materno",
+   "Porque el virus no expresa HBsAg en el lactante",
+   "Porque el virus hace latencia en ganglios neuronales"
+  ],
+  "c": 0,
+  "exp": "La respuesta celular inmadura reduce la capacidad de eliminar el virus: hay menos lesión y síntomas, pero alta cronificación, con riesgo de cirrosis o carcinoma hepatocelular (latencia de 9 a 35 años).",
+  "source": "Compendio ADN (9.e) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5a)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-10",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Virus de la hepatitis B",
+  "q": "¿Qué rasgo del virus de la hepatitis B resulta llamativo para un virus de ADN?",
+  "a": [
+   "Se replica vía un intermediario de ARN (retrotranscriptasa)",
+   "Su genoma es ADN bicatenario lineal, el mayor de los herpesvirus",
+   "Carece de envoltura, lo que lo hace resistente a la desecación",
+   "Hace latencia en ganglios sensitivos y se reactiva"
+  ],
+  "c": 0,
+  "exp": "El VHB (Hepadnaviridae) tiene ADN circular parcialmente bicatenario, pero codifica una retrotranscriptasa y se replica mediante un intermediario de ARN. Tiene envoltura con HBsAg y tropismo hepático estricto.",
+  "source": "Compendio ADN (9.e) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5a)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-11",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Virus varicela-zóster",
+  "q": "Una gestante presenta varicela en los días cercanos al parto. ¿Cuál es el principal riesgo para el recién nacido?",
+  "a": [
+   "Varicela diseminada grave, con neumonía o encefalitis",
+   "Síndrome de varicela congénita con hipoplasia de miembros",
+   "Portación crónica asintomática del virus",
+   "Cataratas y sordera neurosensorial tardías"
+  ],
+  "c": 0,
+  "exp": "La exposición periparto puede causar varicela neonatal grave, con diseminación a pulmón, cerebro e hígado por la inmadurez de la inmunidad celular. El síndrome de varicela congénita corresponde a la vía transplacentaria.",
+  "source": "Compendio ADN (9.d) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5a y 5c)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-12",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Virus varicela-zóster",
+  "q": "Una gestante seronegativa para varicela tuvo contacto con un caso activo. ¿Qué se indica según el cuadernillo?",
+  "a": [
+   "IGVZ (gammaglobulina hiperinmune) lo antes posible, idealmente en 96 h",
+   "Vacuna antivaricela en forma inmediata a la gestante",
+   "Aciclovir solo al recién nacido, al nacer",
+   "Serología a las 4 semanas y conducta expectante"
+  ],
+  "c": 0,
+  "exp": "En la gestante susceptible expuesta se indica gammaglobulina hiperinmune (IGVZ) dentro de las 96 horas y evitar contacto con casos activos. La vacunación de mujeres susceptibles se hace en el posparto. (El CDC la acepta hasta 10 días después del contacto.)",
+  "source": "Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5d, tabla de prevención; Prevención primaria) · Compendio ADN (tabla de agentes)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-13",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Virus herpes simple 1 y 2",
+  "q": "¿Cuáles son las formas clínicas del herpes simple neonatal descriptas en el cuadernillo?",
+  "a": [
+   "Piel-ojos-boca (SEM), SNC y diseminada",
+   "Cataratas, sordera y cardiopatía congénita",
+   "Rinitis, exantema y lesiones óseas",
+   "Hepatitis aguda, ictericia y coluria"
+  ],
+  "c": 0,
+  "exp": "El herpes neonatal suele ser sintomático: forma SEM (piel, ojos, boca), forma con compromiso del SNC (letargo, convulsiones) o forma diseminada (coagulopatía, falla multiorgánica).",
+  "source": "Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5c, neonato) · Compendio ADN (9.f)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-14",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Streptococcus agalactiae",
+  "q": "¿Dónde coloniza Streptococcus agalactiae (EGB) a la persona gestante portadora asintomática?",
+  "a": [
+   "Tracto digestivo inferior y aparato genitourinario",
+   "Nasofaringe y piel, de donde pasa al RN por contacto",
+   "Glándula mamaria, con pasaje al RN por la lactancia",
+   "Placenta, con transmisión transplacentaria temprana"
+  ],
+  "c": 0,
+  "exp": "EGB coloniza el aparato digestivo inferior y el genitourinario; entre el 10% y el 30% de las embarazadas son portadoras vaginales transitorias, y cerca del 60% de los hijos de madres colonizadas se colonizan.",
+  "source": "Compendio ADN (9.g) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 3a)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-15",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "¿Cuándo y cómo se pesquisa la portación de Streptococcus agalactiae en el embarazo?",
+  "a": [
+   "Semanas 35-37: hisopado vaginal y rectal, cultivo selectivo",
+   "Primer trimestre: urocultivo convencional y antibiograma",
+   "Al ingresar en trabajo de parto: hemocultivo materno",
+   "Semana 24: serología IgG e IgM contra el antígeno B"
+  ],
+  "c": 0,
+  "exp": "Se recomienda estudiar a todas las gestantes entre las semanas 35 y 37 con cultivo en medio selectivo con antibióticos (o PCR) de muestras vaginales y rectales.",
+  "source": "Compendio ADN (9.g) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 1)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-16",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Streptococcus agalactiae",
+  "q": "Una gestante con cultivo positivo para EGB inicia trabajo de parto. ¿Qué profilaxis corresponde?",
+  "a": [
+   "Penicilina G intravenosa al menos 4 h antes del parto",
+   "Vacuna anti-EGB a la gestante durante el tercer trimestre",
+   "Penicilina benzatínica IM en dosis única al RN",
+   "Ninguna: es colonización y no causa enfermedad"
+  ],
+  "c": 0,
+  "exp": "La quimioprofilaxis intraparto es con penicilina G intravenosa al menos 4 horas antes del parto. No hay vacunas disponibles contra EGB.",
+  "source": "Compendio ADN (9.g) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 1)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-17",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Treponema pallidum",
+  "q": "Según el cuadernillo, ¿en qué momentos se tamiza sífilis (VDRL/RPR) durante el embarazo?",
+  "a": [
+   "1.er trimestre, 3.er trimestre y parto o aborto",
+   "Solo en el primer control prenatal",
+   "Solo si la pareja tiene diagnóstico de sífilis",
+   "Entre las semanas 35 y 37, junto con la pesquisa de EGB"
+  ],
+  "c": 0,
+  "exp": "El tamizaje prenatal de sífilis es universal y seriado: VDRL/RPR en el primer trimestre, en el tercer trimestre y al momento del parto o aborto.",
+  "source": "Cuadernillo Núcleo 9 Seminario 2026 (Prevención, tamizaje prenatal universal y seriado)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-18",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Treponema pallidum",
+  "q": "¿Cuál es el tratamiento de la sífilis en la persona gestante según el cuadernillo?",
+  "a": [
+   "Penicilina benzatínica y tratamiento de la pareja sexual",
+   "Penicilina benzatínica a la gestante, sin tratar a la pareja",
+   "Espiramicina hasta el final del embarazo",
+   "Penicilina G IV solo durante el trabajo de parto"
+  ],
+  "c": 0,
+  "exp": "Se indica penicilina benzatínica según el estadio clínico materno, con tratamiento simultáneo de la pareja sexual. La penicilina es de elección; no existe vacuna.",
+  "source": "Cuadernillo Núcleo 9 Seminario 2026 (Tratamiento materno oportuno) · Compendio ADN (9.h)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-19",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Treponema pallidum",
+  "q": "¿Qué cuadro es característico de la sífilis congénita en el recién nacido que manifiesta la enfermedad?",
+  "a": [
+   "Rinitis seguida de exantema maculopapular descamativo",
+   "Vesículas en piel, ojos y boca, con compromiso del SNC",
+   "Cataratas, sordera neurosensorial y ductus persistente",
+   "Calcificaciones periventriculares y petequias"
+  ],
+  "c": 0,
+  "exp": "La mayoría nace sin signos, pero puede aparecer rinitis seguida de un exantema maculopapular generalizado y descamativo. En no tratados son frecuentes malformaciones dentales y óseas, ceguera y sordera.",
+  "source": "Compendio ADN (9.h) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 3b)",
+  "verificar": false
+ },
+ {
+  "id": "n9-n-20",
+  "nucleo": "9",
+  "difficulty": "normal",
+  "topic": "Trypanosoma cruzi",
+  "q": "¿Cómo se diagnostica la infección por Trypanosoma cruzi en una persona gestante?",
+  "a": [
+   "Dos técnicas serológicas diferentes reactivas",
+   "Micrométodo en sangre periférica antes del parto",
+   "PCR en sangre materna como única prueba",
+   "Una sola ELISA reactiva en el primer trimestre"
+  ],
+  "c": 0,
+  "exp": "La gestante suele estar en fase crónica indeterminada con baja parasitemia, por eso se buscan anticuerpos: dos pruebas serológicas de métodos distintos (ELISA, IFI, HAI, CMIA); si discordan, se hace una tercera.",
+  "source": "Compendio ADN (9.j) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 4 y Anexo)",
+  "verificar": false
+ },
+ {
+  "id": "n9-d-01",
+  "nucleo": "9",
+  "difficulty": "dificil",
+  "topic": "Toxoplasma gondii",
+  "q": "Gestante de 14 semanas: IgG e IgM anti-Toxoplasma no reactivas. En la semana 24: IgG e IgM reactivas. ¿Cómo se interpreta?",
+  "a": [
+   "Seroconversión: infección aguda adquirida en el embarazo",
+   "Infección crónica previa al embarazo, sin riesgo fetal",
+   "Reactivación de una infección latente materna",
+   "Falso positivo por IgM persistente de años previos"
+  ],
+  "c": 0,
+  "exp": "En la semana 14 era susceptible (sin exposición previa); el paso de negativo a positivo es una seroconversión e indica infección aguda entre las semanas 14 y 24, con riesgo de transmisión fetal.",
+  "source": "Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 3, caso Agustina) · Compendio ADN (9.i)",
+  "verificar": false
+ },
+ {
+  "id": "n9-d-02",
+  "nucleo": "9",
+  "difficulty": "dificil",
+  "topic": "Treponema pallidum",
+  "q": "¿Por qué el diagnóstico de sífilis en la gestante se apoya en pruebas serológicas y no en el cultivo del agente?",
+  "a": [
+   "T. pallidum no se desarrolla en cultivos acelulares",
+   "El cultivo solo es positivo en la sífilis terciaria",
+   "El cultivo no distingue T. pallidum de Leptospira",
+   "T. pallidum es aerobio estricto y crece en días"
+  ],
+  "c": 0,
+  "exp": "T. pallidum es una espiroqueta fina, microaerófila o anaerobia, muy sensible al oxígeno e incapaz de desarrollarse en cultivos acelulares. Se usa VDRL (no treponémica) y una prueba treponémica confirmatoria.",
+  "source": "Compendio ADN (9.h) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 2)",
+  "verificar": false
+ },
+ {
+  "id": "n9-d-03",
+  "nucleo": "9",
+  "difficulty": "dificil",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "Una gestante tiene IgG e IgM anti-Toxoplasma reactivas en una única muestra. ¿Por qué eso no alcanza para afirmar una infección aguda?",
+  "a": [
+   "La IgM puede persistir más de 12 meses tras la infección",
+   "En la toxoplasmosis la IgG aparece siempre antes que la IgM",
+   "La IgM materna también se detecta en el feto",
+   "La IgG reactiva siempre indica reactivación"
+  ],
+  "c": 0,
+  "exp": "La IgM anti-T. gondii puede persistir más de 12 meses y dar un falso positivo de agudeza. La infección aguda se demuestra por seroconversión o aumento al doble de títulos en muestras seriadas con 3 semanas de separación.",
+  "source": "Compendio ADN (9.i, métodos diagnósticos) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 3)",
+  "verificar": false
+ },
+ {
+  "id": "n9-d-04",
+  "nucleo": "9",
+  "difficulty": "dificil",
+  "topic": "Toxoplasma gondii",
+  "q": "Se confirma una toxoplasmosis aguda en una gestante. ¿Qué estudio prenatal permite evaluar si hubo infección fetal?",
+  "a": [
+   "PCR en líquido amniótico",
+   "IgM anti-Toxoplasma en suero materno",
+   "Micrométodo en sangre materna",
+   "Búsqueda de ovoquistes en heces maternas"
+  ],
+  "c": 0,
+  "exp": "El diagnóstico prenatal se hace con ecografía y amniocentesis: la PCR del líquido amniótico para T. gondii tiene excelentes valores predictivos positivo y negativo.",
+  "source": "Compendio ADN (9.i, métodos diagnósticos) · Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 3, pregunta 3)",
+  "verificar": false
+ },
+ {
+  "id": "n9-d-05",
+  "nucleo": "9",
+  "difficulty": "dificil",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "Ante un lactante con sospecha de rubéola congénita, ¿qué hallazgo serológico apoya la infección congénita?",
+  "a": [
+   "IgM específica e IgG persistente más allá de 6-12 meses",
+   "IgG al nacer con el mismo título que la madre",
+   "IgG que cae hasta negativizarse hacia los 6 meses de vida",
+   "IgG e IgM negativas al nacer y a los 6 meses"
+  ],
+  "c": 0,
+  "exp": "En el neonato el cuadernillo indica IgM específica más persistencia de IgG más allá de los 6-12 meses (producción propia, no materna); también RT-PCR en orina o hisopado nasofaríngeo.",
+  "source": "Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5c, neonato)",
+  "verificar": false
+ },
+ {
+  "id": "n9-d-06",
+  "nucleo": "9",
+  "difficulty": "dificil",
+  "topic": "Trypanosoma cruzi",
+  "q": "Un RN hijo de madre con Chagas crónico nace sin signos clínicos. ¿Qué estudio corresponde antes del egreso hospitalario?",
+  "a": [
+   "Micrométodo o PCR en sangre del RN",
+   "ELISA y HAI en sangre del recién nacido",
+   "Ninguno, porque está asintomático",
+   "Repetir la serología materna en el parto"
+  ],
+  "c": 0,
+  "exp": "Antes de los 10 meses se usan métodos directos: la IgG del RN puede ser materna pasiva y cerca del 10% de los RN infectados tiene IgG negativa. Entre el 60% y el 90% de los infectados es asintomático al nacer.",
+  "source": "Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 4 y Anexo) · Compendio ADN (9.j)",
+  "verificar": false
+ },
+ {
+  "id": "n9-d-07",
+  "nucleo": "9",
+  "difficulty": "dificil",
+  "topic": "Trypanosoma cruzi",
+  "q": "Un RN hijo de madre con Chagas tiene un micrométodo negativo antes del egreso. ¿Qué conducta corresponde?",
+  "a": [
+   "Seguimiento y serología a partir de los 10 meses de vida",
+   "Alta definitiva: el micrométodo negativo descarta la infección",
+   "Serología al mes de vida para confirmar o descartar",
+   "Iniciar benznidazol sin más estudios"
+  ],
+  "c": 0,
+  "exp": "Un micrométodo negativo no descarta la infección. Hasta los 10 meses la IgG del niño puede ser materna, por eso el diagnóstico final se hace con serología (dos técnicas) a partir de los 10 meses.",
+  "source": "Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 4, pregunta 5 y Anexo)",
+  "verificar": false
+ },
+ {
+  "id": "n9-d-08",
+  "nucleo": "9",
+  "difficulty": "dificil",
+  "topic": "Streptococcus agalactiae",
+  "q": "RN por parto vaginal, de madre portadora de EGB sin profilaxis intraparto, presenta a las 34 h dificultad respiratoria y sospecha de sepsis. ¿Cómo se clasifica?",
+  "a": [
+   "Enfermedad de comienzo precoz por EGB",
+   "Enfermedad de comienzo tardío por EGB",
+   "Infección transplacentaria con malformaciones",
+   "Colonización benigna sin enfermedad invasiva"
+  ],
+  "c": 0,
+  "exp": "La enfermedad de comienzo precoz se presenta con bacteriemia, neumonía o meningitis; la tardía, con bacteriemia con meningitis. EGB es la causa más frecuente de septicemia y meningitis en el recién nacido.",
+  "source": "Cuadernillo Núcleo 9 Seminario 2026 (Actividad 3a, caso clínico) · Compendio ADN (9.g)",
+  "verificar": false
+ },
+ {
+  "id": "n9-d-09",
+  "nucleo": "9",
+  "difficulty": "dificil",
+  "topic": "Virus herpes simple 1 y 2",
+  "q": "RN con letargo y convulsiones; su madre tenía lesiones vesiculares genitales al parto. Ante sospecha de herpes neonatal con compromiso del SNC, ¿qué estudio corresponde?",
+  "a": [
+   "PCR para VHS en LCR",
+   "IgG anti-VHS en suero del recién nacido",
+   "Test de Tzanck en LCR",
+   "Cultivo de LCR en medio selectivo para EGB"
+  ],
+  "c": 0,
+  "exp": "En el neonato se usa PCR o cultivo viral de hisopado de vesículas o mucosas y, si hay compromiso del SNC, PCR en LCR.",
+  "source": "Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5c, neonato) · Compendio ADN (tabla de agentes, HSV)",
+  "verificar": false
+ },
+ {
+  "id": "n9-d-10",
+  "nucleo": "9",
+  "difficulty": "dificil",
+  "topic": "Treponema pallidum",
+  "q": "Gestante con VDRL reactiva 1/32 y prueba treponémica positiva llega al parto sin tratamiento completo documentado. El RN está asintomático. ¿Qué conducta corresponde?",
+  "a": [
+   "Evaluar LCR (VDRL), Rx de huesos largos y laboratorio",
+   "Alta sin estudios, porque está asintomático al nacer",
+   "Solo una prueba treponémica en sangre del RN y alta",
+   "Comparar VDRL con la madre y dar el alta si es menor"
+  ],
+  "c": 0,
+  "exp": "Sin tratamiento materno adecuado, el RN asintomático se evalúa para definir el esquema de tratamiento: LCR (células, proteínas y VDRL), Rx de huesos largos, hemograma, hepatograma y ecografías.",
+  "source": "Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 2, caso Sofía y algoritmo) · Compendio ADN (9.h, punto 2)",
+  "verificar": false
+ },
+ {
+  "id": "n9-d-11",
+  "nucleo": "9",
+  "difficulty": "dificil",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "Gestante con sífilis tratada en forma adecuada y con tiempo antes del parto; RN asintomático. ¿Qué comparación puntual se realiza?",
+  "a": [
+   "Títulos de VDRL del RN frente a los de la madre",
+   "Prueba treponémica del RN frente a la materna",
+   "IgM del RN frente a la IgG de la madre",
+   "VDRL del RN al nacer frente a la del mes de vida"
+  ],
+  "c": 0,
+  "exp": "En el RN asintomático de una gestante adecuadamente tratada se comparan los títulos de la prueba no treponémica (VDRL) del neonato con los maternos para definir la conducta.",
+  "source": "Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 2, pregunta 4) · Compendio ADN (9.h, punto 1)",
+  "verificar": false
+ },
+ {
+  "id": "n9-d-12",
+  "nucleo": "9",
+  "difficulty": "dificil",
+  "topic": "Virus varicela-zóster",
+  "q": "Un recién nacido presenta cicatrices cutáneas, hipoplasia de miembros y microoftalmia. ¿Qué agente de transmisión vertical es el más probable?",
+  "a": [
+   "Virus varicela-zóster",
+   "Virus de la rubéola",
+   "Citomegalovirus",
+   "Treponema pallidum"
+  ],
+  "c": 0,
+  "exp": "Es el síndrome de varicela congénita: lesiones cutáneas cicatrizales, hipoplasia de miembros y alteraciones oculares (microoftalmia) o del SNC. El diagnóstico se apoya en PCR del líquido vesicular y el antecedente materno.",
+  "source": "Compendio ADN (tabla de agentes, varicela) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5c)",
+  "verificar": false
+ },
+ {
+  "id": "n9-d-13",
+  "nucleo": "9",
+  "difficulty": "dificil",
+  "topic": "Citomegalovirus (CMV)",
+  "q": "RN con hepatoesplenomegalia, petequias, microcefalia y calcificaciones periventriculares; la madre tuvo un cuadro mononucleosiforme leve. ¿Agente más probable?",
+  "a": [
+   "Citomegalovirus",
+   "Virus de la rubéola",
+   "Virus varicela-zóster",
+   "Virus de la hepatitis B"
+  ],
+  "c": 0,
+  "exp": "El 10-15% de los RN con CMV congénito es sintomático: hepatoesplenomegalia, petequias, microcefalia, calcificaciones periventriculares y coriorretinitis. En la gestante suele ser asintomático o mononucleosiforme.",
+  "source": "Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5c) · Compendio ADN (9.b)",
+  "verificar": false
+ },
+ {
+  "id": "n9-d-14",
+  "nucleo": "9",
+  "difficulty": "dificil",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "Una gestante tiene IgG positiva e IgM negativa para CMV y para rubéola. ¿Qué implica para el riesgo fetal en el embarazo actual?",
+  "a": [
+   "Rubéola: riesgo prácticamente nulo; CMV: bajo pero no nulo",
+   "Ambos sin riesgo, porque la IgG materna protege",
+   "Ambos con alto riesgo: IgM negativa indica susceptibilidad",
+   "Rubéola: riesgo por reactivación; CMV: sin riesgo"
+  ],
+  "c": 0,
+  "exp": "Ambos patrones indican infección pasada. En rubéola la inmunidad materna impide en la práctica la transmisión; en CMV el riesgo es bajo pero persiste por reactivación o reinfección por otra cepa.",
+  "source": "Compendio ADN (9.b, pregunta d) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 2d y 5b)",
+  "verificar": false
+ },
+ {
+  "id": "n9-d-15",
+  "nucleo": "9",
+  "difficulty": "dificil",
+  "topic": "Virus de la inmunodeficiencia humana (VIH)",
+  "q": "Gestante de 17 años sin controles en trabajo de parto; a ella se la estudia con prueba rápida para VIH. ¿Qué método corresponde para diagnosticar VIH en el RN?",
+  "a": [
+   "PCR de ADN proviral (método directo)",
+   "La misma prueba rápida de anticuerpos",
+   "ELISA de 4.ª generación al nacer",
+   "Recuento de CD4 en sangre de cordón"
+  ],
+  "c": 0,
+  "exp": "La madre se estudia con métodos indirectos (prueba rápida o ELISA), pero en el RN el cuadernillo indica pruebas virológicas o moleculares: PCR de ADN proviral. Además se indica profilaxis antirretroviral al RN.",
+  "source": "Cuadernillo Núcleo 9 Laboratorio 2026 (TP 20, Grupo 5) · Cuadernillo Núcleo 9 Seminario 2026 (Actividad 5c; Manejo neonatal)",
+  "verificar": false
+ }
+]

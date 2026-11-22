@@ -1,0 +1,767 @@
+[
+ {
+  "id": "n7_1-f-01",
+  "nucleo": "7.1",
+  "difficulty": "facil",
+  "topic": "Infecciones del SNC",
+  "q": "¿Cuál de estas definiciones corresponde a un absceso cerebral?",
+  "a": [
+   "Una colección de pus dentro del encéfalo",
+   "La inflamación de las leptomeninges",
+   "La inflamación difusa del tejido encefálico",
+   "La obstrucción de la circulación del LCR"
+  ],
+  "c": 0,
+  "exp": "El absceso cerebral es una colección intracerebral de pus; la meningitis es inflamación de las meninges y la encefalitis, del encéfalo.",
+  "source": "Compendio ADN 6.1 (introducción, SNC)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-f-02",
+  "nucleo": "7.1",
+  "difficulty": "facil",
+  "topic": "Anatomía del SNC y LCR",
+  "q": "¿En qué espacio circula el líquido cefalorraquídeo?",
+  "a": [
+   "En el espacio subaracnoideo",
+   "Entre la duramadre y el hueso del cráneo",
+   "Entre la duramadre y la aracnoides",
+   "Dentro del espesor de la piamadre"
+  ],
+  "c": 0,
+  "exp": "El LCR circula en el espacio subaracnoideo, entre aracnoides y piamadre, y ahí se generan las reacciones inflamatorias de la meningitis.",
+  "source": "Compendio ADN 6.1 (anatomía de las meninges)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-f-03",
+  "nucleo": "7.1",
+  "difficulty": "facil",
+  "topic": "Neisseria meningitidis",
+  "q": "¿Cómo se transmite Neisseria meningitidis y cuál es su reservorio?",
+  "a": [
+   "Por gotas respiratorias, y el ser humano es el único reservorio",
+   "Por vía fecal-oral, con el agua contaminada como reservorio",
+   "Por heridas contaminadas con esporas presentes en el suelo",
+   "Por picadura de mosquitos, con reservorio en aves silvestres"
+  ],
+  "c": 0,
+  "exp": "Se propaga por gotas respiratorias en contactos cercanos y prolongados; los humanos son los únicos hospedadores naturales y los portadores asintomáticos mantienen la transmisión.",
+  "source": "Compendio ADN 6.1.a.e (Neisseria meningitidis)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-f-04",
+  "nucleo": "7.1",
+  "difficulty": "facil",
+  "topic": "Clostridium tetani",
+  "q": "¿Cuál es la puerta de entrada habitual de Clostridium tetani?",
+  "a": [
+   "Heridas punzantes o abrasiones contaminadas con tierra",
+   "El contacto estrecho con un enfermo de tétanos",
+   "La ingesta de conservas caseras mal procesadas en el hogar",
+   "La inhalación de esporas aerosolizadas"
+  ],
+  "c": 0,
+  "exp": "Las esporas, ubicuas en el suelo fértil, entran por heridas punzantes, cortes o abrasiones y germinan en condiciones anaerobias. El tétanos no se transmite de persona a persona.",
+  "source": "Compendio ADN 6.1.a.g (Clostridium tetani) · Cuadernillo Núcleo 12 Agentes de Piel 2026 (Actividad 3)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-f-05",
+  "nucleo": "7.1",
+  "difficulty": "facil",
+  "topic": "Clostridium botulinum",
+  "q": "¿Qué tipo de parálisis produce la toxina botulínica?",
+  "a": [
+   "Parálisis flácida descendente",
+   "Parálisis espástica con trismo",
+   "Parálisis ascendente con espasmos",
+   "Hemiparesia de un solo lado"
+  ],
+  "c": 0,
+  "exp": "La toxina botulínica bloquea la liberación de acetilcolina en la placa neuromuscular y causa parálisis flácida descendente; la tetánica bloquea la inhibición y causa parálisis espástica (trismo, opistótonos).",
+  "source": "Compendio ADN 6.1.a.f (prevención) · Cuadernillo Núcleo 6 Agentes con ingreso digestivo 2026 (Actividad 2)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-f-06",
+  "nucleo": "7.1",
+  "difficulty": "facil",
+  "topic": "Enterovirus",
+  "q": "¿Cuál es la vía de transmisión de los enterovirus, principales virus causantes de meningitis viral?",
+  "a": [
+   "Fecal-oral, con alimentos y agua contaminados como fuente",
+   "Respiratoria, por aerosoles generados al toser",
+   "Sexual, por contacto con mucosa genital",
+   "Vectorial, por la picadura de mosquitos"
+  ],
+  "c": 0,
+  "exp": "Los enterovirus se transmiten por vía fecal-oral: se replican primero en bucofaringe y tubo digestivo y después alcanzan sus tejidos diana. Los alimentos, el agua y las superficies contaminadas son fuentes importantes.",
+  "source": "Compendio ADN 6.1.b.a (Enterovirus)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-f-07",
+  "nucleo": "7.1",
+  "difficulty": "facil",
+  "topic": "Prevención",
+  "q": "¿Qué vacuna antipoliomielítica se usa hoy en el calendario argentino?",
+  "a": [
+   "La inactivada IPV/Salk: 2, 4 y 6 meses y refuerzo a los 5 años",
+   "La oral atenuada OPV/Sabin, a los 2, 4 y 6 meses",
+   "Una dosis única de vacuna atenuada a los 12 meses",
+   "Una vacuna conjugada de polisacárido con proteína transportadora"
+  ],
+  "c": 0,
+  "exp": "Se usa la vacuna inactivada contra la poliomielitis (IPV/Salk) a los 2, 4 y 6 meses con refuerzo a los 5 años; la oral atenuada (OPV/Sabin) ya no se utiliza.",
+  "source": "Compendio ADN 6.1.b.a (vacunación) · Cuadernillo Núcleo 3 Memoria inmune 2026 (vacunas inactivadas)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-f-08",
+  "nucleo": "7.1",
+  "difficulty": "facil",
+  "topic": "Streptococcus pneumoniae",
+  "q": "¿Qué morfología y comportamiento en agar sangre tiene Streptococcus pneumoniae?",
+  "a": [
+   "Coco gram positivo encapsulado, en diplococos, alfa-hemolítico",
+   "Coco gram positivo en racimos, beta-hemolítico",
+   "Diplococo gram negativo con forma de grano de café, oxidasa positivo",
+   "Bacilo gram negativo pequeño y pleomórfico"
+  ],
+  "c": 0,
+  "exp": "S. pneumoniae es un coco gram positivo encapsulado que se dispone en diplococos o cadenas cortas y es alfa-hemolítico en agar sangre, con más de 90 serotipos capsulares.",
+  "source": "Compendio ADN 6.1.a.c (Streptococcus pneumoniae)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-f-09",
+  "nucleo": "7.1",
+  "difficulty": "facil",
+  "topic": "Infecciones del SNC",
+  "q": "¿Qué tres manifestaciones definen al síndrome meníngeo?",
+  "a": [
+   "Fiebre, cefalea y rigidez de nuca",
+   "Fiebre, convulsiones y deterioro de la conciencia",
+   "Cefalea, afectación de pares craneales y signos focales",
+   "Fiebre, vómitos y petequias en el tronco"
+  ],
+  "c": 0,
+  "exp": "El síndrome meníngeo combina fiebre, cefalea y rigidez. Las convulsiones, el deterioro de conciencia y la focalización corresponden al síndrome encefalítico.",
+  "source": "Compendio ADN 6.1 (síndromes neurológicos)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-f-10",
+  "nucleo": "7.1",
+  "difficulty": "facil",
+  "topic": "Mycobacterium tuberculosis",
+  "q": "¿A quiénes se les aplica la vacuna BCG y en quiénes está contraindicada?",
+  "a": [
+   "A los recién nacidos; contraindicada en inmunodeprimidos",
+   "A los 11 años; está contraindicada en embarazadas",
+   "A los adultos de riesgo, con refuerzo cada 10 años",
+   "A los lactantes a los 2, 4 y 6 meses, sin contraindicaciones"
+  ],
+  "c": 0,
+  "exp": "La BCG se aplica al recién nacido y es eficaz sobre todo en niños, con baja eficacia en adultos. Al ser una vacuna viva atenuada está contraindicada en inmunodeprimidos.",
+  "source": "Compendio ADN 6.1.a.a (Mycobacterium tuberculosis, vacunación)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-01",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Clostridium botulinum",
+  "q": "¿Cuál es el mecanismo de acción de la toxina botulínica?",
+  "a": [
+   "Impide la liberación de acetilcolina en las sinapsis colinérgicas periféricas",
+   "Bloquea la liberación de los neurotransmisores inhibidores glicina y GABA",
+   "Destruye la mielina de los nervios periféricos por acción enzimática",
+   "Despolariza en forma sostenida la placa neuromuscular"
+  ],
+  "c": 0,
+  "exp": "Su cadena ligera es una endopeptidasa de zinc que impide la liberación de acetilcolina y bloquea la neurotransmisión colinérgica periférica, lo que produce parálisis flácida.",
+  "source": "Compendio ADN 6.1.a.f (factores de virulencia) · Cuadernillo Núcleo 6 Agentes con ingreso digestivo 2026 (Actividad 2.c)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-02",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Clostridium tetani",
+  "q": "¿Por qué la tetanospasmina produce parálisis espástica y no flácida?",
+  "a": [
+   "Porque inactiva la liberación de glicina y GABA",
+   "Porque impide la liberación de acetilcolina en las sinapsis colinérgicas",
+   "Porque aumenta la síntesis de acetilcolina en la placa neuromuscular",
+   "Porque destruye las neuronas inhibidoras de la médula espinal"
+  ],
+  "c": 0,
+  "exp": "Su cadena ligera, una endopeptidasa de zinc, inactiva las proteínas que regulan la liberación de glicina y GABA; sin esa inhibición, la actividad sináptica excitatoria queda sin control.",
+  "source": "Compendio ADN 6.1.a.g (factores de virulencia)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-03",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Neisseria meningitidis",
+  "q": "¿Cuál es el principal factor de virulencia de Neisseria meningitidis y qué permite además clasificarla?",
+  "a": [
+   "La cápsula de polisacárido, que define 13 serogrupos",
+   "El lipooligosacárido, que define los serogrupos A, C, Y y W135",
+   "Las proteínas PorA y PorB, que forman poros en la membrana externa",
+   "Los pili de tipo IV, que definen los serotipos capsulares"
+  ],
+  "c": 0,
+  "exp": "La cápsula de polisacárido es el principal factor de virulencia: protege de la fagocitosis mediada por anticuerpos y permite clasificar al meningococo en 13 serogrupos.",
+  "source": "Compendio ADN 6.1.a.e (factores de virulencia)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-04",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Neisseria meningitidis",
+  "q": "¿Qué rasgos caracterizan a la meningococcemia?",
+  "a": [
+   "Trombosis de pequeños vasos, petequias y afectación multiorgánica",
+   "Tumefacción parotídea bilateral con fiebre y cefalea",
+   "Parálisis flácida descendente con compromiso respiratorio",
+   "Lesiones quísticas en el parénquima encefálico con eosinófilos en el LCR"
+  ],
+  "c": 0,
+  "exp": "La meningococcemia es una septicemia con trombosis de los pequeños vasos y afectación multiorgánica; aparecen petequias que pueden evolucionar a lesiones hemorrágicas y hasta coagulación intravascular diseminada.",
+  "source": "Compendio ADN 6.1.a.e (cuadros clínicos)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-05",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Streptococcus agalactiae",
+  "q": "En la enfermedad neonatal tardía por Streptococcus agalactiae, ¿cuál es la manifestación predominante y en qué momento aparece?",
+  "a": [
+   "Bacteriemia con meningitis, entre la semana y los 3 meses de vida",
+   "Bacteriemia con neumonía, en las primeras 24 a 48 horas",
+   "Meningitis con petequias, en la primera semana de vida",
+   "Sepsis con compromiso osteoarticular, después de los 6 meses"
+  ],
+  "c": 0,
+  "exp": "La enfermedad de comienzo tardío ocurre entre la primera semana y los 3 meses, se adquiere de fuentes exógenas, la causa predominantemente el serotipo III y predomina la bacteriemia con meningitis.",
+  "source": "Compendio ADN 6.1.a.d (cuadros clínicos y epidemiología)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-06",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Streptococcus agalactiae",
+  "q": "¿Qué factores aumentan el riesgo de transmisión neonatal de Streptococcus agalactiae?",
+  "a": [
+   "Parto prematuro, rotura prematura de membranas y fiebre intraparto",
+   "El parto por cesárea programada y la edad materna avanzada",
+   "La lactancia materna prolongada y el antecedente de bajo peso al nacer",
+   "El antecedente de vacunación materna incompleta"
+  ],
+  "c": 0,
+  "exp": "La colonización vaginal materna es del 10-30% y alrededor del 60% de los hijos de madres colonizadas se coloniza; el riesgo sube con alta carga bacteriana, parto prematuro, rotura prematura de membranas y fiebre intraparto.",
+  "source": "Compendio ADN 6.1.a.d (vías de transmisión) · Cuadernillo Núcleo 9 Transmisión vertical 2026 (Actividad 3.a)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-07",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Streptococcus pneumoniae",
+  "q": "Además de la cápsula, ¿qué factor de virulencia de Streptococcus pneumoniae es citotóxico y proinflamatorio?",
+  "a": [
+   "La neumolisina",
+   "La tetanolisina",
+   "El lipooligosacárido",
+   "La proteína Opa de superficie"
+  ],
+  "c": 0,
+  "exp": "La neumolisina es citotóxica e inflamatoria; la cápsula evita la fagocitosis, la proteasa de IgA permite evadir la mucosa y la fosforilcolina favorece la diseminación.",
+  "source": "Compendio ADN 6.1.a.c (factores de virulencia)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-08",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Haemophilus influenzae",
+  "q": "¿Qué explica que Haemophilus influenzae tipo b haya sido la causa más común de meningitis en niños antes de la vacunación?",
+  "a": [
+   "Su cápsula PRP, antifagocítica, la más virulenta de los serotipos",
+   "Su crecimiento rápido en agar sangre, que le permite invadir el LCR",
+   "Produce una neurotoxina que viaja por los nervios periféricos",
+   "Es el único serotipo capaz de colonizar la bucofaringe"
+  ],
+  "c": 0,
+  "exp": "De los serotipos a-f, el b (cápsula PRP) es el más virulento por su acción antifagocítica; también aportan los pili, el LPS -que produce inflamación meníngea- y la proteasa de IgA1. Crece en agar chocolate.",
+  "source": "Compendio ADN 6.1.a.b (Haemophilus influenzae tipo B)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-09",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Mycobacterium tuberculosis",
+  "q": "¿En qué contexto aparece la meningitis tuberculosa y qué muestra se usa para buscar el bacilo en el SNC?",
+  "a": [
+   "En formas extrapulmonares de pacientes inmunodeprimidos, con LCR como muestra no contaminada",
+   "En la tuberculosis primaria de pacientes inmunocompetentes, con esputo seriado",
+   "Como complicación de la vacunación con BCG, con biopsia de ganglio",
+   "En la tuberculosis cavitada del ápice pulmonar, con lavado gástrico"
+  ],
+  "c": 0,
+  "exp": "Las formas extrapulmonares (ganglios, huesos, meninges, miliar) se ven en inmunodeprimidos, y la diseminación hematógena o linfática puede complicarse con meningitis tuberculosa. El LCR es una muestra naturalmente estéril.",
+  "source": "Compendio ADN 6.1.a.a (cuadros clínicos) · Cuadernillo Núcleo 7 Laboratorio Respiratorio 2026 (mecanismo de infección y obtención de la muestra)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-10",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Enterovirus",
+  "q": "¿Cómo se caracterizan estructuralmente los enterovirus, de la familia Picornaviridae?",
+  "a": [
+   "Virus desnudos, icosaédricos, con ARN de polaridad positiva",
+   "Virus envueltos, helicoidales, con ARN de polaridad negativa",
+   "Virus desnudos con ADN bicatenario y replicación nuclear",
+   "Virus envueltos con ADN lineal de doble hebra y latencia neuronal"
+  ],
+  "c": 0,
+  "exp": "Son los virus más pequeños: desnudos, icosaédricos, con ARN de polaridad positiva (su genoma alcanza para la infección) y replicación en el citoplasma; al ser desnudos producen lisis celular al liberarse.",
+  "source": "Compendio ADN 6.1.b.a (Enterovirus)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-11",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Arbovirus",
+  "q": "Según el material de la cátedra, ¿qué arbovirosis con compromiso neurológico se reportan con mayor frecuencia en el norte de la Argentina?",
+  "a": [
+   "La encefalitis equina del oeste y el dengue",
+   "La encefalitis japonesa y la fiebre del Nilo Occidental",
+   "La rabia y la encefalitis por sarampión",
+   "La fiebre amarilla y la fiebre de Oropouche"
+  ],
+  "c": 0,
+  "exp": "En el norte del país hay casos esporádicos y brotes, y los más frecuentes son la encefalitis equina del oeste y el dengue; los otros arbovirus que producen encefalitis no son frecuentes en nuestro medio. Es el dato de la cátedra; en la vigilancia nacional también se reportan la encefalitis de San Luis y el virus del Nilo Occidental.",
+  "source": "Compendio ADN 6.1.b.b (Arbovirus) · Cuadernillo Núcleo 10 Vectores 2026 (tabla de ENO)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-12",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Arbovirus",
+  "q": "¿Cómo alcanza el encéfalo un arbovirus después de la viremia inicial?",
+  "a": [
+   "Infectando las células endoteliales de los vasos encefálicos",
+   "Viajando por transporte axonal retrógrado desde la picadura",
+   "Atravesando la lámina cribosa desde el epitelio olfatorio",
+   "Dentro de macrófagos infectados que cruzan los plexos coroides"
+  ],
+  "c": 0,
+  "exp": "El virus infecta las células endoteliales de los vasos encefálicos y así accede al tejido; la respuesta inflamatoria que induce produce la destrucción tisular y la encefalitis.",
+  "source": "Compendio ADN 6.1.b.b (Arbovirus, patogenia)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-13",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "Ante la sospecha de meningitis por enterovirus, ¿qué muestra y qué método indica el material de la cátedra?",
+  "a": [
+   "PCR en LCR obtenido por punción lumbar",
+   "Serología de IgM en suero pareado",
+   "Coprocultivo con aislamiento viral en materia fecal",
+   "Hemocultivo seriado en medio enriquecido"
+  ],
+  "c": 0,
+  "exp": "El diagnóstico se hace a partir del estudio del LCR, que se obtiene por punción lumbar, con pruebas de amplificación de ácidos nucleicos (PCR).",
+  "source": "Compendio ADN 6.1.b.a (método diagnóstico)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-14",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Virus herpes simplex",
+  "q": "¿Dónde establece la latencia el virus herpes simplex?",
+  "a": [
+   "En ganglios sensoriales: trigémino en HSV-1 y sacro en HSV-2",
+   "En los linfocitos B de memoria, como el virus de Epstein-Barr",
+   "En las células mucoepiteliales donde se replica inicialmente",
+   "En las neuronas motoras del asta anterior de la médula espinal"
+  ],
+  "c": 0,
+  "exp": "Tras replicarse en células mucoepiteliales, el virus viaja en forma retrógrada a los ganglios sensoriales: trigémino en HSV-1 y sacro en HSV-2. En la latencia expresa los transcriptos asociados a latencia (LAT), que inhiben la apoptosis neuronal.",
+  "source": "Compendio ADN 6.1.b.c.c (Virus Herpes Simplex)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-15",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Virus de la parotiditis",
+  "q": "¿Por qué estructura llega el virus de la parotiditis al SNC durante su diseminación sistémica?",
+  "a": [
+   "Por el plexo coroideo",
+   "Por los nervios olfatorios",
+   "Por las vellosidades aracnoideas",
+   "Por los ganglios linfáticos cervicales profundos"
+  ],
+  "c": 0,
+  "exp": "Tras replicarse en el epitelio respiratorio y producir una viremia fugaz, el virus llega al SNC a través del plexo coroideo, infecta células mononucleares y puede causar meningitis o encefalitis.",
+  "source": "Compendio ADN 6.1.b.c.b (parotiditis, células blanco)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-16",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Virus del sarampión",
+  "q": "¿Qué receptor usan las cepas salvajes del virus del sarampión para entrar a la célula?",
+  "a": [
+   "CD150 o SLAM, expresada en algunas células T y B",
+   "CD46, miembro de la superfamilia de las inmunoglobulinas",
+   "CD21, el receptor de C3d",
+   "El ácido siálico de la superficie del epitelio respiratorio"
+  ],
+  "c": 0,
+  "exp": "La proteína H de las cepas salvajes se une a CD150/SLAM; CD46 es el receptor de las cepas vacunales y la nectina-4 funciona como receptor en células epiteliales polarizadas. A diferencia de otros paramixovirus, no usa ácido siálico.",
+  "source": "Compendio ADN 6.1.b.c.b (sarampión, células blanco)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-17",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Respuesta inmune",
+  "q": "¿Por qué se considera al SNC un sitio de privilegio inmunológico?",
+  "a": [
+   "No tiene folículos linfoides ni CPA profesionales y expresa poco CMH",
+   "La barrera hematoencefálica impide por completo el paso de linfocitos y anticuerpos",
+   "Sus neuronas expresan altos niveles de CMH I, lo que bloquea la presentación antigénica",
+   "Carece de complemento y de citoquinas proinflamatorias en todo momento"
+  ],
+  "c": 0,
+  "exp": "En el encéfalo y la médula no hay folículos linfoides, ganglios ni células presentadoras profesionales, y la expresión de CMH I y II es muy baja para evitar autorreactividad. La protección depende de las meninges, el LCR y la barrera hematoencefálica.",
+  "source": "Compendio ADN 6.1 (privilegio inmunológico del SNC)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-18",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Respuesta inmune",
+  "q": "¿Cómo participa la inmunidad adaptativa en la defensa del SNC si el parénquima no tiene tejido linfoide?",
+  "a": [
+   "El LCR drena por el sistema glinfático a los ganglios cervicales profundos",
+   "Los linfocitos T vírgenes se activan directamente en el parénquima encefálico",
+   "Los astrocitos actúan como células presentadoras de antígeno profesionales",
+   "Los anticuerpos se producen en los plexos coroides y pasan al espacio subaracnoideo"
+  ],
+  "c": 0,
+  "exp": "Parte del LCR drena por el sistema glinfático a los ganglios cervicales profundos llevando antígenos. Las dendríticas meníngeas los transportan allí y los linfocitos activados vuelven por homing, con las vitaminas A y D como factores clave.",
+  "source": "Compendio ADN 6.1 (inmunidad adaptativa en el SNC)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-19",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Prevención",
+  "q": "¿Cómo es el esquema de la vacuna antimeningocócica conjugada tetravalente en el calendario argentino?",
+  "a": [
+   "Dosis a los 3 y 5 meses, refuerzo a los 15 meses y a los 11 años",
+   "Dosis a los 2, 4 y 6 meses con un refuerzo a los 15-18 meses de vida",
+   "Dosis única al año de vida y refuerzo cada 10 años",
+   "Tres dosis en el primer año y una dosis en el embarazo"
+  ],
+  "c": 0,
+  "exp": "En lactantes se aplica a los 3 y 5 meses con refuerzo a los 15 meses -el grupo con mayor riesgo de enfermar y morir- y una dosis única a los 11 años. Es la conjugada tetravalente ACYW.",
+  "source": "Compendio ADN 6.1.a.e (vacunación, esquema argentino)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-n-20",
+  "nucleo": "7.1",
+  "difficulty": "normal",
+  "topic": "Prevención",
+  "q": "¿Por qué hay que vacunar contra el tétanos incluso a alguien que ya tuvo la enfermedad?",
+  "a": [
+   "Porque la infección natural no induce inmunidad",
+   "Porque la inmunidad que deja la enfermedad dura solo un año",
+   "Porque la toxina deja anticuerpos bloqueantes que hay que neutralizar",
+   "Porque la enfermedad deja inmunidad celular pero no humoral"
+  ],
+  "c": 0,
+  "exp": "La infección natural no confiere inmunidad: la prevención son tres dosis de toxoide tetánico con refuerzos cada 10 años (doble bacteriana en adultos), y el riesgo es mayor cuando la inmunización es inadecuada.",
+  "source": "Compendio ADN 6.1.a.g (vacunación) · Cuadernillo Núcleo 3 Memoria inmune 2026 (toxoides)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-d-01",
+  "nucleo": "7.1",
+  "difficulty": "dificil",
+  "topic": "Clostridium botulinum",
+  "q": "Una lactante de 3 meses llega con cinco días de hipoactividad, rechazo del alimento e irritabilidad, sin fiebre. La madre le dio miel por estreñimiento. ¿Qué explica el cuadro?",
+  "a": [
+   "La ingestión de esporas que colonizan el intestino",
+   "La ingestión de toxina botulínica preformada en el alimento",
+   "La germinación de esporas en una herida con tejido necrótico",
+   "La inhalación de toxina en partículas aerosolizadas"
+  ],
+  "c": 0,
+  "exp": "En el botulismo del lactante se ingieren esporas (miel, leche en polvo, tierra) que colonizan el intestino y producen la toxina ahí; el estreñimiento y el llanto débil evolucionan a parálisis flácida. La toxina preformada es el botulismo alimentario.",
+  "source": "Compendio ADN 6.1.a.f (vías de transmisión y cuadros clínicos) · Cuadernillo Núcleo 6 Agentes con ingreso digestivo 2026 (Actividad 2)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-d-02",
+  "nucleo": "7.1",
+  "difficulty": "dificil",
+  "topic": "Clostridium tetani",
+  "q": "Un hombre de 60 años, con una herida punzante en el pie hace una semana, presenta trismus, sonrisa sardónica, espasmos de la espalda y sudoración profusa. ¿Qué cuadro es?",
+  "a": [
+   "Tétanos generalizado",
+   "Botulismo de las heridas",
+   "Tétanos localizado",
+   "Encefalitis herpética"
+  ],
+  "c": 0,
+  "exp": "El tétanos generalizado empieza con trismus y sonrisa sardónica, sigue con opistótonos y suma afectación autonómica (arritmias, oscilaciones de la presión, sudoración, deshidratación). En el localizado los espasmos quedan limitados al área de la herida.",
+  "source": "Compendio ADN 6.1.a.g (cuadros clínicos)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-d-03",
+  "nucleo": "7.1",
+  "difficulty": "dificil",
+  "topic": "Clostridium tetani",
+  "q": "¿De qué depende la duración del período de incubación del tétanos, que va de unos pocos días a semanas?",
+  "a": [
+   "De la distancia entre la herida primaria y el SNC",
+   "De la cantidad de esporas inoculadas en la herida",
+   "Del estado de inmunidad celular del paciente",
+   "Del tamaño y la profundidad del tejido necrótico"
+  ],
+  "c": 0,
+  "exp": "El período de incubación se relaciona directamente con la distancia de la herida primaria al sistema nervioso central, porque la toxina tiene que llegar hasta ahí.",
+  "source": "Compendio ADN 6.1.a.g (período de incubación)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-d-04",
+  "nucleo": "7.1",
+  "difficulty": "dificil",
+  "topic": "Clostridium botulinum",
+  "q": "En el botulismo alimentario, ¿qué alimento y qué tipos de toxina están implicados con mayor frecuencia, y cuándo aparecen los síntomas?",
+  "a": [
+   "Conservas caseras, toxinas A y B, entre 1 y 3 días después del consumo",
+   "Pescado en conserva, toxina E, a las pocas horas del consumo",
+   "Miel contaminada, toxina C, luego de 4 días o más",
+   "Carne mal cocida, toxinas E y F, entre 7 y 10 días después"
+  ],
+  "c": 0,
+  "exp": "El botulismo alimentario se asocia a conservas preparadas en casa (toxinas A y B) y los síntomas aparecen entre 1 y 3 días después de consumir el alimento. El pescado en conserva se vincula a la toxina tipo E.",
+  "source": "Compendio ADN 6.1.a.f (período de incubación y vías de transmisión)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-d-05",
+  "nucleo": "7.1",
+  "difficulty": "dificil",
+  "topic": "Clostridium botulinum",
+  "q": "Dos pacientes tienen parálisis por toxinas de clostridios: uno con debilidad bilateral descendente y flácida, otro con espasmos y rigidez. ¿Qué distingue a los agentes?",
+  "a": [
+   "C. botulinum da parálisis flácida descendente y C. tetani, parálisis espástica",
+   "C. botulinum da parálisis espástica y C. tetani, parálisis flácida ascendente",
+   "Ambos dan parálisis flácida, pero la de C. tetani empieza por los pares craneales",
+   "Ambos dan parálisis espástica, y se diferencian solo por la vía de entrada"
+  ],
+  "c": 0,
+  "exp": "El botulismo cursa con visión borrosa, xerostomía y estreñimiento y evoluciona a debilidad bilateral descendente con parálisis flácida por bloqueo de la acetilcolina; el tétanos da parálisis espástica porque se pierde la inhibición por glicina y GABA.",
+  "source": "Compendio ADN 6.1.a.f y 6.1.a.g (cuadros clínicos) · Cuadernillo Núcleo 6 Agentes con ingreso digestivo 2026 (Actividad 2.e)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-d-06",
+  "nucleo": "7.1",
+  "difficulty": "dificil",
+  "topic": "Streptococcus agalactiae",
+  "q": "Una gestante portadora de EGB no recibe profilaxis intraparto y el recién nacido presenta dificultad respiratoria a las 34 horas de vida. ¿Qué corresponde esperar?",
+  "a": [
+   "Enfermedad de comienzo precoz, con bacteriemia, neumonía o meningitis",
+   "Enfermedad de comienzo tardío por serotipo III adquirido de fuentes exógenas",
+   "Una infección transplacentaria con malformaciones congénitas",
+   "Una colonización asintomática sin riesgo de enfermedad invasiva"
+  ],
+  "c": 0,
+  "exp": "La enfermedad precoz se presenta en los primeros 7 días -en general dentro de las 24-48 horas- con bacteriemia, neumonía o meningitis, y se asocia a los serotipos Ia, III y V. La meningitis puede no ser evidente al inicio y exige analizar el LCR.",
+  "source": "Compendio ADN 6.1.a.d (cuadros clínicos) · Cuadernillo Núcleo 9 Transmisión vertical 2026 (Actividad 3.a)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-d-07",
+  "nucleo": "7.1",
+  "difficulty": "dificil",
+  "topic": "Neisseria meningitidis",
+  "q": "¿Qué grupo tiene un riesgo marcadamente mayor de enfermedad meningocócica invasiva por un defecto inmunitario puntual?",
+  "a": [
+   "Los pacientes con deficiencias de C5 a C8 del complemento",
+   "Los pacientes con neutropenia prolongada",
+   "Los pacientes con déficit aislado de IgA secretoria",
+   "Los pacientes esplenectomizados por trauma"
+  ],
+  "c": 0,
+  "exp": "La incidencia más alta se da en menores de 5 años, personas institucionalizadas y pacientes con defectos de los últimos factores del complemento: los déficits de C5-C8 implican un riesgo significativamente mayor.",
+  "source": "Compendio ADN 6.1.a.e (epidemiología)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-d-08",
+  "nucleo": "7.1",
+  "difficulty": "dificil",
+  "topic": "Prevención",
+  "q": "¿Por qué la vacuna antimeningocócica tetravalente no cubre el serogrupo B?",
+  "a": [
+   "Porque su polisacárido capsular es un inmunógeno débil y no induce anticuerpos protectores",
+   "Porque el serogrupo B no produce enfermedad invasiva en humanos",
+   "Porque su cápsula cambia de antígeno con cada brote epidémico",
+   "Porque el polisacárido B no puede conjugarse con proteínas transportadoras"
+  ],
+  "c": 0,
+  "exp": "El polisacárido del grupo B es un inmunógeno débil y no induce respuesta de anticuerpos protectora; la inmunidad contra ese serogrupo depende de la exposición natural a antígenos con reactividad cruzada. Las tetravalentes cubren A, C, Y y W135.",
+  "source": "Compendio ADN 6.1.a.e (vacunación)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-d-09",
+  "nucleo": "7.1",
+  "difficulty": "dificil",
+  "topic": "Enterovirus",
+  "q": "Según la cátedra, ¿qué define a un caso sospechoso de parálisis aguda fláccida (PAF)?",
+  "a": [
+   "Parálisis aguda y fláccida en un menor de 15 años, salvo traumatismo grave",
+   "Toda parálisis fláccida en un menor de 5 años con aislamiento de poliovirus en materia fecal",
+   "Toda parálisis fláccida que aparezca entre 4 y 40 días después de recibir una vacuna",
+   "Parálisis asimétrica con arreflexia confirmada por PCR en LCR"
+  ],
+  "c": 0,
+  "exp": "Caso sospechoso: parálisis aguda y fláccida en un menor de 15 años por cualquier motivo que no sea un traumatismo grave. El caso confirmado exige aislar poliovirus salvaje en materia fecal.",
+  "source": "Compendio ADN 6.1.b.a (definiciones de caso de PAF, cátedra)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-d-10",
+  "nucleo": "7.1",
+  "difficulty": "dificil",
+  "topic": "Virus de la parotiditis",
+  "q": "En una meningitis por virus de la parotiditis, ¿cuál es el método diagnóstico de elección y en qué ventana se puede aislar el virus del LCR?",
+  "a": [
+   "RT-PCR en LCR, con aislamiento posible hasta los 8-9 días",
+   "Fijación de complemento en suero, útil desde el día 14",
+   "Aislamiento en cultivo de saliva, posible hasta 2 semanas",
+   "Detección de IgG en LCR, a partir de los 30 días"
+  ],
+  "c": 0,
+  "exp": "La RT-PCR en LCR es el método de elección en la meningitis por parotiditis. Del LCR el virus se aísla dentro de los 8-9 días del inicio de los síntomas y de orina hasta 2 semanas.",
+  "source": "Compendio ADN 6.1.b.c.b (parotiditis, método diagnóstico)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-d-11",
+  "nucleo": "7.1",
+  "difficulty": "dificil",
+  "topic": "Virus herpes simplex",
+  "q": "Ante la sospecha de encefalitis herpética, ¿qué técnica conviene usar sobre el LCR y con qué rendimiento?",
+  "a": [
+   "PCR, con sensibilidad de 98-100% y especificidad del 94%",
+   "Inmunofluorescencia directa con monoclonales anti-glicoproteína G",
+   "Aislamiento en fibroblastos humanos, que informa en 2-7 días",
+   "Serología para distinguir HSV-1 de HSV-2"
+  ],
+  "c": 0,
+  "exp": "La PCR es la técnica de elección en encefalitis o meningitis herpética, con sensibilidad de 98-100% y especificidad del 94% en LCR. La serología no sirve para infecciones agudas y la tinción de Tzanck tiene baja sensibilidad (40-50%).",
+  "source": "Compendio ADN 6.1.b.c.c (HSV, método diagnóstico)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-d-12",
+  "nucleo": "7.1",
+  "difficulty": "dificil",
+  "topic": "Infecciones del SNC",
+  "q": "¿Qué distingue el síndrome de una meningitis aséptica del de una meningitis bacteriana aguda?",
+  "a": [
+   "En la aséptica suele haber solo síndrome meníngeo",
+   "En la aséptica predomina la focalización neurológica",
+   "En la bacteriana no hay rigidez de nuca ni fiebre",
+   "En la bacteriana el compromiso se limita al parénquima encefálico"
+  ],
+  "c": 0,
+  "exp": "En la meningitis bacteriana aguda predomina el síndrome meníngeo, que puede acompañarse de encefalopatía; en la aséptica suele observarse únicamente el síndrome meníngeo. La focalización es propia de las lesiones focales como los abscesos.",
+  "source": "Compendio ADN 6.1 (síndromes neurológicos)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-d-13",
+  "nucleo": "7.1",
+  "difficulty": "dificil",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "¿Qué pruebas bioquímicas permiten diferenciar a Neisseria meningitidis de otras especies del género?",
+  "a": [
+   "Produce ácido por oxidación de glucosa y maltosa",
+   "Es catalasa negativa y fermenta carbohidratos con producción de ácido láctico",
+   "Es oxidasa negativa y ureasa positiva",
+   "Oxida solo la glucosa y no la maltosa"
+  ],
+  "c": 0,
+  "exp": "N. meningitidis es oxidasa y catalasa positiva y produce ácido por oxidación de glucosa y maltosa, lo que la distingue de otras Neisserias. Crece a 35-37 °C en atmósfera húmeda con 5% de CO2 y medios enriquecidos como agar chocolate.",
+  "source": "Compendio ADN 6.1.a.e (características y estructura)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-d-14",
+  "nucleo": "7.1",
+  "difficulty": "dificil",
+  "topic": "Anatomía del SNC y LCR",
+  "q": "¿Por qué la barrera hematoencefálica representa un desafío en el tratamiento de la meningitis?",
+  "a": [
+   "Porque su permeabilidad selectiva obliga a elegir fármacos capaces de atravesarla",
+   "Porque se vuelve impermeable a toda molécula durante la inflamación",
+   "Porque impide que el LCR distribuya los fármacos por el espacio subaracnoideo",
+   "Porque los plexos coroides eliminan los antibióticos antes de que actúen"
+  ],
+  "c": 0,
+  "exp": "La barrera, formada por endotelio con uniones estrechas, membrana basal y astrocitos, solo deja pasar agua y moléculas pequeñas: hay que elegir fármacos capaces de atravesarla para alcanzar concentraciones efectivas en el SNC.",
+  "source": "Compendio ADN 6.1 (barrera hematoencefálica y funciones del LCR)",
+  "verificar": false
+ },
+ {
+  "id": "n7_1-d-15",
+  "nucleo": "7.1",
+  "difficulty": "dificil",
+  "topic": "Infecciones del SNC",
+  "q": "Un paciente desarrolla un absceso cerebral luego de una sinusitis prolongada. ¿Qué mecanismo de acceso al SNC explica mejor el cuadro?",
+  "a": [
+   "Contigüidad desde un sitio vecino",
+   "Vía hematógena a partir de una bacteriemia",
+   "Inóculo directo por un procedimiento quirúrgico",
+   "Acceso por los nervios periféricos"
+  ],
+  "c": 0,
+  "exp": "Un agente puede llegar al SNC por vía hematógena, por contigüidad desde sitios vecinos como los senos paranasales o el oído medio, por inóculo directo (traumatismos, cirugía, derivaciones) o por los nervios periféricos.",
+  "source": "Compendio ADN 6.1 (vías de acceso al SNC)",
+  "verificar": false
+ }
+]

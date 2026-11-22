@@ -1,0 +1,767 @@
+[
+ {
+  "id": "n7-f-01",
+  "nucleo": "7",
+  "difficulty": "facil",
+  "topic": "Mycobacterium tuberculosis",
+  "q": "¿Con qué coloración se visualiza Mycobacterium tuberculosis en una muestra de esputo?",
+  "a": [
+   "Ziehl-Neelsen",
+   "Gram",
+   "Giemsa",
+   "Grocott"
+  ],
+  "c": 0,
+  "exp": "Por su pared rica en lípidos es un bacilo ácido-alcohol resistente: se tiñe con fucsina y resiste la decoloración alcohol-ácida (baciloscopia). Grocott tiñe hongos y Giemsa se usa para parásitos y para H. pylori.",
+  "source": "Cuadernillo Núcleo 7 Laboratorio 2026 (TP 16 y TP 17) · Compendio ADN (6.e.a)",
+  "verificar": false
+ },
+ {
+  "id": "n7-f-02",
+  "nucleo": "7",
+  "difficulty": "facil",
+  "topic": "Bordetella pertussis",
+  "q": "¿Qué agente causa la tos convulsa o coqueluche?",
+  "a": [
+   "Bordetella pertussis",
+   "Corynebacterium diphtheriae",
+   "Haemophilus influenzae tipo b",
+   "Mycoplasma pneumoniae"
+  ],
+  "c": 0,
+  "exp": "La produce B. pertussis. Se previene con vacunas con componente pertussis: quíntuple (celular) a los 2, 4 y 6 meses, cuádruple a los 15-18 meses, triple bacteriana a los 5-6 años y dTpa (acelular) a los 11 años y en embarazadas.",
+  "source": "Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11) · Compendio ADN (6.c.e)",
+  "verificar": false
+ },
+ {
+  "id": "n7-f-03",
+  "nucleo": "7",
+  "difficulty": "facil",
+  "topic": "Virus sincicial respiratorio",
+  "q": "¿Cuál es la causa más habitual de infección aguda y grave de las vías aéreas inferiores en lactantes?",
+  "a": [
+   "Virus sincicial respiratorio",
+   "Rinovirus",
+   "Virus parainfluenza",
+   "Adenovirus"
+  ],
+  "c": 0,
+  "exp": "El VSR es la causa más habitual de bronquiolitis y neumonía en lactantes y niños pequeños; casi todos se infectan antes de los 2 a 4 años y el mayor riesgo está entre las 6 y 12 semanas de vida.",
+  "source": "Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10) · Compendio ADN (6.a.b)",
+  "verificar": false
+ },
+ {
+  "id": "n7-f-04",
+  "nucleo": "7",
+  "difficulty": "facil",
+  "topic": "Rinovirus",
+  "q": "La mayoría de las infecciones de vías aéreas superiores son virales. ¿Qué virus es el principal responsable del resfrío común?",
+  "a": [
+   "Rinovirus",
+   "Virus de la influenza A",
+   "Virus sincicial respiratorio",
+   "Virus de Epstein-Barr"
+  ],
+  "c": 0,
+  "exp": "Las IVAS (rinitis, faringitis, laringitis, otitis media) son en su mayoría virales, sobre todo por rinovirus, y suelen ser autolimitadas. Los coronavirus son la segunda causa de resfrío común.",
+  "source": "Cuadernillo Núcleo 7 Laboratorio 2026 (TP 15) · Compendio ADN (6.a.d)",
+  "verificar": false
+ },
+ {
+  "id": "n7-f-05",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Corynebacterium diphtheriae",
+  "q": "Un niño con vacunas incompletas presenta fiebre, odinofagia intensa y una seudomembrana adherente en las fauces. ¿Qué agente hay que sospechar?",
+  "a": [
+   "Corynebacterium diphtheriae",
+   "Streptococcus pneumoniae",
+   "Mycoplasma pneumoniae",
+   "Klebsiella pneumoniae"
+  ],
+  "c": 0,
+  "exp": "La difteria respiratoria forma una seudomembrana adherente de bacterias, fibrina, linfocitos y células muertas. Se previene con el toxoide diftérico (quíntuple, triple y doble bacteriana).",
+  "source": "Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, caso clínico 1) · Compendio ADN (6.c.h)",
+  "verificar": false
+ },
+ {
+  "id": "n7-f-06",
+  "nucleo": "7",
+  "difficulty": "facil",
+  "topic": "Streptococcus pyogenes",
+  "q": "¿Qué se observa al estudiar Streptococcus pyogenes en el laboratorio?",
+  "a": [
+   "Cocos gram positivos en cadenas, beta-hemolíticos",
+   "Diplococos gram positivos encapsulados con alfa-hemólisis en agar sangre",
+   "Cocobacilos gram negativos muy pequeños que necesitan agar chocolate",
+   "Bacilos gram positivos pleomorfos con forma de garrote y tinción irregular"
+  ],
+  "c": 0,
+  "exp": "S. pyogenes son cocos gram positivos en cadenas que en agar sangre dan colonias blancas de 1 a 2 mm con grandes zonas de beta-hemólisis a las 24 h de incubación.",
+  "source": "Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11) · Compendio ADN (6.c.a)",
+  "verificar": false
+ },
+ {
+  "id": "n7-f-07",
+  "nucleo": "7",
+  "difficulty": "facil",
+  "topic": "Virus de la influenza",
+  "q": "¿En base a qué proteínas de superficie se clasifican las cepas de influenza A, como H1N1 o H3N2?",
+  "a": [
+   "Hemaglutinina y neuraminidasa",
+   "Proteína F y proteína G",
+   "Proteína spike y proteína N",
+   "Proteínas VP1 a VP4"
+  ],
+  "c": 0,
+  "exp": "La hemaglutinina (16 subtipos) se une al ácido siálico y la neuraminidasa (9 subtipos) facilita la liberación viral. Sus combinaciones definen las cepas de influenza A.",
+  "source": "Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 2) · Compendio ADN (6.a.c)",
+  "verificar": false
+ },
+ {
+  "id": "n7-f-08",
+  "nucleo": "7",
+  "difficulty": "facil",
+  "topic": "Prevención",
+  "q": "¿A quiénes se aplica la vacuna BCG en el Calendario Nacional argentino?",
+  "a": [
+   "A todos los recién nacidos",
+   "A los niños de 2, 4 y 6 meses",
+   "A los contactos adultos de un caso de tuberculosis",
+   "A los pacientes inmunodeprimidos con PPD negativa"
+  ],
+  "c": 0,
+  "exp": "La BCG se da al recién nacido. Reduce mucho la incidencia en personas jóvenes, es menos eficaz en adultos y no se usa en inmunodeprimidos; deja la prueba de tuberculina positiva.",
+  "source": "Compendio ADN (6.e.a, vacunación) · Cuadernillo Núcleo 7 Laboratorio 2026 (TP 17)",
+  "verificar": false
+ },
+ {
+  "id": "n7-f-09",
+  "nucleo": "7",
+  "difficulty": "facil",
+  "topic": "Streptococcus pneumoniae",
+  "q": "¿Qué agente es un diplococo gram positivo encapsulado, alfa-hemolítico, que coloniza la orofaringe?",
+  "a": [
+   "Streptococcus pneumoniae",
+   "Streptococcus pyogenes",
+   "Moraxella catarrhalis",
+   "Bordetella pertussis"
+  ],
+  "c": 0,
+  "exp": "El neumococo es un diplococo gram positivo encapsulado, aerobio y anaerobio facultativo, que coloniza la orofaringe y da colonias alfa-hemolíticas en agar sangre.",
+  "source": "Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, cuadro de IVAI) · Compendio ADN (6.c.b)",
+  "verificar": false
+ },
+ {
+  "id": "n7-f-10",
+  "nucleo": "7",
+  "difficulty": "facil",
+  "topic": "Respuesta inmune",
+  "q": "¿Qué mecanismo atrapa las partículas inhaladas en el moco y las transporta hacia la tráquea antes de que lleguen al alvéolo?",
+  "a": [
+   "El sistema mucociliar",
+   "La opsonización por IgG del alvéolo",
+   "La citotoxicidad de las células NK",
+   "La activación del complemento por la vía clásica"
+  ],
+  "c": 0,
+  "exp": "Las secreciones mucosas más el batido de los cilios del epitelio respiratorio barren las partículas hacia la tráquea. Junto a las barreras anatómicas y el reflejo de la tos son la primera línea de defensa.",
+  "source": "Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 1) · Compendio ADN (6, inmunidad del sistema respiratorio)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-01",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Streptococcus pneumoniae",
+  "q": "¿Cuál es el principal factor de virulencia de Streptococcus pneumoniae y cómo actúa?",
+  "a": [
+   "La cápsula de polisacáridos, que inhibe la fagocitosis",
+   "La neumolisina, que degrada la IgA secretora del moco",
+   "La proteína M, que bloquea el depósito de C3b sobre la bacteria",
+   "El lipopolisacárido, que induce la inflamación de las meninges"
+  ],
+  "c": 0,
+  "exp": "La cápsula es el principal factor de virulencia: las cepas no encapsuladas no son virulentas. La neumolisina forma poros al unirse al colesterol y la proteasa de IgA es la que degrada la IgA secretora.",
+  "source": "Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, Actividad 2) · Compendio ADN (6.c.b)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-02",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Streptococcus pneumoniae",
+  "q": "¿Cómo se produce la mayor parte de las infecciones por Streptococcus pneumoniae?",
+  "a": [
+   "Por diseminación endógena desde la nasofaringe colonizada",
+   "Por gotitas respiratorias de persona a persona, con epidemias frecuentes",
+   "Por vía fecal-oral a partir de agua o alimentos contaminados",
+   "Por contacto con fómites e instrumental del ambiente hospitalario"
+  ],
+  "c": 0,
+  "exp": "El neumococo coloniza la nasofaringe y llega por aspiración a los pulmones o por vía hematógena a senos, oído medio y meninges. La transmisión interpersonal por gotitas es rara.",
+  "source": "Compendio ADN (6.c.b, vías de transmisión) · Cuadernillo Núcleo 7 Seminario 2026 (cuadro de IVAI)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-03",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Haemophilus influenzae",
+  "q": "¿En qué medio se cultiva Haemophilus influenzae a partir de una muestra respiratoria?",
+  "a": [
+   "Agar chocolate",
+   "Agar sangre al 5%",
+   "Löwenstein-Jensen",
+   "Agar Sabouraud"
+  ],
+  "c": 0,
+  "exp": "Necesita factores X (hemina) y V (NAD): al calentar el agar sangre se lisan los glóbulos rojos, se liberan ambos y se inactivan las NADasas; ese es el agar chocolate. Löwenstein-Jensen es para micobacterias y Sabouraud para hongos.",
+  "source": "Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, cuadro de IVAI) · Compendio ADN (6.c.d)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-04",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Haemophilus influenzae",
+  "q": "¿Cuál es el principal factor de virulencia de Haemophilus influenzae tipo b, que además es el antígeno de la vacuna conjugada?",
+  "a": [
+   "La cápsula de fosfato de polirribitol (PRP)",
+   "El lipopolisacárido con lípido A de su membrana externa",
+   "La proteasa de IgA1 que facilita la colonización mucosa",
+   "Las adhesinas no pilosas de la superficie bacteriana"
+  ],
+  "c": 0,
+  "exp": "La cápsula de PRP es antifagocítica y define al serotipo b como el más virulento. La prevención es la inmunización activa con PRP purificado conjugado, que en el país va en la quíntuple.",
+  "source": "Compendio ADN (6.c.d) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-05",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Bordetella pertussis",
+  "q": "¿Qué efecto tiene la toxina pertussis sobre la célula del huésped?",
+  "a": [
+   "Aumenta el AMPc al inactivar la proteína Gi",
+   "Produce ciliostasis al interferir la síntesis de ADN de la célula ciliada",
+   "Inhibe la síntesis de proteínas y daña el corazón y los nervios",
+   "Forma poros en la membrana al unirse al colesterol celular"
+  ],
+  "c": 0,
+  "exp": "La toxina pertussis inactiva la proteína Gi y sube el AMPc, lo que aumenta las secreciones y la producción de mucosidad de la fase paroxística; además inhibe la fagocitosis y la migración de monocitos.",
+  "source": "Compendio ADN (6.c.e, factores de virulencia) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, Actividad 3)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-06",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Virus parainfluenza",
+  "q": "¿Qué virus respiratorio es la causa más frecuente de laringotraqueobronquitis (crup) en lactantes?",
+  "a": [
+   "Virus parainfluenza",
+   "Virus de Epstein-Barr",
+   "Rinovirus",
+   "Virus sincicial respiratorio"
+  ],
+  "c": 0,
+  "exp": "Los parainfluenza (familia Paramyxoviridae, 4 serotipos) dan resfrío común, bronquitis y laringotraqueobronquitis o crup en lactantes; se diagnostican por aspirado nasal con inmunofluorescencia y PCR.",
+  "source": "Compendio ADN (6.a, cuadro de parainfluenza y metaneumovirus; el compendio aclara que viene del video seminario y no del cuadernillo)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-07",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Corynebacterium diphtheriae",
+  "q": "¿De qué depende que una cepa de Corynebacterium diphtheriae produzca toxina diftérica?",
+  "a": [
+   "De la lisogenia por el fago beta, que aporta el gen tox",
+   "De una cápsula de polisacáridos con más de 90 serotipos",
+   "De un plásmido que se transfiere entre cepas por conjugación",
+   "De los ácidos micólicos de cadena corta de su pared celular"
+  ],
+  "c": 0,
+  "exp": "La toxina diftérica es una exotoxina A-B codificada por el gen tox, introducido por un bacteriófago lisogénico. La subunidad A inhibe la síntesis de proteínas y afecta sobre todo corazón y sistema nervioso.",
+  "source": "Compendio ADN (6.c.h) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, Actividad 3)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-08",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Mycoplasma pneumoniae",
+  "q": "¿Por qué Mycoplasma pneumoniae es resistente a penicilinas, cefalosporinas y vancomicina?",
+  "a": [
+   "Porque carece de pared celular",
+   "Porque produce una betalactamasa de amplio espectro",
+   "Porque es un parásito intracelular obligado inaccesible al fármaco",
+   "Porque su pared está formada por ácidos micólicos hidrofóbicos"
+  ],
+  "c": 0,
+  "exp": "No tiene pared celular y su membrana contiene esteroles, así que los antibióticos que actúan sobre la pared no le hacen nada. Es pleomorfo y tan chico que atraviesa filtros de 0,45 µm.",
+  "source": "Compendio ADN (6.c.f) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, Actividad 4)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-09",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Mycoplasma pneumoniae",
+  "q": "¿Cómo daña Mycoplasma pneumoniae el epitelio respiratorio?",
+  "a": [
+   "Se adhiere por la adhesina P1 y produce ciliostasis",
+   "Invade los neumocitos y se replica dentro de fagosomas celulares",
+   "Libera una exotoxina A-B que inhibe la síntesis proteica del epitelio",
+   "Forma una seudomembrana de fibrina, bacterias y células muertas"
+  ],
+  "c": 0,
+  "exp": "Se adhiere a los cilios por una estructura de anclaje con la adhesina P1, causa ciliostasis y destruye primero los cilios y después las células ciliadas: de ahí la tos seca persistente.",
+  "source": "Compendio ADN (6.c.f, factores de virulencia) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, Actividad 4)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-10",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Chlamydophila pneumoniae",
+  "q": "En el ciclo de desarrollo de Chlamydophila pneumoniae, ¿cuál es la forma infecciosa?",
+  "a": [
+   "El cuerpo elemental",
+   "El cuerpo reticulado",
+   "El cuerpo de inclusión intranuclear",
+   "La forma L sin pared celular"
+  ],
+  "c": 0,
+  "exp": "El cuerpo elemental es infeccioso y metabólicamente inactivo, resistente como una espora; dentro del fagosoma se transforma en cuerpo reticulado, que se replica por fisión binaria pero no es infeccioso.",
+  "source": "Compendio ADN (6.c.g) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, Actividad 4)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-11",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Klebsiella pneumoniae",
+  "q": "¿Qué caracteriza a Klebsiella pneumoniae como agente de infección de la vía aérea inferior?",
+  "a": [
+   "Bacilo gram negativo inmóvil y encapsulado, de epidemiología nosocomial",
+   "Cocobacilo gram negativo aerobio estricto, que no fermenta carbohidratos",
+   "Diplococo gram positivo encapsulado que coloniza la orofaringe del niño",
+   "Bacilo ácido-alcohol resistente de crecimiento lento en medios sólidos"
+  ],
+  "c": 0,
+  "exp": "Klebsiella es una enterobacteria gram negativa, no móvil, cuya cápsula es el determinante de virulencia; su epidemiología es nosocomial y se diagnostica por cultivo de secreciones respiratorias.",
+  "source": "Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, cuadro de IVAI) · Compendio ADN (6.c, cuadro de la cátedra)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-12",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Streptococcus pyogenes",
+  "q": "¿Cómo contribuye la proteína M a la virulencia de Streptococcus pyogenes?",
+  "a": [
+   "Bloquea la unión de C3b e interfiere la fagocitosis",
+   "Inactiva el C5a y así evita la llegada de los neutrófilos",
+   "Degrada el plasminógeno y disuelve los coágulos de fibrina",
+   "Lisa eritrocitos y leucocitos y genera anticuerpos ASLO"
+  ],
+  "c": 0,
+  "exp": "La proteína M interfiere la fagocitosis al bloquear la unión de C3b y unirse al Fc de los anticuerpos o a la fibronectina. El C5a lo inactiva la peptidasa de C5a y la estreptocinasa degrada plasminógeno.",
+  "source": "Compendio ADN (6.c.a) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, Actividad 1)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-13",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Virus de la influenza",
+  "q": "En el virus influenza, ¿qué caracteriza al shift antigénico?",
+  "a": [
+   "Son rearreglos génicos entre un virus aviar y uno humano, solo en influenza A",
+   "Son mutaciones puntuales en HA y NA que ocurren solo en influenza B",
+   "Ocurre en influenza A y B y explica las epidemias estacionales",
+   "Cambia la polaridad del genoma viral y permite replicar en el citoplasma"
+  ],
+  "c": 0,
+  "exp": "El shift es un cambio mayor por rearreglo de segmentos entre genomas de un virus aviar y uno humano: solo pasa en influenza A y puede dar pandemias. El drift son mutaciones puntuales y da epidemias.",
+  "source": "Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 2) · Compendio ADN (6.a.c)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-14",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Virus sincicial respiratorio",
+  "q": "¿Qué proteína del virus sincicial respiratorio permite la entrada a la célula y explica la formación de sincitios?",
+  "a": [
+   "La proteína F, de fusión",
+   "La proteína G, de adhesión al receptor",
+   "La hemaglutinina-neuraminidasa (HN)",
+   "La proteína M de la matriz viral"
+  ],
+  "c": 0,
+  "exp": "La proteína F fusiona la envoltura con la membrana plasmática y fusiona las células infectadas entre sí, formando sincitios (masas multinucleadas). La G es la que se une al receptor celular.",
+  "source": "Compendio ADN (6.a.b y familia Paramyxoviridae) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 1)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-15",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Adenovirus",
+  "q": "¿Qué consecuencia tiene para el adenovirus el hecho de ser un virus desnudo, sin envoltura?",
+  "a": [
+   "Resiste el pH ácido y la bilis, y se transmite también por vía fecal-oral",
+   "Pierde rápido su infectividad sobre fómites y superficies secas del ambiente",
+   "Sale de la célula por gemación y adquiere así una envoltura lipídica propia",
+   "Replica su genoma en el citoplasma usando una polimerasa de la célula"
+  ],
+  "c": 0,
+  "exp": "La ausencia de envoltura lo hace resistente a detergentes, desecación, pH ácido, bilis y cloro: sobrevive en el ambiente y se transmite por aerosoles, fómites, vía fecal-oral y agua mal clorada.",
+  "source": "Compendio ADN (6.a.a) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 1)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-16",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Rinovirus",
+  "q": "¿Qué receptor celular usa la mayoría de los serotipos de rinovirus para infectar el epitelio nasal?",
+  "a": [
+   "ICAM-1",
+   "El ácido siálico",
+   "CD21",
+   "La enzima convertidora de angiotensina 2"
+  ],
+  "c": 0,
+  "exp": "Al menos el 80% de los serotipos usa ICAM-1. Su cultivo se hace en fibroblastos a 33 °C y no replica en el tubo digestivo porque es sensible al pH ácido.",
+  "source": "Compendio ADN (6.a.d) · Cuadernillo Núcleo 7 Laboratorio 2026 (TP 15)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-17",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Coronavirus (SARS-CoV-2)",
+  "q": "¿Qué diferencia hay entre el genoma del virus influenza y el del SARS-CoV-2?",
+  "a": [
+   "Influenza tiene ARN negativo segmentado y SARS-CoV-2 ARN positivo no segmentado",
+   "Influenza tiene ARN positivo no segmentado y SARS-CoV-2 ARN negativo segmentado",
+   "Influenza tiene ADN bicatenario nuclear y SARS-CoV-2 ARN positivo segmentado",
+   "Los dos tienen ARN negativo segmentado, pero influenza replica en el citoplasma"
+  ],
+  "c": 0,
+  "exp": "Influenza es ARN monocatenario negativo en 8 segmentos y replica en el núcleo; los coronavirus son ARN positivo no segmentado con replicación citoplasmática. Los dos son virus con envoltura.",
+  "source": "Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 3) · Compendio ADN (6.a.c y 6.a.g)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-18",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Virus de Epstein-Barr",
+  "q": "¿A través de qué receptor infecta el virus de Epstein-Barr a los linfocitos B?",
+  "a": [
+   "CD21",
+   "CD4",
+   "ICAM-1",
+   "El receptor de Coxsackie-adenovirus"
+  ],
+  "c": 0,
+  "exp": "La glucoproteína gp350/220 se une a CD21 (receptor de C3d) en los linfocitos B, donde el virus persiste latente de por vida. Se transmite por saliva y causa mononucleosis infecciosa.",
+  "source": "Compendio ADN (6.a.f)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-19",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Respuesta inmune",
+  "q": "¿Cuál es el anticuerpo que constituye la principal defensa en la superficie de la mucosa respiratoria?",
+  "a": [
+   "La IgA secretora",
+   "La IgG4",
+   "La IgE unida a mastocitos",
+   "La IgM natural de los linfocitos B1"
+  ],
+  "c": 0,
+  "exp": "La IgA secretora está en altas concentraciones en las secreciones bronquiales, neutraliza toxinas, virus y bacterias, y facilita su eliminación mucociliar. En el espacio alveolar la predominante es la IgG.",
+  "source": "Compendio ADN (6, inmunidad adaptativa del pulmón) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 1)",
+  "verificar": false
+ },
+ {
+  "id": "n7-n-20",
+  "nucleo": "7",
+  "difficulty": "normal",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "De estos estudios del laboratorio respiratorio, ¿cuál es un método diagnóstico indirecto?",
+  "a": [
+   "El enzimoinmunoensayo que detecta anticuerpos",
+   "La inmunocromatografía lateral que detecta antígeno viral",
+   "El cultivo viral en líneas celulares",
+   "La RT-PCR en hisopado nasofaríngeo"
+  ],
+  "c": 0,
+  "exp": "Los métodos indirectos evalúan la respuesta inmune del paciente, o sea los anticuerpos. Detectar antígeno, genoma o cultivar el agente son métodos directos.",
+  "source": "Cuadernillo Núcleo 7 Laboratorio 2026 (TP 15, Actividad 1) · Compendio ADN (6.b)",
+  "verificar": false
+ },
+ {
+  "id": "n7-d-01",
+  "nucleo": "7",
+  "difficulty": "dificil",
+  "topic": "Streptococcus pneumoniae",
+  "q": "Alejandro, 68 años, sin vacunas desde la adolescencia, con fiebre, expectoración verdosa, dolor en punta de costado y rales en la base derecha. El hemocultivo es positivo a las 18 h con diplococos gram positivos. ¿Cuál es el agente más probable?",
+  "a": [
+   "Streptococcus pneumoniae",
+   "Klebsiella pneumoniae",
+   "Haemophilus influenzae",
+   "Mycobacterium tuberculosis"
+  ],
+  "c": 0,
+  "exp": "Diplococos gram positivos en hemocultivo más neumonía de comienzo brusco con dolor pleurítico: neumococo. Conviene pedir esputo y, al alta, indicar la vacunación antineumocócica.",
+  "source": "Cuadernillo Núcleo 7 Laboratorio 2026 (TP 16, caso 1) · Compendio ADN (6.c.b)",
+  "verificar": false
+ },
+ {
+  "id": "n7-d-02",
+  "nucleo": "7",
+  "difficulty": "dificil",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "Coty, 10 años, consulta por odinofagia, fiebre de 38 °C, adenopatía submentoniana y placas blanquecinas en ambas amígdalas. ¿Qué muestra y determinaciones corresponde pedir?",
+  "a": [
+   "Exudado de fauces con dos hisopos: test rápido de antígeno y cultivo en agar sangre",
+   "Hisopado nasofaríngeo para RT-PCR múltiple de virus respiratorios",
+   "Esputo seriado de tres días para baciloscopia de Ziehl-Neelsen",
+   "Hemocultivos seriados antes de iniciar el tratamiento antibiótico"
+  ],
+  "c": 0,
+  "exp": "La sospecha es faringitis por S. pyogenes: el test rápido por inmunocromatografía da resultado en minutos y el cultivo en agar sangre al 5% confirma o descarta a las 24-48 h, con hisopos distintos.",
+  "source": "Cuadernillo Núcleo 7 Laboratorio 2026 (TP 16, caso 3 y Actividad 2) · Compendio ADN (6.d, cuadro de muestras)",
+  "verificar": false
+ },
+ {
+  "id": "n7-d-03",
+  "nucleo": "7",
+  "difficulty": "dificil",
+  "topic": "Mycoplasma pneumoniae",
+  "q": "Varón de 22 años, sano, con fiebre de una semana, mialgias, cefalea y tos seca irritativa, sin disnea y con saturación normal. La Rx de tórax muestra infiltrados bilaterales intersticiales. ¿Cuál es el agente más probable?",
+  "a": [
+   "Mycoplasma pneumoniae",
+   "Staphylococcus aureus",
+   "Moraxella catarrhalis",
+   "Mycobacterium tuberculosis"
+  ],
+  "c": 0,
+  "exp": "Es una neumonía atípica o ambulatoria: poca semiología frente a una radiografía parcheada llamativa, tos seca y faringitis en un joven. Al no tener pared celular, no responde a betalactámicos.",
+  "source": "Cuadernillo Núcleo 7 Seminario 2026 (Seminario 11, caso clínico 2) · Compendio ADN (6.c.f)",
+  "verificar": false
+ },
+ {
+  "id": "n7-d-04",
+  "nucleo": "7",
+  "difficulty": "dificil",
+  "topic": "Enterovirus (Coxsackie)",
+  "q": "¿Qué cuadros produce el virus Coxsackie del grupo A en niños pequeños?",
+  "a": [
+   "Herpangina y enfermedad de manos, pies y boca",
+   "Crup y bronquiolitis con sibilancias en el lactante",
+   "Queratoconjuntivitis epidémica y fiebre faringoconjuntival",
+   "Mononucleosis infecciosa con linfocitos atípicos"
+  ],
+  "c": 0,
+  "exp": "Coxsackie (Picornaviridae, Enterovirus) se transmite por vía fecal-oral y también por gotitas. El grupo A da herpangina y manos-pies-boca; el B, miocarditis, pleurodinia y meningitis aséptica.",
+  "source": "Compendio ADN (6.a.e)",
+  "verificar": false
+ },
+ {
+  "id": "n7-d-05",
+  "nucleo": "7",
+  "difficulty": "dificil",
+  "topic": "Mycobacterium tuberculosis",
+  "q": "Ante sospecha de tuberculosis pulmonar se piden tres esputos, a primera hora de la mañana y en días consecutivos. ¿Por qué se repite la muestra?",
+  "a": [
+   "Porque la eliminación de bacilos no es constante",
+   "Porque recién en la tercera muestra se puede evaluar la resistencia a rifampicina",
+   "Porque hacen falta tres cultivos para descartar la flora de las vías aéreas altas",
+   "Porque el bacilo se multiplica en el frasco y la primera muestra da falsos negativos"
+  ],
+  "c": 0,
+  "exp": "La eliminación de bacilos en el esputo es intermitente, así que se repite la toma tres días seguidos, con higiene bucal previa y esfuerzo de tos, para que la muestra represente la vía aérea inferior.",
+  "source": "Cuadernillo Núcleo 7 Laboratorio 2026 (TP 17, caso Emiliano y obtención de la muestra)",
+  "verificar": false
+ },
+ {
+  "id": "n7-d-06",
+  "nucleo": "7",
+  "difficulty": "dificil",
+  "topic": "Mycobacterium tuberculosis",
+  "q": "Julio, 48 años, con VIH y mala adherencia al tratamiento, tiene tos con expectoración, sudoración nocturna y chuchos de frío. ¿Por qué su baciloscopia de esputo puede ser negativa aun teniendo tuberculosis?",
+  "a": [
+   "Porque sin hipersensibilidad no hay cavitación y los bacilos no se eliminan",
+   "Porque en el paciente con VIH la carga de bacilos en el pulmón es menor",
+   "Porque en el VIH la tuberculosis es siempre extrapulmonar",
+   "Porque el esputo de la mañana diluye los bacilos y da falsos negativos"
+  ],
+  "c": 0,
+  "exp": "En el paciente VIH positivo hay más bacilos, pero sin respuesta de hipersensibilidad tipo IV no se destruye el parénquima ni se forman cavernas, por lo que el esputo puede resultar negativo.",
+  "source": "Cuadernillo Núcleo 7 Laboratorio 2026 (TP 16, caso 4 y TP 17, mecanismo de infección) · Compendio ADN (6.e.a)",
+  "verificar": false
+ },
+ {
+  "id": "n7-d-07",
+  "nucleo": "7",
+  "difficulty": "dificil",
+  "topic": "Mycobacterium tuberculosis",
+  "q": "¿Dónde se localizan la tuberculosis primaria y la reactivación del adulto?",
+  "a": [
+   "La primaria en el sector inferior del lóbulo superior o superior del inferior, y la reactivación en el ápice",
+   "Las dos en los vértices pulmonares, porque son los sectores mejor ventilados",
+   "La primaria en el ápice y la reactivación en las bases, por diseminación hematógena",
+   "Las dos en la base derecha, siguiendo el trayecto del bronquio principal"
+  ],
+  "c": 0,
+  "exp": "La primaria forma el complejo de Ghon (lesión subpleural más ganglio hiliar con necrosis caseosa). La reactivación se da en el ápice, el sector más oxigenado, con cavernas y fibrosis posterior.",
+  "source": "Cuadernillo Núcleo 7 Laboratorio 2026 (TP 17, mecanismo de infección) · Compendio ADN (6.e.a)",
+  "verificar": false
+ },
+ {
+  "id": "n7-d-08",
+  "nucleo": "7",
+  "difficulty": "dificil",
+  "topic": "Mycobacterium tuberculosis",
+  "q": "En un preparado de pulmón con tuberculosis teñido con hematoxilina-eosina, ¿qué se observa en el granuloma?",
+  "a": [
+   "Necrosis caseosa central rodeada de linfocitos, histiocitos y células de Langhans",
+   "Un infiltrado de neutrófilos con abundantes bacilos rosados en el centro",
+   "Alvéolos ocupados por exudado fibrinoso sin células inflamatorias",
+   "Sincitios multinucleados con cuerpos de inclusión intranucleares"
+  ],
+  "c": 0,
+  "exp": "El granuloma tiene necrosis caseosa central rodeada de linfocitos, histiocitos y células multinucleadas de Langhans; también hay granulomas sin necrosis. Es la expresión de la hipersensibilidad tipo IV.",
+  "source": "Cuadernillo Núcleo 7 Laboratorio 2026 (TP 17, Actividad 2) · Compendio ADN (6.e.a)",
+  "verificar": false
+ },
+ {
+  "id": "n7-d-09",
+  "nucleo": "7",
+  "difficulty": "dificil",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "¿Qué información aporta el GeneXpert además de detectar Mycobacterium tuberculosis?",
+  "a": [
+   "Si la cepa tiene genes de resistencia a la rifampicina",
+   "El recuento de bacilos ácido-alcohol resistentes por campo",
+   "Si el paciente desarrolló hipersensibilidad tipo IV al bacilo",
+   "Qué especie de micobacteria atípica acompaña a la infección"
+  ],
+  "c": 0,
+  "exp": "El GeneXpert es una PCR en tiempo real que detecta específicamente M. tuberculosis y además busca genes de resistencia a la rifampicina, una de sus principales drogas.",
+  "source": "Cuadernillo Núcleo 7 Laboratorio 2026 (TP 17, diagnóstico) · Compendio ADN (6.e)",
+  "verificar": false
+ },
+ {
+  "id": "n7-d-10",
+  "nucleo": "7",
+  "difficulty": "dificil",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "¿Cuánto se incuban los cultivos de micobacterias frente a los de bacterias comunes y hongos?",
+  "a": [
+   "Micobacterias 60 días, bacterias 24 a 72 h y hongos 21 a 28 días",
+   "Micobacterias 21 a 28 días, bacterias 60 días y hongos 24 a 72 h",
+   "Los tres grupos entre 24 y 72 h, con repiques semanales posteriores",
+   "Micobacterias 7 días, bacterias 48 h y hongos 10 días"
+  ],
+  "c": 0,
+  "exp": "Cada grupo tiene su velocidad de crecimiento: la mayoría de las bacterias desarrolla en 24 a 72 h, los hongos se incuban 21 a 28 días y las micobacterias 60 días, en medio de Löwenstein-Jensen.",
+  "source": "Cuadernillo Núcleo 7 Laboratorio 2026 (TP 16, introducción) · Compendio ADN (6.d)",
+  "verificar": false
+ },
+ {
+  "id": "n7-d-11",
+  "nucleo": "7",
+  "difficulty": "dificil",
+  "topic": "Mycobacterium leprae",
+  "q": "¿Qué forma de lepra es multibacilar y muy infecciosa?",
+  "a": [
+   "La lepromatosa, por el déficit de la respuesta celular específica",
+   "La tuberculoide, con granulomas, pocos bacilos y máculas hipopigmentadas",
+   "La lepromatosa, porque los granulomas limitan la proliferación bacteriana",
+   "La tuberculoide, porque los bacilos se concentran en los nervios periféricos"
+  ],
+  "c": 0,
+  "exp": "En la lepra lepromatosa hay un déficit específico de la respuesta celular frente a M. leprae, con muchos bacilos en macrófagos dérmicos, células de Schwann y secreciones nasales. No se cultiva in vitro.",
+  "source": "Compendio ADN (6.e.b) · Cuadernillo Núcleo 7 Laboratorio 2026 (TP 17, introducción)",
+  "verificar": false
+ },
+ {
+  "id": "n7-d-12",
+  "nucleo": "7",
+  "difficulty": "dificil",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "Una paciente consulta en la tercera semana de un cuadro respiratorio viral, ya sin síntomas, y quiere saber si tuvo la infección. ¿Qué muestra y método conviene?",
+  "a": [
+   "Sangre periférica para detectar anticuerpos específicos",
+   "Hisopado nasofaríngeo para test rápido de antígeno",
+   "Hisopado nasofaríngeo para RT-PCR del genoma viral",
+   "Lavado broncoalveolar para aislamiento en cultivo celular"
+  ],
+  "c": 0,
+  "exp": "Los métodos directos rinden en la fase temprana, cuando el virus se está eliminando. Los anticuerpos aparecen varios días después del inicio, así que a las tres semanas sirve la serología.",
+  "source": "Cuadernillo Núcleo 7 Laboratorio 2026 (TP 15, Actividades 3 y 4) · Compendio ADN (6.b)",
+  "verificar": false
+ },
+ {
+  "id": "n7-d-13",
+  "nucleo": "7",
+  "difficulty": "dificil",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "Llega al laboratorio una muestra de esputo de aspecto salivoso. ¿Cómo corresponde interpretarla?",
+  "a": [
+   "No es representativa de la vía aérea inferior",
+   "Es apta si se procesa dentro de las dos horas de la toma",
+   "Indica que la infección está en la vía aérea superior",
+   "Sirve solo para baciloscopia, no para cultivo bacteriano"
+  ],
+  "c": 0,
+  "exp": "Un esputo salivoso representa secreciones orales y no del tracto respiratorio inferior, así que no es confiable. La aptitud se evalúa con los criterios de Murray y Washington.",
+  "source": "Cuadernillo Núcleo 7 Laboratorio 2026 (TP 15, Actividad 1 y TP 16) · Compendio ADN (6.b y 6.d)",
+  "verificar": false
+ },
+ {
+  "id": "n7-d-14",
+  "nucleo": "7",
+  "difficulty": "dificil",
+  "topic": "Respuesta inmune",
+  "q": "¿Qué subclase de IgG responde específicamente contra los polisacáridos capsulares de Streptococcus pneumoniae y Haemophilus influenzae?",
+  "a": [
+   "IgG2",
+   "IgG1",
+   "IgG3",
+   "IgG4"
+  ],
+  "c": 0,
+  "exp": "La IgG2 es el anticuerpo específico frente a los polisacáridos capsulares de neumococo y Haemophilus. La IgG1 y la IgG3 son las únicas que fijan complemento y la IgG4 participa en respuestas alérgicas.",
+  "source": "Compendio ADN (6, inmunoglobulinas del espacio alveolar) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 1)",
+  "verificar": false
+ },
+ {
+  "id": "n7-d-15",
+  "nucleo": "7",
+  "difficulty": "dificil",
+  "topic": "Adenovirus",
+  "q": "Entre adenovirus y virus sincicial respiratorio, ¿en cuál esperaría encontrar diarrea como parte del cuadro, y por qué?",
+  "a": [
+   "En el adenovirus, por su tropismo gastrointestinal y su resistencia al pH ácido",
+   "En el VSR, porque produce viremia y disemina al epitelio intestinal",
+   "En el adenovirus, porque su envoltura lipídica lo protege de la bilis",
+   "En el VSR, porque su proteína G se une a receptores del enterocito"
+  ],
+  "c": 0,
+  "exp": "El adenovirus es desnudo, resiste pH ácido, bilis y enzimas digestivas, y además del epitelio respiratorio y conjuntival infecta el gastrointestinal. El VSR queda limitado a la vía aérea y no da viremia.",
+  "source": "Compendio ADN (6.a.a y 6.a.b) · Cuadernillo Núcleo 7 Seminario 2026 (Seminario 10, Actividad 1.b)",
+  "verificar": false
+ }
+]

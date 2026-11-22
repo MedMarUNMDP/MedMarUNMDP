@@ -1,0 +1,767 @@
+[
+ {
+  "id": "n8-f-01",
+  "nucleo": "8",
+  "difficulty": "facil",
+  "topic": "VIH",
+  "q": "¿A qué familia pertenece el virus de la inmunodeficiencia humana (VIH)?",
+  "a": [
+   "Retroviridae",
+   "Herpesviridae",
+   "Hepadnaviridae",
+   "Flaviviridae"
+  ],
+  "c": 0,
+  "exp": "El VIH es un retrovirus (Retroviridae): genoma de ARN monocatenario que se retrotranscribe a ADN y se integra como provirus.",
+  "source": "Cuadernillo Núcleo 8 2026 (tabla de agentes) · Compendio ADN (8.a)",
+  "verificar": false
+ },
+ {
+  "id": "n8-f-02",
+  "nucleo": "8",
+  "difficulty": "facil",
+  "topic": "VIH",
+  "q": "¿Cuál es el receptor principal que usa la gp120 del VIH para unirse a la célula?",
+  "a": [
+   "CD4",
+   "CD8",
+   "CD21",
+   "CD81"
+  ],
+  "c": 0,
+  "exp": "La gp120 se une a CD4 y a un correceptor de quimiocinas (CCR5 o CXCR4); la gp41 media la fusión de membranas.",
+  "source": "Compendio ADN (8.a, replicación)",
+  "verificar": false
+ },
+ {
+  "id": "n8-f-03",
+  "nucleo": "8",
+  "difficulty": "facil",
+  "topic": "Prevención",
+  "q": "¿Contra qué dos ITS virales hay vacunas en el Calendario Nacional de Vacunación argentino?",
+  "a": [
+   "Hepatitis B y VPH",
+   "VIH y hepatitis C",
+   "VHS-2 y hepatitis B",
+   "VPH y VHS-2"
+  ],
+  "c": 0,
+  "exp": "El calendario incluye la vacuna contra la hepatitis B para toda la población y contra el VPH a los 11 años.",
+  "source": "Cuadernillo Núcleo 8 2026 (Introducción)",
+  "verificar": false
+ },
+ {
+  "id": "n8-f-04",
+  "nucleo": "8",
+  "difficulty": "facil",
+  "topic": "Prevención",
+  "q": "¿Cuál es la medida de prevención que reduce el riesgo de la mayoría de las ITS durante las relaciones sexuales?",
+  "a": [
+   "El uso consistente de preservativo",
+   "La higiene genital posterior",
+   "Los antibióticos preventivos",
+   "La vacuna antitetánica"
+  ],
+  "c": 0,
+  "exp": "El preservativo (de látex, poliuretano o nitrilo) usado en forma consistente cubre mucosas y secreciones y reduce mucho el riesgo.",
+  "source": "Cuadernillo Núcleo 8 2026 · Compendio ADN (8.g)",
+  "verificar": false
+ },
+ {
+  "id": "n8-f-05",
+  "nucleo": "8",
+  "difficulty": "facil",
+  "topic": "Treponema pallidum",
+  "q": "¿Qué enfermedad causa Treponema pallidum subsp. pallidum?",
+  "a": [
+   "Sífilis",
+   "Gonorrea",
+   "Linfogranuloma venéreo",
+   "Chancroide"
+  ],
+  "c": 0,
+  "exp": "T. pallidum subsp. pallidum es el agente de la sífilis venérea, que evoluciona en fases primaria, secundaria y terciaria.",
+  "source": "Compendio ADN (8.e) · Cuadernillo Núcleo 8 2026",
+  "verificar": false
+ },
+ {
+  "id": "n8-f-06",
+  "nucleo": "8",
+  "difficulty": "facil",
+  "topic": "Neisseria gonorrhoeae",
+  "q": "¿Cómo se ve Neisseria gonorrhoeae en una tinción de Gram?",
+  "a": [
+   "Diplococos gramnegativos",
+   "Cocos grampositivos en cadena",
+   "Bacilos gramnegativos curvos",
+   "Espiroquetas finas"
+  ],
+  "c": 0,
+  "exp": "Son diplococos gramnegativos con lados adyacentes aplanados, en «grano de café».",
+  "source": "Compendio ADN (8.g)",
+  "verificar": false
+ },
+ {
+  "id": "n8-f-07",
+  "nucleo": "8",
+  "difficulty": "facil",
+  "topic": "Virus del papiloma humano",
+  "q": "¿Qué lesión benigna anogenital producen los tipos 6 y 11 del VPH?",
+  "a": [
+   "Condilomas acuminados",
+   "Chancro duro",
+   "Vesículas agrupadas",
+   "Bubón inguinal"
+  ],
+  "c": 0,
+  "exp": "Los VPH 6 y 11 causan condilomas acuminados: verrugas anogenitales, proliferaciones benignas del epitelio escamoso.",
+  "source": "Cuadernillo Núcleo 8 2026 (galería de lesiones) · Compendio ADN (8.g)",
+  "verificar": false
+ },
+ {
+  "id": "n8-f-08",
+  "nucleo": "8",
+  "difficulty": "facil",
+  "topic": "Trichomonas vaginalis",
+  "q": "¿Qué tipo de agente es Trichomonas vaginalis?",
+  "a": [
+   "Un protozoo flagelado",
+   "Un hongo levaduriforme",
+   "Una bacteria sin pared",
+   "Un virus envuelto"
+  ],
+  "c": 0,
+  "exp": "T. vaginalis es un protozoo flagelado de transmisión sexual; en la mujer produce flujo y en el hombre suele ser asintomático.",
+  "source": "Cuadernillo Núcleo 8 2026 (TP 19) · Compendio ADN (8.h)",
+  "verificar": false
+ },
+ {
+  "id": "n8-f-09",
+  "nucleo": "8",
+  "difficulty": "facil",
+  "topic": "Epidemiología",
+  "q": "¿Por qué el término «enfermedad de transmisión sexual» se reemplazó por «infección de transmisión sexual»?",
+  "a": [
+   "Porque muchas cursan sin síntomas",
+   "Porque ya no se transmiten por vía sexual",
+   "Porque todas tienen cura",
+   "Porque solo afectan a los genitales"
+  ],
+  "c": 0,
+  "exp": "Gran parte de las ITS son asintomáticas: la persona puede transmitirlas sin saber que está infectada.",
+  "source": "Compendio ADN (Núcleo 8, introducción)",
+  "verificar": false
+ },
+ {
+  "id": "n8-f-10",
+  "nucleo": "8",
+  "difficulty": "facil",
+  "topic": "Epidemiología",
+  "q": "¿Cuál de estas ITS se puede curar con tratamiento?",
+  "a": [
+   "Sífilis",
+   "Infección por VIH",
+   "Infección por VHS-2",
+   "Infección por VPH"
+  ],
+  "c": 0,
+  "exp": "La sífilis, la gonorrea, la clamidiasis y la tricomoniasis se curan con antimicrobianos; la infección por VIH, VHS o VPH no tiene tratamiento curativo y la hepatitis B crónica se controla, pero no se cura.",
+  "source": "Cuadernillo Núcleo 8 2026 (Introducción)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-01",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "VIH",
+  "q": "¿Qué función cumple la gp41 en la envoltura del VIH?",
+  "a": [
+   "Media la fusión de las membranas",
+   "Une el virus al receptor CD4",
+   "Retrotranscribe el genoma",
+   "Integra el ADN proviral"
+  ],
+  "c": 0,
+  "exp": "La gp120 se une a CD4 y al correceptor; después la gp41 favorece la fusión de la envoltura con la membrana celular.",
+  "source": "Compendio ADN (8.a)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-02",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "VIH",
+  "q": "¿Qué correceptor usan los virus M-trópicos que predominan al inicio de la infección por VIH?",
+  "a": [
+   "CCR5",
+   "CXCR4",
+   "CD21",
+   "DC-SIGN"
+  ],
+  "c": 0,
+  "exp": "Las cepas M-trópicas iniciales usan CD4 y CCR5; las T-trópicas, más tardías, usan CXCR4.",
+  "source": "Compendio ADN (8.a, replicación)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-03",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "VIH",
+  "q": "¿Qué enzima del VIH inserta el ADN viral en el cromosoma de la célula y forma el provirus?",
+  "a": [
+   "Integrasa",
+   "Retrotranscriptasa",
+   "Proteasa",
+   "ARN polimerasa celular"
+  ],
+  "c": 0,
+  "exp": "La integrasa inserta el ADNc en el genoma del huésped; la proteasa actúa después, en la maduración tras la gemación.",
+  "source": "Compendio ADN (8.a)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-04",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "VIH",
+  "q": "¿Por qué el VIH acumula tantas variantes durante la infección?",
+  "a": [
+   "Su retrotranscriptasa comete muchos errores",
+   "Tiene un genoma segmentado",
+   "Su ADN se recombina con el celular",
+   "Cambia de familia viral"
+  ],
+  "c": 0,
+  "exp": "La retrotranscriptasa del VIH tiene una tasa de error alta (cerca de 1 cada 2.000 bases), lo que genera variación antigénica de la gp120.",
+  "source": "Compendio ADN (8.a)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-05",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "VIH",
+  "q": "¿Qué tipo y grupo de VIH es el más frecuente en Argentina?",
+  "a": [
+   "VIH-1, grupo M",
+   "VIH-2, grupo A",
+   "VIH-1, grupo O",
+   "VIH-2, grupo M"
+  ],
+  "c": 0,
+  "exp": "El VIH-1 causa la pandemia y en Argentina predomina el grupo M; el VIH-2, menos virulento, se asocia a África occidental.",
+  "source": "Compendio ADN (8.a, tipos y subtipos)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-06",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "VIH",
+  "q": "¿Qué tejido linfoide se agota temprano de linfocitos T CD4 con CCR5 después de la transmisión sexual del VIH?",
+  "a": [
+   "El tejido linfoide asociado al intestino",
+   "La médula ósea",
+   "El timo",
+   "Las amígdalas palatinas"
+  ],
+  "c": 0,
+  "exp": "Poco después de la transmisión, el VIH infecta y agota los linfocitos CD4 con CCR5 del GALT.",
+  "source": "Compendio ADN (8.a) · Cuadernillo Núcleo 8 2026 (Actividad 1)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-07",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "VIH",
+  "q": "¿Qué recuento de linfocitos T CD4 define el estadio SIDA?",
+  "a": [
+   "Menos de 200/µl",
+   "Menos de 500/µl",
+   "Menos de 1.000/µl",
+   "Menos de 50/µl"
+  ],
+  "c": 0,
+  "exp": "El SIDA aparece con CD4 por debajo de 200/µl, con infecciones oportunistas, neoplasias, síndrome caquectizante o demencia.",
+  "source": "Compendio ADN (8.a) · Cuadernillo Núcleo 8 2026 (evolución y CD4)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-08",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "VIH",
+  "q": "Confirmado el diagnóstico de VIH, ¿qué dos parámetros se miden para seguir la infección y el tratamiento antirretroviral?",
+  "a": [
+   "Recuento de CD4 y carga viral",
+   "Western blot y antígeno p24",
+   "Anti-VIH y VDRL",
+   "Hemograma y hepatograma"
+  ],
+  "c": 0,
+  "exp": "El recuento de CD4 refleja la inmunosupresión y la carga viral (ARN por PCR), la replicación y la respuesta al tratamiento.",
+  "source": "Cuadernillo Núcleo 8 2026 (Actividad 1 i) · Compendio ADN (8.a)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-09",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "VIH",
+  "q": "¿Qué detectan los ensayos de cuarta generación para VIH que se usan en el laboratorio clínico?",
+  "a": [
+   "Antígeno p24 y anticuerpos anti-VIH",
+   "Solo el ARN viral",
+   "Solo anticuerpos IgG",
+   "El ADN proviral integrado"
+  ],
+  "c": 0,
+  "exp": "Los inmunoensayos de 4.ª generación detectan a la vez el antígeno p24 y los anticuerpos, lo que acorta el período ventana.",
+  "source": "Cuadernillo Núcleo 8 2026 (Anexo, VIH)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-10",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "Virus del papiloma humano",
+  "q": "¿Cuál es la característica estructural del virus del papiloma humano?",
+  "a": [
+   "ADN circular bicatenario sin envoltura",
+   "ARN monocatenario con envoltura",
+   "ADN parcialmente bicatenario envuelto",
+   "ARN segmentado sin envoltura"
+  ],
+  "c": 0,
+  "exp": "El VPH (Papillomaviridae) es pequeño, sin envoltura, de cápside icosaédrica y genoma de ADN circular bicatenario.",
+  "source": "Compendio ADN (8.b) · Cuadernillo Núcleo 8 2026",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-11",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "Virus del papiloma humano",
+  "q": "¿Qué proteínas del VPH de alto riesgo actúan como oncogenes?",
+  "a": [
+   "E5, E6 y E7",
+   "L1 y L2",
+   "E1 y E2",
+   "gp120 y gp41"
+  ],
+  "c": 0,
+  "exp": "En los tipos de alto riesgo (16 y 18), E5, E6 y E7 estimulan la proliferación y la transformación; L1 y L2 son estructurales.",
+  "source": "Compendio ADN (8.b, factores de virulencia)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-12",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "Virus del papiloma humano",
+  "q": "¿Qué célula característica del Papanicolaou orienta a infección por VPH?",
+  "a": [
+   "El coilocito",
+   "La célula guía",
+   "La célula de Tzanck",
+   "La célula de Reed-Sternberg"
+  ],
+  "c": 0,
+  "exp": "El coilocito es la célula epitelial alterada típica del VPH; la lesión coilocitótica puede evolucionar a displasia.",
+  "source": "Compendio ADN (8.b) · Cuadernillo Núcleo 8 2026 (TP 19)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-13",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "Virus del herpes simple tipo 2",
+  "q": "¿Dónde establece latencia el virus del herpes simple tipo 2?",
+  "a": [
+   "En neuronas sensitivas",
+   "En linfocitos B",
+   "En hepatocitos",
+   "En queratinocitos basales"
+  ],
+  "c": 0,
+  "exp": "El VHS-2 se replica en células mucoepiteliales y queda latente en las neuronas que las inervan; la reactivación causa recurrencias.",
+  "source": "Compendio ADN (8.c)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-14",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "Virus del herpes simple tipo 2",
+  "q": "¿Qué lesión genital es típica de la infección por VHS-2?",
+  "a": [
+   "Vesículas dolorosas sobre base eritematosa",
+   "Una úlcera única e indolora de fondo duro",
+   "Verrugas indoloras en los pliegues",
+   "Una úlcera mínima con bubón inguinal"
+  ],
+  "c": 0,
+  "exp": "Las vesículas sobre base eritematosa progresan a pústulas, úlceras y costras, con dolor, ardor y recurrencias.",
+  "source": "Cuadernillo Núcleo 8 2026 (galería de lesiones) · Compendio ADN (8.c)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-15",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "Treponema pallidum",
+  "q": "¿Por qué Treponema pallidum no se ve con la tinción de Gram?",
+  "a": [
+   "Es demasiado fino",
+   "No tiene pared celular",
+   "Es ácido-alcohol resistente",
+   "Vive solo dentro de células"
+  ],
+  "c": 0,
+  "exp": "Es una espiroqueta demasiado fina para el Gram o el Giemsa: se observa con microscopía de campo oscuro o inmunofluorescencia.",
+  "source": "Compendio ADN (8.e)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-16",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "Treponema pallidum",
+  "q": "¿Qué detectan las pruebas no treponémicas como la VDRL?",
+  "a": [
+   "Anticuerpos reagínicos contra lípidos",
+   "Antígenos de la pared del treponema",
+   "Anticuerpos específicos anti-T. pallidum",
+   "ADN del treponema"
+  ],
+  "c": 0,
+  "exp": "La VDRL detecta reaginas (IgG e IgM) contra antígenos lipoidales liberados por el daño celular; por eso puede dar falsos positivos.",
+  "source": "Cuadernillo Núcleo 8 2026 (Anexo) · Compendio ADN (8.e)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-17",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "Chlamydia trachomatis",
+  "q": "¿Cuál es la forma infecciosa de Chlamydia trachomatis?",
+  "a": [
+   "El cuerpo elemental",
+   "El cuerpo reticulado",
+   "La inclusión con glucógeno",
+   "La espora"
+  ],
+  "c": 0,
+  "exp": "El cuerpo elemental es infeccioso y metabólicamente inactivo; dentro de la célula se convierte en cuerpo reticulado, que se replica.",
+  "source": "Compendio ADN (8.f) · Cuadernillo Núcleo 8 2026 (Actividad 3 b)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-18",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "Chlamydia trachomatis",
+  "q": "¿Cuál es el método de elección para diagnosticar una infección genital por Chlamydia trachomatis?",
+  "a": [
+   "Amplificación de ácidos nucleicos",
+   "Cultivo en agar chocolate",
+   "Serología con anticuerpos IgG",
+   "Tinción de Gram del flujo"
+  ],
+  "c": 0,
+  "exp": "Las pruebas moleculares (NAAT/PCR) son sensibles y específicas y son las de elección (SADI 2025); la serología no distingue infección actual de previa.",
+  "source": "Cuadernillo Núcleo 8 2026 (TP 19) · Compendio ADN (8.f)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-19",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "Neisseria gonorrhoeae",
+  "q": "¿Qué factor de virulencia de Neisseria gonorrhoeae permite la adhesión inicial y resiste a los neutrófilos?",
+  "a": [
+   "Los pili",
+   "La cápsula de ácido siálico",
+   "La toxina tipo AB",
+   "El flagelo polar"
+  ],
+  "c": 0,
+  "exp": "Los pili median la adhesión a células mucosas no ciliadas y resisten a los neutrófilos; Opa y PorB completan la adhesión.",
+  "source": "Compendio ADN (8.g)",
+  "verificar": false
+ },
+ {
+  "id": "n8-n-20",
+  "nucleo": "8",
+  "difficulty": "normal",
+  "topic": "Trichomonas vaginalis",
+  "q": "¿Qué examen rápido permite ver Trichomonas vaginalis en el flujo vaginal?",
+  "a": [
+   "El examen en fresco",
+   "La tinción de Ziehl-Neelsen",
+   "El campo oscuro",
+   "La tinta china"
+  ],
+  "c": 0,
+  "exp": "En el examen en fresco de fondo de saco posterior se ve su motilidad; también se observa en el Papanicolaou o con Giemsa.",
+  "source": "Cuadernillo Núcleo 8 2026 (TP 19) · Compendio ADN (8.h)",
+  "verificar": false
+ },
+ {
+  "id": "n8-d-01",
+  "nucleo": "8",
+  "difficulty": "dificil",
+  "topic": "VIH",
+  "q": "Una persona tuvo una exposición sexual de alto riesgo hace pocos días. ¿Qué estudio es más útil por el período ventana?",
+  "a": [
+   "Antígeno o ARN del VIH",
+   "Western blot",
+   "VDRL",
+   "Cultivo viral"
+  ],
+  "c": 0,
+  "exp": "Por el período ventana, los anticuerpos pueden faltar; la detección de antígeno o ARN viral identifica antes la infección. En los primeros ~10 días incluso el ARN puede ser indetectable, por eso se repite el estudio.",
+  "source": "Cuadernillo Núcleo 8 2026 (Actividad 2 f y Anexo VIH)",
+  "verificar": false
+ },
+ {
+  "id": "n8-d-02",
+  "nucleo": "8",
+  "difficulty": "dificil",
+  "topic": "VIH",
+  "q": "¿Por qué el diagnóstico de VIH en menores de 18 meses no se basa en anticuerpos?",
+  "a": [
+   "Pueden tener anticuerpos maternos",
+   "Todavía no tienen linfocitos CD4",
+   "El virus no se replica en lactantes",
+   "La carga viral siempre es indetectable"
+  ],
+  "c": 0,
+  "exp": "La IgG materna atraviesa la placenta y puede persistir hasta los 18 meses, así que el diagnóstico se hace con métodos directos (PCR de ADN proviral o carga viral).",
+  "source": "Cuadernillo Núcleo 8 2026 (Actividad 1 h)",
+  "verificar": false
+ },
+ {
+  "id": "n8-d-03",
+  "nucleo": "8",
+  "difficulty": "dificil",
+  "topic": "VIH",
+  "q": "¿Qué perfil de laboratorio corresponde a la fase de latencia clínica del VIH?",
+  "a": [
+   "Carga viral baja y CD4 en descenso",
+   "Carga viral alta y CD4 normales",
+   "Carga viral alta y CD4 bajo 200/µl",
+   "Carga viral nula y CD4 estables"
+  ],
+  "c": 0,
+  "exp": "En la latencia la replicación es baja (sobre todo en ganglios) y los CD4 bajan gradualmente; en el SIDA la carga sube y los CD4 caen bajo 200/µl.",
+  "source": "Compendio ADN (8.a, evolución)",
+  "verificar": false
+ },
+ {
+  "id": "n8-d-04",
+  "nucleo": "8",
+  "difficulty": "dificil",
+  "topic": "Respuesta inmune",
+  "q": "¿Por qué los anticuerpos neutralizantes contra la gp120 no alcanzan para controlar el VIH?",
+  "a": [
+   "La gp120 cambia por mutación",
+   "No se generan anticuerpos contra la gp120",
+   "El virus no circula en la sangre",
+   "Los anticuerpos destruyen los CD4"
+  ],
+  "c": 0,
+  "exp": "El VIH escapa por variación antigénica de la gp120 y por la latencia en reservorios; el virus recubierto de anticuerpos sigue siendo infeccioso.",
+  "source": "Compendio ADN (8.a, rol del sistema inmune)",
+  "verificar": false
+ },
+ {
+  "id": "n8-d-05",
+  "nucleo": "8",
+  "difficulty": "dificil",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "Mujer de 32 años con exantema palmoplantar no pruriginoso y una lesión cicatrizal en un labio menor. ¿Qué agente y estudio corresponden?",
+  "a": [
+   "T. pallidum; prueba no treponémica y treponémica",
+   "VHS-2; PCR de la lesión",
+   "C. trachomatis; NAAT de endocérvix",
+   "VPH; Papanicolaou"
+  ],
+  "c": 0,
+  "exp": "El exantema palmoplantar tras un chancro sugiere sífilis secundaria; se estudia con serología no treponémica y treponémica.",
+  "source": "Cuadernillo Núcleo 8 2026 (TP 19, caso 3)",
+  "verificar": false
+ },
+ {
+  "id": "n8-d-06",
+  "nucleo": "8",
+  "difficulty": "dificil",
+  "topic": "Treponema pallidum",
+  "q": "¿Con qué prueba se sigue la respuesta al tratamiento de la sífilis?",
+  "a": [
+   "Con títulos de la prueba no treponémica",
+   "Con la prueba treponémica",
+   "Con campo oscuro mensual",
+   "Con PCR en sangre"
+  ],
+  "c": 0,
+  "exp": "Las treponémicas quedan positivas toda la vida; la respuesta se evalúa con la caída de la no treponémica (cuatro veces o dos diluciones).",
+  "source": "Cuadernillo Núcleo 8 2026 (Anexo, sífilis)",
+  "verificar": false
+ },
+ {
+  "id": "n8-d-07",
+  "nucleo": "8",
+  "difficulty": "dificil",
+  "topic": "Treponema pallidum",
+  "q": "Después de tratar una sífilis, la VDRL sube de 1/8 a 1/32. ¿Cómo se interpreta?",
+  "a": [
+   "Falla del tratamiento o reinfección",
+   "Respuesta adecuada al tratamiento",
+   "Cicatriz serológica sin importancia",
+   "Falso positivo por la vacuna"
+  ],
+  "c": 0,
+  "exp": "Cuadruplicar los títulos (subir dos diluciones) es significativo: falla del tratamiento o reinfección, según el antecedente.",
+  "source": "Cuadernillo Núcleo 8 2026 (Anexo, sífilis)",
+  "verificar": false
+ },
+ {
+  "id": "n8-d-08",
+  "nucleo": "8",
+  "difficulty": "dificil",
+  "topic": "Chlamydia trachomatis",
+  "q": "¿Qué lesión describe un linfogranuloma venéreo por Chlamydia trachomatis?",
+  "a": [
+   "Úlcera mínima y bubón inguinal que supura",
+   "Úlcera única, dura e indolora",
+   "Úlceras indoloras confluentes sin adenopatías",
+   "Úlceras múltiples dolorosas de base blanda"
+  ],
+  "c": 0,
+  "exp": "El LGV empieza con una úlcera mínima y sigue con un bubón fluctuante y doloroso que puede supurar y causar linfedema.",
+  "source": "Cuadernillo Núcleo 8 2026 (galería de lesiones)",
+  "verificar": false
+ },
+ {
+  "id": "n8-d-09",
+  "nucleo": "8",
+  "difficulty": "dificil",
+  "topic": "Klebsiella granulomatis",
+  "q": "Un paciente tiene úlceras genitales indoloras que confluyen y deforman los genitales, sin adenopatías. ¿Qué cuadro sugiere?",
+  "a": [
+   "Granuloma inguinal",
+   "Chancroide",
+   "Linfogranuloma venéreo",
+   "Herpes genital recurrente"
+  ],
+  "c": 0,
+  "exp": "El granuloma inguinal (Klebsiella granulomatis) da úlceras no dolorosas que confluyen y deforman, sin adenopatías.",
+  "source": "Cuadernillo Núcleo 8 2026 (galería de lesiones)",
+  "verificar": false
+ },
+ {
+  "id": "n8-d-10",
+  "nucleo": "8",
+  "difficulty": "dificil",
+  "topic": "Haemophilus ducreyi",
+  "q": "¿Qué lesión corresponde al chancroide por Haemophilus ducreyi?",
+  "a": [
+   "Úlcera blanda, purulenta y muy dolorosa",
+   "Úlcera dura, única e indolora",
+   "Placas elevadas en pliegues macerados",
+   "Vesículas agrupadas que ulceran"
+  ],
+  "c": 0,
+  "exp": "El chancro blando es una úlcera de base no indurada, purulenta, rodeada de úlceras dolorosas, con adenopatía que fluctúa y se rompe.",
+  "source": "Cuadernillo Núcleo 8 2026 (galería de lesiones)",
+  "verificar": false
+ },
+ {
+  "id": "n8-d-11",
+  "nucleo": "8",
+  "difficulty": "dificil",
+  "topic": "Neisseria gonorrhoeae",
+  "q": "Varón de 25 años con disuria y secreción uretral purulenta. ¿Qué hallazgo del Gram de la secreción orienta a gonorrea?",
+  "a": [
+   "Diplococos gramnegativos intracelulares en polimorfonucleares",
+   "Cocos grampositivos en racimos dentro de neutrófilos",
+   "Bacilos gramnegativos extracelulares abundantes",
+   "Levaduras con seudohifas sin reacción inflamatoria"
+  ],
+  "c": 0,
+  "exp": "En el hombre sintomático, los diplococos gramnegativos intracelulares en la secreción uretral son confiables para gonorrea; en mujeres y asintomáticos se usa NAAT o cultivo.",
+  "source": "Compendio ADN (8.g) · Cuadernillo Núcleo 8 2026 (TP 19, caso 1)",
+  "verificar": false
+ },
+ {
+  "id": "n8-d-12",
+  "nucleo": "8",
+  "difficulty": "dificil",
+  "topic": "Mycoplasma genitalium",
+  "q": "Un hombre tiene uretritis persistente con estudios negativos para gonococo y Chlamydia. ¿Qué agente conviene buscar?",
+  "a": [
+   "Mycoplasma genitalium",
+   "Treponema pallidum",
+   "Virus del papiloma humano",
+   "Phthirus pubis"
+  ],
+  "c": 0,
+  "exp": "M. genitalium (grupo Mollicutes) causa uretritis no gonocócica; se busca con métodos moleculares.",
+  "source": "Cuadernillo Núcleo 8 2026 (TP 19, caso 6)",
+  "verificar": false
+ },
+ {
+  "id": "n8-d-13",
+  "nucleo": "8",
+  "difficulty": "dificil",
+  "topic": "Virus de la hepatitis B",
+  "q": "¿Qué marcador de hepatitis B indica inmunidad por vacunación o por infección pasada?",
+  "a": [
+   "Anti-HBs",
+   "HBsAg",
+   "Anti-HBc IgM",
+   "HBeAg"
+  ],
+  "c": 0,
+  "exp": "El anti-HBs indica inmunidad; el HBsAg, infección actual; el anti-HBc IgM, infección aguda o reciente; el HBeAg, replicación.",
+  "source": "Cuadernillo Núcleo 8 2026 (Anexo, hepatitis B)",
+  "verificar": false
+ },
+ {
+  "id": "n8-d-14",
+  "nucleo": "8",
+  "difficulty": "dificil",
+  "topic": "Virus de la hepatitis C",
+  "q": "Un control de rutina da anti-VHC reactivo. ¿Qué estudio confirma si la infección está activa?",
+  "a": [
+   "ARN del VHC por PCR",
+   "Un segundo anti-VHC",
+   "Anti-VHC de tipo IgM",
+   "Hepatograma completo"
+  ],
+  "c": 0,
+  "exp": "El anti-VHC no distingue infección activa de resuelta: ARN detectable confirma infección activa; no detectable sugiere resuelta o falso positivo.",
+  "source": "Cuadernillo Núcleo 8 2026 (Anexo, hepatitis C)",
+  "verificar": false
+ },
+ {
+  "id": "n8-d-15",
+  "nucleo": "8",
+  "difficulty": "dificil",
+  "topic": "Respuesta inmune",
+  "q": "¿Qué rasgo distingue la inmunidad de la mucosa uterina del resto de las mucosas?",
+  "a": [
+   "Predomina la IgG, no la IgA secretora",
+   "No tiene microbiota",
+   "Carece de linfocitos T CD8",
+   "Predomina la IgE"
+  ],
+  "c": 0,
+  "exp": "En la mucosa uterina la principal inmunoglobulina es la IgG; además la vagina tiene abundantes Lactobacillus y el endometrio agregados linfoides.",
+  "source": "Cuadernillo Núcleo 8 2026 (TP 19, microbiota del tracto reproductor)",
+  "verificar": false
+ }
+]

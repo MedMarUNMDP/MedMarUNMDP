@@ -1,0 +1,937 @@
+[
+ {
+  "id": "n6-f-01",
+  "nucleo": "6",
+  "difficulty": "facil",
+  "topic": "Escherichia coli enterohemorrágica",
+  "q": "¿Qué alimento se asocia con más frecuencia a los casos de síndrome urémico hemolítico en Argentina?",
+  "a": [
+   "La carne picada mal cocida",
+   "El arroz cocido guardado a temperatura ambiente",
+   "La miel en lactantes menores de un año",
+   "El pescado crudo de agua dulce"
+  ],
+  "c": 0,
+  "exp": "La carne picada se contamina durante el faenado y la bacteria queda distribuida en todo el producto: hay que cocinarla a 70 °C o más. El reservorio principal de ECEH es el ganado bovino.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (TP 14, Actividad 5) · Compendio ADN (7.f.c)",
+  "verificar": false
+ },
+ {
+  "id": "n6-f-02",
+  "nucleo": "6",
+  "difficulty": "facil",
+  "topic": "Rotavirus",
+  "q": "¿A qué edades se aplican las dos dosis de la vacuna contra rotavirus en el calendario nacional argentino?",
+  "a": [
+   "A los 2 y a los 4 meses de vida",
+   "A los 2, 4 y 6 meses, con refuerzo a los 18 meses",
+   "Dosis única a los 12 meses de vida",
+   "Al nacer y a los 6 meses de vida"
+  ],
+  "c": 0,
+  "exp": "La primera dosis va a los 2 meses (edad máxima 14 semanas y 6 días) y la segunda a los 4 meses, sin pasar las 24 semanas de vida.",
+  "source": "Compendio ADN (7.c.e) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Grupo 2f)",
+  "verificar": false
+ },
+ {
+  "id": "n6-f-03",
+  "nucleo": "6",
+  "difficulty": "facil",
+  "topic": "Virus de la hepatitis A",
+  "q": "¿Cuál es la vía de transmisión del virus de la hepatitis A?",
+  "a": [
+   "Fecal-oral, por agua o alimentos contaminados",
+   "Parenteral, por sangre, agujas o material contaminado",
+   "Sexual y perinatal, igual que el VHB y el VHC",
+   "Respiratoria, por gotitas y aerosoles"
+  ],
+  "c": 0,
+  "exp": "El VHA y el VHE ingresan por vía digestiva (fecal-oral); los de ingreso parenteral son el B, el C y el D. Por eso en A y E la prevención es saneamiento, agua segura e higiene.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 9, objetivos) · Compendio ADN (7.g)",
+  "verificar": false
+ },
+ {
+  "id": "n6-f-04",
+  "nucleo": "6",
+  "difficulty": "facil",
+  "topic": "Giardia lamblia",
+  "q": "¿Qué tipo de parásito es Giardia lamblia y cuál es su forma infectante?",
+  "a": [
+   "Protozoo flagelado; el quiste es la forma infectante",
+   "Protozoo flagelado; el trofozoíto es la forma infectante que se ingiere",
+   "Nematode; el huevo larvado es la forma infectante",
+   "Apicomplexa; el ooquiste es la forma infectante"
+  ],
+  "c": 0,
+  "exp": "Giardia es un protozoo flagelado con dos formas: trofozoíto (vegetativa, en duodeno y yeyuno) y quiste, que es la forma infectante que se ingiere con agua o alimentos contaminados.",
+  "source": "Compendio ADN (7.a.a) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 2b)",
+  "verificar": false
+ },
+ {
+  "id": "n6-f-05",
+  "nucleo": "6",
+  "difficulty": "facil",
+  "topic": "Clostridium botulinum",
+  "q": "¿Qué alimento se asocia clásicamente al botulismo del lactante?",
+  "a": [
+   "La miel",
+   "El arroz cocido mal conservado",
+   "La leche sin pasteurizar",
+   "Los huevos crudos o mal cocidos"
+  ],
+  "c": 0,
+  "exp": "La miel puede contener esporas de C. botulinum que germinan en el intestino del lactante y producen toxina in vivo; la tierra y el polvo contaminados son hoy la fuente más frecuente.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 2) · Compendio ADN (7.e)",
+  "verificar": false
+ },
+ {
+  "id": "n6-f-06",
+  "nucleo": "6",
+  "difficulty": "facil",
+  "topic": "Enterobacterias",
+  "q": "¿Qué características comparten las bacterias de la familia Enterobacteriaceae?",
+  "a": [
+   "Bacilos gramnegativos, anaerobios facultativos y oxidasa negativos",
+   "Bacilos grampositivos esporulados y anaerobios estrictos",
+   "Cocos gramnegativos aerobios estrictos y catalasa negativos",
+   "Bacilos curvos microaerófilos que no fermentan hidratos de carbono"
+  ],
+  "c": 0,
+  "exp": "Las enterobacterias son bacilos gramnegativos, anaerobios facultativos, fermentan glucosa, reducen nitratos a nitritos y son catalasa positivas y oxidasa negativas, lo que las separa de Pseudomonas y Vibrio.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 1a) · Compendio ADN (7.e)",
+  "verificar": false
+ },
+ {
+  "id": "n6-f-07",
+  "nucleo": "6",
+  "difficulty": "facil",
+  "topic": "Taenia solium",
+  "q": "¿Cómo adquiere una persona la teniosis por Taenia solium?",
+  "a": [
+   "Comiendo carne de cerdo cruda o mal cocida",
+   "Ingiriendo los huevos del parásito con agua o verduras mal lavadas",
+   "Por penetración activa de larvas filariformes en la piel",
+   "Por la picadura de un insecto hematófago infectado"
+  ],
+  "c": 0,
+  "exp": "La teniosis (tenia adulta en el intestino delgado) se adquiere al comer carne de cerdo con Cysticercus cellulosae. Si en cambio se ingieren los huevos, lo que se desarrolla es cisticercosis.",
+  "source": "Compendio ADN (7.a.f, 7.b caso 2) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 4)",
+  "verificar": false
+ },
+ {
+  "id": "n6-f-08",
+  "nucleo": "6",
+  "difficulty": "facil",
+  "topic": "Vibrio cholerae",
+  "q": "¿Cómo son las heces típicas del cólera?",
+  "a": [
+   "Acuosas, en \"agua de arroz\", sin sangre",
+   "Con sangre, moco y pus, con pujo y tenesmo",
+   "Pastosas, de mal olor, con restos de alimentos",
+   "Negras y alquitranadas, con melena"
+  ],
+  "c": 0,
+  "exp": "V. cholerae no invade la mucosa: la toxina colérica provoca hipersecreción, con diarrea acuosa incolora e inodora (\"agua de arroz\") y pérdidas que llegan a un litro por hora.",
+  "source": "Compendio ADN (7.e.f) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 5)",
+  "verificar": false
+ },
+ {
+  "id": "n6-f-09",
+  "nucleo": "6",
+  "difficulty": "facil",
+  "topic": "Enterobius vermicularis",
+  "q": "¿Cuál es el síntoma más característico de la oxiurosis?",
+  "a": [
+   "Prurito anal de predominio nocturno",
+   "Diarrea con sangre, moco, pujo y tenesmo",
+   "Ictericia con coluria y acolia",
+   "Mialgias con edema periocular y fiebre alta"
+  ],
+  "c": 0,
+  "exp": "Las hembras grávidas migran de noche a la región perianal a poner huevos; el prurito se origina por hipersensibilidad a las sustancias que el parásito excreta y secreta.",
+  "source": "Compendio ADN (7.a.d) · Cuadernillo Núcleo 6 Digestivo 2026 (TP 12, caso 4)",
+  "verificar": false
+ },
+ {
+  "id": "n6-f-10",
+  "nucleo": "6",
+  "difficulty": "facil",
+  "topic": "Echinococcus granulosus",
+  "q": "¿Quién es el hospedador definitivo de Echinococcus granulosus?",
+  "a": [
+   "El perro",
+   "La oveja",
+   "El cerdo",
+   "El ser humano"
+  ],
+  "c": 0,
+  "exp": "El cestode adulto vive fijo a la mucosa del intestino delgado del perro, que elimina huevos con las heces. Los herbívoros y el humano (accidental) son intermediarios y alojan el quiste hidatídico.",
+  "source": "Compendio ADN (7.a.g, 7.b caso 1) · Cuadernillo Núcleo 6 Digestivo 2026 (TP 12, caso 1)",
+  "verificar": false
+ },
+ {
+  "id": "n6-f-11",
+  "nucleo": "6",
+  "difficulty": "facil",
+  "topic": "Escherichia coli uropatógena",
+  "q": "¿Cuál es el agente que se aísla con más frecuencia en las infecciones urinarias adquiridas en la comunidad?",
+  "a": [
+   "Escherichia coli",
+   "Proteus mirabilis",
+   "Enterococcus faecalis",
+   "Klebsiella pneumoniae"
+  ],
+  "c": 0,
+  "exp": "En pacientes sin factores de riesgo ni enfermedad de base, E. coli se aísla en más del 70% de las ITU de la comunidad, seguida por Klebsiella spp., Proteus mirabilis y Enterococcus faecalis.",
+  "source": "Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (Introducción) · Compendio ADN (7.h)",
+  "verificar": false
+ },
+ {
+  "id": "n6-f-12",
+  "nucleo": "6",
+  "difficulty": "facil",
+  "topic": "Infección del tracto urinario",
+  "q": "¿Por qué las mujeres tienen mayor predisposición a las infecciones urinarias que los varones?",
+  "a": [
+   "Por una uretra corta y cercana al introito vaginal y al ano",
+   "Porque su orina tiene un pH más alcalino que la del varón",
+   "Porque no producen proteína de Tamm-Horsfall en el asa de Henle",
+   "Porque la vejiga femenina carece de urotelio estratificado"
+  ],
+  "c": 0,
+  "exp": "La cortedad de la uretra femenina y su proximidad al ano y la vagina facilitan la colonización por uropatógenos intestinales; el coito \"masajea\" la uretra y favorece el ascenso a la vejiga.",
+  "source": "Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (Actividad 1B) · Compendio ADN (7.h)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-01",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Vibrio cholerae",
+  "q": "¿Cuál es el mecanismo de acción de la toxina colérica?",
+  "a": [
+   "Se une al gangliósido GM1 y activa la adenilato ciclasa",
+   "Inactiva los ribosomas y detiene la síntesis de proteínas",
+   "Inhibe la liberación de acetilcolina en las sinapsis colinérgicas",
+   "Invade el enterocito, lisa la vacuola y se multiplica en el citoplasma"
+  ],
+  "c": 0,
+  "exp": "Es una toxina A-B: la cadena B se une al gangliósido GM1 y la cadena A activa la adenilato ciclasa. El AMPc elevado provoca secreción de agua y electrolitos, con diarrea secretora.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 3) · Compendio ADN (7.e.f)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-02",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Escherichia coli enterotoxigénica",
+  "q": "¿Qué toxinas produce Escherichia coli enterotoxigénica (ECET) y qué cuadro causa?",
+  "a": [
+   "LT y ST, con diarrea acuosa profusa sin sangre",
+   "Toxina Shiga, con colitis hemorrágica y riesgo de SUH",
+   "Intimina y toxina Shiga, con lesión del colon y sangre",
+   "Enterotoxina termoestable, con vómitos en las primeras horas"
+  ],
+  "c": 0,
+  "exp": "ECET coloniza el intestino delgado y produce la toxina termolábil (LT, eleva el AMPc) y la termoestable (ST, eleva el GMPc): diarrea acuosa, la clásica \"diarrea del viajero\".",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 7) · Compendio ADN (7.e.g)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-03",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Shigella spp.",
+  "q": "¿Cuál es el mecanismo de patogenia de Shigella spp.?",
+  "a": [
+   "Invade y se replica en las células del colon",
+   "Produce una enterotoxina que eleva el AMPc sin invadir la mucosa",
+   "Se adhiere al borde en cepillo del intestino delgado sin invadir",
+   "Coloniza la mucosa gástrica protegida por su actividad ureasa"
+  ],
+  "c": 0,
+  "exp": "Shigella usa un sistema de secreción tipo III (proteínas IpaA-D) para invadir el epitelio del colon, reorganiza la actina y se disemina de célula a célula; induce apoptosis de los macrófagos.",
+  "source": "Compendio ADN (7.e.b) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 5)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-04",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Rotavirus",
+  "q": "¿Cuál es el método de elección para diagnosticar una gastroenteritis por rotavirus?",
+  "a": [
+   "Detección del antígeno viral en heces por ELISA o látex",
+   "Cultivo celular con pretratamiento de la muestra con tripsina",
+   "Serología con IgM específica en el suero del paciente",
+   "Microscopía electrónica de la materia fecal"
+  ],
+  "c": 0,
+  "exp": "La concentración de virus en heces es muy alta, así que la detección directa del antígeno (EIA o aglutinación de látex) es el método de elección; el cultivo no se usa para diagnóstico.",
+  "source": "Compendio ADN (7.c.e, 7.d) · Cuadernillo Núcleo 6 Digestivo 2026 (TP 13, Actividad 2)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-05",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Norovirus",
+  "q": "¿Qué rasgo del norovirus explica los brotes explosivos en restaurantes y cruceros?",
+  "a": [
+   "Bastan unos 10 viriones y resiste el cloro del agua potable",
+   "Tiene una envoltura lipídica que lo protege del ácido gástrico",
+   "Se transmite por vía respiratoria además de la digestiva",
+   "Su genoma segmentado permite reordenamientos frecuentes entre cepas"
+  ],
+  "c": 0,
+  "exp": "Es un virus desnudo que resiste calor de 60 °C, pH 3, detergentes y el cloro del agua potable, y sólo 10 viriones inician la enfermedad; hasta el 30% de los infectados son asintomáticos y contagian.",
+  "source": "Compendio ADN (7.c.d) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Grupo 3)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-06",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Adenovirus",
+  "q": "Un lactante presenta diarrea acuosa, conjuntivitis y tos productiva con probable bronquiolitis. ¿Qué agente explica mejor ese cuadro?",
+  "a": [
+   "Adenovirus",
+   "Rotavirus",
+   "Norovirus",
+   "Poliovirus"
+  ],
+  "c": 0,
+  "exp": "Adenovirus infecta a la vez el epitelio respiratorio, el digestivo y la conjuntiva, así que un mismo virus explica la diarrea, la conjuntivitis y el compromiso respiratorio.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Grupo 1) · Compendio ADN (7.c.a)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-07",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Salmonella spp.",
+  "q": "¿Qué diferencia a Salmonella Typhi del resto de las salmonelas en cuanto al reservorio?",
+  "a": [
+   "Su único reservorio es el ser humano",
+   "Su reservorio son los reptiles y las aves de corral",
+   "Vive en el ganado bovino y el resto, en el ser humano",
+   "Comparte con el resto los mismos reservorios animales"
+  ],
+  "c": 0,
+  "exp": "S. Typhi y Paratyphi están adaptadas al ser humano, único reservorio, y se contraen por agua o alimentos contaminados por un portador. El resto de las salmonelas viene de reservorios animales.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 6b) · Compendio ADN (7.e.c)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-08",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Helicobacter pylori",
+  "q": "¿Qué enzima le permite a Helicobacter pylori sobrevivir a la acidez gástrica?",
+  "a": [
+   "La ureasa",
+   "La catalasa",
+   "La coagulasa",
+   "La fosfolipasa C"
+  ],
+  "c": 0,
+  "exp": "La gran cantidad de ureasa neutraliza el ácido con el amoníaco que produce; eso mismo se aprovecha en el test del aliento con urea marcada, que detecta en el aire exhalado los productos de la hidrólisis de la urea.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (TP 14, Actividad 2)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-09",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Yersinia enterocolitica",
+  "q": "¿Qué particularidad del cultivo de Yersinia enterocolitica se aprovecha para aislarla de las heces?",
+  "a": [
+   "Crece a 4 °C: se usa enriquecimiento en frío",
+   "Necesita atmósfera microaerófila con más CO2 a 42 °C",
+   "Requiere medios con 10% de cloruro de sodio",
+   "Sólo crece en cultivo celular pretratado con tripsina"
+  ],
+  "c": 0,
+  "exp": "Crece lento a la temperatura habitual de incubación pero tolera los 4 °C: el almacenamiento prolongado en frío mejora selectivamente su aislamiento. Por eso también se multiplica en alimentos refrigerados.",
+  "source": "Compendio ADN (7.e.a) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 5)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-10",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Campylobacter spp.",
+  "q": "¿Qué condiciones de cultivo necesita Campylobacter jejuni?",
+  "a": [
+   "Poco oxígeno, más CO2 y dos o más días de incubación",
+   "Anaerobiosis estricta en jarra con generador de hidrógeno",
+   "Medio con alta salinidad y pH alcalino sostenido",
+   "Agar chocolate a temperatura ambiente durante siete días"
+  ],
+  "c": 0,
+  "exp": "Son microaerófilos: necesitan 5-7% de oxígeno y 5-10% de CO2, medios selectivos y, en las especies termófilas, temperaturas elevadas, con dos o más días de incubación.",
+  "source": "Compendio ADN (7.e.d) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 5)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-11",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Bacillus cereus",
+  "q": "¿Qué distingue a las dos formas de intoxicación alimentaria por Bacillus cereus?",
+  "a": [
+   "La toxina termoestable da vómitos y la termolábil, diarrea",
+   "La toxina termoestable da diarrea y la termolábil, vómitos",
+   "Una forma cursa con fiebre alta y la otra con hipotermia",
+   "Una depende de la espora y la otra de la endotoxina"
+  ],
+  "c": 0,
+  "exp": "La enterotoxina termoestable causa la forma emética (vómitos, náuseas y espasmos, 1 a 6 h) y la termolábil, parecida a la LT de E. coli y a la colérica, la forma diarreica.",
+  "source": "Compendio ADN (7.e.e) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 5)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-12",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Staphylococcus aureus",
+  "q": "¿Por qué recalentar un alimento no evita la intoxicación alimentaria por Staphylococcus aureus?",
+  "a": [
+   "Las enterotoxinas resisten 100 °C por 30 minutos",
+   "La bacteria forma esporas que germinan al enfriarse el alimento",
+   "La endotoxina se libera cuando el calor lisa a la bacteria",
+   "El estafilococo se multiplica a temperatura de refrigeración"
+  ],
+  "c": 0,
+  "exp": "Las enterotoxinas estafilocócicas son superantígenos estables aunque se calienten a 100 °C durante 30 minutos: es una intoxicación por toxina preformada, no una infección.",
+  "source": "Compendio ADN (7.e.e) · Cuadernillo Núcleo 6 Digestivo 2026 (TP 14, Actividad 3)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-13",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Enfermedades transmitidas por alimentos",
+  "q": "¿Cuál es la diferencia entre infección e intoxicación alimentaria?",
+  "a": [
+   "La infección es por microorganismos vivos y la intoxicación, por toxinas preformadas",
+   "En la infección hay fiebre y en la intoxicación nunca aparece",
+   "La infección la producen bacterias y la intoxicación, sólo hongos",
+   "Un brote de intoxicación exige dos o más casos y la infección puede ser un caso aislado"
+  ],
+  "c": 0,
+  "exp": "La infección resulta de ingerir patógenos vivos que se multiplican (Salmonella, Shigella, VHA, Trichinella); la intoxicación, de toxinas o químicos presentes en el alimento, aun sin microorganismo viable.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (TP 14, Introducción y Actividad 3b) · Compendio ADN (7.f.b)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-14",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Entamoeba histolytica",
+  "q": "¿Qué hallazgo microscópico confirma que una ameba es Entamoeba histolytica?",
+  "a": [
+   "Trofozoítos que fagocitan eritrocitos",
+   "Quistes maduros con cuatro núcleos en el examen al fresco",
+   "Trofozoítos adheridos por su disco suctor al epitelio",
+   "Ooquistes con esporozoítos en su interior"
+  ],
+  "c": 0,
+  "exp": "E. histolytica es la única ameba humana capaz de fagocitar eritrocitos: ver trofozoítos con seudópodos y eritrofagocitosis la confirma. El quiste tetranucleado es la forma infectante, pero no la distingue de E. dispar.",
+  "source": "Compendio ADN (7.a.b) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 2)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-15",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Ascaris lumbricoides",
+  "q": "¿Qué es el ciclo de Loos en la infección por Ascaris lumbricoides?",
+  "a": [
+   "La migración de las larvas por hígado, corazón y pulmón",
+   "El pasaje de los huevos desde el suelo al agua de riego y las verduras",
+   "La autoinfección a partir de los huevos de la región perianal",
+   "El ciclo entre el cerdo y el humano que cierra la transmisión"
+  ],
+  "c": 0,
+  "exp": "Las larvas atraviesan la pared intestinal, llegan por vía porta al hígado, corazón derecho y pulmón, suben por bronquios y tráquea, se degluten y maduran en el intestino delgado.",
+  "source": "Compendio ADN (7.a.c y recuadro ciclo de Loos) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 3d)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-16",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Trichinella spiralis",
+  "q": "¿Cuál es la forma infectante de Trichinella spiralis y cómo se adquiere?",
+  "a": [
+   "La larva muscular L1, al comer carne cruda o mal cocida",
+   "El huevo larvado, ingerido con agua o verduras contaminadas",
+   "El quiste, eliminado con las heces del cerdo infectado",
+   "La larva filariforme, que penetra activamente la piel"
+  ],
+  "c": 0,
+  "exp": "La larva muscular L1 está en el músculo de cerdo, jabalí u otros animales; se libera en el estómago por digestión, llega al duodeno, penetra las vellosidades y en dos días muda hasta adulto.",
+  "source": "Compendio ADN (7.a.e) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 3)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-17",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "¿Cuál es el método diagnóstico de elección para la oxiurosis?",
+  "a": [
+   "El test de Graham seriado en la región perianal",
+   "El coproparasitológico seriado de materia fecal",
+   "La serología por ELISA para IgG específica",
+   "La biopsia de apéndice cecal con cortes transversales"
+  ],
+  "c": 0,
+  "exp": "Los huevos se depositan en los pliegues perianales, no en las heces (allí aparecen sólo en el 10% de los casos). Un Graham detecta el 60%; repetido 5 a 7 días llega al 100%.",
+  "source": "Compendio ADN (7.a.d) · Cuadernillo Núcleo 6 Digestivo 2026 (TP 12, caso 4)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-18",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Virus de la hepatitis B",
+  "q": "¿Qué resultado serológico identifica a una persona vacunada contra hepatitis B?",
+  "a": [
+   "Anti-HBs positivo, con el resto de los marcadores negativos",
+   "Anti-HBc IgG positivo con HBsAg negativo",
+   "HBsAg positivo junto con anti-HBe positivo",
+   "HBeAg positivo con anti-HBc IgM positivo"
+  ],
+  "c": 0,
+  "exp": "La vacuna contiene HBsAg, así que genera sólo anti-HBs. Si además hay anti-HBc, hubo contacto con el virus: eso marca infección actual o antigua, no vacunación.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 9, Actividad 2) · Compendio ADN (7.g)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-19",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Virus de la hepatitis B",
+  "q": "¿Por qué se produce el daño hepático en la infección por el virus de la hepatitis B?",
+  "a": [
+   "Por la respuesta inmune celular contra los hepatocitos infectados",
+   "Por el efecto citopático directo del virus sobre el hepatocito",
+   "Por la endotoxina que se libera durante la replicación viral",
+   "Por la obstrucción mecánica de los canalículos biliares intrahepáticos"
+  ],
+  "c": 0,
+  "exp": "El VHB no tiene efecto citopático significativo: la inmunidad celular y la inflamación producen los síntomas y, cuando son eficaces, la resolución, al destruir los hepatocitos infectados.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 9, Actividades 2c y 3) · Compendio ADN (7.g)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-20",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Virus de la hepatitis D",
+  "q": "¿Por qué el virus de la hepatitis D no puede infectar por sí solo?",
+  "a": [
+   "Porque usa el HBsAg del virus de la hepatitis B como envoltura",
+   "Porque carece de genoma propio y necesita el ADN del VHB",
+   "Porque sólo se replica dentro de los linfocitos T del huésped",
+   "Porque requiere una coinfección con el virus de la hepatitis C"
+  ],
+  "c": 0,
+  "exp": "El VHD es un virus tipo viroide, con ARN monocatenario circular, que usa la envoltura de HBsAg del VHB para ensamblarse y salir: de ahí que la coinfección o sobreinfección con VHB sea obligada.",
+  "source": "Compendio ADN (7.g) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 9, Grupo 3)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-21",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Proteus mirabilis",
+  "q": "¿Qué factor de virulencia de Proteus mirabilis favorece la formación de cálculos urinarios?",
+  "a": [
+   "La ureasa, que alcaliniza la orina",
+   "La cápsula polisacárida, que inhibe la fagocitosis",
+   "Las fimbrias tipo 1, que median la adherencia",
+   "La toxina Shiga, que daña el endotelio renal"
+  ],
+  "c": 0,
+  "exp": "La ureasa alcaliniza la orina y favorece la precipitación de sales con formación de cálculos de estruvita; además P. mirabilis tiene fimbrias y flagelos para la colonización ascendente.",
+  "source": "Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (Actividad 2) · Compendio ADN (7.h.b)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-22",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Micoplasmas genitales",
+  "q": "¿Qué rasgo de los micoplasmas explica que no respondan a los antibióticos que actúan sobre la pared celular?",
+  "a": [
+   "No tienen pared celular",
+   "Son intracelulares obligados",
+   "Tienen una cápsula muy gruesa",
+   "Forman esporas resistentes"
+  ],
+  "c": 0,
+  "exp": "Son procariotas muy pequeños, pleomórficos y sin pared celular, por lo que resisten a los antibióticos dirigidos a ella; crecen en medios enriquecidos o asociados a membranas celulares.",
+  "source": "Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (Actividad 2) · Compendio ADN (7.h.b)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-23",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Infección del tracto urinario",
+  "q": "¿Qué mecanismo explica la mayor parte de las infecciones urinarias en el paciente sondado?",
+  "a": [
+   "El biofilm en la sonda y el ascenso extraluminal",
+   "La diseminación hematógena desde un foco infeccioso a distancia",
+   "La contaminación de la orina ya emitida en la bolsa colectora",
+   "El reflujo vesicoureteral por atonía progresiva del uréter"
+  ],
+  "c": 0,
+  "exp": "Los uropatógenos forman un biofilm intra y extraluminal que los protege de los antimicrobianos y de la inmunidad; dos tercios ascienden por vía extratransluminal, entre la sonda y la mucosa uretral.",
+  "source": "Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (ITU en el paciente sondado) · Compendio ADN (7.h)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-24",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Respuesta inmune",
+  "q": "¿Cuál es el perfil de respuesta T helper que predomina frente a los helmintos?",
+  "a": [
+   "Th2, con IL-4, IL-5 e IL-13",
+   "Th1, con IL-12 e IFN-gamma, que activa macrófagos",
+   "Th17, con IL-17 y reclutamiento de neutrófilos",
+   "Treg, con IL-10 y supresión de la respuesta efectora"
+  ],
+  "c": 0,
+  "exp": "Los helmintos inducen un perfil Th2: IL-4 e IL-13 activan macrófagos alternativos, IL-5 recluta eosinófilos y la IgE provoca desgranulación de mastocitos y citotoxicidad dependiente de anticuerpos.",
+  "source": "Compendio ADN (7.i.e)",
+  "verificar": false
+ },
+ {
+  "id": "n6-n-25",
+  "nucleo": "6",
+  "difficulty": "normal",
+  "topic": "Epidemiología",
+  "q": "Según el estudio de parasitosis intestinales en poblaciones infantiles de Argentina, ¿qué explica la tendencia descendente de norte a sur?",
+  "a": [
+   "El clima cálido y húmedo del noreste favorece a los geohelmintos",
+   "El norte tiene mayor cobertura de agua de red que el sur del país",
+   "Los protozoos necesitan suelos áridos y fríos para enquistarse",
+   "En el sur se concentran las poblaciones rurales y periurbanas"
+  ],
+  "c": 0,
+  "exp": "Los geohelmintos necesitan suelos cálidos y húmedos para desarrollarse: de ahí su mayor prevalencia en Misiones y Formosa y su ausencia en zonas áridas o frías como La Pampa y Chubut.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (TP 12, Actividad 1; Navone y col., 2017) · Compendio ADN (7.b)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-01",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Taenia solium",
+  "q": "Un nene de 5 años con convulsiones tiene en la resonancia lesiones quísticas con un escólex en su interior y ELISA para cisticercosis positivo. ¿Qué forma parasitaria ingirió?",
+  "a": [
+   "Huevos eliminados en heces humanas",
+   "Cisticercos de carne de cerdo mal cocida",
+   "Quistes presentes en agua de pozo contaminada",
+   "Larvas filariformes desarrolladas en el suelo"
+  ],
+  "c": 0,
+  "exp": "La cisticercosis se adquiere al ingerir huevos de T. solium por vía fecal-oral, con el humano como hospedador intermediario accidental. Comer carne con cisticercos produce teniosis, no neurocisticercosis.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 5a) · Compendio ADN (7.a.f, 7.b caso 2)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-02",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Echinococcus granulosus",
+  "q": "¿Por qué el coproparasitológico no sirve para diagnosticar hidatidosis en una persona?",
+  "a": [
+   "Porque el humano no aloja el adulto y no elimina huevos",
+   "Porque los huevos se destruyen al pasar por el jugo gástrico",
+   "Porque el quiste libera escólices únicamente en la orina",
+   "Porque el coproparasitológico solo detecta protozoos y no huevos de cestodes"
+  ],
+  "c": 0,
+  "exp": "El humano es hospedador intermediario: aloja el quiste hidatídico, no el cestode adulto, así que no elimina huevos. Se diagnostica por imágenes (ecografía, TAC) y serología (ELISA IgG, HAI).",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 4b) · Compendio ADN (7.a.g)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-03",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Strongyloides stercoralis",
+  "q": "Un paciente con VIH de larga evolución tiene diarrea acuosa, tos y sibilancias, y en el coproparasitológico se ven larvas rabditoides y filariformes. ¿Qué explica el cuadro?",
+  "a": [
+   "Autoinfección interna por Strongyloides stercoralis",
+   "Ascariosis en fase pulmonar con síndrome de Loeffler",
+   "Criptosporidiosis con compromiso biliar en inmunosuprimido",
+   "Triquinosis en fase de invasión muscular"
+  ],
+  "c": 0,
+  "exp": "En inmunocomprometidos las larvas rabditoides se vuelven filariformes en el lumen, penetran la pared intestinal o perianal y repiten el ciclo de Loos: hiperinfección con síntomas digestivos y pulmonares.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (TP 12, caso 5) · Compendio ADN (7.b caso 5)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-04",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Escherichia coli enterohemorrágica",
+  "q": "¿Cuál es la tríada que caracteriza al síndrome urémico hemolítico típico?",
+  "a": [
+   "Anemia hemolítica microangiopática, plaquetopenia e insuficiencia renal",
+   "Fiebre, ictericia y hepatomegalia dolorosa",
+   "Anemia, leucocitosis y eosinofilia marcada",
+   "Diarrea sanguinolenta, fiebre alta y convulsiones con eosinófilos en el LCR"
+  ],
+  "c": 0,
+  "exp": "Son anemia hemolítica microangiopática (hemoglobina baja, eritrocitos fragmentados, Coombs negativa), plaquetas por debajo de 150.000/mm3 y deterioro de la función renal con creatinina elevada para la edad.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (TP 14, Actividad 5b) · Compendio ADN (7.f.c)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-05",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Escherichia coli enterohemorrágica",
+  "q": "¿Cómo daña los tejidos la toxina Shiga?",
+  "a": [
+   "Inactiva los ribosomas y detiene la síntesis de proteínas",
+   "Activa la adenilato ciclasa y eleva el AMPc del enterocito",
+   "Degrada el peptidoglicano del endotelio vascular renal",
+   "Activa de forma inespecífica a los linfocitos T como superantígeno"
+  ],
+  "c": 0,
+  "exp": "La subunidad B se une al glucolípido Gb3 de células de riñón, cerebro, intestino y endotelio; la A inactiva los ribosomas y detiene la síntesis proteica, con muerte celular y microangiopatía.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (TP 14, Actividad 5b) · Compendio ADN (7.f.c, 7.e.b)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-06",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Escherichia coli enteroinvasiva",
+  "q": "¿Qué categoría de Escherichia coli tiene una patogenia prácticamente idéntica a la de Shigella?",
+  "a": [
+   "La enteroinvasiva (ECEI)",
+   "La enterotoxigénica (ECET)",
+   "La enteroagregativa (ECEA)",
+   "La enteropatógena (ECEP)"
+  ],
+  "c": 0,
+  "exp": "ECEI invade las células epiteliales del colon, lisa la vacuola fagocítica, se multiplica en el citoplasma y se propaga a las células vecinas, con una disentería indistinguible de la shigelosis.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 7) · Compendio ADN (7.e.g)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-07",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Salmonella spp.",
+  "q": "¿En qué muestra esperaría recuperar Salmonella Enteritidis en un cuadro de gastroenteritis?",
+  "a": [
+   "En materia fecal",
+   "En hemocultivo con medio de enriquecimiento",
+   "En orina recogida por chorro medio",
+   "En líquido cefalorraquídeo"
+  ],
+  "c": 0,
+  "exp": "La mayoría de las gastroenteritis por salmonelas no tifoideas queda limitada al intestino: se buscan en coprocultivo con medios selectivos. En lactantes, ancianos o inmunocomprometidos pueden dar bacteriemia; S. Typhi se busca en sangre.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividad 6b) · Compendio ADN (7.e.c)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-08",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Virus de la hepatitis B",
+  "q": "Un paciente tiene HBsAg y HBeAg positivos, anti-HBc IgM positivo y anti-HBs negativo. ¿Qué situación representa?",
+  "a": [
+   "Hepatitis B aguda en fase replicativa",
+   "Hepatitis B crónica sin replicación activa",
+   "Infección resuelta hace varios años",
+   "Persona vacunada sin contacto previo con el virus"
+  ],
+  "c": 0,
+  "exp": "La IgM anti-HBc es el mejor marcador de infección aguda reciente, y HBsAg junto con HBeAg indican replicación activa. En la infección crónica predomina la IgG anti-HBc.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 9, Actividad 2) · Compendio ADN (7.g)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-09",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Virus de la hepatitis E",
+  "q": "¿En qué grupo la hepatitis E tiene una evolución particularmente grave?",
+  "a": [
+   "En las embarazadas",
+   "En los recién nacidos de madre portadora",
+   "En los adultos mayores de 60 años",
+   "En los pacientes en hemodiálisis crónica"
+  ],
+  "c": 0,
+  "exp": "En pacientes sanos la mortalidad del VHE es de 1-2%, pero en embarazadas llega al 20%, posiblemente por una respuesta inmunitaria alterada. No deja estado de portador crónico.",
+  "source": "Compendio ADN (7.g, tabla comparativa) · Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 9, Grupo 1)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-10",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Clostridium botulinum",
+  "q": "¿Cómo explica la toxina botulínica la parálisis flácida del lactante?",
+  "a": [
+   "Su endopeptidasa inactiva las proteínas que liberan acetilcolina",
+   "Bloquea los receptores de glicina de las interneuronas medulares",
+   "Inactiva los ribosomas de la neurona motora periférica",
+   "Eleva el AMPc en la placa neuromuscular"
+  ],
+  "c": 0,
+  "exp": "La cadena pesada se une a receptores de la neurona motora y promueve la endocitosis; la cadena ligera, endopeptidasa de zinc, inactiva las proteínas que regulan la liberación de acetilcolina.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Actividades 2c y 2d) · Compendio ADN (7.e)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-11",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "¿Para qué sirve el agar MacConkey en la identificación de enterobacterias?",
+  "a": [
+   "Es selectivo y diferencial: separa por fermentación de lactosa",
+   "Es un medio de enriquecimiento para bacterias nutricionalmente exigentes",
+   "Es un medio cromogénico que detecta la actividad de la ureasa",
+   "Es un medio básico en el que crece casi cualquier bacteria"
+  ],
+  "c": 0,
+  "exp": "Permite el crecimiento de bacilos gramnegativos y diferencia por color: las fermentadoras de lactosa dan colonias rosadas, mientras Shigella y Salmonella dan colonias incoloras.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (TP 14, diagnóstico microbiológico) · Compendio ADN (7.e.b, 7.f.a)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-12",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Infección del tracto urinario",
+  "q": "¿Qué recuento en orina de micción espontánea define bacteriuria significativa en una embarazada?",
+  "a": [
+   "Más de 100.000 UFC/ml de un único uropatógeno",
+   "Más de 1.000 UFC/ml de un único uropatógeno",
+   "Cualquier recuento, siempre que haya piuria en el sedimento",
+   "Más de 10.000 UFC/ml de dos o más uropatógenos distintos"
+  ],
+  "c": 0,
+  "exp": "Por micción espontánea se exige más de 100.000 UFC/ml de un único uropatógeno; por sondaje vesical, más de 1.000, y por punción suprapúbica cualquier cantidad. En el embarazo basta un urocultivo positivo.",
+  "source": "Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (ITU en la embarazada)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-13",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Escherichia coli uropatógena",
+  "q": "¿Qué mecanismo de Escherichia coli uropatógena explica las infecciones urinarias recurrentes?",
+  "a": [
+   "Las comunidades bacterianas intracelulares en la vejiga",
+   "La producción de toxina Shiga en el urotelio vesical",
+   "La formación de esporas resistentes en la pared de la vejiga",
+   "La variación de fase de los antígenos flagelares H y capsulares K"
+  ],
+  "c": 0,
+  "exp": "Tras adherirse por fimbrias tipo 1, E. coli invade las células vesicales y forma comunidades bacterianas intracelulares (\"pods\"), reservorios desde los que luego sale como filamentos largos.",
+  "source": "Compendio ADN (7.h.a) · Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (Actividad 1C)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-14",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Infección del tracto urinario",
+  "q": "¿Cuál es la función de la proteína de Tamm-Horsfall (uromodulina) en la defensa urinaria?",
+  "a": [
+   "Se une a las fimbrias bacterianas e impide la adherencia",
+   "Secuestra los sideróforos para privar a la bacteria de hierro",
+   "Opsoniza las bacterias para su fagocitosis por neutrófilos",
+   "Forma poros en la membrana bacteriana, como la catelicidina"
+  ],
+  "c": 0,
+  "exp": "La uromodulina, producida en el asa de Henle, se une a las bacterias por sus fimbrias tipo 1, les impide adherirse a la mucosa vesical y las agrega para eliminarlas con la orina. La NGAL es la que secuestra sideróforos.",
+  "source": "Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (Actividad 1A) · Compendio ADN (7.h)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-15",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Infección del tracto urinario",
+  "q": "Una paciente tuvo tres episodios de cistitis en un año, todos por E. coli pero con distinto genotipo y antibiograma. ¿Cómo se denomina cada episodio nuevo?",
+  "a": [
+   "Reinfección",
+   "Recidiva",
+   "Bacteriuria asintomática",
+   "ITU complicada"
+  ],
+  "c": 0,
+  "exp": "La recidiva es un segundo episodio por el mismo microorganismo; la reinfección, por uno distinto, aunque ambos sean E. coli con distinto genotipo. Más de 3 episodios por año, o 2 en 6 meses, se llama recurrencia.",
+  "source": "Compendio ADN (7.h) · Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (Actividad 4)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-16",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "En un sedimento de orina, ¿qué sugiere la presencia de cilindros leucocitarios?",
+  "a": [
+   "Que la infección compromete el parénquima renal",
+   "Que la muestra se recogió de manera inadecuada",
+   "Que hay bacterias ureolíticas en la orina fresca",
+   "Que existe una fístula entre el intestino y la vía urinaria"
+  ],
+  "c": 0,
+  "exp": "Los cilindros leucocitarios o bacterianos localizan la infección a nivel renal (parenquimatosa). Los cristales de fosfato amónico-magnésico, en cambio, orientan a bacterias ureolíticas.",
+  "source": "Cuadernillo Núcleo 6.1 Agentes Urinarios 2026 (Actividad 3a) · Compendio ADN (7.h)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-17",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Echovirus",
+  "q": "Un bebé de 2 meses tiene fiebre, diarrea líquida e irritabilidad, y un hermanito empezó con el mismo cuadro. Entre los Picornaviridae, ¿qué agente es el más probable?",
+  "a": [
+   "Echovirus",
+   "Rinovirus",
+   "Poliovirus",
+   "Coxsackie A"
+  ],
+  "c": 0,
+  "exp": "El rinovirus no da diarrea, el poliovirus es neurotrópico y Coxsackie A causa herpangina y exantemas; el echovirus (por ejemplo el 11) coincide con fiebre, diarrea, irritabilidad y transmisión familiar.",
+  "source": "Cuadernillo Núcleo 6 Digestivo 2026 (Seminario 8, Grupo 4) · Compendio ADN (7.c.b, 7.c.c)",
+  "verificar": false
+ },
+ {
+  "id": "n6-d-18",
+  "nucleo": "6",
+  "difficulty": "dificil",
+  "topic": "Respuesta inmune",
+  "q": "¿Qué consecuencia epidemiológica tiene la variación antigénica de los parásitos?",
+  "a": [
+   "Permite reinfecciones y transmisión continua en zonas endémicas",
+   "Genera inmunidad esterilizante tras el primer contacto con el parásito",
+   "Impide la aparición de portadores sanos en la población",
+   "Hace innecesaria la colaboración de los linfocitos T CD4"
+  ],
+  "c": 0,
+  "exp": "Al variar sus antígenos, los parásitos evaden la inmunidad adquirida y el huésped se vuelve resistente sólo después de exponerse a numerosas cepas: hay reinfecciones, cronicidad y transmisión sostenida.",
+  "source": "Compendio ADN (7.i.f)",
+  "verificar": false
+ }
+]

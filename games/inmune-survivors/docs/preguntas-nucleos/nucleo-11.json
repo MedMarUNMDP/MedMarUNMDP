@@ -1,0 +1,767 @@
+[
+ {
+  "id": "n11-f-01",
+  "nucleo": "11",
+  "difficulty": "facil",
+  "topic": "Zoonosis (concepto)",
+  "q": "Según la cátedra, ¿qué es una zoonosis?",
+  "a": [
+   "Una enfermedad transmisible entre animales vertebrados y el ser humano",
+   "Una infección que se transmite sólo por la picadura de un artrópodo vector",
+   "Una infección que el paciente adquiere durante una internación",
+   "Una enfermedad que pasa de la madre al feto durante el embarazo"
+  ],
+  "c": 0,
+  "exp": "Las zoonosis son las enfermedades e infecciones transmisibles entre animales vertebrados y el ser humano, de manera directa o a través del ambiente. De los 1.415 patógenos humanos conocidos, el 61% es zoonótico.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Introducción) · Compendio ADN (11, introducción)",
+  "verificar": false
+ },
+ {
+  "id": "n11-f-02",
+  "nucleo": "11",
+  "difficulty": "facil",
+  "topic": "Una Salud",
+  "q": "¿A qué se refiere el concepto de Una Salud?",
+  "a": [
+   "A la conexión entre la salud humana, la animal y la del ambiente",
+   "A la cobertura universal de salud para toda la población",
+   "A unificar los calendarios de vacunación humana y veterinaria",
+   "A tratar a todos los convivientes de un caso confirmado de zoonosis"
+  ],
+  "c": 0,
+  "exp": "Una Salud reconoce que la salud humana, la animal y la ambiental están conectadas y que el bienestar de cada componente afecta a los otros; por eso las zoonosis se abordan de manera conjunta y multidisciplinaria.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 1) · Compendio ADN (11.e)",
+  "verificar": false
+ },
+ {
+  "id": "n11-f-03",
+  "nucleo": "11",
+  "difficulty": "facil",
+  "topic": "Virus de la rabia (Lyssavirus)",
+  "q": "¿Cuál es el agente causal de la rabia humana?",
+  "a": [
+   "El virus de la rabia, género Lyssavirus, familia Rhabdoviridae",
+   "Un arenavirus de la familia Arenaviridae, igual que el virus Junín",
+   "Un hantavirus de la familia Bunyaviridae, eliminado por roedores",
+   "Una espiroqueta del género Leptospira"
+  ],
+  "c": 0,
+  "exp": "La rabia humana la produce el virus de la rabia, de la familia Rhabdoviridae, género Lyssavirus. Es un virus con envoltura y neurotropismo marcado.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3) · Compendio ADN (11.a)",
+  "verificar": false
+ },
+ {
+  "id": "n11-f-04",
+  "nucleo": "11",
+  "difficulty": "facil",
+  "topic": "Virus Junín (fiebre hemorrágica argentina)",
+  "q": "¿Cuál es el reservorio principal del virus Junín, agente de la fiebre hemorrágica argentina?",
+  "a": [
+   "Calomys musculinus, el ratón maicero",
+   "El perro doméstico sin vacunar",
+   "Los murciélagos insectívoros",
+   "Las aves psitácidas, como loros y cotorras"
+  ],
+  "c": 0,
+  "exp": "El reservorio principal es Calomys musculinus (ratón maicero); en menor proporción participan Calomys laucha, Akodon azarae y Mus musculus. El virus se elimina con la orina y la saliva de roedores persistentemente infectados.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (cuadro ENO, Actividad 4) · Compendio ADN (11.b)",
+  "verificar": false
+ },
+ {
+  "id": "n11-f-05",
+  "nucleo": "11",
+  "difficulty": "facil",
+  "topic": "Hantavirus",
+  "q": "¿Cuál es el principal mecanismo de transmisión de los hantavirus al ser humano?",
+  "a": [
+   "La inhalación de aerosoles de excretas de roedores infectados",
+   "La picadura de mosquitos del género Aedes",
+   "La ingestión de carne de cerdo mal cocida",
+   "El contacto de la piel sana con el agua de red durante el baño diario"
+  ],
+  "c": 0,
+  "exp": "El virus es eliminado por los roedores infectados en sangre, secreciones y excretas, y se transmite sobre todo por inhalación de aerosoles. También puede haber contagio por contacto con excrementos o secreciones y, raramente, por mordedura del roedor.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (cuadro ENO) · Compendio ADN (11.b)",
+  "verificar": false
+ },
+ {
+  "id": "n11-f-06",
+  "nucleo": "11",
+  "difficulty": "facil",
+  "topic": "Leptospira interrogans",
+  "q": "¿Cómo se infectan habitualmente las personas con Leptospira?",
+  "a": [
+   "Por contacto de mucosas o piel lesionada con agua o barro con orina animal",
+   "Por inhalar el polvo de excrementos secos de aves enjauladas o de gallineros",
+   "Por consumir quesos elaborados con leche sin pasteurizar",
+   "Por la mordedura de un perro no vacunado"
+  ],
+  "c": 0,
+  "exp": "Las personas son hospedadores accidentales y se infectan por contacto directo con orina de animales infectados o indirecto a través de suelo, agua o materiales contaminados, a través de mucosas o piel lesionada.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (cuadro ENO, Leptospirosis) · Compendio ADN (11.g)",
+  "verificar": false
+ },
+ {
+  "id": "n11-f-07",
+  "nucleo": "11",
+  "difficulty": "facil",
+  "topic": "Chlamydophila psittaci",
+  "q": "¿Cuál es el reservorio principal de Chlamydophila psittaci?",
+  "a": [
+   "Las aves psitácidas: loros, cotorras y guacamayos",
+   "Los roedores silvestres de los géneros Oligoryzomys y Calomys",
+   "El ganado caprino y ovino",
+   "Los perros y gatos callejeros"
+  ],
+  "c": 0,
+  "exp": "El reservorio son las aves psitácidas (loros, cotorras, guacamayos); menos frecuente es el contagio desde palomas y aves de corral. Los grupos de riesgo incluyen veterinarios, cuidadores de zoológico y trabajadores de plantas avícolas.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (cuadro ENO, Actividad 5) · Compendio ADN (11.h)",
+  "verificar": false
+ },
+ {
+  "id": "n11-f-08",
+  "nucleo": "11",
+  "difficulty": "facil",
+  "topic": "Brucella spp.",
+  "q": "Además del contacto con tejidos de animales infectados, ¿cuál es la otra vía clásica de transmisión de la brucelosis?",
+  "a": [
+   "La ingestión de alimentos no pasteurizados",
+   "La picadura de flebótomos infectados",
+   "La inhalación de aerosoles de orina de roedor",
+   "La ingestión de huevos del parásito en verduras mal lavadas"
+  ],
+  "c": 0,
+  "exp": "La brucelosis se adquiere por contacto de piel o mucosas con tejidos de animales infectados y por ingestión de alimentos no pasteurizados; también por inhalación. Los grupos de riesgo son quienes consumen lácteos crudos, trabajan con animales o en laboratorio.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (cuadro ENO, Actividad 5) · Compendio ADN (11.f)",
+  "verificar": false
+ },
+ {
+  "id": "n11-f-09",
+  "nucleo": "11",
+  "difficulty": "facil",
+  "topic": "Echinococcus granulosus",
+  "q": "En el ciclo de Echinococcus granulosus, ¿cuál es el hospedador definitivo?",
+  "a": [
+   "El perro",
+   "La oveja",
+   "El cerdo",
+   "El ser humano"
+  ],
+  "c": 0,
+  "exp": "El adulto de E. granulosus vive fijo a la mucosa del intestino delgado del perro, el hospedador definitivo. Ovinos, bovinos, caprinos y porcinos son intermediarios y el ser humano es un intermediario accidental.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (cuadro ENO, Actividad 3) · Compendio ADN (11.d)",
+  "verificar": false
+ },
+ {
+  "id": "n11-f-10",
+  "nucleo": "11",
+  "difficulty": "facil",
+  "topic": "Trichinella spiralis",
+  "q": "¿Cómo adquiere el ser humano la triquinosis?",
+  "a": [
+   "Al comer carne cruda o mal cocida de cerdo o de animales de caza",
+   "Al ingerir huevos del parásito presentes en el pelaje del perro o en el suelo",
+   "Al inhalar aerosoles de excretas de roedores silvestres",
+   "Al tomar leche de vaca sin pasteurizar"
+  ],
+  "c": 0,
+  "exp": "La infección se produce al ingerir carne cruda o poco cocida con larvas musculares, sobre todo de cerdo, jabalí, oso o caballo. En Argentina pesan la faena domiciliaria y los chacinados caseros o de circuitos informales.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 2, laboratorio) · Compendio ADN (11.d)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-01",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Virus de la rabia (Lyssavirus)",
+  "q": "¿Cómo es el genoma del virus de la rabia?",
+  "a": [
+   "ARN monocatenario no segmentado de polaridad negativa, con cinco proteínas",
+   "ARN monocatenario de polaridad negativa, segmentado en ocho fragmentos distintos",
+   "ADN bicatenario circular que se replica en el núcleo",
+   "ARN bicatenario segmentado, en un virus sin envoltura"
+  ],
+  "c": 0,
+  "exp": "El genoma es una única molécula de ARN no segmentado de polaridad negativa que codifica cinco proteínas: N, P, M, G y L. El genoma segmentado en ocho fragmentos corresponde a los virus influenza.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3.a) · Compendio ADN (11.a)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-02",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Virus de la rabia (Lyssavirus)",
+  "q": "¿Qué explica el neurotropismo del virus de la rabia?",
+  "a": [
+   "Que su proteína G interactúa con el receptor nicotínico de acetilcolina y gangliósidos",
+   "Que su neuraminidasa se une al ácido siálico del epitelio respiratorio",
+   "Que su proteína N se une al receptor CD4 de los linfocitos T",
+   "Que el lipopolisacárido de su pared se adhiere al endotelio de los vasos sanguíneos"
+  ],
+  "c": 0,
+  "exp": "La proteína G interactúa con receptores como el nicotínico de acetilcolina y gangliósidos: el virus penetra en las terminales nerviosas o se replica en el músculo antes de ascender al sistema nervioso central.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3.a) · Compendio ADN (11.a)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-03",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Virus de la rabia (Lyssavirus)",
+  "q": "¿Cuál es el mecanismo de transmisión más frecuente de la rabia al ser humano?",
+  "a": [
+   "La inoculación de saliva infectada por mordedura o en una herida preexistente",
+   "La inhalación de aerosoles en cuevas con grandes colonias de murciélagos hematófagos",
+   "El trasplante de córnea de un donante infectado",
+   "El contacto de saliva del animal con piel sana"
+  ],
+  "c": 0,
+  "exp": "La transmisión principal es la inoculación de saliva infectada por mordedura o herida preexistente, y también a través de mucosas. Los aerosoles y el trasplante de córnea son excepcionales; la saliva sobre piel sana es un accidente no significativo.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3.c) · Compendio ADN (11.a)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-04",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Virus de la rabia (Lyssavirus)",
+  "q": "Ante un accidente potencialmente rábico, ¿cuál es la primera medida sobre la herida?",
+  "a": [
+   "Lavarla a chorro con agua y jabón lo antes posible",
+   "Suturarla de inmediato con la mayor cantidad de puntos",
+   "Infiltrar la vacuna antirrábica alrededor de la herida",
+   "Esperar los diez días de observación del animal agresor"
+  ],
+  "c": 0,
+  "exp": "Primero el lavado inmediato y a chorro con agua y jabón: el agua arrastra el virus y el jabón altera su capa lipídica. Después se usan antisépticos, se infiltra el suero antirrábico en la herida y se aplica la vacuna.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3.f) · Compendio ADN (11.a)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-05",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Virus de la rabia (Lyssavirus)",
+  "q": "¿Qué estudios permiten confirmar una rabia humana en vida del paciente?",
+  "a": [
+   "Inmunofluorescencia directa en saliva o piel de nuca, y RT-PCR",
+   "Hemocultivos seriados incubados durante dos semanas y serología pareada",
+   "Cultivo en medios con vitaminas B2 y B12 a 28-30 °C",
+   "Hemaglutinación indirecta en líquido del quiste"
+  ],
+  "c": 0,
+  "exp": "El diagnóstico antemortem se basa en la detección de antígeno rábico por inmunofluorescencia directa en saliva o biopsia de piel de nuca; también se usa RT-PCR en saliva, LCR o tejidos y ELISA para anticuerpos.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3.e y 3.g) · Compendio ADN (11.a)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-06",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Virus Junín (fiebre hemorrágica argentina)",
+  "q": "¿Cómo ingresa el virus Junín al organismo de los trabajadores rurales de la pampa húmeda?",
+  "a": [
+   "Por vía cutáneo-mucosa: escoriaciones de la piel o inhalación de aerosoles",
+   "Por la picadura de la hembra de los flebótomos infectados durante la cosecha",
+   "Por ingestión de agua con huevos del parásito",
+   "Por mordedura directa del roedor reservorio"
+  ],
+  "c": 0,
+  "exp": "El virus Junín penetra por vía cutáneo-mucosa, a través de escoriaciones frecuentes en trabajadores rurales o por mucosa conjuntival, oral o nasal al inhalar aerosoles contaminados que se producen durante la cosecha. La incubación es de 6 a 14 días.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4) · Compendio ADN (11.b)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-07",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Virus Junín (fiebre hemorrágica argentina)",
+  "q": "¿En qué consiste el tratamiento específico de la fiebre hemorrágica argentina?",
+  "a": [
+   "En administrar plasma inmune de convalecientes, con anticuerpos anti-virus Junín",
+   "En aplicar la vacuna Candid#1 en cuanto se sospecha el caso",
+   "En administrar corticoides en altas dosis durante la fase hemorrágica-neurológica",
+   "En dar antibióticos por vía parenteral durante dos semanas"
+  ],
+  "c": 0,
+  "exp": "El tratamiento específico es la administración de anticuerpos anti-virus Junín obtenidos de plasma inmune de personas convalecientes de FHA. Sin tratamiento específico, la mortalidad de la fase hemorrágica-neurológica es alta.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4) · Compendio ADN (11.b)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-08",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Prevención",
+  "q": "Entre las zoonosis de este núcleo, ¿cuál cuenta con vacuna para uso humano?",
+  "a": [
+   "La fiebre hemorrágica argentina, con la vacuna Candid#1",
+   "La leptospirosis, con una vacuna indicada a trabajadores rurales",
+   "La brucelosis, con la misma vacuna que se aplica al ganado",
+   "El síndrome pulmonar por hantavirus, con una vacuna a virus inactivado"
+  ],
+  "c": 0,
+  "exp": "Candid#1 se aplica a quienes residen o trabajan en el área endémica de FHA. No hay vacuna humana para hantavirosis, leptospirosis, brucelosis, psitacosis ni triquinosis; en leptospirosis y brucelosis sí existen vacunas veterinarias.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividades 2, 4 y 5) · Compendio ADN (11.b, 11.f, 11.g, 11.h)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-09",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Hantavirus",
+  "q": "¿A qué familia pertenecen los hantavirus y cómo evoluciona el síndrome pulmonar por hantavirus?",
+  "a": [
+   "Bunyaviridae; en cuatro fases: febril o prodrómica, cardiopulmonar, diurética y de convalecencia",
+   "Arenaviridae; en dos fases: prodrómica y hemorrágica-neurológica",
+   "Orthomyxoviridae; en una única fase febril autolimitada",
+   "Rhabdoviridae; en tres fases: prodrómica, de excitación y paralítica"
+  ],
+  "c": 0,
+  "exp": "Los hantavirus son Bunyaviridae con ARN monocatenario negativo y envoltura. El SPH evoluciona en cuatro fases: prodrómica (3-5 días, fiebre y mialgias), cardiopulmonar, diurética y de convalecencia. La incubación va de 4 a 42 días. La cátedra los ubica en Bunyaviridae; en la clasificación actual del ICTV integran la familia Hantaviridae (orden Bunyavirales).",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4) · Compendio ADN (11.b)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-10",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Hantavirus",
+  "q": "Entre las zoonosis por roedores de este núcleo, ¿en cuál se demostró transmisión de persona a persona?",
+  "a": [
+   "El virus Andes",
+   "El virus Junín",
+   "El virus de la rabia",
+   "La influenza aviar H5N1"
+  ],
+  "c": 0,
+  "exp": "Entre las zoonosis por roedores, la transmisión persona a persona sólo se demostró para el virus Andes; en la FHA no ocurre. Para H5N1 no hay, hasta el momento, evidencia de propagación entre humanos.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (cuadro ENO, Actividades 4 y 5) · Compendio ADN (11.b)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-11",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Hantavirus",
+  "q": "¿Cuál es el ensayo de elección para el diagnóstico de hantavirosis?",
+  "a": [
+   "La detección de anticuerpos IgM por ELISA",
+   "El aislamiento del virus en cultivo celular",
+   "La inmunofluorescencia directa en biopsia de piel de nuca",
+   "La hemaglutinación indirecta en líquido pleural"
+  ],
+  "c": 0,
+  "exp": "El ELISA para IgM es el ensayo de elección. La RT-PCR permite detectar ARN viral en sangre entera, coágulo o tejidos obtenidos en los primeros 10 días de enfermedad.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4.c) · Compendio ADN (11.b)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-12",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Virus de la influenza",
+  "q": "¿Qué característica del genoma de influenza A le permite el salto de especie y dar pandemias?",
+  "a": [
+   "Está segmentado en ocho fragmentos de ARN, lo que permite el reordenamiento",
+   "Es un ARN no segmentado que sólo acumula mutaciones puntuales en la hemaglutinina",
+   "Es un ADN bicatenario que se integra al genoma de la célula",
+   "Es un ARN de polaridad positiva que actúa como ARN mensajero"
+  ],
+  "c": 0,
+  "exp": "El genoma es ARN monocatenario negativo segmentado en ocho fragmentos: cuando dos cepas coinfectan una célula puede haber reordenamiento (shift) y surgir combinaciones nuevas de HA y NA frente a las que la población no tiene inmunidad.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5.1) · Compendio ADN (11.c)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-13",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Virus de la influenza",
+  "q": "¿Por qué el cerdo es clave en la ecología zoonótica de la influenza A?",
+  "a": [
+   "Porque se infecta con cepas aviares y humanas y favorece los virus híbridos",
+   "Porque es el reservorio natural del virus en todo el mundo",
+   "Porque elimina el virus por la orina y contamina el agua de bebida",
+   "Porque es el único mamífero en el que el virus se replica en el núcleo celular"
+  ],
+  "c": 0,
+  "exp": "Las aves acuáticas son el reservorio natural y el cerdo es hospedador intermediario: puede infectarse con cepas aviares y humanas, y esa mezcla de genes facilita la aparición de virus híbridos capaces de adaptarse al hombre.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5.2) · Compendio ADN (11.c)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-14",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Toxocara canis",
+  "q": "¿Cuál es la forma infectante de Toxocara canis para el ser humano y cómo se adquiere?",
+  "a": [
+   "El huevo larvado del suelo, ingerido por manos, alimentos o pelaje del perro",
+   "La larva L1 presente en la carne de cerdo o de jabalí cruda o mal cocida",
+   "El protoescólex liberado al romperse un quiste",
+   "La larva que penetra activamente la piel descalza"
+  ],
+  "c": 0,
+  "exp": "El huevo eliminado con las heces del perro se vuelve larvado (L2) en el suelo en 2-3 semanas y sobrevive meses. Se ingiere por manos contaminadas, suelo, agua, alimentos o pelaje de la mascota; el grupo de riesgo son niños con geofagia u onicofagia.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4, laboratorio) · Compendio ADN (caso 6, Toxocara canis)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-15",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Trichinella spiralis",
+  "q": "¿Cuál es la forma infectante de Trichinella spiralis y qué tipo de ciclo tiene?",
+  "a": [
+   "La larva muscular L1; ciclo directo, con dos generaciones en el mismo hospedador",
+   "El huevo larvado del suelo; ciclo indirecto, con un hospedador intermediario",
+   "El quiste con vesículas hijas; ciclo indirecto entre perro y herbívoros",
+   "El cisticerco de la carne de vaca; ciclo con el humano como único definitivo"
+  ],
+  "c": 0,
+  "exp": "La forma infectante es la larva muscular L1 presente en la carne. El ciclo es directo: no necesita hospedador intermediario y en el mismo hospedador se desarrollan dos generaciones, adultos en el intestino y larvas en el músculo estriado.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividades 1 y 2, laboratorio) · Compendio ADN (11.d; 7.a.e)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-16",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Trichinella spiralis",
+  "q": "¿Cuáles son las manifestaciones principales de la etapa de invasión muscular de la triquinosis?",
+  "a": [
+   "Fiebre, edema palpebral y mialgias",
+   "Ictericia, hepatomegalia y hemorragias en piel y mucosas",
+   "Tos, hemoptisis, dolor torácico y disnea de esfuerzo",
+   "Hidrofobia, espasmos musculares generalizados y fonofobia"
+  ],
+  "c": 0,
+  "exp": "Las manifestaciones principales son fiebre, edema de párpados y periocular, y dolor muscular, con eosinofilia y leucocitosis. Antes puede haber una etapa intestinal con diarrea, dolor abdominal y vómitos.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 2, laboratorio) · Compendio ADN (11.d; 7.a.e)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-17",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Echinococcus granulosus",
+  "q": "¿Qué forma de Echinococcus granulosus infecta al ser humano y dónde se localiza con más frecuencia el quiste?",
+  "a": [
+   "El huevo con embrión hexacanto u oncosfera; en el hígado, en el 60-70% de los casos",
+   "La larva muscular L1; en los músculos estriados, sobre todo del diafragma",
+   "El protoescólex del quiste fértil; en el intestino delgado",
+   "El cisticerco presente en la carne; en el sistema nervioso central"
+  ],
+  "c": 0,
+  "exp": "El humano ingiere accidentalmente huevos con oncosfera o embrión hexacanto; estos penetran la mucosa intestinal, pasan a la circulación portal y forman el quiste hidatídico, sobre todo en hígado (60-70%) y en segundo lugar en pulmón.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3, laboratorio) · Compendio ADN (11.d; 7.a.g)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-18",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Brucella spp.",
+  "q": "¿Cómo son las bacterias del género Brucella?",
+  "a": [
+   "Cocobacilos gramnegativos pequeños, inmóviles y de crecimiento lento",
+   "Espiroquetas finas y enroscadas, con un gancho en uno o ambos extremos",
+   "Bacilos grampositivos esporulados y aerobios",
+   "Bacterias intracelulares obligadas con cuerpos elementales y reticulados"
+  ],
+  "c": 0,
+  "exp": "Brucella es un cocobacilo gramnegativo pequeño, inmóvil y no encapsulado, aerobio estricto y de crecimiento lento (una semana o más): los hemocultivos se incuban dos semanas antes de informarse negativos.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5.1) · Compendio ADN (11.f)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-19",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Leptospira interrogans",
+  "q": "¿Qué característica de Leptospira explica que atraviese mucosas intactas o pequeñas abrasiones de la piel?",
+  "a": [
+   "Que es una espiroqueta fina y muy móvil, con flagelos periplásmicos",
+   "Que forma esporas resistentes a la desecación",
+   "Que produce una exotoxina que lisa el epitelio",
+   "Que es un parásito intracelular obligado del sistema reticuloendotelial"
+  ],
+  "c": 0,
+  "exp": "Las leptospiras son espiroquetas finas y enroscadas, con un gancho en los extremos y dos flagelos periplásmicos que les dan movilidad: por eso penetran mucosas intactas o piel con cortes y se diseminan por sangre a todos los tejidos.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5.6) · Compendio ADN (11.g)",
+  "verificar": false
+ },
+ {
+  "id": "n11-n-20",
+  "nucleo": "11",
+  "difficulty": "normal",
+  "topic": "Chlamydophila psittaci",
+  "q": "¿Cómo se transmite la psitacosis y qué forma del agente es la infectante?",
+  "a": [
+   "Por inhalación de excrementos secos o secreciones de aves; el cuerpo elemental",
+   "Por mordedura del ave infectada; el cuerpo reticulado",
+   "Por ingestión de huevos presentes en el plumaje; la oncosfera hexacanto",
+   "Por contacto de la piel con agua con orina de ave; el cuerpo reticulado"
+  ],
+  "c": 0,
+  "exp": "C. psittaci ingresa por el aparato respiratorio al inhalar excrementos secos, orina o secreciones de aves. El cuerpo elemental es la forma infectante, metabólicamente inactiva y resistente al ambiente; el reticulado es el que se multiplica.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5, Psitacosis) · Compendio ADN (11.h)",
+  "verificar": false
+ },
+ {
+  "id": "n11-d-01",
+  "nucleo": "11",
+  "difficulty": "dificil",
+  "topic": "Virus Junín (fiebre hemorrágica argentina)",
+  "q": "Un paciente con fiebre, cefalea, mareos y dolor ocular durmió en el galpón de una casa quinta donde había problemas con el control de roedores de los campos vecinos. ¿Qué agente sospechás?",
+  "a": [
+   "Virus Junín (Arenaviridae)",
+   "Hantavirus (familia Bunyaviridae)",
+   "Leptospira interrogans (leptospirosis)",
+   "Chlamydophila psittaci (psitacosis)"
+  ],
+  "c": 0,
+  "exp": "El síndrome febril con cefalea, mareos y dolor retroorbitario más exposición a roedores en un área posiblemente endémica orienta a fiebre hemorrágica argentina por virus Junín, un arenavirus con envoltura y ARN de cadena simple.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4, caso 1) · Compendio ADN (11.b)",
+  "verificar": false
+ },
+ {
+  "id": "n11-d-02",
+  "nucleo": "11",
+  "difficulty": "dificil",
+  "topic": "Hantavirus",
+  "q": "Un trabajador del Parque Nacional Los Alerces ingresa a Esquel por insuficiencia respiratoria grave tras tres días de fiebre y mialgias; a los 7 días su esposa inicia síntomas similares. ¿Qué sospechás?",
+  "a": [
+   "Síndrome pulmonar por hantavirus, probablemente por virus Andes",
+   "Fiebre hemorrágica argentina por virus Junín",
+   "Leptospirosis en su forma ictérica o síndrome de Weil",
+   "Psitacosis con compromiso pulmonar y del sistema nervioso central"
+  ],
+  "c": 0,
+  "exp": "La progresión rápida a insuficiencia respiratoria en la región surandina y el contagio a la esposa orientan a SPH: la transmisión interhumana sólo se demostró para el virus Andes. No hay tratamiento específico ni vacuna.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4, caso 2) · Compendio ADN (11.b)",
+  "verificar": false
+ },
+ {
+  "id": "n11-d-03",
+  "nucleo": "11",
+  "difficulty": "dificil",
+  "topic": "Hantavirus",
+  "q": "¿Cuál es la diferencia correcta entre reservorios y áreas de riesgo de la FHA y de la hantavirosis en Argentina?",
+  "a": [
+   "La FHA tiene a Calomys musculinus en la pampa húmeda; el hantavirus, a Oligoryzomys",
+   "Ambas comparten el mismo reservorio roedor, pero la FHA sólo aparece en la región surandina",
+   "La FHA tiene reservorio en roedores urbanos y la hantavirosis en aves acuáticas",
+   "La hantavirosis se limita a Buenos Aires, Córdoba y Santa Fe, y la FHA a la Patagonia"
+  ],
+  "c": 0,
+  "exp": "El área endémica de FHA es la pampa húmeda (Buenos Aires, Córdoba, Santa Fe y La Pampa), con Calomys musculinus como reservorio principal. El SPH se distribuye en NOA, NEA, Centro y surandina, con roedores del género Oligoryzomys.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4.b) · Compendio ADN (11.b)",
+  "verificar": false
+ },
+ {
+  "id": "n11-d-04",
+  "nucleo": "11",
+  "difficulty": "dificil",
+  "topic": "Trichinella spiralis",
+  "q": "Confirmás una triquinosis en un paciente que comió ahumado de jabalí en una reunión familiar. ¿Cuál es la conducta correcta del equipo de salud?",
+  "a": [
+   "Notificar el caso e investigar a los comensales y el alimento",
+   "Aislar al paciente en habitación individual durante diez días",
+   "Indicar profilaxis a los convivientes con gammaglobulina específica",
+   "Pedir coproparasitológico seriado a toda la familia"
+  ],
+  "c": 0,
+  "exp": "La triquinosis es un evento de notificación obligatoria: hay que notificar, identificar a los contactos que pudieron comer la misma carne, intervenir sobre el alimento y el establecimiento, tratar al paciente y educar sobre la cocción.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 2, laboratorio, consignas 2 y 3) · Compendio ADN (11.d)",
+  "verificar": false
+ },
+ {
+  "id": "n11-d-05",
+  "nucleo": "11",
+  "difficulty": "dificil",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "¿Qué hallazgos de laboratorio y qué estudio confirman una sospecha de triquinosis?",
+  "a": [
+   "Eosinofilia con CPK y LDH elevadas, y ELISA IgG para Trichinella",
+   "Leucopenia con plaquetopenia, y RT-PCR en sangre del período agudo",
+   "Eosinofilia con anemia ferropénica, y coproparasitológico seriado",
+   "Bilirrubina y creatinina elevadas, y hemaglutinación indirecta"
+  ],
+  "c": 0,
+  "exp": "El hemograma muestra eosinofilia y leucocitosis, con CK y LDH elevadas por el daño muscular. La confirmación es serológica (ELISA IgG, detectable entre 12 y 60 días) y, si hace falta, digestión artificial de músculo.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 2, laboratorio) · Compendio ADN (11.d; 7.a.e)",
+  "verificar": false
+ },
+ {
+  "id": "n11-d-06",
+  "nucleo": "11",
+  "difficulty": "dificil",
+  "topic": "Toxocara canis",
+  "q": "Un nene de 10 años con perros sin desparasitar tiene disminución de la agudeza visual, granuloma macular en el fondo de ojo y eosinofilia. ¿Qué parásito y qué estadio explican el cuadro?",
+  "a": [
+   "Toxocara canis; la larva L2 encapsulada en un granuloma",
+   "Echinococcus granulosus; el quiste hidatídico con vesículas hijas",
+   "Trichinella spiralis; la larva L1 enquistada en el músculo",
+   "Taenia solium; el cisticerco en el tejido ocular"
+  ],
+  "c": 0,
+  "exp": "En la toxocariasis el humano es hospedador accidental: las larvas L2 migran por la circulación sistémica y quedan encapsuladas en granulomas (larva migrans visceral u ocular). El diagnóstico es serológico, no coproparasitológico.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 4, laboratorio) · Compendio ADN (caso 6, Toxocara canis)",
+  "verificar": false
+ },
+ {
+  "id": "n11-d-07",
+  "nucleo": "11",
+  "difficulty": "dificil",
+  "topic": "Echinococcus granulosus",
+  "q": "¿Por qué no se usa materia fecal como muestra para diagnosticar hidatidosis en el ser humano?",
+  "a": [
+   "Porque el humano no alberga el parásito adulto y no elimina huevos",
+   "Porque los huevos se destruyen al pasar por el intestino humano",
+   "Porque los huevos de Echinococcus no se distinguen de los de Taenia",
+   "Porque el quiste se calcifica y deja de liberar material al intestino"
+  ],
+  "c": 0,
+  "exp": "El humano es hospedador intermediario accidental: desarrolla el quiste pero no el adulto intestinal, así que no elimina huevos por heces. El coproparasitológico y el ELISA de coproantígenos sí son útiles en el perro.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3, laboratorio) · Compendio ADN (11.d; 7.a.g)",
+  "verificar": false
+ },
+ {
+  "id": "n11-d-08",
+  "nucleo": "11",
+  "difficulty": "dificil",
+  "topic": "Echinococcus granulosus",
+  "q": "¿Con qué método de imagen se busca el quiste hidatídico hepático y en qué regiones del país es endémica la enfermedad?",
+  "a": [
+   "Ecotomografía; en la Patagonia y sectores de la región Centro",
+   "Radiografía simple de abdomen; sólo en las provincias del NOA y el NEA",
+   "Resonancia magnética; exclusivamente en la pampa húmeda",
+   "Centellograma hepático; sólo en el NEA"
+  ],
+  "c": 0,
+  "exp": "La ecotomografía muestra el quiste y sus vesículas hijas y es de gran utilidad en el hígado; TC y RM aportan detalle anatómico. Las áreas endémicas son la Patagonia y sectores de Buenos Aires, La Pampa, sur de Santa Fe y Córdoba.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3, laboratorio) · Compendio ADN (11.d; 7.a.g)",
+  "verificar": false
+ },
+ {
+  "id": "n11-d-09",
+  "nucleo": "11",
+  "difficulty": "dificil",
+  "topic": "Brucella spp.",
+  "q": "¿Qué resultado serológico se considera diagnóstico de brucelosis?",
+  "a": [
+   "Un aumento de cuatro veces del título o un único título de 1:160 o mayor",
+   "Cualquier título de IgG positivo, por bajo que sea",
+   "La detección de IgM, que desaparece en la primera semana",
+   "La presencia de IgA en orina durante la convalecencia"
+  ],
+  "c": 0,
+  "exp": "Los anticuerpos anti-Brucella pueden persistir mucho tiempo, así que el diagnóstico exige un aumento de cuatro veces del título o un único título igual o mayor a 1:160. Puede haber reactividad cruzada con otras bacterias.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5.2) · Compendio ADN (11.f)",
+  "verificar": false
+ },
+ {
+  "id": "n11-d-10",
+  "nucleo": "11",
+  "difficulty": "dificil",
+  "topic": "Respuesta inmune",
+  "q": "¿Cómo sobrevive Brucella dentro de los macrófagos que la fagocitan?",
+  "a": [
+   "Inhibe la fusión fagosoma-lisosoma, suprime el TNF-alfa y produce catalasa",
+   "Libera una exotoxina potente que lisa al fagocito desde adentro",
+   "Se recubre de una cápsula que impide el reconocimiento por las opsoninas",
+   "Escapa al citoplasma gracias a la cadena O rugosa de su lipopolisacárido"
+  ],
+  "c": 0,
+  "exp": "Brucella es un parásito intracelular del sistema reticuloendotelial: inhibe la fusión fagosoma-lisosoma, suprime el TNF-alfa e inactiva el peróxido de hidrógeno y el superóxido con catalasa y superóxido dismutasa.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5.1) · Compendio ADN (11.f)",
+  "verificar": false
+ },
+ {
+  "id": "n11-d-11",
+  "nucleo": "11",
+  "difficulty": "dificil",
+  "topic": "Chlamydophila psittaci",
+  "q": "¿Cómo se manifiesta la psitacosis y cuánto dura su período de incubación?",
+  "a": [
+   "Fiebre alta, cefalea y tos no productiva, tras 5 a 14 días",
+   "Diarrea acuosa y vómitos, tras 24 a 48 horas de incubación",
+   "Edema facial y mialgias con eosinofilia, tras 1 a 2 semanas",
+   "Ictericia con insuficiencia renal y hemorragias, tras 6 a 14 días"
+  ],
+  "c": 0,
+  "exp": "Tras 5 a 14 días de incubación aparecen cefalea, fiebre alta, escalofríos, mialgias y tos no productiva con crepitantes y consolidación. Es frecuente el compromiso del sistema nervioso central y puede haber hepatomegalia y esplenomegalia.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5, Psitacosis) · Compendio ADN (11.h)",
+  "verificar": false
+ },
+ {
+  "id": "n11-d-12",
+  "nucleo": "11",
+  "difficulty": "dificil",
+  "topic": "Respuesta inmune",
+  "q": "¿Qué es el síndrome de Weil y qué papel tiene la respuesta inmune en la leptospirosis?",
+  "a": [
+   "Es la forma ictérica grave; parte del daño, como la meningitis y la nefropatía, es inmunológico",
+   "Es la forma leve seudogripal; la respuesta inmune no participa del daño",
+   "Es una reacción anafiláctica por rotura de un quiste, mediada por IgE",
+   "Es la fase convaleciente con eliminación urinaria prolongada de la bacteria"
+  ],
+  "c": 0,
+  "exp": "El síndrome de Weil es la forma ictérica grave (cerca del 10% de las infecciones sintomáticas), con insuficiencia hepática y renal, vasculitis, miocarditis y mortalidad del 10-15%. La meningitis y la nefropatía por inmunocomplejos son inmunológicas.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 5.7) · Compendio ADN (11.g)",
+  "verificar": false
+ },
+ {
+  "id": "n11-d-13",
+  "nucleo": "11",
+  "difficulty": "dificil",
+  "topic": "Virus de la rabia (Lyssavirus)",
+  "q": "¿Qué afirmación sobre la profilaxis post-exposición antirrábica es correcta?",
+  "a": [
+   "Se prefiere el esquema de Zagreb: 4 dosis en 3 visitas, con dos dosis el día 0",
+   "El esquema de Essen se reserva para pacientes inmunocomprometidos",
+   "El embarazo contraindica la vacunación antirrábica",
+   "Las dosis son menores en niños que en adultos"
+  ],
+  "c": 0,
+  "exp": "Zagreb (día 0 con dos dosis, una en cada brazo, día 7 y día 21) se prefiere porque reduce una visita y el abandono. Essen modificado son 4 dosis en 4 visitas y no se usa en inmunocomprometidos; el embarazo no contraindica la vacuna.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3.f) · Compendio ADN (11.a)",
+  "verificar": false
+ },
+ {
+  "id": "n11-d-14",
+  "nucleo": "11",
+  "difficulty": "dificil",
+  "topic": "Epidemiología argentina",
+  "q": "El único caso confirmado de rabia humana desde 2021 fue una mujer mordida por un gato callejero al que había contagiado un murciélago. ¿Qué muestra este caso?",
+  "a": [
+   "Un spillover: la vigilancia animal sigue siendo clave aunque no haya casos humanos",
+   "Que el ciclo doméstico canino es hoy la principal fuente de rabia humana",
+   "Que la profilaxis post-exposición perdió eficacia frente a variantes de murciélago",
+   "Que la rabia dejó de ser un problema de salud pública en el país"
+  ],
+  "c": 0,
+  "exp": "El caso (Buenos Aires, 2021) es un ejemplo de spillover: un murciélago Tadarida brasiliensis contagió al gato y este a la mujer, que no consultó ni recibió PPE. La ausencia de casos humanos no implica ausencia de circulación viral.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 3, BEN N.º 799 SE 9 2026)",
+  "verificar": false
+ },
+ {
+  "id": "n11-d-15",
+  "nucleo": "11",
+  "difficulty": "dificil",
+  "topic": "Epidemiología argentina",
+  "q": "¿Por qué la triquinosis y la hantavirosis tienen estacionalidades opuestas en Argentina?",
+  "a": [
+   "La triquinosis sube en los meses fríos y la hantavirosis, en los cálidos",
+   "Las dos suben en invierno, cuando los roedores se refugian en las viviendas",
+   "La triquinosis sube en verano por el consumo de carne al aire libre",
+   "La hantavirosis sube en invierno porque el virus resiste mejor el frío"
+  ],
+  "c": 0,
+  "exp": "La triquinosis se concentra en los meses fríos, asociada a la faena domiciliaria de cerdos y animales silvestres y a chacinados caseros o de circuitos informales; la hantavirosis concentra sus casos en los meses cálidos.",
+  "source": "Cuadernillo Núcleo 11 Zoonosis 2026 (Actividad 2.b del seminario y Actividad 2 del laboratorio)",
+  "verificar": false
+ }
+]

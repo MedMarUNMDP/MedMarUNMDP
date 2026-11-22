@@ -1,0 +1,767 @@
+[
+ {
+  "id": "n10-f-01",
+  "nucleo": "10",
+  "difficulty": "facil",
+  "topic": "Aedes aegypti",
+  "q": "¿Cuál es el principal vector del dengue en los ciclos urbanos de nuestro país?",
+  "a": [
+   "Aedes aegypti",
+   "Anopheles hembra, de picadura nocturna",
+   "Flebótomos de la subfamilia Phlebotominae",
+   "Triatominos domiciliarios como la vinchuca"
+  ],
+  "c": 0,
+  "exp": "Aedes aegypti es una especie introducida e invasora que se volvió la principal de importancia sanitaria en Argentina: transmite dengue, Zika, chikungunya y fiebre amarilla urbana.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (Seminario e Introducción) · Compendio ADN (10)",
+  "verificar": false
+ },
+ {
+  "id": "n10-f-02",
+  "nucleo": "10",
+  "difficulty": "facil",
+  "topic": "Virus del dengue",
+  "q": "¿A qué familia pertenece el virus del dengue y cuántas variantes circulan?",
+  "a": [
+   "Flaviviridae (Flavivirus), con cuatro serotipos",
+   "Togaviridae (Alphavirus), con cuatro serotipos",
+   "Peribunyaviridae, con dos serotipos descriptos",
+   "Flaviviridae, pero con un único serotipo circulante"
+  ],
+  "c": 0,
+  "exp": "El virus del dengue es un Flavivirus de la familia Flaviviridae y existen cuatro variantes: DENV 1, 2, 3 y 4.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (Introducción) · Compendio ADN (10.a)",
+  "verificar": false
+ },
+ {
+  "id": "n10-f-03",
+  "nucleo": "10",
+  "difficulty": "facil",
+  "topic": "Trypanosoma cruzi",
+  "q": "¿Cuál es el vector principal de Trypanosoma cruzi en la enfermedad de Chagas-Mazza?",
+  "a": [
+   "Los triatominos, como la vinchuca (Triatoma infestans)",
+   "El mosquito Aedes aegypti, de hábitos diurnos y urbanos",
+   "Los flebótomos de zonas rurales y peridomiciliarias",
+   "Los mosquitos Culex que crían en grandes humedales"
+  ],
+  "c": 0,
+  "exp": "El vector del Chagas son los triatominos; en Argentina Triatoma infestans, antropófila, de hábitos nocturnos y que vuela poco, coloniza la vivienda precaria.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (Actividad 5 y TP 21) · Compendio ADN (10.g)",
+  "verificar": false
+ },
+ {
+  "id": "n10-f-04",
+  "nucleo": "10",
+  "difficulty": "facil",
+  "topic": "Plasmodium spp.",
+  "q": "¿Qué insecto transmite el paludismo y qué hábito de picadura tiene?",
+  "a": [
+   "El mosquito Anopheles hembra, de picadura nocturna",
+   "El mosquito Aedes aegypti, de picadura diurna",
+   "El flebótomo hembra, que pica al atardecer",
+   "El triatomino, que pica de noche y defeca al alimentarse"
+  ],
+  "c": 0,
+  "exp": "El vector del paludismo es la hembra de Anopheles, que cría en pantanos y agua estancada, pica de noche y es antropofílica.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (TP 21, Actividad 2) · Compendio ADN (10.e)",
+  "verificar": false
+ },
+ {
+  "id": "n10-f-05",
+  "nucleo": "10",
+  "difficulty": "facil",
+  "topic": "Leishmania spp.",
+  "q": "¿Qué insectos transmiten la leishmaniasis?",
+  "a": [
+   "Dípteros flebótomos de la subfamilia Phlebotominae",
+   "Mosquitos del género Anopheles, de actividad nocturna",
+   "Mosquitos Aedes que crían en recipientes artificiales",
+   "Chinches triatominas que colonizan el intradomicilio"
+  ],
+  "c": 0,
+  "exp": "Leishmania se transmite por la picadura de dípteros flebótomos (familia Psychodidae, subfamilia Phlebotominae), de hábitat rural y peridomiciliario y mayor actividad al atardecer y de noche.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4 y TP 21) · Compendio ADN (10.f)",
+  "verificar": false
+ },
+ {
+  "id": "n10-f-06",
+  "nucleo": "10",
+  "difficulty": "facil",
+  "topic": "Virus de la fiebre amarilla",
+  "q": "¿Con qué cepa se prepara la vacuna contra la fiebre amarilla y qué duración de inmunidad genera?",
+  "a": [
+   "Cepa 17D, con inmunidad para toda la vida",
+   "Cepa 17D, pero exige un refuerzo anual",
+   "Cepa TAK-003, con dos dosis separadas por tres meses",
+   "No hay vacuna: solo se hace control vectorial"
+  ],
+  "c": 0,
+  "exp": "La vacuna se prepara con la cepa 17D (virus vivo atenuado) y, según la OMS, una dosis protege de por vida. En Argentina el calendario la indica a los 18 meses, con refuerzo a los 11 años, en zonas de riesgo.",
+  "source": "Compendio ADN (10.b, punto 4) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 2)",
+  "verificar": false
+ },
+ {
+  "id": "n10-f-07",
+  "nucleo": "10",
+  "difficulty": "facil",
+  "topic": "Aedes aegypti",
+  "q": "En el ambiente urbano, ¿dónde pone sus huevos Aedes aegypti?",
+  "a": [
+   "En recipientes artificiales con agua limpia y estancada",
+   "En pantanos y charcas con abundante vegetación",
+   "En grietas de paredes de barro y techos de paja",
+   "En materia orgánica sombreada del peridomicilio rural"
+  ],
+  "c": 0,
+  "exp": "Aedes aegypti usa cualquier contenedor que acumule agua (macetas, cubetas, botellas). Por eso la medida central es eliminar criaderos; los pantanos son el criadero de Anopheles.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (TP 21, Actividad 1) · Compendio ADN (10)",
+  "verificar": false
+ },
+ {
+  "id": "n10-f-08",
+  "nucleo": "10",
+  "difficulty": "facil",
+  "topic": "Virus chikungunya",
+  "q": "¿A qué familia pertenece el virus chikungunya?",
+  "a": [
+   "Togaviridae, es un alphavirus",
+   "Flaviviridae, igual que dengue y Zika",
+   "Peribunyaviridae, igual que el virus Oropouche",
+   "Flaviviridae, aunque sin reactividad cruzada"
+  ],
+  "c": 0,
+  "exp": "Chikungunya es un alphavirus de la familia Togaviridae, a diferencia de dengue, Zika y fiebre amarilla, que son Flaviviridae. Comparte con ellos el vector Aedes.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (cuadro de agentes) · Compendio ADN (10.d)",
+  "verificar": false
+ },
+ {
+  "id": "n10-f-09",
+  "nucleo": "10",
+  "difficulty": "facil",
+  "topic": "Plasmodium spp.",
+  "q": "Entre los tres protozoos del núcleo, ¿cuál es el apicomplexa?",
+  "a": [
+   "Plasmodium spp.",
+   "Trypanosoma cruzi",
+   "Leishmania spp.",
+   "Ninguno: los tres son protozoos flagelados"
+  ],
+  "c": 0,
+  "exp": "Plasmodium es un protozoo apicomplexa (esporozoario); Trypanosoma cruzi y Leishmania son protozoos flagelados.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (cuadro de agentes) · Compendio ADN (10)",
+  "verificar": false
+ },
+ {
+  "id": "n10-f-10",
+  "nucleo": "10",
+  "difficulty": "facil",
+  "topic": "Prevención",
+  "q": "¿En qué se basa la prevención del paludismo en la mayoría de los países?",
+  "a": [
+   "En el rociado residual intradomiciliario y los mosquiteros con insecticida",
+   "En la vacunación masiva y gratuita de toda la población de las zonas endémicas",
+   "En el control de los bancos de sangre y el tamizaje de donantes",
+   "En el mejoramiento habitacional con revoque y pisos de madera"
+  ],
+  "c": 0,
+  "exp": "La prevención del paludismo se apoya en el rociado residual intradomiciliario (RRI) y en la distribución de mosquiteros tratados con insecticida (MTI).",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (Introducción) · Compendio ADN (10)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-01",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Arbovirus",
+  "q": "¿Qué significa que un virus sea un arbovirus?",
+  "a": [
+   "Que se agrupa por su transmisión vectorial por artrópodos, no por su taxonomía",
+   "Que pertenece a la familia Flaviviridae y tiene ARN de polaridad positiva",
+   "Que es un género viral definido por la secuencia de su glucoproteína E",
+   "Que solo puede replicarse en células de invertebrados, nunca de vertebrados"
+  ],
+  "c": 0,
+  "exp": "Arbovirus (arthropod borne viral diseases) no es una clasificación taxonómica sino un agrupamiento ecológico basado en la transmisión por artrópodos; incluye varias familias virales.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (Introducción) · Compendio ADN (10)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-02",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Arbovirus",
+  "q": "Una vez que el mosquito ingiere sangre virémica, ¿cuál es el recorrido del arbovirus dentro del vector?",
+  "a": [
+   "Epitelio intestinal, lámina basal, hemolinfa y glándulas salivales",
+   "Glándulas salivales, hemolinfa y después epitelio intestinal",
+   "Hemolinfa, ovarios y transmisión exclusivamente a la descendencia",
+   "Epitelio intestinal y luego eliminación en las deyecciones del insecto"
+  ],
+  "c": 0,
+  "exp": "El virus replica en el epitelio intestinal, atraviesa la lámina basal, viaja por la hemolinfa y se acumula en las glándulas salivales, desde donde se inocula con la saliva.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (Introducción, Figura 1) · Compendio ADN (10)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-03",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Virus del dengue",
+  "q": "¿Cuáles son las características estructurales del virus del dengue?",
+  "a": [
+   "ARN monocatenario positivo, envuelto, con glucoproteína E externa",
+   "ADN bicatenario desnudo, con cápside icosaédrica y replicación nuclear",
+   "ARN segmentado de polaridad negativa, envuelto",
+   "ARN monocatenario positivo pero sin envoltura lipídica"
+  ],
+  "c": 0,
+  "exp": "Los cuatro serotipos son ARN monocatenario positivo con envoltura, donde la glucoproteína E forma la capa externa y expresa determinantes antigénicos compartidos entre flavivirus.",
+  "source": "Compendio ADN (10.a, punto 1) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 2)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-04",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Vectores",
+  "q": "¿Qué combinación de vector y hábitat de cría o refugio es correcta?",
+  "a": [
+   "Triatoma, grietas de paredes rústicas; Anopheles, cuerpos de agua con vegetación",
+   "Triatoma, microcontenedores urbanos; Anopheles, grietas de paredes de barro",
+   "Lutzomyia, agua limpia de macetas; Aedes, materia orgánica sombreada",
+   "Los cuatro usan los mismos microhábitats urbanos con agua estancada"
+  ],
+  "c": 0,
+  "exp": "Los vectores de parásitos piden nichos rústicos (grietas para Triatoma, materia orgánica sombreada para Lutzomyia, agua con vegetación para Anopheles); Aedes aegypti usa microcontenedores artificiales urbanos.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (TP 21, Introducción)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-05",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Virus del dengue",
+  "q": "En la primoinfección por dengue, ¿cuándo ocurre la etapa crítica y con qué signo coincide?",
+  "a": [
+   "Entre los días 4 y 7, al caer la fiebre (defervescencia)",
+   "En los primeros dos días, con el pico febril de 40 °C",
+   "Después del día 10, cuando la IgM alcanza su máximo",
+   "Durante la etapa de recuperación, con la reabsorción del líquido"
+  ],
+  "c": 0,
+  "exp": "La etapa crítica va aproximadamente del día 4 al 7 y coincide con la defervescencia: es el período de mayor riesgo por extravasación de plasma, hemorragias y daño de órganos.",
+  "source": "Compendio ADN (10.a, etapas) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 1.b.I)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-06",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Epidemiología",
+  "q": "¿Qué integra la tríada ecoepidemiológica de las infecciones de transmisión vectorial?",
+  "a": [
+   "Patógeno, vector y hospedador",
+   "Vector, reservorio y vacuna disponible",
+   "Clima, insecticida y vivienda precaria",
+   "Patógeno, hospedador intermedio y hospedador definitivo"
+  ],
+  "c": 0,
+  "exp": "La tríada es patógeno + vector + hospedador, modulada por la matriz ambiental y socioeconómica: la temperatura, la humedad y el régimen hídrico regulan la competencia vectorial.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (TP 21, Introducción)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-07",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Virus del dengue",
+  "q": "¿Cuál es el mecanismo del fenómeno de amplificación dependiente de anticuerpos (ADA) en el dengue?",
+  "a": [
+   "Anticuerpos no neutralizantes facilitan la entrada del virus a células mononucleares",
+   "Anticuerpos neutralizantes bloquean la glucoproteína E y lisan los hepatocitos",
+   "Los linfocitos T citotóxicos destruyen las plaquetas por reconocimiento directo del virus",
+   "El interferón inducido por el virus produce la extravasación de plasma"
+  ],
+  "c": 0,
+  "exp": "Los anticuerpos producidos contra un serotipo no son necesariamente neutralizantes frente a otro: al unirse al virus favorecen su entrada en macrófagos y monocitos vía receptores Fc y amplifican la infección.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (Actividad 1.b.IV) · Compendio ADN (10.a, punto 2)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-08",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Respuesta inmune",
+  "q": "En la inmunopatogenia del dengue, ¿qué citocina se relaciona con las manifestaciones hemorrágicas?",
+  "a": [
+   "TNF-α",
+   "IL-4",
+   "IL-10",
+   "Interferón gamma producido por linfocitos B"
+  ],
+  "c": 0,
+  "exp": "Los macrófagos producen citocinas proinflamatorias (IL-1β, IL-2, IL-6, IL-8 y TNF-α); el TNF-α se vincula con las hemorragias al favorecer la trombocitopenia y la disfunción endotelial.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (Actividad 1.b.II y III) · Compendio ADN (10, respuesta inmune)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-09",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "Un paciente con sospecha de dengue consulta en el segundo día de fiebre. ¿Qué método diagnóstico corresponde?",
+  "a": [
+   "RT-PCR para el ARN viral o ELISA de antígeno",
+   "IgM específica por ELISA de captura",
+   "Comparar títulos de IgG de fase aguda y convaleciente",
+   "Inmunofluorescencia indirecta sobre biopsia hepática"
+  ],
+  "c": 0,
+  "exp": "En la viremia temprana se usa aislamiento viral, RT-PCR o ELISA de antígeno; la IgM recién se hace detectable en la etapa crítica, cuando la viremia desaparece.",
+  "source": "Compendio ADN (10.a, punto 5) · Cuadernillo Núcleo 10 Vectores 2026 (TP 21, Actividad 1.d)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-10",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Virus de la fiebre amarilla",
+  "q": "¿Cómo es la patogenia de la fiebre amarilla en su forma grave?",
+  "a": [
+   "Enfermedad bifásica con tropismo hepático y renal, ictericia y hemorragias",
+   "Enfermedad monofásica con artritis paralizante persistente",
+   "Infección leve con sarpullido, conjuntivitis no purulenta y dolor en manos y pies",
+   "Accesos febriles periódicos por ruptura sincronizada de eritrocitos"
+  ],
+  "c": 0,
+  "exp": "Es bifásica: una fase febril inicial y, tras una breve remisión, la forma grave por localización hepática y renal, con ictericia, hemorragias digestivas (vómito negro) y letalidad de hasta 50% en epidemias.",
+  "source": "Compendio ADN (10.b, punto 2) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 2)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-11",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Virus del Zika",
+  "q": "Según el Ministerio de Salud, ¿qué signo acompaña al sarpullido en el cuadro sintomático del Zika?",
+  "a": [
+   "Conjuntivitis no purulenta",
+   "Ictericia con vómito negro",
+   "Esplenomegalia con pancitopenia",
+   "Úlcera indolora de fondo granuloso en el sitio de la picadura"
+  ],
+  "c": 0,
+  "exp": "El cuadro incluye sarpullido más fiebre, conjuntivitis no purulenta, cefalea, dolor corporal y articular (manos y pies), decaimiento e inflamación de miembros inferiores; puede dar problemas neurológicos.",
+  "source": "Compendio ADN (10.c, punto 2, sintomatología del Ministerio de Salud)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-12",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Virus chikungunya",
+  "q": "¿Qué manifestación clínica le da el nombre a la enfermedad por virus chikungunya?",
+  "a": [
+   "Las artralgias intensas que hacen caminar encorvado",
+   "La ictericia de la forma grave",
+   "El shock por extravasación de plasma",
+   "La microcefalia de la infección congénita"
+  ],
+  "c": 0,
+  "exp": "El nombre, en lengua makonde, alude a la postura encorvada por las artralgias intensas (el material habla de «artritis paralizante»). No hay antiviral específico ni vacuna en el Calendario Nacional.",
+  "source": "Compendio ADN (10.d, puntos 2 y 4) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 2)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-13",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Plasmodium spp.",
+  "q": "En el ciclo de Plasmodium, ¿qué papel cumple el mosquito Anopheles?",
+  "a": [
+   "Es el hospedador definitivo, donde ocurre la fase sexual o esporogónica",
+   "Es el hospedador intermedio, donde ocurre la fase eritrocítica",
+   "Es solo un transportador mecánico, sin replicación del parásito",
+   "Es el reservorio donde el parásito persiste como hipnozoíto"
+  ],
+  "c": 0,
+  "exp": "El ciclo es heteroxénico: el humano es el hospedador intermedio (fases exoeritrocítica y eritrocítica) y el Anopheles hembra el definitivo, donde se da la fase sexual o esporogónica.",
+  "source": "Compendio ADN (10.e, cadena epidemiológica) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 3)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-14",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Plasmodium spp.",
+  "q": "¿Qué estadio de Plasmodium entra al ser humano con la picadura y hacia dónde se dirige?",
+  "a": [
+   "El esporozoíto, que viaja al hígado",
+   "El gametocito, que queda en sangre periférica",
+   "El merozoíto, que va directo al eritrocito",
+   "El tripomastigote metacíclico, que penetra en la dermis"
+  ],
+  "c": 0,
+  "exp": "El Anopheles inocula esporozoítos maduros de sus glándulas salivales en la dermis y el torrente sanguíneo; los esporozoítos viajan al hígado para la fase preeritrocítica o exoeritrocítica.",
+  "source": "Compendio ADN (10.e, puerta de entrada) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 3)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-15",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Plasmodium spp.",
+  "q": "¿Cuál es la puerta de salida de Plasmodium desde el hospedador humano?",
+  "a": [
+   "Los gametocitos de la sangre periférica, ingeridos por el mosquito",
+   "Los esporozoítos liberados por el hígado hacia la bilis",
+   "Los merozoítos eliminados por orina durante los accesos febriles",
+   "Los trofozoítos que salen por las lesiones cutáneas de la picadura"
+  ],
+  "c": 0,
+  "exp": "El mosquito ingiere micro y macrogametocitos al alimentarse; estos resisten la digestión en el estómago del vector e inician la esporogonia.",
+  "source": "Compendio ADN (10.e, puerta de salida) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 3)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-16",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Leishmania spp.",
+  "q": "¿Qué formas presenta Leishmania en el mamífero y en el vector, y cuál es su tropismo celular?",
+  "a": [
+   "Amastigote intracelular en el mamífero y promastigote flagelado en el vector",
+   "Promastigote intracelular en el mamífero y amastigote flagelado en el vector",
+   "Epimastigote en el mamífero y tripomastigote metacíclico en el vector",
+   "Esporozoíto en el mamífero y gametocito en el intestino del vector"
+  ],
+  "c": 0,
+  "exp": "Es un parásito dimorfo: promastigote flagelado en el vector y amastigote intracelular obligado en las células del sistema fagocítico mononuclear (macrófagos y monocitos) del mamífero.",
+  "source": "Compendio ADN (10.f, puntos 1 y I) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4.b.I)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-17",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Leishmania spp.",
+  "q": "¿Qué cuadro clínico define a la leishmaniasis visceral o kala-azar?",
+  "a": [
+   "Fiebre, esplenomegalia, caquexia y pancitopenia",
+   "Úlceras cutáneas indoloras con fondo granuloso",
+   "Destrucción del tabique nasal con disfonía",
+   "Infiltrados nodulares difusos de aspecto leprómico, sin úlcera"
+  ],
+  "c": 0,
+  "exp": "La forma visceral (kala-azar) cursa con fiebre, esplenomegalia, caquexia y pancitopenia por compromiso del sistema fagocítico mononuclear: bazo, hígado, médula ósea y ganglios.",
+  "source": "Compendio ADN (10.f, punto II) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4.b.II y III)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-18",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Trypanosoma cruzi",
+  "q": "¿Cómo ingresa Trypanosoma cruzi al ser humano en la transmisión vectorial?",
+  "a": [
+   "Por los tripomastigotes metacíclicos de las deyecciones del triatomino",
+   "Por los tripomastigotes inoculados con la saliva del triatomino",
+   "Por los amastigotes que el vector regurgita mientras se alimenta",
+   "Por los epimastigotes que atraviesan la piel intacta del hospedador"
+  ],
+  "c": 0,
+  "exp": "La vía vectorial es por las deyecciones del triatomino infectado al picar: los tripomastigotes metacíclicos penetran las células en el sitio de la picadura y se transforman en amastigotes.",
+  "source": "Compendio ADN (10.g, vías de transmisión y formas) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 5)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-19",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Trypanosoma cruzi",
+  "q": "¿Qué forma de Trypanosoma cruzi se multiplica en el intestino medio del triatomino?",
+  "a": [
+   "El epimastigote",
+   "El amastigote",
+   "El tripomastigote metacíclico",
+   "El promastigote procíclico, que después hace metaciclogénesis"
+  ],
+  "c": 0,
+  "exp": "En el vector, los tripomastigotes pasan a esferomastigotes en el estómago y luego a epimastigotes fusiformes y móviles que se reproducen en el intestino medio; en el intestino posterior se forman los metacíclicos.",
+  "source": "Compendio ADN (10.g, formas del parásito)",
+  "verificar": false
+ },
+ {
+  "id": "n10-n-20",
+  "nucleo": "10",
+  "difficulty": "normal",
+  "topic": "Trypanosoma cruzi",
+  "q": "Además de la vectorial, ¿cuáles son otras vías de transmisión de la enfermedad de Chagas-Mazza?",
+  "a": [
+   "Transfusional, congénita, oral, accidental y por trasplantes",
+   "Respiratoria por aerosoles y contacto interhumano casual",
+   "Sexual y por fómites contaminados con deyecciones secas",
+   "Solo la congénita, porque las demás fueron descartadas"
+  ],
+  "c": 0,
+  "exp": "La vectorial es la principal en la naturaleza, pero también se transmite por sangre o plasma contaminados, por vía transplacentaria (alrededor del 5 % de los hijos de madres infectadas), oral, accidental y por trasplantes.",
+  "source": "Compendio ADN (10.g, vías de transmisión) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4, casos clínicos)",
+  "verificar": false
+ },
+ {
+  "id": "n10-d-01",
+  "nucleo": "10",
+  "difficulty": "dificil",
+  "topic": "Plasmodium spp.",
+  "q": "Un nene de 6 años de una región subtropical tiene fiebre, escalofríos y sudoración cada 48 h. La gota gruesa muestra eritrocitos con trofozoítos y gametocitos. ¿Qué explica la periodicidad?",
+  "a": [
+   "La esquizogonia eritrocítica sincronizada, que rompe los glóbulos rojos cada 48 h",
+   "La esquizogonia exoeritrocítica hepática, que libera merozoítos cada 48 h",
+   "La fase esporogónica del mosquito, que dura entre 8 y 12 días",
+   "La activación periódica de hipnozoítos latentes en el hepatocito"
+  ],
+  "c": 0,
+  "exp": "La fiebre terciana corresponde a accesos cada 48 h por el ciclo esquizogónico eritrocítico, cuya ruptura sincronizada libera merozoítos y pigmento y produce las etapas fría, caliente y de sudoración.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (Actividad 3.c y casos clínicos, Caso 1) · Compendio ADN (10.e)",
+  "verificar": false
+ },
+ {
+  "id": "n10-d-02",
+  "nucleo": "10",
+  "difficulty": "dificil",
+  "topic": "Plasmodium spp.",
+  "q": "¿Qué especie de Plasmodium produce fiebre cuartana y qué la caracteriza?",
+  "a": [
+   "P. malariae, con ciclo de 72 h y persistencia crónica",
+   "P. falciparum, con ciclo de 72 h y alta letalidad",
+   "P. vivax, con ciclo de 48 h y recaídas por hipnozoítos",
+   "P. ovale, con ciclo de 72 h y accesos cada dos días"
+  ],
+  "c": 0,
+  "exp": "P. malariae da fiebre cuartana (cada 72 h) y persistencia crónica por su tropismo eritrocítico estable sin hipnozoítos. La terciana la causan P. falciparum (maligna), P. vivax y P. ovale.",
+  "source": "Compendio ADN (10.e, fiebre terciana y cuartana) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 3.c)",
+  "verificar": false
+ },
+ {
+  "id": "n10-d-03",
+  "nucleo": "10",
+  "difficulty": "dificil",
+  "topic": "Plasmodium spp.",
+  "q": "¿Qué ocurre durante la fase esporogónica en el Anopheles y cuánto dura?",
+  "a": [
+   "Los gametocitos forman ooquistes que liberan miles de esporozoítos en 1-2 semanas",
+   "Los esporozoítos se transforman en gametocitos en 18-25 días",
+   "Los merozoítos invaden el epitelio intestinal y se replican en 48 h",
+   "Los trofozoítos maduran a esquizontes en las glándulas salivales en 72 h"
+  ],
+  "c": 0,
+  "exp": "Los gametocitos forman gametos, cigoto, oocineto y ooquiste, que libera miles de esporozoítos en 1 a 2 semanas (8-12 días según el material; depende de la temperatura); migran a las glándulas salivales.",
+  "source": "Compendio ADN (10.e, modo de transmisión y ciclo en el vector)",
+  "verificar": false
+ },
+ {
+  "id": "n10-d-04",
+  "nucleo": "10",
+  "difficulty": "dificil",
+  "topic": "Epidemiología",
+  "q": "¿Cuál es la situación de Argentina respecto del paludismo según la OMS?",
+  "a": [
+   "Está certificada libre de malaria, pero sigue vigilando casos importados",
+   "Es endémica en el NOA, con transmisión autóctona sostenida durante todo el año",
+   "Nunca tuvo transmisión autóctona, así que no requiere vigilancia",
+   "Está en fase de preeliminación, junto con Paraguay y El Salvador"
+  ],
+  "c": 0,
+  "exp": "Argentina fue certificada libre de malaria por la OMS en 2019 (Paraguay en 2018, El Salvador en 2021, Belice en 2023), pero los sistemas sanitarios siguen vigilando eventuales casos importados.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (Introducción) · Cuadernillo TP 21 (Actividad 2.c)",
+  "verificar": false
+ },
+ {
+  "id": "n10-d-05",
+  "nucleo": "10",
+  "difficulty": "dificil",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "¿Qué resultado serológico indica infección reciente por dengue?",
+  "a": [
+   "IgM específica en suero agudo o aumento al cuádruple del título de IgG",
+   "IgG positiva en una única muestra de la fase convaleciente",
+   "IgM negativa con IgG positiva en el primer día de fiebre",
+   "Cualquier título de IgG, porque no hay reactividad cruzada entre flavivirus"
+  ],
+  "c": 0,
+  "exp": "La presencia de IgM específica o un incremento al cuádruple del título entre el suero agudo y el convaleciente indican infección reciente. Hay que considerar la reactividad cruzada entre flavivirus.",
+  "source": "Compendio ADN (10.a, punto 5) · Cuadernillo Núcleo 10 Vectores 2026 (TP 21, Actividad 1.d)",
+  "verificar": false
+ },
+ {
+  "id": "n10-d-06",
+  "nucleo": "10",
+  "difficulty": "dificil",
+  "topic": "Virus del dengue",
+  "q": "¿Qué par de hallazgos de laboratorio define la etapa crítica del dengue?",
+  "a": [
+   "Plaquetas en su punto más bajo y pico de hematocrito",
+   "Plaquetas en su punto más bajo y hematocrito descendido",
+   "Plaquetas en recuperación y hematocrito en su valor basal",
+   "Viremia alta con IgM e IgG todavía indetectables"
+  ],
+  "c": 0,
+  "exp": "En la etapa crítica el recuento de plaquetas toca su mínimo y el hematocrito su máximo, por la hemoconcentración que produce la extravasación de plasma. En la recuperación el riesgo es la sobrecarga de líquidos.",
+  "source": "Compendio ADN (10.a, etapas) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 1.b.I)",
+  "verificar": false
+ },
+ {
+  "id": "n10-d-07",
+  "nucleo": "10",
+  "difficulty": "dificil",
+  "topic": "Respuesta inmune",
+  "q": "¿Cómo contribuye el complemento al aumento de la permeabilidad vascular en el dengue grave?",
+  "a": [
+   "Los inmunocomplejos activan la vía clásica y aumentan las anafilotoxinas C3a/C5a",
+   "La vía de las lectinas lisa de forma directa las plaquetas y el endotelio vascular",
+   "El complejo de ataque a la membrana destruye los hepatocitos infectados",
+   "La vía alternativa neutraliza la glucoproteína E y bloquea la viremia"
+  ],
+  "c": 0,
+  "exp": "Los anticuerpos heterólogos no neutralizantes activan el complemento por la vía clásica, con aumento de las anafilotoxinas C3a y C5a, que incrementan la permeabilidad vascular.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (Actividad 1.b.III) · Compendio ADN (10, complicaciones)",
+  "verificar": false
+ },
+ {
+  "id": "n10-d-08",
+  "nucleo": "10",
+  "difficulty": "dificil",
+  "topic": "Prevención",
+  "q": "¿Cómo recomienda el Ministerio de Salud la vacuna contra el dengue en Argentina?",
+  "a": [
+   "De 15 a 39 años en departamentos priorizados, dos dosis separadas por tres meses",
+   "A toda la población de las zonas endémicas del NEA y NOA, en dosis única anual",
+   "A los menores de 15 años del NEA y del NOA, con un esquema de tres dosis",
+   "De 15 a 39 años en zonas endémicas, y ya integra el Calendario Nacional"
+  ],
+  "c": 0,
+  "exp": "Es una estrategia focalizada con Qdenga (TAK-003) en departamentos priorizados por carga de dengue del NOA, el NEA y el Centro, con dos dosis separadas por tres meses; no integra el Calendario Nacional.",
+  "source": "Compendio ADN (10.a, punto 4) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 1.c)",
+  "verificar": false
+ },
+ {
+  "id": "n10-d-09",
+  "nucleo": "10",
+  "difficulty": "dificil",
+  "topic": "Leishmania spp.",
+  "q": "Un maderero de Puerto Iguazú tiene lesiones nodulares en tórax de un año de evolución; la biopsia muestra amastigotes dentro de macrófagos. ¿Cuál es el diagnóstico?",
+  "a": [
+   "Leishmaniasis tegumentaria",
+   "Enfermedad de Chagas-Mazza en fase aguda",
+   "Paludismo por P. vivax",
+   "Forma cutánea diseminada de la fiebre amarilla"
+  ],
+  "c": 0,
+  "exp": "Los amastigotes dentro de macrófagos dérmicos confirman leishmaniasis tegumentaria, con especies dermatotrópicas como L. braziliensis y L. guyanensis; la exposición laboral en monte es el antecedente clave.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4, casos clínicos, Caso 2) · Compendio ADN (10.f)",
+  "verificar": false
+ },
+ {
+  "id": "n10-d-10",
+  "nucleo": "10",
+  "difficulty": "dificil",
+  "topic": "Leishmania spp.",
+  "q": "En la leishmaniasis tegumentaria, ¿qué caracteriza al polo anérgico del espectro clínico?",
+  "a": [
+   "Alta carga parasitaria con respuesta Th2 e infiltrados nodulares sin úlcera",
+   "Baja carga parasitaria con respuesta Th1 exagerada y destrucción mucosa",
+   "Carga parasitaria intermedia con úlcera que cura de forma espontánea",
+   "Ausencia de parásitos con granulomas bien formados y curación rápida"
+  ],
+  "c": 0,
+  "exp": "El polo anérgico (cutánea difusa) tiene alta carga parasitaria, predominio Th2 con IL-4 e IL-10 y anergia celular, con infiltrados nodulares no ulcerativos y sin granulomas.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4.c) · Compendio ADN (10.f, espectro tegumentario)",
+  "verificar": false
+ },
+ {
+  "id": "n10-d-11",
+  "nucleo": "10",
+  "difficulty": "dificil",
+  "topic": "Leishmania spp.",
+  "q": "¿Por qué la leishmaniasis mucocutánea destruye tejido aunque haya pocos parásitos en las lesiones?",
+  "a": [
+   "Por una respuesta Th1 exagerada, con IFN-γ y TNF-α",
+   "Por la multiplicación masiva de amastigotes en la mucosa",
+   "Por la anergia inmune específica con déficit de Th1",
+   "Por la acción directa de los promastigotes metacíclicos inoculados"
+  ],
+  "c": 0,
+  "exp": "La forma mucocutánea, causada principalmente por L. braziliensis, cursa con respuesta hiperinmune (Th1 exagerada, IFN-γ y TNF-α) que produce destrucción necrotizante granulomatosa pese al pausiparasitismo.",
+  "source": "Compendio ADN (10.f, cuadro de manifestaciones) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4.b.III)",
+  "verificar": false
+ },
+ {
+  "id": "n10-d-12",
+  "nucleo": "10",
+  "difficulty": "dificil",
+  "topic": "Leishmania spp.",
+  "q": "¿Qué especies causan la leishmaniasis visceral y qué órganos compromete?",
+  "a": [
+   "L. donovani y L. infantum/chagasi: bazo, hígado, médula ósea y ganglios",
+   "L. braziliensis: tabique nasal, orofaringe y epiglotis",
+   "L. mexicana y L. amazonensis: macrófagos cutáneos y subcutáneos",
+   "L. guyanensis: macrófagos dérmicos, con úlcera única autolimitada"
+  ],
+  "c": 0,
+  "exp": "La visceral la causan L. donovani y L. infantum/chagasi, con tropismo por el sistema fagocítico mononuclear (bazo, hígado, médula ósea, ganglios); sin tratamiento es mortal en más del 95 % de los casos (OMS).",
+  "source": "Compendio ADN (10.f, cuadro de manifestaciones) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4.b.III)",
+  "verificar": false
+ },
+ {
+  "id": "n10-d-13",
+  "nucleo": "10",
+  "difficulty": "dificil",
+  "topic": "Trypanosoma cruzi",
+  "q": "Un hombre de un barrio de Santiago del Estero refiere disnea de esfuerzo, palpitaciones y edema de tobillos de meses de evolución. ¿Qué forma de Chagas corresponde?",
+  "a": [
+   "La crónica determinada, con cardiopatía chagásica",
+   "La aguda, con miocarditis difusa y alta parasitemia",
+   "La crónica indeterminada, asintomática y con anatomía normal",
+   "La congénita reactivada, con hepatoesplenomegalia"
+  ],
+  "c": 0,
+  "exp": "La forma crónica determinada (más de 10 años, 30-40% de los infectados) da cardiopatía por inflamación, miocitólisis y fibrosis del miocardio y del sistema excitoconductor, con arritmias y tromboembolismo.",
+  "source": "Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4, casos clínicos, Caso 3) · Compendio ADN (10.g, tropismo y fases)",
+  "verificar": false
+ },
+ {
+  "id": "n10-d-14",
+  "nucleo": "10",
+  "difficulty": "dificil",
+  "topic": "Trypanosoma cruzi",
+  "q": "¿Qué caracteriza a la fase crónica indeterminada de la enfermedad de Chagas-Mazza?",
+  "a": [
+   "Baja parasitemia con títulos altos de anticuerpos y anatomía normal",
+   "Alta parasitemia con tripomastigotes abundantes en sangre y linfa",
+   "Megaformaciones digestivas por denervación del esófago y el colon",
+   "Fibrosis del sistema excitoconductor con arritmias y tromboembolismo"
+  ],
+  "c": 0,
+  "exp": "El 60-70 % de los infectados permanece en la forma indeterminada, asintomática: baja parasitemia, títulos elevados de anticuerpos y anatomía normal. Evoluciona 1-2 % por año a formas determinadas.",
+  "source": "Compendio ADN (10.g, evolución de las formas) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 5)",
+  "verificar": false
+ },
+ {
+  "id": "n10-d-15",
+  "nucleo": "10",
+  "difficulty": "dificil",
+  "topic": "Prevención",
+  "q": "Dentro de las medidas de control del Chagas, ¿cuál corresponde a la prevención secundaria?",
+  "a": [
+   "Detectar y tratar a tiempo la infección en embarazadas y recién nacidos",
+   "Rociar las viviendas con insecticidas y mejorar la vivienda",
+   "Colocar marcapasos en la cardiopatía chagásica establecida",
+   "Dar educación sanitaria para la participación comunitaria y la vigilancia"
+  ],
+  "c": 0,
+  "exp": "La prevención secundaria busca detectar y tratar temprano: control de embarazadas y recién nacidos (sangre de cordón y serología a los 10 meses). El control vectorial es primaria y el manejo de la cardiopatía, terciaria.",
+  "source": "Compendio ADN (10.g, medidas de control) · Cuadernillo Núcleo 10 Vectores 2026 (Actividad 4, casos clínicos)",
+  "verificar": false
+ }
+]

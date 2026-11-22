@@ -254,7 +254,7 @@ Todo en `src/data/` (UMD, con tests), separado del motor:
 4. ✅ **Sandbox infinito** (v3.8): mezcla agentes y jefes de todos los núcleos, con ranking general.
 5. **Las 12 piezas nuevas** de sprite. Los 9 jefes de núcleo ya tienen arte propio y mecánica (v3.9).
 6. **Rasgos de comportamiento**, uno por vez, con tests en el arnés.
-7. **Preguntas por núcleo**, más el banco general de defensa contra agentes.
+7. ✅ **Preguntas por núcleo** (v3.10): 415 preguntas de los cuadernillos y el compendio, revisadas.
 
 ## Decisiones pendientes
 

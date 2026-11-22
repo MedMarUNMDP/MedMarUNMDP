@@ -1,0 +1,767 @@
+[
+ {
+  "id": "n12-f-01",
+  "nucleo": "12",
+  "difficulty": "facil",
+  "topic": "Staphylococcus aureus",
+  "q": "¿Cómo se describe la morfología y la tinción de Gram de Staphylococcus aureus?",
+  "a": [
+   "Coco grampositivo agrupado en racimos",
+   "Coco grampositivo agrupado en cadenas",
+   "Bacilo grampositivo esporulado",
+   "Bacilo ácido alcohol resistente"
+  ],
+  "c": 0,
+  "exp": "S. aureus es un coco grampositivo en racimos, de la familia Staphylococcaceae; las cadenas corresponden a Streptococcus.",
+  "source": "Cuadernillo Núcleo 12 Seminario 2026 (cuadro de agentes) · Compendio ADN (12.2.b)",
+  "verificar": false
+ },
+ {
+  "id": "n12-f-02",
+  "nucleo": "12",
+  "difficulty": "facil",
+  "topic": "Streptococcus pyogenes",
+  "q": "¿Qué patrón de hemólisis en agar sangre y qué grupo de Lancefield corresponden a Streptococcus pyogenes?",
+  "a": [
+   "Beta hemólisis, grupo A",
+   "Alfa hemólisis, grupo A",
+   "Beta hemólisis estrecha, grupo B",
+   "Alfa hemólisis, sin grupo de Lancefield"
+  ],
+  "c": 0,
+  "exp": "S. pyogenes es beta hemolítico del grupo A; S. agalactiae es beta estrecha grupo B y S. pneumoniae es alfa hemolítico.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (cuadro de Streptococcus) · Compendio ADN (12.2.a)",
+  "verificar": false
+ },
+ {
+  "id": "n12-f-03",
+  "nucleo": "12",
+  "difficulty": "facil",
+  "topic": "Clostridium tetani",
+  "q": "¿Cuál es la vía de transmisión de Clostridium tetani?",
+  "a": [
+   "Herida contaminada con esporas del suelo",
+   "Gotitas respiratorias de persona a persona",
+   "Picadura de un artrópodo vector",
+   "Ingesta de carne mal refrigerada"
+  ],
+  "c": 0,
+  "exp": "El tétanos se adquiere por heridas contaminadas con esporas presentes en la mayoría de los suelos; en el recién nacido, la puerta de entrada es el muñón umbilical.",
+  "source": "Cuadernillo Núcleo 12 Seminario 2026 (Actividad 3) · Compendio ADN (12.2.b Clostridium tetani)",
+  "verificar": false
+ },
+ {
+  "id": "n12-f-04",
+  "nucleo": "12",
+  "difficulty": "facil",
+  "topic": "Clostridium perfringens",
+  "q": "¿Dónde se encuentra habitualmente Clostridium perfringens?",
+  "a": [
+   "En la tierra, el agua y el tracto intestinal",
+   "Solo en las fosas nasales humanas",
+   "En suelos arenosos de playas tropicales",
+   "En el excremento de murciélagos"
+  ],
+  "c": 0,
+  "exp": "C. perfringens es ubicuo: está en tierra, agua y tracto intestinal, y llega a los tejidos blandos por contaminación de heridas y traumatismos.",
+  "source": "Cuadernillo Núcleo 12 Seminario 2026 (Actividad 3) · Compendio ADN (12.2.b Clostridium perfringens)",
+  "verificar": false
+ },
+ {
+  "id": "n12-f-05",
+  "nucleo": "12",
+  "difficulty": "facil",
+  "topic": "Mycobacterium leprae",
+  "q": "¿Qué característica de tinción define a Mycobacterium leprae?",
+  "a": [
+   "Bacilo ácido alcohol resistente",
+   "Coco grampositivo en racimos",
+   "Bacilo gramnegativo curvo",
+   "Bacilo grampositivo esporulado"
+  ],
+  "c": 0,
+  "exp": "M. leprae es un bacilo débilmente grampositivo y fuertemente ácido alcohol resistente (BAAR), con pared rica en lípidos.",
+  "source": "Cuadernillo Núcleo 12 Seminario 2026 (cuadro de agentes) · Compendio ADN (12.2.c)",
+  "verificar": false
+ },
+ {
+  "id": "n12-f-06",
+  "nucleo": "12",
+  "difficulty": "facil",
+  "topic": "Sarcoptes scabiei",
+  "q": "¿Qué agente produce la escabiosis o sarna?",
+  "a": [
+   "Sarcoptes scabiei",
+   "Pediculus humanus capitis",
+   "Tunga penetrans",
+   "Dermatobia hominis"
+  ],
+  "c": 0,
+  "exp": "La escabiosis la produce el ácaro Sarcoptes scabiei variedad hominis, que cava túneles en el estrato córneo de la epidermis.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (TP 25) · Compendio ADN (12.3.a)",
+  "verificar": false
+ },
+ {
+  "id": "n12-f-07",
+  "nucleo": "12",
+  "difficulty": "facil",
+  "topic": "Ancylostoma braziliense / caninum",
+  "q": "¿Cómo adquiere una persona la larva migrans cutánea?",
+  "a": [
+   "Por larvas que penetran la piel desde el suelo",
+   "Por ingesta de huevos en agua contaminada",
+   "Por contacto directo piel a piel con un enfermo",
+   "Por picadura de una mosca hematófaga"
+  ],
+  "c": 0,
+  "exp": "Las larvas filariformes de Ancylostoma de perros y gatos están en la arena o el suelo húmedo y penetran la piel, con frecuencia en pies descalzos.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (TP 25, Actividad 1) · Compendio ADN (12.3.e)",
+  "verificar": false
+ },
+ {
+  "id": "n12-f-08",
+  "nucleo": "12",
+  "difficulty": "facil",
+  "topic": "Dermatofitos",
+  "q": "¿Qué tejidos afectan los hongos dermatofitos?",
+  "a": [
+   "Piel y faneras (pelos y uñas)",
+   "Tejido celular subcutáneo profundo",
+   "Pulmón y sistema nervioso central",
+   "Endotelio vascular y médula ósea"
+  ],
+  "c": 0,
+  "exp": "Los dermatofitos son queratinofílicos: invaden la queratina de piel, pelo y uñas, sin llegar a los tejidos profundos.",
+  "source": "Cuadernillo Núcleo 12 Seminario 2026 (micosis superficiales) · Compendio ADN (12.6.a)",
+  "verificar": false
+ },
+ {
+  "id": "n12-f-09",
+  "nucleo": "12",
+  "difficulty": "facil",
+  "topic": "Respuesta inmune",
+  "q": "¿Qué célula de la epidermis capta antígenos y los presenta a los linfocitos en los ganglios linfáticos?",
+  "a": [
+   "La célula de Langerhans",
+   "El melanocito",
+   "La célula de Merkel",
+   "El queratinocito basal"
+  ],
+  "c": 0,
+  "exp": "Las células de Langerhans son las dendríticas de la epidermis: captan, procesan y presentan antígenos para iniciar la respuesta adaptativa.",
+  "source": "Cuadernillo Núcleo 12 Seminario 2026 (Actividad 1) · Compendio ADN (12.1)",
+  "verificar": false
+ },
+ {
+  "id": "n12-f-10",
+  "nucleo": "12",
+  "difficulty": "facil",
+  "topic": "Prevención",
+  "q": "¿Contra qué agentes protege la vacuna triple viral del calendario argentino?",
+  "a": [
+   "Sarampión, rubéola y paperas",
+   "Sarampión, rubéola y varicela",
+   "Sarampión, parvovirus B19 y paperas",
+   "Rubéola, paperas y herpes zóster"
+  ],
+  "c": 0,
+  "exp": "La triple viral cubre sarampión, rubéola/síndrome de rubéola congénita y paperas; se aplica a los 12 meses y a los 5 años.",
+  "source": "Compendio ADN (12.5.a y 12.5.b, calendario nacional)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-01",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Staphylococcus aureus",
+  "q": "¿Cuál es el mecanismo de acción de la proteína A de Staphylococcus aureus?",
+  "a": [
+   "Se une al Fc de las inmunoglobulinas e impide la opsonización",
+   "Convierte el fibrinógeno en fibrina formando un coágulo protector",
+   "Separa las capas superficiales de la epidermis",
+   "Estimula la proliferación de linfocitos T como superantígeno"
+  ],
+  "c": 0,
+  "exp": "La proteína A es un factor de superficie que une el fragmento Fc de la IgG y bloquea la eliminación mediada por anticuerpos.",
+  "source": "Cuadernillo Núcleo 12 Seminario 2026 (Actividad 2.b) · Compendio ADN (12.2.b)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-02",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Staphylococcus aureus",
+  "q": "¿Qué toxinas de Staphylococcus aureus producen el síndrome de la piel escaldada?",
+  "a": [
+   "Las toxinas exfoliativas",
+   "Las enterotoxinas A-R",
+   "La toxina del síndrome del shock tóxico-1",
+   "La coagulasa"
+  ],
+  "c": 0,
+  "exp": "Las toxinas exfoliativas ETA/ETB rompen los puentes intercelulares del estrato granuloso y causan el síndrome de la piel escaldada o enfermedad de Ritter.",
+  "source": "Cuadernillo Núcleo 12 Seminario 2026 (Actividad 2.b) · Compendio ADN (12.2.b)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-03",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Streptococcus pyogenes",
+  "q": "¿Qué factor de virulencia de Streptococcus pyogenes inactiva un quimioatrayente de neutrófilos?",
+  "a": [
+   "La peptidasa de C5a",
+   "La estreptoquinasa",
+   "La hialuronidasa",
+   "La estreptolisina S"
+  ],
+  "c": 0,
+  "exp": "La peptidasa de C5a inactiva el C5a y evita el reclutamiento temprano de neutrófilos; las otras degradan tejidos o lisan células.",
+  "source": "Cuadernillo Núcleo 12 Seminario 2026 (Actividad 2.c) · Compendio ADN (12.2.a)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-04",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Streptococcus pyogenes",
+  "q": "¿Qué función cumplen las exotoxinas pirógenas estreptocócicas como SpeA y SpeC?",
+  "a": [
+   "Actúan como superantígenos y liberan citocinas proinflamatorias",
+   "Degradan el ácido hialurónico y facilitan el pasaje por los tejidos",
+   "Lisan eritrocitos, leucocitos y plaquetas",
+   "Bloquean la unión de C3b a la pared bacteriana"
+  ],
+  "c": 0,
+  "exp": "SpeA y SpeC actúan como superantígenos que estimulan macrófagos y linfocitos T cooperadores (escarlatina, shock tóxico, fascitis necrosante); SpeB es además una proteasa que degrada tejido.",
+  "source": "Cuadernillo Núcleo 12 Seminario 2026 (Actividad 2.c) · Compendio ADN (12.2.a)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-05",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Streptococcus pyogenes",
+  "q": "Dentro de las infecciones por Streptococcus pyogenes, ¿cómo se clasifican la fiebre reumática y la glomerulonefritis aguda?",
+  "a": [
+   "Complicaciones no supurativas",
+   "Infecciones supurativas profundas",
+   "Cuadros mediados por toxinas",
+   "Infecciones localizadas superficiales"
+  ],
+  "c": 0,
+  "exp": "Son complicaciones posestreptocócicas no supurativas, mediadas por la respuesta inmune (reacción cruzada y depósito de complejos inmunes).",
+  "source": "Cuadernillo Núcleo 12 Seminario 2026 (Actividad 2.c.2) · Compendio ADN (12.2.a)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-06",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Clostridium perfringens",
+  "q": "¿Cuál es la toxina más importante de Clostridium perfringens y qué actividad tiene?",
+  "a": [
+   "La toxina alfa, una lecitinasa que lisa eritrocitos y endotelio",
+   "La tetanospasmina, que bloquea la liberación de neurotransmisores inhibidores",
+   "Una enterotoxina termoestable que produce vómitos precoces",
+   "Una toxina exfoliativa que separa el estrato granuloso"
+  ],
+  "c": 0,
+  "exp": "La toxina alfa es una lecitinasa (fosfolipasa C) responsable del daño tisular de la mionecrosis o gangrena gaseosa.",
+  "source": "Cuadernillo Núcleo 12 Seminario 2026 (Actividad 3) · Compendio ADN (12.2.b Clostridium perfringens)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-07",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Clostridium tetani",
+  "q": "¿Cómo actúa la tetanospasmina de Clostridium tetani?",
+  "a": [
+   "Bloquea la liberación de GABA y glicina en las sinapsis inhibidoras",
+   "Inhibe la liberación de acetilcolina en la placa motora",
+   "Lisa las membranas de los eritrocitos y los leucocitos",
+   "Activa de forma masiva a los linfocitos T como superantígeno"
+  ],
+  "c": 0,
+  "exp": "La tetanospasmina es una neurotoxina que impide la liberación de neurotransmisores inhibidores, de ahí la hipertonía y los espasmos.",
+  "source": "Cuadernillo Núcleo 12 Seminario 2026 (Actividad 3) · Compendio ADN (12.2.b Clostridium tetani)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-08",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Clostridium tetani",
+  "q": "¿Cómo se previene el tétanos según el material de la cátedra?",
+  "a": [
+   "Con tres dosis de toxoide tetánico y refuerzos cada 10 años",
+   "Con una sola dosis de toxoide que deja inmunidad de por vida",
+   "Con la inmunidad que deja haber padecido la enfermedad",
+   "Con profilaxis antibiótica prolongada después de cualquier herida"
+  ],
+  "c": 0,
+  "exp": "La prevención es la vacunación con tres dosis de toxoide y refuerzos cada 10 años; la infección no induce inmunidad. En el Calendario Nacional el esquema primario se da con quíntuple (2, 4 y 6 meses), refuerzos a los 15-18 meses y al ingreso escolar, y después dT cada 10 años.",
+  "source": "Compendio ADN (12.2.b, prevención) · Cuadernillo Núcleo 12 Seminario 2026 (Actividad 3.b)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-09",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Virus herpes simple 1 y 2",
+  "q": "¿Dónde establece latencia el virus herpes simple tipo 1?",
+  "a": [
+   "En los cuerpos neuronales del ganglio del trigémino",
+   "En los ganglios sacros",
+   "En los linfocitos B de memoria de los ganglios linfáticos",
+   "En las células basales de la epidermis"
+  ],
+  "c": 0,
+  "exp": "El HSV-1 llega por transporte axonal retrógrado al ganglio trigémino, donde queda latente; el HSV-2 lo hace en el ganglio sacro.",
+  "source": "Compendio ADN (12.4.a.a y 12.4.a.b)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-10",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Virus herpes simple 1 y 2",
+  "q": "¿Qué estructura y material genético tienen los virus de la familia Herpesviridae?",
+  "a": [
+   "ADN bicatenario lineal, cápside icosaédrica con envoltura",
+   "ARN monocatenario negativo con nucleocápside helicoidal",
+   "ADN bicatenario circular sin envoltura",
+   "ARN monocatenario positivo con envoltura"
+  ],
+  "c": 0,
+  "exp": "Los herpesvirus tienen genoma de ADN lineal de doble hebra, cápside icosaédrica, tegumento y envoltura lipídica, y establecen latencia.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (cuadro de virus) · Compendio ADN (12.4.a)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-11",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Virus varicela-zóster",
+  "q": "¿Dónde permanece latente el virus varicela-zóster después de la varicela?",
+  "a": [
+   "En las células neurales de los ganglios sensitivos",
+   "En los linfocitos B y los monocitos de la sangre periférica",
+   "En las células basales de la epidermis",
+   "En los macrófagos del tejido reticuloendotelial"
+  ],
+  "c": 0,
+  "exp": "La latencia del VVZ se establece en células neuronales y gliales de los ganglios sensoriales; su reactivación produce el herpes zóster.",
+  "source": "Compendio ADN (12.4.a.c y 12.5.c)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-12",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Virus del molusco contagioso",
+  "q": "¿A qué familia pertenece el virus del molusco contagioso y qué material genético tiene?",
+  "a": [
+   "Poxviridae, ADN bicatenario",
+   "Papillomaviridae, ADN bicatenario circular",
+   "Herpesviridae, ADN bicatenario lineal",
+   "Parvoviridae, ADN monocatenario"
+  ],
+  "c": 0,
+  "exp": "El molusco contagioso es un Poxviridae (género Molluscipoxvirus) con ADN lineal bicatenario; los poxvirus son los virus más grandes conocidos.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (TP 23, caso 5) · Compendio ADN (12.4.b)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-13",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Virus del papiloma humano (VPH)",
+  "q": "¿Qué características estructurales tiene el virus del papiloma humano?",
+  "a": [
+   "Virus desnudo, cápside icosaédrica, ADN bicatenario circular",
+   "Virus con envoltura, cápside icosaédrica, ADN bicatenario lineal",
+   "Virus desnudo con ARN monocatenario positivo",
+   "Virus con envoltura y nucleocápside helicoidal"
+  ],
+  "c": 0,
+  "exp": "El HPV es un virus sin envoltura, de cápside icosaédrica, con genoma de ADN doble cadena circular cerrado (episoma).",
+  "source": "Compendio ADN (12.4.c) · Cuadernillo Núcleo 12 Laboratorio 2026 (TP 23, caso 6)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-14",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Herpesvirus humanos 6 y 7",
+  "q": "¿Qué enfermedad exantemática producen el HHV-6B y, a veces, el HHV-7?",
+  "a": [
+   "El exantema súbito o sexta enfermedad",
+   "El eritema infeccioso o quinta enfermedad",
+   "La escarlatina",
+   "La rubéola"
+  ],
+  "c": 0,
+  "exp": "El exantema súbito o roséola cursa con fiebre alta de 3-5 días y después exantema maculopapular rosado en cara y tronco que dura 24-48 horas.",
+  "source": "Compendio ADN (12.5.f)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-15",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Virus de Epstein-Barr",
+  "q": "¿Cuáles son las características clínicas principales de la mononucleosis infecciosa por virus de Epstein-Barr?",
+  "a": [
+   "Faringitis, fiebre, adenopatías y esplenomegalia",
+   "Fiebre alta de 3 días y después exantema rosado en tronco",
+   "Exantema en mejillas con aspecto de cachetada",
+   "Trismo, risa sardónica y espasmos generalizados"
+  ],
+  "c": 0,
+  "exp": "La primoinfección por EBV cursa con faringitis, fiebre, adenopatías y esplenomegalia; suele ser benigna y resuelve en 3 a 6 semanas.",
+  "source": "Compendio ADN (12.5.d)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-16",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "En el examen directo con KOH de una muestra de piel, ¿cómo se observan los dermatofitos?",
+  "a": [
+   "Como hifas hialinas tabicadas y ramificadas",
+   "Como levaduras con pseudohifas y blastoconidios",
+   "Como hifas cortas mezcladas con cúmulos de levaduras",
+   "Como esférulas de doble pared con endosporas"
+  ],
+  "c": 0,
+  "exp": "El KOH digiere la queratina y deja ver hifas hialinas, tabicadas y ramificadas de 4 a 6 micrones, propias de los dermatofitos.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (anexo de técnicas, KOH) · Compendio ADN (12.6.a)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-17",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Candida spp.",
+  "q": "¿Qué estructuras de Candida se observan en un raspado tratado con KOH o en una tinción de PAS?",
+  "a": [
+   "Pseudohifas y blastoconidios",
+   "Artroconidios dentro del tallo piloso",
+   "Hifas no tabicadas de diámetro irregular",
+   "Esférulas con endosporas"
+  ],
+  "c": 0,
+  "exp": "Candida se ve como levaduras ovaladas en gemación (blastoconidios) con pseudohifas; la PAS las resalta por su contenido de carbohidratos.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (TP 24, casos 2 y 4) · Compendio ADN (12.6.a)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-18",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Respuesta inmune",
+  "q": "¿Cuál es el perfil de respuesta inmune que predomina frente a los parásitos en la piel?",
+  "a": [
+   "Th2, con eosinófilos, mastocitos e IgE",
+   "Th1, con macrófagos activados y granulomas",
+   "Th17, con reclutamiento masivo de neutrófilos",
+   "Citotóxica CD8 con interferón tipo I"
+  ],
+  "c": 0,
+  "exp": "La respuesta antiparasitaria cutánea es Th2: IL-4, IL-5 e IL-13, IgE, eosinófilos, mastocitos y basófilos.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (TP 25, Actividad 3)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-19",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Pediculus humanus capitis",
+  "q": "¿Dónde deposita sus huevos (liendres) el piojo de la cabeza?",
+  "a": [
+   "Adheridos al tallo del pelo",
+   "En los surcos que cava en el estrato córneo",
+   "En las costuras de la ropa",
+   "Libres sobre la superficie del cuero cabelludo"
+  ],
+  "c": 0,
+  "exp": "Las liendres quedan fuertemente adheridas al tallo piloso a 1-2 mm del cuero cabelludo por una sustancia quitinosa; son ovoides y operculadas.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (TP 25, Actividad 2.D) · Compendio ADN (12.3.b)",
+  "verificar": false
+ },
+ {
+  "id": "n12-n-20",
+  "nucleo": "12",
+  "difficulty": "normal",
+  "topic": "Micosis sistémicas endémicas",
+  "q": "¿Cuál es la puerta de entrada habitual de Histoplasma capsulatum, Coccidioides spp. y Paracoccidioides brasiliensis?",
+  "a": [
+   "Inhalatoria, por esporas del ambiente",
+   "Traumatismo cutáneo con material contaminado",
+   "Endógena, desde la microbiota de la piel",
+   "Digestiva, por alimentos contaminados"
+  ],
+  "c": 0,
+  "exp": "Las micosis sistémicas endémicas se inician por inhalación de esporas ambientales y luego se diseminan por vía hematógena o linfática, incluso a la piel.",
+  "source": "Cuadernillo Núcleo 12 Seminario 2026 (micosis sistémicas 5.1) · Compendio ADN (12.6.b)",
+  "verificar": false
+ },
+ {
+  "id": "n12-d-01",
+  "nucleo": "12",
+  "difficulty": "dificil",
+  "topic": "Staphylococcus aureus",
+  "q": "Un nene de 8 años tiene costras melicéricas con ampollas rotas alrededor de la boca, sin fiebre, y tuvo un furúnculo axilar hace dos semanas. ¿Cuál es el diagnóstico más probable?",
+  "a": [
+   "Impétigo",
+   "Erisipela",
+   "Fascitis necrosante",
+   "Síndrome de la piel escaldada"
+  ],
+  "c": 0,
+  "exp": "Las costras color miel con ampollas y autoinoculación por rascado, sin compromiso sistémico, definen el impétigo, con S. aureus como agente más frecuente.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (TP 23, caso clínico 1)",
+  "verificar": false
+ },
+ {
+  "id": "n12-d-02",
+  "nucleo": "12",
+  "difficulty": "dificil",
+  "topic": "Diagnóstico de laboratorio",
+  "q": "De una lesión cutánea se informan cocos grampositivos en racimos y prueba de coagulasa positiva. ¿Qué permite concluir ese resultado?",
+  "a": [
+   "Se trata de Staphylococcus aureus",
+   "Se trata de un estafilococo coagulasa negativo",
+   "Se trata de Streptococcus pyogenes",
+   "Se trata de Clostridium perfringens"
+  ],
+  "c": 0,
+  "exp": "La coagulasa separa S. aureus (positiva) de los estafilococos coagulasa negativos; es la prueba de identificación principal de S. aureus.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (TP 23, caso 1, puntos 3 y 4) · Compendio ADN (12.2.b)",
+  "verificar": false
+ },
+ {
+  "id": "n12-d-03",
+  "nucleo": "12",
+  "difficulty": "dificil",
+  "topic": "Streptococcus pyogenes",
+  "q": "Una nena de 6 años tiene fiebre y, tras un raspón, una placa eritematosa caliente de bordes netos y sobreelevados con piel de naranja y adenopatía inguinal. ¿Qué cuadro es?",
+  "a": [
+   "Erisipela",
+   "Impétigo",
+   "Celulitis por Clostridium perfringens",
+   "Pitiriasis versicolor inflamatoria"
+  ],
+  "c": 0,
+  "exp": "La placa de bordes netos y sobreelevados, con fiebre y adenopatía, es una erisipela, cuyo agente típico es S. pyogenes, que entró por el raspón.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (TP 23, caso clínico 2)",
+  "verificar": false
+ },
+ {
+  "id": "n12-d-04",
+  "nucleo": "12",
+  "difficulty": "dificil",
+  "topic": "Clostridium tetani",
+  "q": "Un hombre de 62 años tiene trismo, risa sardónica y espasmos ante estímulos, 10 días después de una herida punzante con tierra. ¿Qué espera ver en el Gram de esa herida?",
+  "a": [
+   "Bacilos grampositivos con esporas terminales redondeadas",
+   "Cocos grampositivos en racimos",
+   "Bacilos grandes grampositivos sin esporas ni leucocitos",
+   "Bacilos ácido alcohol resistentes"
+  ],
+  "c": 0,
+  "exp": "C. tetani es un bacilo grampositivo esporulado con esporas terminales en palillo de tambor; el diagnóstico sigue siendo clínico porque el cultivo es positivo solo en el 30%.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (TP 23, caso clínico 3) · Compendio ADN (12.2.b)",
+  "verificar": false
+ },
+ {
+  "id": "n12-d-05",
+  "nucleo": "12",
+  "difficulty": "dificil",
+  "topic": "Prevención",
+  "q": "Ante una herida tetanígena en una persona con esquema de vacunación desconocido, ¿qué corresponde según la pauta del material?",
+  "a": [
+   "Una dosis de Td más inmunoglobulina antitetánica",
+   "Solo una dosis de Td, sin inmunoglobulina antitetánica",
+   "Solo inmunoglobulina antitetánica",
+   "Nada, porque la herida ya cerró"
+  ],
+  "c": 0,
+  "exp": "Con menos de 3 dosis o situación desconocida y herida tetanígena se indica vacuna Td (completando el esquema) más IGT en otro sitio de aplicación.",
+  "source": "Compendio ADN (12.2.b, tabla de inmunoprofilaxis) · Cuadernillo Núcleo 12 Seminario 2026 (Actividad 3.b)",
+  "verificar": false
+ },
+ {
+  "id": "n12-d-06",
+  "nucleo": "12",
+  "difficulty": "dificil",
+  "topic": "Mycobacterium leprae",
+  "q": "En la lepra tuberculoide, ¿qué combinación de respuesta inmune y hallazgos corresponde?",
+  "a": [
+   "Perfil Th1, granulomas con escasos bacilos y lepromina fuertemente positiva",
+   "Perfil Th2, macrófagos repletos de bacilos y lepromina negativa",
+   "Perfil Th2, lesiones escasas y lepromina positiva",
+   "Perfil Th1, carga bacilar altísima y compromiso multiorgánico"
+  ],
+  "c": 0,
+  "exp": "La lepra tuberculoide es paucibacilar: respuesta Th1 con granulomas y lepromina muy positiva, a diferencia de la lepromatosa, Th2 y multibacilar.",
+  "source": "Cuadernillo Núcleo 12 Seminario 2026 (Actividad 4.b) · Compendio ADN (12.2.c)",
+  "verificar": false
+ },
+ {
+  "id": "n12-d-07",
+  "nucleo": "12",
+  "difficulty": "dificil",
+  "topic": "Virus herpes simple 1 y 2",
+  "q": "Una mujer de 20 años tiene vesículas agrupadas y dolorosas en el labio que reaparecen en el mismo lugar antes de cada examen. En el raspado de la lesión, ¿qué se observa?",
+  "a": [
+   "Células multinucleadas o sincicios",
+   "Cuerpos de inclusión eosinofílicos intracitoplasmáticos",
+   "Coilocitos con gránulos de queratohialina prominentes",
+   "Artroconidios rodeando el tallo piloso"
+  ],
+  "c": 0,
+  "exp": "El efecto citopático del HSV-1 es la formación de sincicios con núcleos claros y cromatina marginada, además de cuerpos de Cowdry tipo A.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (TP 23, caso 4, Herpes tipo I)",
+  "verificar": false
+ },
+ {
+  "id": "n12-d-08",
+  "nucleo": "12",
+  "difficulty": "dificil",
+  "topic": "Virus de Epstein-Barr",
+  "q": "¿Qué perfil serológico confirma una primoinfección por virus de Epstein-Barr?",
+  "a": [
+   "IgM anti-VCA presente y anticuerpos anti-EBNA ausentes",
+   "IgG anti-VCA y anti-EBNA presentes",
+   "Altos títulos de anticuerpos contra antígenos tempranos",
+   "IgG anti-EBNA aislada sin anticuerpos anti-VCA"
+  ],
+  "c": 0,
+  "exp": "La infección aguda se confirma con IgM contra la cápside viral en ausencia de anti-EBNA; el portador sano tiene IgG anti-VCA y anti-EBNA.",
+  "source": "Compendio ADN (12.5.d, métodos indirectos)",
+  "verificar": false
+ },
+ {
+  "id": "n12-d-09",
+  "nucleo": "12",
+  "difficulty": "dificil",
+  "topic": "Virus de la rubéola",
+  "q": "¿Cuándo se produce el síndrome de rubéola congénita y qué defectos incluye?",
+  "a": [
+   "Por infección materna en el primer trimestre; da cataratas y sordera",
+   "Por infección materna en el último mes, con neumonía neonatal grave",
+   "Por infección perinatal en el canal de parto, con meningitis y sepsis",
+   "Por reactivación materna del virus latente, con anemia fetal"
+  ],
+  "c": 0,
+  "exp": "El SRC aparece cuando la infección materna ocurre en el primer trimestre y puede dar cardiopatías, cataratas y sordera; se previene con la vacunación.",
+  "source": "Compendio ADN (12.5.b)",
+  "verificar": false
+ },
+ {
+  "id": "n12-d-10",
+  "nucleo": "12",
+  "difficulty": "dificil",
+  "topic": "Parvovirus B19",
+  "q": "¿Qué complicación produce el parvovirus B19 en un paciente con anemia hemolítica crónica?",
+  "a": [
+   "Crisis aplásica transitoria con reticulocitopenia",
+   "Hydrops fetalis",
+   "Poliartritis de manos y muñecas",
+   "Púrpura trombocitopénica por complejos inmunes"
+  ],
+  "c": 0,
+  "exp": "Al lisar los precursores eritroides, el B19 provoca crisis aplásica transitoria con reticulocitopenia de 7-10 días y caída de la hemoglobina.",
+  "source": "Compendio ADN (12.5.e, complicaciones hematológicas)",
+  "verificar": false
+ },
+ {
+  "id": "n12-d-11",
+  "nucleo": "12",
+  "difficulty": "dificil",
+  "topic": "Sarcoptes scabiei",
+  "q": "¿Qué forma clínica de escabiosis corresponde a un paciente inmunodeprimido con escasa respuesta frente al ácaro?",
+  "a": [
+   "Sarna costrosa o noruega",
+   "Sarna nodular o hiperérgica",
+   "Sarna clásica",
+   "Larva migrans cutánea"
+  ],
+  "c": 0,
+  "exp": "La sarna anérgica (costrosa o noruega) aparece en inmunodeprimidos; la nodular es la forma hiperérgica y la clásica, la del huésped inmunocompetente.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (TP 25, Actividad 1.B) · Compendio ADN (12.3.a)",
+  "verificar": false
+ },
+ {
+  "id": "n12-d-12",
+  "nucleo": "12",
+  "difficulty": "dificil",
+  "topic": "Malassezia furfur",
+  "q": "Un paciente de 20 años tiene máculas hipopigmentadas con descamación furfurácea en dorso y pecho, más notorias tras el verano. ¿Qué imagen microscópica se espera?",
+  "a": [
+   "Hifas cortas y cúmulos de levaduras",
+   "Hifas hialinas tabicadas y ramificadas",
+   "Pseudohifas con blastoconidios en gemación",
+   "Artroconidios en el interior del tallo piloso"
+  ],
+  "c": 0,
+  "exp": "La pitiriasis versicolor por Malassezia muestra levaduras esféricas u ovaladas de pared gruesa mezcladas con hifas cortas poco ramificadas.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (TP 24, caso 1) · Compendio ADN (12.6.a)",
+  "verificar": false
+ },
+ {
+  "id": "n12-d-13",
+  "nucleo": "12",
+  "difficulty": "dificil",
+  "topic": "Dermatofitos",
+  "q": "Un nene de 7 años tiene una placa alopécica con descamación grisácea y pelos fracturados; en el tallo piloso se ven artroconidios. ¿Qué agente es el más probable en nuestro medio?",
+  "a": [
+   "Microsporum canis",
+   "Malassezia furfur",
+   "Candida albicans",
+   "Histoplasma capsulatum"
+  ],
+  "c": 0,
+  "exp": "Es una tiña capitis por dermatofitos y en nuestro medio el agente aislado con mayor frecuencia es M. canis, de origen zoófilo.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (TP 24, caso 3) · Compendio ADN (12.6.a)",
+  "verificar": false
+ },
+ {
+  "id": "n12-d-14",
+  "nucleo": "12",
+  "difficulty": "dificil",
+  "topic": "Histoplasma capsulatum",
+  "q": "Un paciente inmunocomprometido con tos y lesiones papulares en tronco trabajó en el norte del país con excremento de murciélago. En la biopsia de piel, ¿qué forma del hongo espera?",
+  "a": [
+   "Levaduras",
+   "Hifas tabicadas",
+   "Hifas no tabicadas",
+   "Esférulas con endosporas"
+  ],
+  "c": 0,
+  "exp": "Histoplasma es dimórfico: en los tejidos a 37 grados se presenta como levaduras, mientras que la forma filamentosa corresponde al ambiente.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (TP 24, Actividad 2, caso 2) · Compendio ADN (12.6.b)",
+  "verificar": false
+ },
+ {
+  "id": "n12-d-15",
+  "nucleo": "12",
+  "difficulty": "dificil",
+  "topic": "Coccidioides spp.",
+  "q": "En una biopsia de piel con Grocott de un trasplantado oriundo de una zona árida del norte argentino se ven esférulas de doble pared con endosporas. ¿Qué agente es?",
+  "a": [
+   "Coccidioides spp.",
+   "Histoplasma capsulatum",
+   "Paracoccidioides brasiliensis",
+   "Mucor sp."
+  ],
+  "c": 0,
+  "exp": "Las esférulas de doble pared con endosporas son típicas de Coccidioides; la zona árida y la inmunosupresión orientan a coccidioidomicosis diseminada.",
+  "source": "Cuadernillo Núcleo 12 Laboratorio 2026 (TP 24, Actividad 2, caso 3)",
+  "verificar": false
+ }
+]
