@@ -59,7 +59,7 @@
     'capside':             { textura: 'virus_icosahedral', estado: 'existe' },
     'herpesvirus':         { textura: 'virus_capsid_cross_section', estado: 'existe' },
     'retrovirus':          { textura: 'virus_spiked', estado: 'nuevo' },
-    'hepadnavirus':        { textura: 'virus_enveloped', estado: 'variacion', variacion: { capsula: true } },
+    'hepadnavirus':        { textura: 'virus_enveloped', estado: 'variacion', variacion: { escala: 0.85 } },
     'arbovirus':           { textura: 'virus_spiked', estado: 'variacion', variacion: { escala: 0.7 } },
     'bala':                { textura: 'virus_enveloped', estado: 'nuevo', variacion: { estirar: 1.8 } },
     'poxvirus':            { textura: 'virus_capsid_cross_section', estado: 'nuevo', variacion: { estirar: 1.3 } },

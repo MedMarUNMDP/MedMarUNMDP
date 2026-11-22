@@ -2,6 +2,11 @@
 
 Formato: la versión más nueva arriba. Al publicar una versión, agregá una sección nueva acá y subí `?build=` en index.html (ver CLAUDE.md del juego). El historial previo a v3.1 está en `README.txt`.
 
+## v3.7.2
+
+- Se saca el halo circular de las especies con cápsula y la membrana de las inclusiones: se veían como burbujas
+  alrededor del enemigo. Todas las especies vuelven a tener solo el contorno de su forma.
+
 ## v3.7.1
 
 - **Contornos**: la silueta se arma con una máscara sólida. Las zonas semitransparentes (halo de la cápsula, bordes

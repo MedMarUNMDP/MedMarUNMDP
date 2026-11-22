@@ -802,7 +802,7 @@
     }
 
     // Hornea una vez la textura de la especie: pieza base + variación por código (tinte, estiramiento, copias en
-    // par/cadena/racimo, cápsula, espora). Queda cacheada: cada enemigo sigue siendo una sola imagen.
+    // par/cadena/racimo/inclusión, espora). Queda cacheada: cada enemigo sigue siendo una sola imagen.
     getSpeciesTexture(agente){
       const key=`species-${agente.id}`;
       if(this.textures.exists(key))return key;
@@ -823,14 +823,13 @@
       const estirar=v.estirar||1,escala=v.escala||1,copias=v.copias||1,aspect=sh/sw;
       const fit=S*0.86/Math.max(estirar,1)/Math.max(1,aspect);
       const drawCopy=(cx,cy,size,rot=0)=>{ctx.save();ctx.translate(cx,cy);ctx.rotate(rot);ctx.scale(estirar,1);ctx.drawImage(tinted,-size/2,-size*aspect/2,size,size*aspect);ctx.restore();};
-      const capsula=v.capsula||agente.rasgos.includes('capsula');
-      if(capsula){ctx.save();ctx.translate(S/2,S/2);ctx.scale(Math.max(1,estirar),1);ctx.beginPath();ctx.arc(0,0,S*0.47/Math.max(1,estirar),0,Math.PI*2);ctx.fillStyle='rgba(235,255,250,0.16)';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle='rgba(235,255,250,0.42)';ctx.stroke();ctx.restore();}
+      // Sin halos ni burbujas alrededor (cápsula, membrana de inclusión): cada especie lleva solo el contorno de su forma.
       const c=S/2,d=v.disposicion;
       if(d==='par'){const sz=fit*(v.escala||0.55);drawCopy(c-sz*0.36,c,sz,-0.25);drawCopy(c+sz*0.36,c,sz,0.25);}
       else if(d==='cadena'){const n=Math.max(2,copias),span=S*0.62,sz=Math.min(fit*(v.escala||0.42),span/(n-1)*1.15);for(let i=0;i<n;i++){const t=i/(n-1)-0.5;drawCopy(c+t*span,c+Math.sin(t*Math.PI*1.6)*S*0.09,sz,t*0.5);}}
       else if(d==='racimo'){const sz=fit*(v.escala||0.45),n=Math.max(3,copias);for(let i=0;i<n;i++){const a=i/n*Math.PI*2+0.4;drawCopy(c+Math.cos(a)*sz*0.42,c+Math.sin(a)*sz*0.42,sz,a);}}
       else if(d==='polimorfo'){[[0,0,0.62],[-0.28,0.22,0.4],[0.3,-0.2,0.34]].forEach(([dx,dy,k],i)=>drawCopy(c+dx*S,c+dy*S,fit*k,i*0.9));}
-      else if(d==='inclusion'){ctx.beginPath();ctx.arc(c,c,S*0.44,0,Math.PI*2);ctx.fillStyle='rgba(255,220,240,0.20)';ctx.fill();ctx.lineWidth=4;ctx.strokeStyle='rgba(255,220,240,0.55)';ctx.stroke();[[0,0],[-0.17,-0.12],[0.16,-0.1],[-0.1,0.17],[0.14,0.15]].forEach(([dx,dy],i)=>drawCopy(c+dx*S,c+dy*S,fit*0.3,i));}
+      else if(d==='inclusion'){[[0,0],[-0.17,-0.12],[0.16,-0.1],[-0.1,0.17],[0.14,0.15]].forEach(([dx,dy],i)=>drawCopy(c+dx*S,c+dy*S,fit*0.3,i));}
       else drawCopy(c,c,fit*escala);
       if(v.espora==='terminal'){const ex=c+fit*escala*estirar*0.42;ctx.beginPath();ctx.ellipse(ex,c,S*0.07,S*0.055,0,0,Math.PI*2);ctx.fillStyle='rgba(255,252,225,0.95)';ctx.fill();ctx.lineWidth=2.5;ctx.strokeStyle='rgba(60,40,70,0.85)';ctx.stroke();}
       tex.refresh();
