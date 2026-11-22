@@ -136,3 +136,69 @@ test('C. perfringens deja burbujas de gas que explotan; Pneumocystis frena con s
   correr(pc.h, 3.5);
   assert.ok(pc.s.playerSpeedFactor() < 1, 'cerca de Pneumocystis el jugador va más lento');
 });
+
+test('Neisseria: cápsula → endotoxina y la suelta → endotoxina → cápsula otra vez', () => {
+  const { h, s, jefe } = escenaConJefe('neisseria-meningitidis');
+  const fases = [];
+  correr(h, 22, () => { if (fases[fases.length - 1] !== jefe.mech.phase) fases.push(jefe.mech.phase); });
+  assert.deepEqual(fases.slice(0, 4), ['capsula', 'expuesta1', 'expuesta2', 'capsula']);
+  assert.ok(jefe.mech.shield > 0, 'la cápsula vuelve completa');
+});
+
+test('el granuloma libera pocos bacilos, pero rápidos, resistentes y no fagocitables', () => {
+  const { h, s } = escenaConJefe('mycobacterium-tuberculosis');
+  correr(h, 11.5); // 1,6 s de entrada + 5 s abierto + 4,5 s encapsulado
+  const bacilos = s.enemies.filter((e) => e.minion && e.agente === 'mycobacterium-tuberculosis');
+  assert.equal(bacilos.length, 2);
+  const comun = s.spawnEnemy('bacteria', false, { x: 1200, y: 1200 });
+  for (const b of bacilos) {
+    assert.ok(b.maxHp > comun.maxHp * 4, 'mucha más vida que un enemigo común');
+    assert.ok(b.speed > comun.speed * 1.3, 'más rápidos');
+    assert.equal(b.sizeTier, 2);
+  }
+});
+
+test('C. perfringens lanza burbujas que caen como minas y deja otras alrededor', () => {
+  const { h, s, jefe } = escenaConJefe('clostridium-perfringens');
+  let lanzadas = 0, minas = [];
+  correr(h, 8, (sc) => {
+    lanzadas = Math.max(lanzadas, sc.enemyProjectiles.filter((p) => p.landAt).length);
+    for (const z of sc.biofilmZones) if (z.mine && !minas.includes(z)) minas.push(z);
+  });
+  assert.ok(lanzadas >= 1, 'lanza burbujas');
+  assert.ok(minas.length >= 3, 'quedan minas (dejadas y lanzadas)');
+  assert.ok(minas.every((z) => z.mine.radius >= 120), 'más rango de explosión');
+  assert.ok(minas.some((z) => Math.hypot(z.x - jefe.x, z.y - jefe.y) > jefe.radius + 15), 'alrededor suyo, no encima');
+});
+
+test('los proyectiles que vencen se desvanecen en vez de desaparecer de golpe', () => {
+  const { h, s, jefe } = escenaConJefe('plasmodium');
+  s.spawnBossBurst(jefe, 4, { color: 0xff5a6e, speed: 10, damage: 1, size: 10, life: 50 });
+  const objs = s.enemyProjectiles.map((p) => p.obj);
+  let tweensDeFundido = 0;
+  const add = s.tweens.add.bind(s.tweens);
+  s.tweens.add = (cfg) => { if (objs.includes(cfg.targets) && cfg.alpha === 0) tweensDeFundido++; return add(cfg); };
+  for (let i = 0; i < 6; i++) s.update(0, FRAME);
+  assert.ok(objs.every((o) => !s.enemyProjectiles.some((p) => p.obj === o)), 'salen de la lista (ya no dañan)');
+  assert.equal(tweensDeFundido, 4, 'cada uno con su fundido');
+});
+
+test('el helminto colosal embiste, se aleja y vuelve a embestir (no orbita al jugador)', () => {
+  const h = createScene({ seed: 5, modo: 'sandbox', debugMode: true });
+  const s = h.scene;
+  s.debugInvincible = true;
+  s.activeSkills.delete('granules');
+  s.player.setPosition(1500, 1900);
+  s.debugAction('boss:helminto-colosal');
+  const jefe = s.enemies.find((e) => e.isBoss);
+  const fases = [];
+  let lejosEnRetirada = 0;
+  correr(h, 25, () => {
+    const f = jefe.charge?.phase;
+    if (f && fases[fases.length - 1] !== f) fases.push(f);
+    if (f === 'retirada') lejosEnRetirada = Math.max(lejosEnRetirada, Math.hypot(jefe.x - s.player.x, jefe.y - s.player.y));
+  });
+  assert.ok(fases.filter((f) => f === 'embestida').length >= 2, `debería embestir varias veces (${fases.join(' → ')})`);
+  assert.ok(fases.includes('retirada') && fases.includes('acecho'));
+  assert.ok(lejosEnRetirada > 400, 'en la retirada se aleja');
+});

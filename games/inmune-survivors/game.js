@@ -291,7 +291,7 @@
   const AGENTES_DATA = globalThis.InmuneAgentes || null;
   const FICHAS_DATA = globalThis.InmuneFichas || null;
   const MODOS_API = globalThis.InmuneModos || null;
-  const GAME_VERSION = '3.9.0';
+  const GAME_VERSION = '3.9.1';
   // Arte propio de los jefes de núcleo (assets/boss_*.webp, recortados de docs/arte/jefes-nucleo-3x3.png).
   const BOSS_ART = {
     'escherichia-coli':'boss_stec', 'mycobacterium-tuberculosis':'boss_granuloma', 'neisseria-meningitidis':'boss_meningococo',
@@ -1077,10 +1077,17 @@
     initBossMechanic(e,spec){
       const id=spec.mechanic;if(!id||!BOSS_MECHANICS[id])return;
       e.mechanic=id;e.mech={clock:BOSS_MECHANICS[id].firstMs||2600,clock2:4200,count:0,damageTaken:1,invulnUntil:-1,pulse:1};
-      if(id==='neisseria-meningitidis'){e.mech.shieldMax=e.maxHp*0.28;e.mech.shield=e.mech.shieldMax;}
+      if(id==='neisseria-meningitidis'){e.mech.shieldMax=e.maxHp*0.28;e.mech.shield=e.mech.shieldMax;e.mech.phase='capsula';e.mech.clock=9000;}
       if(id==='mycobacterium-tuberculosis')e.mech.phase='abierto';
       const ring=BOSS_MECHANICS[id].ring;
       if(ring){e.mechRing=this.add.circle(e.x,e.y,ring.radius||e.visualSize*0.6,ring.color,ring.fill??0.06).setStrokeStyle(ring.stroke??4,ring.color,0.8).setDepth(ring.depth??23);}
+    }
+
+    // Neisseria suelta la cápsula (por tiempo o porque se la rompieron) y libera endotoxina.
+    releaseCapsule(e,broken=false){
+      const m=e.mech;m.shield=0;m.phase='expuesta1';m.clock=5000;
+      this.spawnBossBurst(e,14,{color:0xff6f6f,speed:170,damage:10+this.elapsed*0.01});
+      this.bossMechanicText(e,broken?'CÁPSULA ROTA · ENDOTOXINA':'SUELTA LA CÁPSULA · ENDOTOXINA','#ffb0b0');
     }
 
     bossMechanicText(e,text,color){this.showFloatingText(e.x,e.y-e.visualSize*0.55,text,color||BOSS_MECHANICS[e.mechanic]?.color||'#ffe39a',12);}
@@ -1090,6 +1097,7 @@
       if(this.biofilmZones.length>=16)return null;
       const g=this.add.graphics().setDepth(17);
       g.fillStyle(o.color,o.mine?0.30:0.20);g.fillCircle(0,0,o.radius);g.lineStyle(3,o.color,0.65);g.strokeCircle(0,0,o.radius);
+      if(o.mine){g.lineStyle(2,o.color,0.35);g.strokeCircle(0,0,o.mine.radius/1.6);}
       const obj=this.add.container(x,y,[g]).setAlpha(0.92);
       const z={x,y,obj,radius:o.radius,life:o.life||9000,tick:0,damage:o.damage,slow:o.slow||0,label:o.label||'',labelColor:o.labelColor||'#ffd0a0',mine:o.mine?{t:o.mine.t,radius:o.mine.radius,total:o.mine.t}:null};
       this.biofilmZones.push(z);return z;
@@ -1106,15 +1114,28 @@
       this.burstEffect(e.x,e.y,o.color,Math.min(140,e.visualSize*0.5));
     }
 
+    // Burbuja lanzada: viaja hasta un punto y ahí queda como mina (no daña en el camino).
+    spawnBossLob(e,tx,ty,o){
+      if(this.enemyProjectiles.length>=70)return;
+      const a=Math.atan2(ty-e.y,tx-e.x),obj=this.add.container(e.x,e.y).setDepth(30);
+      obj.add([this.add.circle(0,0,15,o.color,0.22).setStrokeStyle(2,0xffffff,0.7),this.add.circle(-4,-4,4,0xffffff,0.75)]);
+      this.enemyProjectiles.push({obj,vx:Math.cos(a)*o.speed,vy:Math.sin(a)*o.speed,damage:0,life:6000,radius:12,landAt:{x:tx,y:ty},landMine:o.mine});
+    }
+
     // Súbditos de una especie concreta alrededor del jefe (más chicos y frágiles que un enemigo común).
-    spawnBossMinions(e,agenteId,count){
+    spawnBossMinions(e,agenteId,count,o={}){
       const agente=AGENTES_DATA?.agente(agenteId);if(!agente)return;
       this.forcedSpawnAgente=agenteId;
       try{
         for(let i=0;i<count;i++){
           const a=Math.PI*2*i/count+this.rng.float(0,0.5),p={x:e.x+Math.cos(a)*(e.radius+50),y:e.y+Math.sin(a)*(e.radius+50)};
           const m=this.spawnEnemy(agente.familia,false,p);if(!m)continue;
-          m.minion=true;m.hp=m.maxHp=Math.max(24,e.maxHp*0.006);m.damage=Math.max(6,e.damage*0.12);
+          m.minion=true;
+          if(o.strong){
+            // bacilos de élite: varias veces la vida de un enemigo común, más rápidos y demasiado grandes para fagocitar
+            m.hp=m.maxHp=m.maxHp*(o.hpMul||6);m.speed*=o.speedMul||1.9;m.damage*=o.damageMul||1.4;m.sizeTier=2;
+            m.outlineColor=0xffdf75;m.visualScale*=1.15;m.obj.setScale(m.visualScale);
+          }else{m.hp=m.maxHp=Math.max(24,e.maxHp*0.006);m.damage=Math.max(6,e.damage*0.12);}
         }
       }finally{this.forcedSpawnAgente=null;}
     }
@@ -1124,17 +1145,21 @@
       m.clock-=dtMs;m.clock2-=dtMs;
       switch(e.mechanic){
         case 'escherichia-coli': // toxina Shiga + embestidas con flagelos
-          if(m.clock<=0){m.clock=4200*crisis;this.spawnHazard(e.x,e.y,{radius:80,color:0xff8a2a,damage:6+t*0.01,slow:0.72,life:9000,label:'TOXINA SHIGA',labelColor:'#ffb36b'});this.bossMechanicText(e,'TOXINA SHIGA');}
+          if(m.clock<=0){m.clock=4200*crisis;this.spawnHazard(e.x,e.y,{radius:120,color:0xff8a2a,damage:6+t*0.01,slow:0.72,life:16000,label:'TOXINA SHIGA',labelColor:'#ffb36b'});this.bossMechanicText(e,'TOXINA SHIGA');}
           if(m.clock2<=0){m.clock2=6200*crisis;m.dashUntil=t+0.9;this.bossMechanicText(e,'FLAGELOS: EMBESTIDA','#ffd27a');}
           e.mechSpeed=t<(m.dashUntil||0)?2.7:1;break;
         case 'mycobacterium-tuberculosis': // granuloma: se encapsula y después se abre por necrosis caseosa
           e.mechSpeed=0.45;
-          if(m.clock<=0&&m.phase==='abierto'){m.phase='cerrado';m.clock=4200;m.damageTaken=0.15;this.bossMechanicText(e,'GRANULOMA: CÁPSULA FIBROSA','#d9d2ff');}
-          else if(m.clock<=0){m.phase='abierto';m.clock=6500*crisis;m.damageTaken=1;this.spawnBossMinions(e,'mycobacterium-tuberculosis',this.multiResistance?4:3);this.bossMechanicText(e,'NECROSIS CASEOSA: LIBERA BACILOS','#ffb0c8');}
+          if(m.clock<=0&&m.phase==='abierto'){m.phase='cerrado';m.clock=4500;m.damageTaken=0.15;this.bossMechanicText(e,'GRANULOMA: CÁPSULA FIBROSA','#d9d2ff');}
+          else if(m.clock<=0){m.phase='abierto';m.clock=9500*crisis;m.damageTaken=1;this.spawnBossMinions(e,'mycobacterium-tuberculosis',this.multiResistance?3:2,{hpMul:6,speedMul:1.9,damageMul:1.4,strong:true});this.bossMechanicText(e,'NECROSIS CASEOSA: LIBERA BACILOS','#ffb0c8');}
           break;
-        case 'neisseria-meningitidis': // cápsula que absorbe daño; al romperse, endotoxina
+        case 'neisseria-meningitidis': // ciclo: cápsula → endotoxina y la suelta → endotoxina → cápsula de nuevo
           e.mechSpeed=1.2;
-          if(m.shield<=0&&m.clock<=0){m.shield=m.shieldMax;this.bossMechanicText(e,'CÁPSULA REGENERADA','#9fdcff');}
+          if(m.clock<=0){
+            if(m.phase==='capsula')this.releaseCapsule(e);
+            else if(m.phase==='expuesta1'){m.phase='expuesta2';m.clock=5000;this.spawnBossBurst(e,14,{color:0xff6f6f,speed:170,damage:10+t*0.01});this.bossMechanicText(e,'ENDOTOXINA','#ffb0b0');}
+            else{m.phase='capsula';m.shield=m.shieldMax;m.clock=9000*crisis;this.bossMechanicText(e,'CÁPSULA REGENERADA','#9fdcff');}
+          }
           break;
         case 'vih': // variación antigénica (inmune un momento, cambia de color, suelta viriones) y una latencia
           if(m.clock<=0){m.clock=7000*crisis;m.count++;m.invulnUntil=t+1.4;m.tint=[0xffffff,0x9fffe0,0xffc36b,0xc59bff][m.count%4];this.spawnVirusMinions(e);this.bossMechanicText(e,'VARIACIÓN ANTIGÉNICA','#ff9ec4');}
@@ -1153,11 +1178,11 @@
         case 'plasmodium': { // ciclo eritrocítico: el glóbulo rojo se hincha y estalla en merozoítos
           const cycle=7000*crisis,swell=1600;
           m.pulse=m.clock<swell?1+0.14*(1-Math.max(0,m.clock)/swell):1;
-          if(m.clock<=0){m.clock=cycle;this.spawnBossBurst(e,this.multiResistance?20:16,{color:0xff5a6e,speed:155,damage:9+t*0.01,size:6});this.cameras.main.flash(180,255,80,80,false);this.bossMechanicText(e,'ESQUIZOGONIA · FIEBRE','#ff8fa0');}
+          if(m.clock<=0){m.clock=cycle;this.spawnBossBurst(e,this.multiResistance?20:16,{color:0xff5a6e,speed:175,damage:9+t*0.01,size:10,life:7500});this.bossMechanicText(e,'ESQUIZOGONIA · FIEBRE','#ff8fa0');}
           break;
         }
         case 'echinococcus-granulosus': // quiste fijo: protoescólices y rotura a mitad de vida
-          if(m.clock<=0){m.clock=6000*crisis;this.spawnBossBurst(e,8,{color:0xffe2a6,speed:85,damage:10+t*0.01,size:7,homing:true,life:7000});this.bossMechanicText(e,'PROTOESCÓLICES','#ffe7b5');}
+          if(m.clock<=0){m.clock=6000*crisis;this.spawnBossBurst(e,8,{color:0xffe2a6,speed:85,damage:10+t*0.01,size:7,homing:true,life:12000});this.bossMechanicText(e,'PROTOESCÓLICES','#ffe7b5');}
           if(!m.ruptured&&e.hp<e.maxHp*0.5){
             m.ruptured=true;const radius=300;
             const wave=this.add.circle(e.x,e.y,20,0xffe2a6,0.12).setStrokeStyle(6,0xfff0c8,0.9).setDepth(29);
@@ -1168,7 +1193,18 @@
           }
           break;
         case 'clostridium-perfringens': // gangrena gaseosa: burbujas de gas que explotan
-          if(m.clock<=0){m.clock=2300*crisis;m.count++;this.spawnHazard(e.x+this.rng.float(-40,40),e.y+this.rng.float(-40,40),{radius:30,color:0xd9c8ff,damage:13+t*0.012,life:2600,mine:{t:1700,radius:95},label:'GAS',labelColor:'#e6dcff'});if(m.count%4===1)this.bossMechanicText(e,'GANGRENA GASEOSA','#e6dcff');}
+          if(m.clock<=0){
+            // deja una burbuja en un punto al azar alrededor suyo
+            m.clock=2600*crisis;m.count++;const a=this.rng.float(0,Math.PI*2),r=this.rng.float(e.radius+20,e.radius+170);
+            this.spawnHazard(e.x+Math.cos(a)*r,e.y+Math.sin(a)*r,{radius:34,color:0xd9c8ff,damage:13+t*0.012,life:4000,mine:{t:2700,radius:135},label:'GAS',labelColor:'#e6dcff'});
+            if(m.count%4===1)this.bossMechanicText(e,'GANGRENA GASEOSA','#e6dcff');
+          }
+          if(m.clock2<=0){
+            // y lanza burbujas hacia donde estás: caen y explotan al rato
+            m.clock2=3600*crisis;
+            for(let i=0;i<2;i++)this.spawnBossLob(e,this.player.x+this.rng.float(-70,70),this.player.y+this.rng.float(-70,70),{color:0xd9c8ff,speed:230,mine:{radius:34,color:0xd9c8ff,damage:13+t*0.012,life:2500,mine:{t:1100,radius:120},label:'GAS',labelColor:'#e6dcff'}});
+            this.bossMechanicText(e,'LANZA GAS','#e6dcff');
+          }
           break;
         case 'pneumocystis-jirovecii': { // fijo: aura que frena y, si tenés poca vida, ataca más (oportunista)
           if(d<230)this.auraSlowUntil=t+0.12;
@@ -1769,15 +1805,26 @@
         if(sporeIndex>=0){const spore=this.enemyProjectiles[sporeIndex],sx=b.obj.x,sy=b.obj.y;spore.hp-=1;this.burstEffect(spore.obj.x,spore.obj.y,0xc8ff52,17);spore.obj.destroy();this.enemyProjectiles.splice(sporeIndex,1);b.obj.destroy();this.playerBullets.splice(i,1);this.showFloatingText(sx,sy,'ESPORA ROTA','#d7ff84',10);continue;}
         let hit=null;for(const e of this.enemies){if(!e.dead&&this.projectileHitsEnemy(b,e)){hit=e;break;}}
         if(hit){if(b.source==='antibodies'){this.attachAntibody(hit,b);this.burstEffect(b.obj.x,b.obj.y,0xffdf91,14);b.obj.destroy();this.playerBullets.splice(i,1);continue;}this.burstEffect(b.obj.x,b.obj.y,hit.color||0x9df2ce,11);this.damageEnemy(hit,b.damage,true,b.source||'player');if(this.activeSkills.has('complement')&&this.rng.next()<(this.complementChance||.18)){const near=this.enemies.filter(e=>e!==hit&&!e.dead&&dist2(e,hit)<125*125).sort((a,b)=>dist2(a,hit)-dist2(b,hit))[0];if(near){this.makeImmuneSprite('complement',near.x,near.y,.72);this.burstEffect(near.x,near.y,0x9de8ff,24);this.damageEnemy(near,b.damage*.35,false,b.source||'player');if(near.hp<=0)this.killEnemy(near,false);}}if(hit.hp<=0)this.killEnemy(hit,false);if(b.pierce>0){b.pierce--;b.damage*=0.78;}else{b.obj.destroy();this.playerBullets.splice(i,1);}if(this.questionPaused)return;}
-        else if(b.life<=0||dist2(b.obj,this.player)>800*800){b.obj.destroy();this.playerBullets.splice(i,1);}
+        else if(b.life<=0||dist2(b.obj,this.player)>800*800){this.fadeOutProjectile(b);this.playerBullets.splice(i,1);}
       }
       for(let i=this.enemyProjectiles.length-1;i>=0;i--){
         const b=this.enemyProjectiles[i];b.life-=dtMs;
         if(b.homing){const desired=Math.atan2(this.player.y-b.obj.y,this.player.x-b.obj.x),current=Math.atan2(b.vy,b.vx),angle=current+clampAngle(wrapAngle(desired-current),1.25*dt),speed=Math.hypot(b.vx,b.vy);b.vx=Math.cos(angle)*speed;b.vy=Math.sin(angle)*speed;b.obj.rotation=angle+Math.PI/2;}
         b.obj.x+=b.vx*dt;b.obj.y+=b.vy*dt;
-        if(dist2(b.obj,this.player)<(this.playerRadius+b.radius)**2){this.damagePlayer(b.damage);b.obj.destroy();this.enemyProjectiles.splice(i,1);}
-        else if(b.life<=0||dist2(b.obj,this.player)>900*900){b.obj.destroy();this.enemyProjectiles.splice(i,1);}
+        if(b.landAt){
+          if(Math.hypot(b.landAt.x-b.obj.x,b.landAt.y-b.obj.y)<Math.hypot(b.vx,b.vy)*dt+4||b.life<=0){this.spawnHazard(b.obj.x,b.obj.y,b.landMine);this.fadeOutProjectile(b,140);this.enemyProjectiles.splice(i,1);}
+          continue;
+        }
+        if(dist2(b.obj,this.player)<(this.playerRadius+b.radius)**2){this.damagePlayer(b.damage);this.fadeOutProjectile(b,110);this.enemyProjectiles.splice(i,1);}
+        else if(b.life<=0||dist2(b.obj,this.player)>900*900){this.fadeOutProjectile(b);this.enemyProjectiles.splice(i,1);}
       }
+    }
+
+    // Los proyectiles que vencen o impactan se desvanecen (achicándose y siguiendo un poco su trayectoria)
+    // en vez de desaparecer de golpe. Ya salieron de la lista: no dañan ni chocan durante el fundido.
+    fadeOutProjectile(b,ms=240){
+      const o=b.obj;if(!o?.active)return;
+      this.tweens.add({targets:o,alpha:0,scaleX:(o.scaleX||1)*0.55,scaleY:(o.scaleY||1)*0.55,x:o.x+(b.vx||0)*ms/2000,y:o.y+(b.vy||0)*ms/2000,duration:ms,ease:'Quad.Out',onComplete:()=>o.destroy()});
     }
 
     attachAntibody(e,bullet){
@@ -1886,7 +1933,7 @@
         dealt*=e.mech.damageTaken;
         if(e.mech.shield>0){
           const absorbed=Math.min(e.mech.shield,dealt);e.mech.shield-=absorbed;dealt-=absorbed;
-          if(e.mech.shield<=0){e.mech.clock=9000;this.spawnBossBurst(e,14,{color:0xff6f6f,speed:170,damage:10+this.elapsed*0.01});this.bossMechanicText(e,'CÁPSULA ROTA · ENDOTOXINA','#ffb0b0');}
+          if(e.mech.shield<=0&&e.mech.phase==='capsula')this.releaseCapsule(e,true);
         }
       }
       e.hp-=dealt;e.hitFlash=155;
@@ -2025,14 +2072,32 @@
       // Parasites drift along a preferred heading. They can approach the player, but turn gradually.
         if(e.isWorm){
           let desired=e.heading;
-          if(d<(e.isBoss?1800:880))desired=Math.atan2(dy,dx);
+          if(d<880)desired=Math.atan2(dy,dx);
+          // Jefe gusano: embiste en línea recta (casi sin girar, así se pasa de largo), se aleja y acecha antes
+          // de volver a embestir. Antes giraba siempre hacia el jugador y terminaba orbitándolo.
+          let bossTurn=1.3,bossAccel=0.34,bossMax=1.95;
+          if(e.isBoss){
+            const c=e.charge||(e.charge={phase:'acecho',t:1.2,announced:false});c.t-=dt;
+            if(c.phase==='acecho'){
+              desired=Math.atan2(dy,dx);bossTurn=2.4;bossAccel=-0.9;bossMax=0.7;
+              if(!c.announced){c.announced=true;this.showFloatingText(e.x,e.y-60,'SE PREPARA PARA EMBESTIR','#ffb0c8',11);}
+              if(c.t<=0&&Math.abs(wrapAngle(desired-e.heading))<0.35){c.phase='embestida';c.t=2.6;c.lock=desired;}
+            }else if(c.phase==='embestida'){
+              desired=c.lock;bossTurn=0.22;bossAccel=1.6;bossMax=2.5;
+              const passed=(dx*Math.cos(e.heading)+dy*Math.sin(e.heading))<0&&d>240;
+              if(c.t<=0||passed){c.phase='retirada';c.t=3.2;}
+            }else{
+              desired=Math.atan2(-dy,-dx);bossTurn=1.1;bossAccel=0.2;bossMax=1.25;
+              if(c.t<=0||d>760){c.phase='acecho';c.t=0.9;c.announced=false;}
+            }
+          }
           const fromCenter=Math.hypot(e.x-CENTER,e.y-CENTER);
-          if(fromCenter>ARENA_RADIUS-310)desired=Math.atan2(CENTER-e.y,CENTER-e.x);
+          if(fromCenter>ARENA_RADIUS-310&&!(e.isBoss&&e.charge?.phase==='acecho'))desired=Math.atan2(CENTER-e.y,CENTER-e.x);
           const difference=wrapAngle(desired-e.heading),turnLoad=clamp(Math.abs(difference)/1.55,0,1);
           if(this.elapsed<e.wormEntryUntil)e.wormMomentum=0.38;
-          const turnRate=e.isBoss?1.30:clamp(0.82/(0.58+e.wormMomentum*0.82),0.30,0.86);
+          const turnRate=e.isBoss?bossTurn:clamp(0.82/(0.58+e.wormMomentum*0.82),0.30,0.86);
           e.heading+=clampAngle(difference,turnRate*dt);
-          e.wormMomentum=clamp(e.wormMomentum+(e.isBoss?0.34:0.22-turnLoad*0.68)*dt,0.38,e.isBoss?1.95:1.55);
+          e.wormMomentum=clamp(e.wormMomentum+(e.isBoss?bossAccel:0.22-turnLoad*0.68)*dt,0.38,e.isBoss?bossMax:1.55);
           e.speedNow=e.speed*e.wormMomentum;
           const wave=Math.sin(this.elapsed*5.1+e.animPhase)*0.10;
           e.x+=(Math.cos(e.heading)-Math.sin(e.heading)*wave)*e.speedNow*dt;
@@ -2059,14 +2124,15 @@
       const highlight = e.hitFlash > 0 ? 0xffffff : 0xffb5d7;
       const baseR = e.wormWidth * 0.59;
       // Closely spaced round segments overlap into one continuous silhouette.
-      for (let i = pts.length - 1; i >= 0; i--) {
-        const p = pts[i];
-        const progress = 1 - i / (pts.length - 1);
-        const r = baseR * (0.72 + 0.28 * progress);
-        g.fillStyle(outline, 1); g.fillCircle(p.x, p.y, r + 2.2);
-        g.fillStyle(body, 1); g.fillCircle(p.x, p.y, r);
-        g.fillStyle(highlight, 0.72); g.fillCircle(p.x - r*0.22, p.y - r*0.28, Math.max(2,r*0.24));
-      }
+      // Tres pasadas: todos los bordes, después todos los cuerpos y por último los brillos. Así el contorno queda
+      // solo en la silueta (antes cada segmento dibujaba su borde encima del cuerpo del anterior).
+      const radius = i => baseR * (0.72 + 0.28 * (1 - i / (pts.length - 1)));
+      g.fillStyle(outline, 1);
+      for (let i = pts.length - 1; i >= 0; i--) g.fillCircle(pts[i].x, pts[i].y, radius(i) + 2.6);
+      g.fillStyle(body, 1);
+      for (let i = pts.length - 1; i >= 0; i--) g.fillCircle(pts[i].x, pts[i].y, radius(i));
+      g.fillStyle(highlight, 0.72);
+      for (let i = pts.length - 1; i >= 0; i -= 2) { const r = radius(i); g.fillCircle(pts[i].x - r*0.22, pts[i].y - r*0.28, Math.max(2,r*0.24)); }
       const headSource=e.headSprite;
       if(headSource?.active){
         headSource.setPosition(e.x,e.y).setRotation(e.heading+Math.PI/2);

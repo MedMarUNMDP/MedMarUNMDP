@@ -2,6 +2,23 @@
 
 Formato: la versión más nueva arriba. Al publicar una versión, agregá una sección nueva acá y subí `?build=` en index.html (ver CLAUDE.md del juego). El historial previo a v3.1 está en `README.txt`.
 
+## v3.9.1
+
+Ajustes de jefes tras probarlos en el Laboratorio:
+- *E. coli* STEC: nubes de toxina más grandes (radio 120) y más duraderas (16 s).
+- Granuloma: libera menos bacilos (2 cada ~14 s), pero son de élite: 6 veces la vida de un enemigo común, casi el
+  doble de rápidos y no fagocitables.
+- *N. meningitidis*: ciclo nuevo. Cápsula activa (9 s) → dispara y la suelta → 5 s → dispara de nuevo → 5 s → se
+  vuelve a encapsular. Si le rompés la cápsula antes, pasa directo a la fase sin cápsula.
+- *Plasmodium*: sin destello rojo de pantalla; merozoítos más grandes y de mayor alcance.
+- Quiste hidatídico: los protoescólices duran 12 s.
+- *C. perfringens*: además de dejar burbujas en puntos al azar alrededor suyo, lanza burbujas hacia vos que caen y
+  explotan. Tardan más en explotar, tienen más rango (120 a 135) y muestran el radio de la explosión.
+- **Todos los proyectiles** se desvanecen al vencer o al impactar en vez de desaparecer de golpe.
+- **Helminto colosal**: embiste en línea recta (se pasa de largo), se aleja y acecha antes de volver a embestir. Ya no
+  orbita al jugador.
+- **Gusanos**: el contorno se dibuja solo en la silueta. Antes cada segmento pintaba su borde encima del anterior.
+
 ## v3.9
 
 **Jefes de núcleo con arte propio** (`assets/boss_*.webp`, recortados de `docs/arte/jefes-nucleo-3x3.png`). Todos
