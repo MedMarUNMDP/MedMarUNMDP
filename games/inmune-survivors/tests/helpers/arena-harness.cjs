@@ -105,6 +105,7 @@ function makeDom() {
     querySelectorAll: () => [],
     querySelector: () => null,
     createElement: () => element(`__tmp_${elements.size}`),
+    createTextNode: text => ({ nodeType: 3, textContent: String(text) }),
     addEventListener() {},
     body: element('body'),
     documentElement: element('html')
@@ -149,7 +150,7 @@ function loadGame() {
   vm.createContext(context);
   context.globalThis = context;
 
-  for (const file of ['src/core/runtime-services.js', 'src/config/game-balance.js', 'src/core/lab-actions.js', 'src/data/agentes.js', 'src/data/fichas.js']) {
+  for (const file of ['src/core/runtime-services.js', 'src/config/game-balance.js', 'src/core/lab-actions.js', 'src/data/agentes.js', 'src/data/fichas.js', 'src/core/modos.js']) {
     vm.runInContext(fs.readFileSync(path.join(ROOT, file), 'utf8'), context, { filename: file });
   }
 
@@ -164,7 +165,7 @@ function loadGame() {
 }
 
 // ---------- escena lista para usar ----------
-// options: seed, infection, infectionDifficulty, evolutionDifficulty, debugMode, coarse
+// options: seed, modo ('sandbox' | 'nucleo'), nucleo, infection (perfil clásico, sin modo), infectionDifficulty, evolutionDifficulty, debugMode, coarse
 function createScene(options = {}) {
   const loaded = loadGame();
   const { Arena, context } = loaded;
@@ -205,7 +206,8 @@ function createScene(options = {}) {
   });
 
   scene.init({
-    infection: options.infection || 'bacteriana',
+    infection: options.modo ? undefined : (options.infection || 'bacteriana'),
+    modo: options.modo, nucleo: options.nucleo,
     infectionDifficulty: options.infectionDifficulty || 'internado',
     evolutionDifficulty: options.evolutionDifficulty || 'estudiante',
     debugMode: !!options.debugMode,

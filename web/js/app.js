@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-21-pc"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-22-juegos"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -39,7 +39,7 @@ const hiloCacheCliente = new Map()
 const ACCIONES_LECTURA_DEDUPE = new Set([
     "bootstrap", "foroBootstrap", "listarEtiquetas", "listarHilos", "verHilo",
     "misSolicitudes", "misIntercambios", "miPerfil", "obtenerChat", "listarDenuncias",
-    "listarModeradores", "soyModerador"
+    "listarModeradores", "soyModerador", "rankingJuego"
 ])
 const FRESCURA_FORO_CLIENTE_MS = 20000
 const FRESCURA_USUARIO_CLIENTE_MS = 20000
@@ -2601,6 +2601,8 @@ async function cargarBootstrap() {
                 cargarForoBootstrap()
             }
 
+            if (nombre === "juegos") cargarRankingJuego(false)
+
             if (nombre === "moderacion") {
                 cargarDenuncias()
                 if (esAdminActual) {
@@ -2778,6 +2780,7 @@ async function cargarBootstrap() {
         // intercambios), para no dejarla en una compu compartida. El tema se conserva.
         function limpiarDatosDeSesion(borrarAlmacenamiento) {
             foroCacheCliente.clear()
+            rankingCache.clear()
             hiloCacheCliente.clear()
             chatCacheCliente.clear()
             imagenesResueltasCliente.clear()
@@ -2849,7 +2852,11 @@ async function cargarBootstrap() {
                 ? history.state
                 : crearEstadoNavegacion("inicio", null)
 
-            if (esEstadoMedmar(history.state) && !history.state.guard) {
+            if (vistaInicialPedida) {
+                // Llegada desde un juego (/?vista=juegos): directo al ranking.
+                mostrarSeccion(vistaInicialPedida, null, false)
+                vistaInicialPedida = null
+            } else if (esEstadoMedmar(history.state) && !history.state.guard) {
                 await aplicarEstadoHistorial(estado)
             } else {
                 mostrarSeccion("inicio", null, false)
@@ -3766,6 +3773,124 @@ async function cargarBootstrap() {
                 boton.disabled = false
             }
         })
+
+        // ==================== JUEGOS Y RANKING ====================
+        // El juego guarda el puntaje con la acción guardarPuntaje (comparte la sesión: mismo origen).
+        // Acá solo se lee el ranking (acción rankingJuego), con caché corta por modo para ahorrar invocaciones.
+
+        const JUEGO_RANKING = "inmune-survivors"
+        const RANKING_FRESCURA_MS = 30000
+        const rankingCache = new Map()
+        const rankingModo = document.getElementById("rankingModo")
+        const rankingLista = document.getElementById("rankingLista")
+        const rankingPropio = document.getElementById("rankingPropio")
+        const rankingResultados = document.getElementById("rankingResultados")
+        const rankingMsg = document.getElementById("rankingMsg")
+        const rankingBuscar = document.getElementById("rankingBuscar")
+        let rankingPedido = 0
+
+        document.querySelector(".juegoPortada img")?.addEventListener("error", function () { this.remove() })
+
+        function etiquetaModoRanking(modo) {
+            const opcion = rankingModo && Array.from(rankingModo.options).find(function (o) { return o.value === modo })
+            return opcion ? opcion.textContent : modo
+        }
+
+        function formatearDuracion(segundos) {
+            const s = Math.max(0, Number(segundos) || 0)
+            const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60
+            return h ? h + " h " + String(m).padStart(2, "0") + " min" : m + ":" + String(r).padStart(2, "0")
+        }
+
+        function filaRankingHtml(f) {
+            const podio = f.posicion <= 3 ? " podio" + f.posicion : ""
+            const medalla = f.posicion === 1 ? "🥇" : f.posicion === 2 ? "🥈" : f.posicion === 3 ? "🥉" : "#" + f.posicion
+            return "<li class='rankingFila" + podio + (f.esPropio ? " propia" : "") + "'>" +
+                "<span class='rankingPos'>" + escapeHtml(medalla) + "</span>" +
+                avatarHtml(f.pseudonimo, f.foto) +
+                "<span class='rankingNombre'><b>" + escapeHtml(f.pseudonimo) + (f.esPropio ? " (vos)" : "") + "</b>" +
+                "<small>" + escapeHtml(formatearDuracion(f.segundos)) + " de partida</small></span>" +
+                "<span class='rankingPuntos'>" + escapeHtml(Number(f.puntaje).toLocaleString("es-AR")) + "</span></li>"
+        }
+
+        function renderizarRanking(r) {
+            const modo = r.modo
+            const enlaceJugar = "/juegos/inmune-survivors/"
+            if (r.propio) {
+                rankingPropio.innerHTML = "Estás <strong>#" + escapeHtml(r.propio.posicion) + "</strong> de " + escapeHtml(r.total) +
+                    " en " + escapeHtml(etiquetaModoRanking(modo)) + " con <strong>" + escapeHtml(Number(r.propio.puntaje).toLocaleString("es-AR")) + "</strong> puntos."
+            } else {
+                rankingPropio.innerHTML = "Todavía no jugaste " + escapeHtml(etiquetaModoRanking(modo)) + ". <a href='" + enlaceJugar + "'>¡Jugá y entrá al ranking!</a>"
+            }
+
+            const top = Array.isArray(r.top) ? r.top : []
+            let html = top.map(filaRankingHtml).join("")
+            // Si estás fuera del top, tu fila aparece al final separada.
+            if (r.propio && !top.some(function (f) { return f.esPropio })) {
+                html += "<li class='rankingSeparador' aria-hidden='true'>···</li>" + filaRankingHtml(r.propio)
+            }
+            rankingLista.innerHTML = html
+            rankingMsg.textContent = top.length ? "" : "Nadie jugó este modo todavía. ¡El primer puesto está libre!"
+
+            if (Array.isArray(r.busqueda)) {
+                rankingResultados.innerHTML = r.busqueda.length
+                    ? "<p class='rankingSubtitulo'>Resultados para “" + escapeHtml(rankingBuscar.value.trim()) + "”</p><ol class='rankingLista'>" + r.busqueda.map(filaRankingHtml).join("") + "</ol>"
+                    : "<p class='rankingSubtitulo'>Nadie con ese pseudónimo jugó " + escapeHtml(etiquetaModoRanking(modo)) + ".</p>"
+            } else {
+                rankingResultados.innerHTML = ""
+            }
+        }
+
+        async function cargarRankingJuego(forzar) {
+            if (!rankingModo || !sesion) return
+            const modo = rankingModo.value
+            const buscar = rankingBuscar.value.trim()
+            if (buscar && buscar.length < 2) { rankingResultados.innerHTML = "<p class='rankingSubtitulo'>Escribí al menos 2 letras.</p>"; return }
+            const clave = modo + "|" + buscar.toLowerCase()
+            const cache = rankingCache.get(clave)
+            if (cache) renderizarRanking(cache.data)
+            if (cache && !forzar && Date.now() - cache.ts < RANKING_FRESCURA_MS) return
+            if (!cache) { rankingLista.innerHTML = ""; rankingPropio.innerHTML = ""; rankingMsg.textContent = "Cargando ranking…" }
+
+            const pedido = ++rankingPedido
+            const r = await llamar("rankingJuego", { juego: JUEGO_RANKING, modo: modo, buscar: buscar || undefined, limite: 20 })
+            if (pedido !== rankingPedido) return
+            if (!r.ok) {
+                if (!cache) rankingMsg.textContent = r.error === "modo_invalido" ? "Ese modo no tiene ranking." : r.error === "accion_invalida" ? "El ranking se está activando. Probá de nuevo en un rato." : mensajeError(r.error)
+                return
+            }
+            rankingCache.set(clave, { ts: Date.now(), data: r })
+            renderizarRanking(r)
+        }
+
+        if (rankingModo) {
+            rankingModo.addEventListener("change", function () {
+                try { localStorage.setItem("medmar:rankingModo", rankingModo.value) } catch (_) {}
+                cargarRankingJuego(false)
+            })
+            document.getElementById("formRankingBuscar").addEventListener("submit", function (e) {
+                e.preventDefault()
+                cargarRankingJuego(false)
+            })
+            rankingBuscar.addEventListener("search", function () { if (!rankingBuscar.value) cargarRankingJuego(false) })
+            try {
+                const guardado = localStorage.getItem("medmar:rankingModo")
+                if (guardado && Array.from(rankingModo.options).some(function (o) { return o.value === guardado })) rankingModo.value = guardado
+            } catch (_) {}
+        }
+
+        // Al volver del juego (otra pestaña o el botón Atrás) el ranking se refresca.
+        window.addEventListener("pageshow", function () { if (seccionActual === "juegos") cargarRankingJuego(true) })
+        document.addEventListener("visibilitychange", function () { if (!document.hidden && seccionActual === "juegos") cargarRankingJuego(true) })
+
+        // Enlaces desde el juego: /?vista=juegos&ranking=<modo>. Se leen una vez y se limpian de la URL.
+        const parametrosIniciales = new URLSearchParams(location.search)
+        let vistaInicialPedida = parametrosIniciales.get("vista") === "juegos" ? "juegos" : null
+        if (vistaInicialPedida) {
+            const modoPedido = parametrosIniciales.get("ranking")
+            if (rankingModo && modoPedido && Array.from(rankingModo.options).some(function (o) { return o.value === modoPedido })) rankingModo.value = modoPedido
+            try { history.replaceState(history.state, "", location.pathname + location.hash) } catch (_) {}
+        }
 
         // ==================== INICIO ====================
 

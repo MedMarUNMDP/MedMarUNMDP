@@ -48,7 +48,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261121a">
+    <link rel="stylesheet" href="/css/styles.css?v=20261122a">
 </head>
 
 <body>
@@ -434,7 +434,53 @@
             <div id="vistaJuegos" style="display:none">
 
                 <h2 class="seccion-titulo" style="margin-top:0">Juegos</h2>
-                <p class="vacio">Estamos preparando esta sección. Acá vas a poder jugar y, debajo de cada juego, ver el ranking de los mejores puntajes con el pseudónimo de cada uno. 🎮</p>
+
+                <article class="juegoCard">
+                    <div class="juegoPortada" aria-hidden="true">
+                        <img src="/juegos/inmune-survivors/assets/boss_virus.webp" alt="" loading="lazy">
+                    </div>
+                    <div class="juegoInfo">
+                        <span class="juegoEtiqueta">Microbiología e inmunología</span>
+                        <h3>Inmune Survivors</h3>
+                        <p>Defendé el tejido de los agentes de ADN. Jugá en <b>Sandbox infinito</b>, con todos los núcleos mezclados, o en <b>Foco por núcleo</b>, solo con los agentes del núcleo que estés estudiando. Para evolucionar, tenés que responder preguntas.</p>
+                        <a class="btn-primario juegoJugar" id="btnJugarInmune" href="/juegos/inmune-survivors/">Jugar ↗</a>
+                        <p class="juegoNota">Funciona en el celular y en la PC (con pantalla completa). Tus puntajes entran al ranking con tu pseudónimo.</p>
+                    </div>
+                </article>
+
+                <section class="rankingJuego" aria-labelledby="rankingTitulo">
+                    <div class="rankingCabecera">
+                        <h3 id="rankingTitulo">🏆 Ranking</h3>
+                        <label class="rankingSelector">
+                            <span class="sr-only">Modo del ranking</span>
+                            <select id="rankingModo">
+                                <option value="sandbox">Sandbox infinito</option>
+                                <option value="nucleo-6">Núcleo 6 · Digestivo y urinario</option>
+                                <option value="nucleo-7">Núcleo 7 · Respiratorio</option>
+                                <option value="nucleo-7.1">Núcleo 7.1 · SNC</option>
+                                <option value="nucleo-8">Núcleo 8 · ITS</option>
+                                <option value="nucleo-9">Núcleo 9 · Transmisión vertical</option>
+                                <option value="nucleo-10">Núcleo 10 · Vectores</option>
+                                <option value="nucleo-11">Núcleo 11 · Zoonosis</option>
+                                <option value="nucleo-12">Núcleo 12 · Piel</option>
+                                <option value="nucleo-13-14">Núcleo 13-14 · Oportunistas</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="rankingPropio" id="rankingPropio" aria-live="polite"></div>
+
+                    <form class="rankingBuscar" id="formRankingBuscar" role="search">
+                        <input type="search" id="rankingBuscar" placeholder="Buscá a alguien por pseudónimo" maxlength="24" autocomplete="off" aria-label="Buscar en el ranking por pseudónimo">
+                        <button type="submit" class="btn-secundario">Buscar</button>
+                    </form>
+                    <div id="rankingResultados" class="rankingResultados" aria-live="polite"></div>
+
+                    <ol class="rankingLista" id="rankingLista" aria-label="Mejores puntajes"></ol>
+                    <p class="rankingMsg" id="rankingMsg" aria-live="polite"></p>
+
+                    <p class="ayudaPerfil rankingAyuda">Cuenta tu mejor partida de cada modo. Puntaje: 10 por agente eliminado, 2 por segundo y 25 por respuesta correcta, multiplicado por la dificultad. El Laboratorio no suma.</p>
+                </section>
 
             </div>
 
@@ -661,7 +707,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261121a"></script>
+    <script src="/js/app.js?v=20261122a"></script>
 
 
 </body>

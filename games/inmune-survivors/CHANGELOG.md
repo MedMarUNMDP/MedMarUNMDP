@@ -2,6 +2,30 @@
 
 Formato: la versión más nueva arriba. Al publicar una versión, agregá una sección nueva acá y subí `?build=` en index.html (ver CLAUDE.md del juego). El historial previo a v3.1 está en `README.txt`.
 
+## v3.8
+
+**Modos nuevos (reemplazan la elección de infección)**
+- **Sandbox infinito**: agentes de todos los núcleos mezclados, en cualquier tejido. Los jefes alternan los cuatro
+  clásicos con los jefes de cada núcleo, en orden aleatorio.
+- **Foco por núcleo**: elegís uno de los 9 núcleos (6 a 13-14) y solo aparecen sus agentes, en su tejido, con la
+  proporción de familias del núcleo y contra su jefe (por ejemplo *N. meningitidis* en el 7.1). Si un núcleo solo tiene
+  parásitos con forma de gusano y se llena el tope de gusanos, sale otra familia del mismo núcleo.
+- Las preguntas todavía son las del banco general (etiquetarlas por núcleo es la etapa 7 del plan).
+
+**Menú nuevo**
+- Solo se elige el modo (y el núcleo), la presión de infección y el nivel de las preguntas. Se recuerda la última elección.
+- Récords locales por modo, "Cómo se juega" plegable, acceso al ranking de MedMar y al Laboratorio.
+
+**Ranking de MedMar**
+- Si iniciaste sesión en medmar.com.ar, al terminar la partida el puntaje se manda a la API (`guardarPuntaje`), que lo
+  recalcula y valida. El juego carga supabase-js recién en ese momento y comparte la sesión de la web.
+- Un ranking por modo: Sandbox y uno por núcleo. El Laboratorio no suma.
+
+**Pantalla completa en PC**
+- Botón "Pantalla completa" (o tecla F) también en la computadora. Con Esc se vuelve al marco de la página.
+- Corrección: al cambiar de tamaño, el lienzo se quedaba con el tamaño viejo (setZoom disparaba un redimensionado que
+  pisaba el tamaño nuevo).
+
 ## v3.7.2
 
 - Se saca el halo circular de las especies con cápsula y la membrana de las inclusiones: se veían como burbujas

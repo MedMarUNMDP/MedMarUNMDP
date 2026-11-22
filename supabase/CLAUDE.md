@@ -19,7 +19,8 @@ se aplica acá impacta producción.
 (intercambio de comisiones, matching por ciclos en `finalize_exchange`) · `conversaciones`, `conversacion_participantes`,
 `mensajes` (chat de un intercambio, 14 días) · `hilos` (`is_sensitive`), `respuestas` (anidadas con `parent_id`,
 FK al mismo hilo), `likes_hilos`, `likes_respuestas` (foro) ·
-`denuncias` (moderación) · `notificacion_queue` · `idempotency_keys` · `rate_limit_buckets` · `private.legacy_password_migrations`.
+`denuncias` (moderación) · `puntajes_juegos` (ranking: mejor puntaje por usuario/juego/modo, RPC `ranking_juego`) ·
+`notificacion_queue` · `idempotency_keys` · `rate_limit_buckets` · `private.legacy_password_migrations`.
 
 Funciones clave: `is_moderator`, `is_admin`, `prevent_role_escalation`, `consume_rate_limit`, `finalize_exchange`,
 `cleanup_expired_data`, `recount_medmar_counters`. Storage: bucket `profile-photos`.

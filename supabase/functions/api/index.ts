@@ -43,6 +43,9 @@ const RATE_LIMITS: Record<string, [number, number]> = {
   resolverImagen: [30, 300],
   soyModerador: [30, 300],
   bootstrap: [30, 300],
+  iniciarPartida: [60, 3600],
+  guardarPuntaje: [30, 3600],
+  rankingJuego: [60, 300],
 }
 
 const ALLOWED_HOSTS = [
@@ -525,6 +528,162 @@ async function obtenerChat(user: User, client: SupabaseClient, admin: SupabaseCl
   }})
 }
 
+// ==================== JUEGOS: PUNTAJES Y RANKING ====================
+// Misma fórmula y mismos multiplicadores que games/inmune-survivors/src/core/modos.js (calcularPuntaje).
+// El cliente manda los componentes de la partida; el puntaje se recalcula acá y se descartan partidas imposibles.
+const JUEGOS_RANKING = new Set(['inmune-survivors'])
+const MODO_RANKING = /^(sandbox|nucleo-(6|7|7\.1|8|9|10|11|12|13-14))$/
+const MULT_INFECCION: Record<string, number> = { ambulatorio: 0.75, internado: 1, inmunosuprimido: 1.5 }
+const MULT_EVOLUCION: Record<string, number> = { no_curse: 0.75, estudiante: 1, infectologo: 1.5 }
+const PARTIDA_MIN_SEGUNDOS = 20
+const PARTIDA_MAX_SEGUNDOS = 4 * 3600
+const PARTIDA_TOLERANCIA_S = 15 // reloj del cliente vs. servidor y latencia
+const PARTIDA_VIGENCIA_MS = 24 * 3600 * 1000
+
+// Entrada de partida firmada (HMAC con una clave derivada de la secret key; no se guarda nada en la base).
+// iniciarPartida la entrega al empezar; guardarPuntaje la exige, controla que los segundos declarados no superen
+// el tiempo real transcurrido desde el inicio y usa su id como clave de idempotencia (una entrada = una partida).
+const encoder = new TextEncoder()
+let claveFirmaPartida: Promise<CryptoKey> | null = null
+function base64url(bytes: Uint8Array) {
+  let bin = ''
+  for (const b of bytes) bin += String.fromCharCode(b)
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+async function firmaPartida(datos: string) {
+  if (!claveFirmaPartida) claveFirmaPartida = crypto.subtle.importKey('raw', encoder.encode('medmar-partida-v1:' + SECRET_KEY), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+  return base64url(new Uint8Array(await crypto.subtle.sign('HMAC', await claveFirmaPartida, encoder.encode(datos))))
+}
+function igualesSeguro(a: string, b: string) {
+  if (a.length !== b.length) return false
+  let diff = 0
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  return diff === 0
+}
+async function verificarEntradaPartida(token: unknown, userId: string, juego: string, modo: string) {
+  const m = /^([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\.(\d{13})\.([A-Za-z0-9_-]{43})$/.exec(String(token || ''))
+  if (!m) return null
+  const esperada = await firmaPartida(`${m[1]}.${userId}.${juego}.${modo}.${m[2]}`)
+  if (!igualesSeguro(esperada, m[3])) return null
+  const inicio = Number(m[2])
+  if (!Number.isFinite(inicio) || Date.now() - inicio > PARTIDA_VIGENCIA_MS || inicio > Date.now() + 60_000) return null
+  return { id: m[1], inicio }
+}
+
+function enteroNoNegativo(value: unknown) {
+  const n = Number(value)
+  return Number.isInteger(n) && n >= 0 && n <= 10_000_000 ? n : null
+}
+
+function validarPartida(body: any) {
+  const juego = String(body?.juego || '')
+  const modo = String(body?.modo || '')
+  if (!JUEGOS_RANKING.has(juego) || !MODO_RANKING.test(modo)) return null
+  const dificultadInfeccion = String(body?.dificultadInfeccion || '')
+  const dificultadEvolucion = String(body?.dificultadEvolucion || '')
+  if (!(dificultadInfeccion in MULT_INFECCION) || !(dificultadEvolucion in MULT_EVOLUCION)) return null
+  const segundos = enteroNoNegativo(body?.segundos)
+  const kills = enteroNoNegativo(body?.kills)
+  const correctas = enteroNoNegativo(body?.correctas)
+  const preguntas = enteroNoNegativo(body?.preguntas)
+  const jefes = enteroNoNegativo(body?.jefes)
+  if (segundos === null || kills === null || correctas === null || preguntas === null || jefes === null) return null
+  // Plausibilidad (topes holgados: el arnés de simulación da ~0,8 eliminaciones por segundo): no hay partidas de menos
+  // de 20 s, ni más de 6 eliminaciones por segundo, ni más preguntas que una cada ~10 s, ni más de un jefe cada ~25 s.
+  if (segundos < PARTIDA_MIN_SEGUNDOS || segundos > PARTIDA_MAX_SEGUNDOS) return null
+  if (kills > segundos * 6 + 40) return null
+  if (preguntas > Math.floor(segundos / 10) + 5 || correctas > preguntas) return null
+  if (jefes > Math.floor(segundos / 25) + 3) return null
+  const puntaje = Math.floor((kills * 10 + segundos * 2 + correctas * 25) * MULT_INFECCION[dificultadInfeccion] * MULT_EVOLUCION[dificultadEvolucion])
+  // Si el cliente dice otro puntaje, la partida no se corresponde con lo que se jugó (o se modificó).
+  if (body?.puntaje !== undefined && Number(body.puntaje) !== puntaje) return null
+  const version = String(body?.version || '').slice(0, 20)
+  return { juego, modo, segundos, puntaje, detalle: { kills, correctas, preguntas, jefes, dificultadInfeccion, dificultadEvolucion, version } }
+}
+
+async function posicionEnRanking(client: SupabaseClient, userId: string, juego: string, modo: string) {
+  const { data, error } = await client.rpc('ranking_juego', { p_juego: juego, p_modo: modo, p_limite: 1, p_usuario: userId, p_buscar: null })
+  if (error) throw error
+  const fila = (data || []).find((r: any) => String(r.user_id) === userId)
+  const total = Number((data || [])[0]?.total || 0)
+  return { posicion: fila ? Number(fila.posicion) : null, total }
+}
+
+async function iniciarPartida(user: User, body: any) {
+  const juego = String(body?.juego || '')
+  const modo = String(body?.modo || '')
+  if (!JUEGOS_RANKING.has(juego) || !MODO_RANKING.test(modo)) return json({ ok: false, error: 'modo_invalido' })
+  const id = crypto.randomUUID()
+  const inicio = Date.now()
+  const firma = await firmaPartida(`${id}.${user.id}.${juego}.${modo}.${inicio}`)
+  return json({ ok: true, partida: `${id}.${inicio}.${firma}` })
+}
+
+async function guardarPuntaje(user: User, client: SupabaseClient, admin: SupabaseClient, body: any) {
+  const partida = validarPartida(body)
+  if (!partida) return json({ ok: false, error: 'partida_invalida' })
+  const { juego, modo, segundos, puntaje, detalle } = partida
+  const entrada = await verificarEntradaPartida(body?.partida, user.id, juego, modo)
+  if (!entrada) return json({ ok: false, error: 'partida_sin_inicio' })
+  // Reintento de la misma partida: misma respuesta, sin volver a sumar.
+  const operationId = entrada.id
+  const previa = await getIdempotent(admin, user.id, operationId)
+  if (previa) return json(previa)
+  if (segundos > (Date.now() - entrada.inicio) / 1000 + PARTIDA_TOLERANCIA_S) return json({ ok: false, error: 'partida_invalida' })
+  let record = false
+  let mejor = puntaje
+  for (let intento = 0; intento < 2; intento++) {
+    const { data: actual, error } = await admin.from('puntajes_juegos').select('puntaje,partidas')
+      .eq('user_id', user.id).eq('juego', juego).eq('modo', modo).maybeSingle()
+    if (error) throw error
+    if (!actual) {
+      const { error: errIns } = await admin.from('puntajes_juegos').insert({ user_id: user.id, juego, modo, puntaje, segundos, detalle })
+      if (errIns) { if (pgCode(errIns) === '23505') continue; throw errIns }
+      record = true
+      break
+    }
+    const supera = puntaje > Number(actual.puntaje)
+    const cambios: Record<string, unknown> = { partidas: Number(actual.partidas || 1) + 1 }
+    if (supera) Object.assign(cambios, { puntaje, segundos, detalle, logrado_at: new Date().toISOString() })
+    // Con récord, solo se escribe si sigue siendo mayor (dos envíos simultáneos no pisan el mejor puntaje).
+    let consulta = admin.from('puntajes_juegos').update(cambios).eq('user_id', user.id).eq('juego', juego).eq('modo', modo)
+    if (supera) consulta = consulta.lt('puntaje', puntaje)
+    const { error: errUpd } = await consulta
+    if (errUpd) throw errUpd
+    record = supera
+    mejor = Math.max(puntaje, Number(actual.puntaje))
+    break
+  }
+  const { posicion, total } = await posicionEnRanking(client, user.id, juego, modo)
+  const respuesta = { ok: true, puntaje, mejor, record, posicion, total, modo }
+  await saveIdempotent(admin, user.id, 'guardarPuntaje', operationId, respuesta)
+  return json(respuesta)
+}
+
+async function rankingJuego(user: User, client: SupabaseClient, body: any) {
+  const juego = String(body?.juego || '')
+  const modo = String(body?.modo || '')
+  if (!JUEGOS_RANKING.has(juego) || !MODO_RANKING.test(modo)) return json({ ok: false, error: 'modo_invalido' })
+  const limite = Math.min(50, Math.max(5, Number(body?.limite) || 20))
+  // Búsqueda por pseudónimo: mismos caracteres que permite actualizarPseudonimo; % y _ quedan escapados.
+  const buscarRaw = String(body?.buscar || '').trim().normalize('NFC').slice(0, 24)
+  const buscar = /^[A-Za-zÀ-ÿ0-9 _.-]{2,24}$/.test(buscarRaw) ? buscarRaw.replace(/[\\%_]/g, (c) => '\\' + c) : null
+  const { data, error } = await client.rpc('ranking_juego', { p_juego: juego, p_modo: modo, p_limite: limite, p_usuario: user.id, p_buscar: buscar })
+  if (error) throw error
+  const filas = (data || []).map((r: any) => ({
+    posicion: Number(r.posicion), pseudonimo: r.pseudonimo || 'Estudiante', foto: r.foto_url || '',
+    puntaje: Number(r.puntaje), segundos: Number(r.segundos), fecha: r.logrado_at, esPropio: String(r.user_id) === user.id,
+    coincide: !!buscar && String(r.pseudonimo || '').toLowerCase().includes(buscarRaw.toLowerCase()),
+  }))
+  const total = Number((data || [])[0]?.total || 0)
+  return json({
+    ok: true, juego, modo, total,
+    top: filas.filter((f: any) => f.posicion <= limite),
+    propio: filas.find((f: any) => f.esPropio) || null,
+    busqueda: buscar ? filas.filter((f: any) => f.coincide) : null,
+  })
+}
+
 async function handle(req: Request, body: any) {
   const action = String(body?.accion || '')
   const authRequired = !['health', 'legacyLogin'].includes(action)
@@ -800,6 +959,18 @@ async function handle(req: Request, body: any) {
       if((previa||[]).length)return json({ok:true,repetida:true})
       const {error}=await admin.from('denuncias').insert({tipo,id_publicacion:id,denunciante_id:user.id,motivo});if(error)throw error
       return json({ok:true})
+    }
+    case 'iniciarPartida': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return iniciarPartida(user,body)
+    }
+    case 'guardarPuntaje': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return guardarPuntaje(user,client,admin,body)
+    }
+    case 'rankingJuego': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return rankingJuego(user,client,body)
     }
     case 'soyModerador': { const rl=await rateLimit(admin,action,user.id);if(rl)return rl; return json({ok:true,esModerador:await isModerator(admin,user.id),esAdmin:await isAdmin(admin,user.id)}) }
     case 'listarModeradores': {

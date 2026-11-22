@@ -2,7 +2,8 @@
 
 Survivor de arena (estilo "bullet heaven") educativo: un progenitor hematopoyético defiende un tejido
 infectado. Ataque automático; el jugador solo se mueve. Subir de nivel = responder una pregunta de
-inmunología/microbiología (acierto → mejora de vía; error → oleada extra). Versión actual: **3.7**.
+inmunología/microbiología (acierto → mejora de vía; error → oleada extra). Versión actual: **3.8**. Modos: **Sandbox infinito** y **Foco por núcleo**,
+con ranking en MedMar.
 
 ## Archivos
 
@@ -13,6 +14,9 @@ inmunología/microbiología (acierto → mejora de vía; error → oleada extra)
 - `src/config/game-balance.js` — límites, multiplicadores y efectos por vía (fuente única de verdad de las tarjetas).
 - `src/core/runtime-services.js` — `Rng`, `Clock`, `Storage` inyectables (tests reproducibles).
 - `src/core/lab-actions.js` — acciones del modo Laboratorio.
+- `src/core/modos.js` — modos de juego (agentes, pesos por familia, tejido y jefes de cada núcleo), fórmula del
+  puntaje y topes de plausibilidad. **La fórmula y los topes están duplicados en `supabase/functions/api`
+  (`guardarPuntaje`)**: si cambian, cambialos en los dos lados.
 - `src/data/agentes.js` — catálogo ADN 2026: 114 agentes por núcleo, morfologías, rasgos y jefes. `src/data/fichas.js` —
   fichas validadas (clase, cuadro, dato clave). Cambiar contenido médico → `revisor-contenido-medico` + validación del autor.
   Cada enemigo común toma una especie de su familia y su textura se "hornea" una vez (`getSpeciesTexture`).

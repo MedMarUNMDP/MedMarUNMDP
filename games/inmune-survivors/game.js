@@ -290,6 +290,8 @@
   // morfologías genéricas de antes.
   const AGENTES_DATA = globalThis.InmuneAgentes || null;
   const FICHAS_DATA = globalThis.InmuneFichas || null;
+  const MODOS_API = globalThis.InmuneModos || null;
+  const GAME_VERSION = '3.8.0';
   const SPECIES_TEXTURE_SIZE = 256;
   const randomItem = (rng, list) => rng.pick(list);
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
@@ -324,7 +326,7 @@
     }
 
     init(data) {
-      this.settings = data && data.infection ? { ...data } : { infection:'bacteriana', infectionDifficulty:'internado', evolutionDifficulty:'estudiante' };
+      this.settings = data && (data.modo || data.infection) ? { ...data } : { modo:'sandbox', infectionDifficulty:'internado', evolutionDifficulty:'estudiante' };
       this.runtime=data?.runtime||InmuneRuntime.createRuntime();this.rng=this.runtime.rng;this.clock=this.runtime.clock;this.storage=this.runtime.storage;
       this.ui=data?.uiBridge||{emit:()=>{},setActions:()=>{},clearActions:()=>{},isHidden:()=>false,getDeviceProfile:()=>({cores:4,memory:0,coarse:false})};
       const device=this.ui.getDeviceProfile(),cores=Number(device.cores||4),memory=Number(device.memory||0),coarse=!!device.coarse;
@@ -336,11 +338,18 @@
       this.settings.infectionDifficulty = INFECTION_DIFFICULTIES[this.settings.infectionDifficulty] ? this.settings.infectionDifficulty : 'internado';
       this.settings.evolutionDifficulty = EVOLUTION_DIFFICULTIES[this.settings.evolutionDifficulty] ? this.settings.evolutionDifficulty : 'estudiante';
       this.debugMode=!!this.settings.debugMode;
-      this.theme = INFECTIONS[this.settings.infection] || INFECTIONS.bacteriana;
+      // Modos v3.8 (Sandbox infinito / Foco por núcleo). Sin `modo` (arnés de tests viejo) queda el perfil de
+      // infección clásico de INFECTIONS.
+      this.modo=this.settings.modo&&MODOS_API?MODOS_API.crearModo({modo:this.settings.modo,nucleo:this.settings.nucleo},AGENTES_DATA):null;
+      if(this.modo){
+        this.theme={label:this.modo.etiqueta,weights:this.modo.pesos,maps:this.modo.mapas.map(id=>({id,label:(TISSUE_VISUALS[id]||TISSUE_VISUALS.endothelium).label}))};
+      }else this.theme = INFECTIONS[this.settings.infection] || INFECTIONS.bacteriana;
       this.infectionDiff = INFECTION_DIFFICULTIES[this.settings.infectionDifficulty];
       this.evolutionDiff = {id:this.settings.evolutionDifficulty,...EVOLUTION_DIFFICULTIES[this.settings.evolutionDifficulty]};
       this.map = randomItem(this.rng,this.theme.maps);
       this.tissueVisual = TISSUE_VISUALS[this.map.id] || TISSUE_VISUALS.endothelium;
+      if(this.modo)this.theme.accent=this.tissueVisual.accent;
+      this.bossSpecs=this.buildBossSequence();
     }
 
     create() {
@@ -372,7 +381,7 @@
         resumeGame: () => this.resumeGame(),
         debug: action => this.debugAction(action)
       });
-      this.emit('is:run-start', { infection:this.theme.label, map:this.map.label, infectionDifficulty:this.infectionDiff.label, evolutionDifficulty:this.evolutionDiff.label, multiplier:this.infectionDiff.multiplier*this.evolutionDiff.multiplier, debug:this.debugMode });
+      this.emit('is:run-start', { modo:this.modo?.corto||null, infection:this.theme.label, map:this.map.label, infectionDifficulty:this.infectionDiff.label, evolutionDifficulty:this.evolutionDiff.label, multiplier:this.infectionDiff.multiplier*this.evolutionDiff.multiplier, debug:this.debugMode });
     }
 
     emit(name, detail) { this.ui.emit(name,detail); }
@@ -629,6 +638,8 @@
     }
 
     getScore() {
+      // Misma fórmula que el servidor (InmuneModos.calcularPuntaje y la acción guardarPuntaje de la API).
+      if(MODOS_API)return MODOS_API.calcularPuntaje({kills:this.kills,segundos:this.elapsed,correctas:this.correctAnswers,dificultadInfeccion:this.settings.infectionDifficulty,dificultadEvolucion:this.evolutionDiff.id});
       const raw = this.kills * 10 + Math.floor(this.elapsed) * 2 + this.correctAnswers * 25;
       return Math.floor(raw * this.infectionDiff.multiplier * this.evolutionDiff.multiplier);
     }
@@ -776,20 +787,31 @@
 
     // ---------- Especies (catálogo ADN 2026) ----------
 
-    // Elige una especie de la familia del enemigo. Los gusanos solo toman especies con forma de gusano del mismo
-    // tipo (nematodo o cestodo); los demás, especies que no son gusanos. Solo agentes confirmados en algún núcleo.
-    pickAgente(type,morphology){
+    // Elige una especie de la familia del enemigo entre los agentes del modo (todos los núcleos en Sandbox, solo los
+    // del núcleo en Foco por núcleo). allowWorm=false descarta las especies con forma de gusano (tope de gusanos).
+    pickAgente(type,allowWorm=true){
       if(!AGENTES_DATA)return null;
-      const wormKind=morphology.worm?(morphology.wormKind==='cestode'?'tapeworm':'nematode'):null;
-      if(!this.speciesPool)this.speciesPool={};
-      const key=`${type}:${wormKind||'-'}`;
-      if(!this.speciesPool[key])this.speciesPool[key]=AGENTES_DATA.AGENTES.filter(a=>{
-        if(a.familia!==type||!a.nucleos.length)return false;
-        const gusano=AGENTES_DATA.MORFOLOGIAS[a.morfologia]?.gusano||null;
-        return wormKind?gusano===wormKind:!gusano;
-      });
-      const pool=this.speciesPool[key];
+      if(!this.speciesPool){
+        this.speciesPool={};
+        const ids=this.modo?new Set(this.modo.agentes):null;
+        for(const a of AGENTES_DATA.AGENTES){
+          if(!a.nucleos.length||(ids&&!ids.has(a.id)))continue;
+          (this.speciesPool[a.familia]||(this.speciesPool[a.familia]=[])).push(a);
+        }
+      }
+      let pool=this.speciesPool[type]||[];
+      if(!allowWorm)pool=pool.filter(a=>!AGENTES_DATA.MORFOLOGIAS[a.morfologia]?.gusano);
       return pool.length?randomItem(this.rng,pool):null;
+    }
+
+    // Morfología base del motor para un agente: los gusanos usan el nematodo o el cestodo; el resto, la pieza
+    // con la misma textura o una de su familia.
+    baseMorphologyForAgente(type,agente){
+      const gusano=AGENTES_DATA.MORFOLOGIAS[agente.morfologia]?.gusano;
+      if(gusano){const kind=gusano==='tapeworm'?'cestode':'nematode';return MORPHOLOGY.parasite.find(m=>m.worm&&m.wormKind===kind);}
+      const textura=AGENTES_DATA.MORFOLOGIAS[agente.morfologia]?.textura;
+      const options=(MORPHOLOGY[type]||[]).filter(m=>!m.worm);
+      return options.find(m=>m.texture===textura)||randomItem(this.rng,options);
     }
 
     // Morfología del motor para una especie: misma forma de moverse (id de la morfología base), textura horneada
@@ -878,8 +900,37 @@
       return Math.max(12,granuleDps+netDps+swarmDps+s.blastDamage*0.20);
     }
 
+    // Secuencia de jefes del modo: en Foco por núcleo, el jefe del núcleo; en Sandbox, los clásicos alternados con
+    // los de todos los núcleos (orden aleatorio por partida). Sin modo, los cuatro clásicos.
+    buildBossSequence(){
+      if(!this.modo||!AGENTES_DATA)return BOSS_MORPHOLOGIES;
+      const propios=this.modo.jefes.map(j=>this.bossSpecFromAgente(j)).filter(Boolean);
+      if(this.modo.id==='nucleo')return propios.length?propios:BOSS_MORPHOLOGIES;
+      const clasicos=this.rng.shuffle([...BOSS_MORPHOLOGIES]),deNucleo=this.rng.shuffle(propios),out=[];
+      for(let i=0;i<Math.max(clasicos.length,deNucleo.length);i++){if(clasicos[i])out.push(clasicos[i]);if(deNucleo[i])out.push(deNucleo[i]);}
+      return out;
+    }
+
+    // Jefe a partir de una especie del catálogo: mismo comportamiento que el jefe clásico de su familia (los
+    // hongos quedan fijos, los gusanos serpentean) con la textura horneada de la especie, más grande.
+    bossSpecFromAgente(jefe){
+      const a=AGENTES_DATA.agente(jefe.agente);if(!a)return null;
+      const gusano=AGENTES_DATA.MORFOLOGIAS[a.morfologia]?.gusano;
+      const spec={id:`jefe-${a.id}`,type:a.familia,label:gusano?a.nombre:jefe.titulo,radius:55,color:a.tinte??0xffa52f,outline:0x26103e,boss:true,agente:a.id,agenteJefe:a.id,stationary:a.familia==='fungus'};
+      if(gusano)Object.assign(spec,{texture:'boss_helminth',worm:true,wormKind:gusano==='tapeworm'?'cestode':'nematode',headTexture:gusano==='tapeworm'?'helminth_tapeworm_scolex':'helminth_nematode_head',cruiseSpeed:245,bodyLength:1500});
+      return spec;
+    }
+
+    requiredBossIds(){
+      const seq=this.bossSpecs||BOSS_MORPHOLOGIES;
+      return (this.modo?.id==='sandbox'?seq.slice(0,4):seq).map(b=>b.id);
+    }
+
     spawnBoss() {
-      const spec=BOSS_MORPHOLOGIES[this.bossSequenceIndex%BOSS_MORPHOLOGIES.length];
+      const seq=this.bossSpecs||BOSS_MORPHOLOGIES;
+      let spec=seq[this.bossSequenceIndex%seq.length];
+      // La textura de la especie se hornea recién acá (en init todavía no están cargadas las piezas base).
+      if(spec.agenteJefe&&!spec.worm)spec={...spec,texture:this.getSpeciesTexture(AGENTES_DATA.agente(spec.agenteJefe))};
       const spawnAt={x:CENTER,y:CENTER};
       const boss=this.spawnEnemy(spec.type,true,spawnAt,spec);
       if(!boss)return;
@@ -896,14 +947,18 @@
     spawnEnemy(forceType = null, forcedLarge = false, spawnAt = null, bossSpec = null) {
       const enemyLimit=this.debugMode?Math.min(220,this.debugSpawnLimit||180):(this.multiResistance?Math.min(96,this.maxEnemyCount+24):this.maxEnemyCount);
       if ((!bossSpec&&this.activeEnemyCount>=enemyLimit) || (bossSpec&&this.activeEnemyCount>=enemyLimit+2) || this.gameEnded || this.questionPaused) return;
-      const type = bossSpec?.type || forceType || this.pickEnemyType();
-      let morphology = bossSpec || randomItem(this.rng,MORPHOLOGY[type]);
-      if (!bossSpec && type === 'parasite' && morphology.worm && this.enemies.reduce((n,e)=>n+(!e.dead&&e.isWorm?1:0),0) >= (this.lowPerformanceDevice?2:3)) {
-        morphology = randomItem(this.rng,MORPHOLOGY.parasite.filter(m => !m.worm));
+      let type = bossSpec?.type || forceType || this.pickEnemyType();
+      let morphology = bossSpec;
+      if(!bossSpec){
+        // Identidad: cada enemigo común es una especie concreta del catálogo del modo. Primero la especie y después
+        // la forma, así un núcleo sin gusanos no los genera. Los gusanos tienen tope y no nacen junto a otro enemigo.
+        const allowWorm=type==='parasite'&&!spawnAt&&this.enemies.reduce((n,e)=>n+(!e.dead&&e.isWorm?1:0),0)<(this.lowPerformanceDevice?2:3);
+        let agente=this.pickAgente(type,allowWorm);
+        // Núcleo cuyos parásitos son todos gusanos (p. ej. zoonosis) con el tope lleno: sale otra familia del núcleo.
+        if(!agente&&this.modo&&!forceType){for(const t of ['bacteria','virus','fungus']){agente=this.pickAgente(t,false);if(agente){type=t;break;}}}
+        if(agente)morphology=this.morphologyForAgente(type,agente,this.baseMorphologyForAgente(type,agente));
+        else{const options=(MORPHOLOGY[type]||MORPHOLOGY.bacteria).filter(m=>allowWorm||!m.worm);morphology=randomItem(this.rng,options);}
       }
-      if(spawnAt&&type==='parasite'&&morphology.worm&&!bossSpec)morphology=randomItem(this.rng,MORPHOLOGY.parasite.filter(m=>!m.worm));
-      // Identidad: cada enemigo común es una especie concreta del catálogo de su familia.
-      if(!bossSpec){const agente=this.pickAgente(type,morphology);if(agente)morphology=this.morphologyForAgente(type,agente,morphology);}
       const isWorm=morphology.worm===true;
       const p=spawnAt?this.constrainToArena(spawnAt.x,spawnAt.y,bossSpec?Math.max(160,this.playerRadius+20):150):(bossSpec?this.randomSpawnPoint(560,760):(isWorm?this.randomSpawnPoint(235,390):this.randomSpawnPoint()));
 
@@ -1588,7 +1643,7 @@
       if(this.colonies.length>=2)return;
       let p=this.debugMode?this.constrainToArena(this.player.x+90,this.player.y,115):this.randomPointInArena(115);
       if(!this.debugMode)for(let i=0;i<12&&Math.hypot(p.x-this.player.x,p.y-this.player.y)<250;i++)p=this.randomPointInArena(115);
-      const art={bacteriana:{key:'focus_bacterial',name:'BACTERIANO',color:0x65f0c0},viral:{key:'focus_viral',name:'VIRAL',color:0x72cfff},fungica:{key:'focus_fungal',name:'MICÓTICO',color:0xc5a0ff},parasitaria:{key:'focus_parasitic',name:'PARASITARIO',color:0xffa5bb}}[this.settings.infection]||{key:'focus_bacterial',name:'BACTERIANO',color:0x65f0c0};
+      const art={bacteriana:{key:'focus_bacterial',name:'BACTERIANO',color:0x65f0c0},viral:{key:'focus_viral',name:'VIRAL',color:0x72cfff},fungica:{key:'focus_fungal',name:'MICÓTICO',color:0xc5a0ff},parasitaria:{key:'focus_parasitic',name:'PARASITARIO',color:0xffa5bb}}[this.modo?({bacteria:'bacteriana',virus:'viral',fungus:'fungica',parasite:'parasitaria'})[this.pickEnemyType()]:this.settings.infection]||{key:'focus_bacterial',name:'BACTERIANO',color:0x65f0c0};
       const safeZone=this.add.circle(p.x,p.y,71,art.color,0.035).setStrokeStyle(2,art.color,0.78).setDepth(7);
       const graphic=this.add.graphics().setDepth(10);
       const core=this.add.image(p.x,p.y,art.key).setDisplaySize(144,144).setDepth(9);
@@ -1959,7 +2014,7 @@
       this.xpNeed=Math.round(260+this.questionCount*65+Math.pow(this.questionCount,1.35)*12);
       let question=this.selectUnusedQuestion();
       if(!question){
-        const requiredBosses=BOSS_MORPHOLOGIES.map(b=>b.id),allBossesDefeated=requiredBosses.every(id=>this.defeatedBossIds?.has(id));
+        const requiredBosses=this.requiredBossIds(),allBossesDefeated=requiredBosses.every(id=>this.defeatedBossIds?.has(id));
         if(!allBossesDefeated){this.usedQuestionIds.clear();question=this.selectUnusedQuestion();if(!question){this.questionPaused=false;this.pendingQuestionOutcome=null;this.tweens.resumeAll();return;}}
         else {this.questionPaused=false;this.pendingQuestionOutcome=null;this.multiResistance=true;this.multiResistanceAt=this.elapsed;this.resistanceBossClock=26000;this.tweens.resumeAll();
         this.emit('is:close-question',{});this.emit('is:multiresistance',{time:this.elapsed});
@@ -2022,9 +2077,16 @@
 
     finishGame() {
       if(this.gameEnded)return;this.gameEnded=true;this.stats.health=Math.max(0,this.stats.health);
-      const score=this.getScore(),key=`is_best_${this.settings.infection}_${this.settings.infectionDifficulty}_${this.settings.evolutionDifficulty}`;
+      const score=this.getScore(),key=`is_best_${this.modo?this.modo.rankingModo:this.settings.infection}_${this.settings.infectionDifficulty}_${this.settings.evolutionDifficulty}`;
       const previous=this.storage.getNumber(key),best=Math.max(score,previous);this.storage.setNumber(key,best);
-      this.emit('is:game-over',{...this.getRunSummary(),best,isRecord:score>previous,infection:this.theme.label,map:this.map.label,infectionDifficulty:this.infectionDiff.label,evolutionDifficulty:this.evolutionDiff.label,multiplier:this.infectionDiff.multiplier*this.evolutionDiff.multiplier});
+      this.emit('is:game-over',{...this.getRunSummary(),best,isRecord:score>previous,ranking:this.getRankingPayload(score),infection:this.theme.label,map:this.map.label,infectionDifficulty:this.infectionDiff.label,evolutionDifficulty:this.evolutionDiff.label,multiplier:this.infectionDiff.multiplier*this.evolutionDiff.multiplier});
+    }
+
+    // Datos que el juego manda a la API (acción guardarPuntaje). El servidor recalcula el puntaje con la misma
+    // fórmula y valida que sea plausible. El Laboratorio y el modo clásico de los tests no envían nada.
+    getRankingPayload(score){
+      if(this.settings.debugMode||!this.modo)return null;
+      return {juego:'inmune-survivors',modo:this.modo.rankingModo,puntaje:score,kills:this.kills,segundos:Math.floor(this.elapsed),correctas:this.correctAnswers,preguntas:this.questionCount,jefes:this.bossKills,dificultadInfeccion:this.settings.infectionDifficulty,dificultadEvolucion:this.evolutionDiff.id,version:GAME_VERSION};
     }
 
     destroyTransientObjects() {
@@ -2035,7 +2097,7 @@
     }
   }
 
-  let game=null,selectedInfection='bacteriana',selectedInfectionDifficulty='internado',selectedEvolutionDifficulty='estudiante';
+  let game=null,selectedMode='sandbox',selectedNucleo='6',selectedInfectionDifficulty='internado',selectedEvolutionDifficulty='estudiante';
   const uiBridge={
     emit:(name,detail)=>window.dispatchEvent(new CustomEvent(name,{detail})),
     setActions:(actions)=>{window.IS_ACTIONS=actions;},
@@ -2044,18 +2106,64 @@
     getDeviceProfile:()=>({cores:navigator.hardwareConcurrency||4,memory:navigator.deviceMemory||0,coarse:window.matchMedia?.('(pointer: coarse)').matches||navigator.maxTouchPoints>0})
   };
   const gameRuntime=InmuneRuntime.createRuntime({storage:new InmuneRuntime.Storage(window.localStorage)});
-  let currentSettings={infection:selectedInfection,infectionDifficulty:selectedInfectionDifficulty,evolutionDifficulty:selectedEvolutionDifficulty};
+  let currentSettings={modo:selectedMode,nucleo:selectedNucleo,infectionDifficulty:selectedInfectionDifficulty,evolutionDifficulty:selectedEvolutionDifficulty};
   const $=id=>document.getElementById(id);
   const menuScreen=$('menuScreen'),gameScreen=$('gameScreen');
   const questionLayer=$('questionLayer'),upgradeLayer=$('upgradeLayer'),gameOverLayer=$('gameOverLayer'),pauseLayer=$('pauseLayer'),focusEvolutionLayer=$('focusEvolutionLayer');
   function openLayer(el){el.classList.add('open');}
   function closeLayer(el){el.classList.remove('open');}
 
-  document.querySelectorAll('[data-infection]').forEach(btn=>btn.addEventListener('click',()=>{
-    selectedInfection=btn.dataset.infection;document.querySelectorAll('[data-infection]').forEach(b=>b.classList.toggle('selected',b===btn));
-  }));
-  document.querySelectorAll('[data-infection-difficulty]').forEach(btn=>btn.addEventListener('click',()=>{selectedInfectionDifficulty=btn.dataset.infectionDifficulty;document.querySelectorAll('[data-infection-difficulty]').forEach(b=>b.classList.toggle('selected',b===btn));}));
-  document.querySelectorAll('[data-evolution-difficulty]').forEach(btn=>btn.addEventListener('click',()=>{selectedEvolutionDifficulty=btn.dataset.evolutionDifficulty;document.querySelectorAll('[data-evolution-difficulty]').forEach(b=>b.classList.toggle('selected',b===btn));}));
+  // ---- Menú: modo (Sandbox / Foco por núcleo), núcleo y dificultades. La elección se recuerda. ----
+  const NUCLEOS=globalThis.InmuneAgentes?.NUCLEOS||[];
+  const MENU_KEY='is_menu_v38';
+  try{const m=JSON.parse(localStorage.getItem(MENU_KEY)||'null');if(m){
+    if(m.modo==='nucleo'||m.modo==='sandbox')selectedMode=m.modo;
+    if(NUCLEOS.some(n=>n.id===m.nucleo))selectedNucleo=m.nucleo;
+    if(INFECTION_DIFFICULTIES[m.inf])selectedInfectionDifficulty=m.inf;
+    if(EVOLUTION_DIFFICULTIES[m.evo])selectedEvolutionDifficulty=m.evo;
+  }}catch(_){}
+  const saveMenu=()=>{try{localStorage.setItem(MENU_KEY,JSON.stringify({modo:selectedMode,nucleo:selectedNucleo,inf:selectedInfectionDifficulty,evo:selectedEvolutionDifficulty}));}catch(_){}};
+  const rankingKey=()=>selectedMode==='nucleo'?`nucleo-${selectedNucleo}`:'sandbox';
+  const modeLabel=key=>key==='sandbox'?'Sandbox infinito':`Núcleo ${String(key).replace('nucleo-','')}`;
+  const shortName=n=>n.nombre.replace(/^Agentes (con|que) /,'').replace(/^ingreso /,'Ingreso ').replace(/^./,c=>c.toUpperCase());
+  $('nucleoChoices').innerHTML='';
+  for(const n of NUCLEOS){
+    const b=document.createElement('button');b.type='button';b.className='nucleo-choice';b.dataset.nucleo=n.id;b.setAttribute('role','radio');
+    const cantidad=globalThis.InmuneAgentes.agentesDeNucleo(n.id).length;
+    const tag=document.createElement('b');tag.textContent=`Núcleo ${n.id}`;
+    const name=document.createElement('span');name.textContent=shortName(n);
+    const meta=document.createElement('small');meta.textContent=`Jefe: ${n.jefe.titulo} · ${cantidad} agentes`;
+    b.append(tag,name,meta);$('nucleoChoices').appendChild(b);
+  }
+  function syncMenu(){
+    document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('selected',b.dataset.mode===selectedMode));
+    document.querySelectorAll('[data-nucleo]').forEach(b=>{const on=b.dataset.nucleo===selectedNucleo;b.classList.toggle('selected',on);b.setAttribute('aria-checked',on?'true':'false');});
+    document.querySelectorAll('[data-infection-difficulty]').forEach(b=>b.classList.toggle('selected',b.dataset.infectionDifficulty===selectedInfectionDifficulty));
+    document.querySelectorAll('[data-evolution-difficulty]').forEach(b=>b.classList.toggle('selected',b.dataset.evolutionDifficulty===selectedEvolutionDifficulty));
+    $('nucleoPicker').hidden=selectedMode!=='nucleo';
+    $('startButton').textContent=selectedMode==='nucleo'?`JUGAR NÚCLEO ${selectedNucleo} ↗`:'JUGAR SANDBOX ↗';
+    $('rankingLink').href=`/?vista=juegos&ranking=${encodeURIComponent(rankingKey())}`;
+    renderLocalRecords();saveMenu();
+  }
+  document.querySelectorAll('[data-mode]').forEach(btn=>btn.addEventListener('click',()=>{selectedMode=btn.dataset.mode;syncMenu();}));
+  $('nucleoChoices').addEventListener('click',e=>{const b=e.target.closest('[data-nucleo]');if(!b)return;selectedNucleo=b.dataset.nucleo;syncMenu();});
+  document.querySelectorAll('[data-infection-difficulty]').forEach(btn=>btn.addEventListener('click',()=>{selectedInfectionDifficulty=btn.dataset.infectionDifficulty;syncMenu();}));
+  document.querySelectorAll('[data-evolution-difficulty]').forEach(btn=>btn.addEventListener('click',()=>{selectedEvolutionDifficulty=btn.dataset.evolutionDifficulty;syncMenu();}));
+  // Récords locales: el mejor de cada modo (cualquier dificultad) y el de la configuración elegida.
+  function bestLocal(key,inf=null,evo=null){
+    let best=0;
+    for(const i of inf?[inf]:Object.keys(INFECTION_DIFFICULTIES))for(const v of evo?[evo]:Object.keys(EVOLUTION_DIFFICULTIES))best=Math.max(best,gameRuntime.storage.getNumber(`is_best_${key}_${i}_${v}`));
+    return best;
+  }
+  function renderLocalRecords(){
+    const box=$('localRecords');box.innerHTML='';
+    const row=(label,value,current)=>{const r=document.createElement('div');r.className='record-row'+(current?' actual':'');const l=document.createElement('span');l.textContent=label;const v=document.createElement('strong');v.textContent=value?value.toLocaleString('es-AR'):'—';r.append(l,v);box.appendChild(r);};
+    const key=rankingKey();
+    row(`${modeLabel(key)} · esta dificultad`,bestLocal(key,selectedInfectionDifficulty,selectedEvolutionDifficulty),true);
+    const others=['sandbox',...NUCLEOS.map(n=>`nucleo-${n.id}`)].map(k=>[k,bestLocal(k)]).filter(([,v])=>v>0);
+    for(const [k,v] of others)row(modeLabel(k),v,false);
+    if(!others.length){const p=document.createElement('p');p.className='muted';p.style.margin='2px 0 0';p.textContent='Todavía no jugaste: tu primer récord te espera.';box.appendChild(p);}
+  }
 
   const mobileViewport=()=>window.matchMedia('(max-width: 760px), (pointer: coarse)').matches;
   // Píxeles reales por píxel CSS: hasta ×2 en PC y ×1,5 en celular (pantallas chicas con DPR 3 no lo notan y
@@ -2078,8 +2186,11 @@
     const bounds=$('gameContainer').getBoundingClientRect();
     if(bounds.width<2||bounds.height<2)return;
     fitLogicalViewport();
+    // Tamaño destino calculado antes de setZoom: setZoom dispara el RESIZE de la escena, que recalcula W y H
+    // con el tamaño viejo (por eso al entrar en pantalla completa en PC el lienzo no se agrandaba).
+    const pw=Math.round(W*RENDER_RES),ph=Math.round(H*RENDER_RES);
     game.scale.setZoom(1/RENDER_RES);
-    game.scale.resize(Math.round(W*RENDER_RES),Math.round(H*RENDER_RES));
+    game.scale.resize(pw,ph);
   }
   let fitQueued=false;
   const queueFit=()=>{if(fitQueued)return;fitQueued=true;requestAnimationFrame(()=>{fitQueued=false;fitGameToContainer();});};
@@ -2099,28 +2210,57 @@
     }catch(_){}
     return false;
   }
-  function enterMobileFullscreen(){
-    document.body.classList.add('mobile-game-fullscreen');
+  // En PC la pantalla completa es opcional (botón o tecla F); en celular se entra sola al jugar.
+  const isGameFullscreen=()=>document.body.classList.contains('game-fullscreen');
+  function enterGameFullscreen(){
+    document.body.classList.add('game-fullscreen');
     if(!fullscreenElement()&&!standalone())requestElementFullscreen(document.documentElement);
-    if(screen.orientation?.lock)screen.orientation.lock('portrait').catch(()=>{});
+    queueFit();
   }
-  function exitMobileFullscreen(){
-    document.body.classList.remove('mobile-game-fullscreen');
+  function exitGameFullscreen(){
+    document.body.classList.remove('game-fullscreen');
     if(fullscreenElement()){if(document.exitFullscreen)document.exitFullscreen().catch(()=>{});else if(document.webkitExitFullscreen)document.webkitExitFullscreen();}
     $('fullscreenButton')?.classList.remove('recovery-visible');
+    queueFit();
+  }
+  function toggleGameFullscreen(){
+    if(gameScreen.style.display==='none')return;
+    if(isGameFullscreen()&&(fullscreenElement()||!mobileViewport()))exitGameFullscreen();
+    else if(!fullscreenSupported()&&mobileViewport())$('installHint').classList.add('open');
+    else enterGameFullscreen();
+    setTimeout(refreshFullscreenRecovery,350);
   }
   function refreshFullscreenRecovery(){
     const button=$('fullscreenButton');
     if(!button)return;
-    const active=gameScreen.style.display!=='none'&&mobileViewport();
+    const playing=gameScreen.style.display!=='none';
+    if(!mobileViewport()){
+      button.textContent=isGameFullscreen()?'Salir de pantalla completa':'Pantalla completa';
+      button.classList.remove('recovery-visible');button.classList.toggle('pc-visible',playing);
+      if(playing)requestAnimationFrame(fitGameToContainer);
+      return;
+    }
+    button.classList.remove('pc-visible');
     // En iPhone (sin API) el botón explica cómo instalarlo; si ya se abrió desde el inicio, no hace falta.
     button.textContent=fullscreenSupported()?'Pantalla completa':'Ver a pantalla completa';
-    button.classList.toggle('recovery-visible',active&&!fullscreenElement()&&!standalone());
-    if(active)requestAnimationFrame(fitGameToContainer);
+    button.classList.toggle('recovery-visible',playing&&!fullscreenElement()&&!standalone());
+    if(playing)requestAnimationFrame(fitGameToContainer);
   }
-  $('fullscreenButton').addEventListener('click',()=>{
-    if(!fullscreenSupported()){$('installHint').classList.add('open');return;}
-    enterMobileFullscreen();$('fullscreenButton').classList.remove('recovery-visible');setTimeout(refreshFullscreenRecovery,350);
+  $('fullscreenButton').addEventListener('click',toggleGameFullscreen);
+  // PC: al salir de la pantalla completa del navegador (Esc) el marco vuelve a su lugar. Si el navegador no
+  // la concede (iframe, permisos), el juego igual ocupa toda la ventana.
+  let hadBrowserFullscreen=false;
+  const onFullscreenChange=()=>{
+    if(fullscreenElement())hadBrowserFullscreen=true;
+    else if(hadBrowserFullscreen){hadBrowserFullscreen=false;if(!mobileViewport())document.body.classList.remove('game-fullscreen');}
+    queueFit();
+  };
+  document.addEventListener('fullscreenchange',onFullscreenChange);
+  document.addEventListener('webkitfullscreenchange',onFullscreenChange);
+  document.addEventListener('keydown',e=>{
+    if((e.key!=='f'&&e.key!=='F')||e.ctrlKey||e.metaKey||e.altKey||e.repeat)return;
+    if(e.target?.closest?.('input,textarea,select')||document.querySelector('.modal-layer.open'))return;
+    e.preventDefault();toggleGameFullscreen();
   });
   $('installHintClose')?.addEventListener('click',()=>$('installHint').classList.remove('open'));
   document.addEventListener('webkitfullscreenchange',refreshFullscreenRecovery);
@@ -2135,14 +2275,15 @@
   window.addEventListener('pageshow',()=>setTimeout(refreshFullscreenRecovery,180));
   function showGame(){
     menuScreen.style.display='none';gameScreen.style.display='block';
-    const infection=INFECTIONS[currentSettings.infection],combat=INFECTION_DIFFICULTIES[currentSettings.infectionDifficulty],quiz=EVOLUTION_DIFFICULTIES[currentSettings.evolutionDifficulty];
-    $('runTitle').textContent=`${currentSettings.debugMode?'LABORATORIO · ':''}${infection.label} · Progenitor hematopoyético`;
+    const combat=INFECTION_DIFFICULTIES[currentSettings.infectionDifficulty],quiz=EVOLUTION_DIFFICULTIES[currentSettings.evolutionDifficulty];
+    $('runTitle').textContent=`${currentSettings.debugMode?'LABORATORIO · ':''}${currentSettings.modo==='nucleo'?`Núcleo ${currentSettings.nucleo}`:'Sandbox infinito'} · Progenitor hematopoyético`;
     $('runSubtitle').textContent=currentSettings.debugMode?'Modo libre · oleadas y preguntas automáticas desactivadas':`${combat.label} · ${quiz.label} · ×${(combat.multiplier*quiz.multiplier).toFixed(2).replace('.',',')} puntos · arena circular`;
   }
   function launchGame(debugMode=false){
-    currentSettings={infection:selectedInfection,infectionDifficulty:selectedInfectionDifficulty,evolutionDifficulty:selectedEvolutionDifficulty,debugMode,runtime:gameRuntime,uiBridge};
+    currentSettings={modo:debugMode?'sandbox':selectedMode,nucleo:selectedNucleo,infectionDifficulty:selectedInfectionDifficulty,evolutionDifficulty:selectedEvolutionDifficulty,debugMode,runtime:gameRuntime,uiBridge};
+    $('rankResult').textContent='';startRankingTicket(currentSettings);
     closeLayer(questionLayer);closeLayer(upgradeLayer);closeLayer(focusEvolutionLayer);closeLayer(gameOverLayer);closeLayer(pauseLayer);$('debugPanel').classList.toggle('open',debugMode);showGame();
-    if(mobileViewport())enterMobileFullscreen();
+    if(mobileViewport())enterGameFullscreen();
     else requestAnimationFrame(()=>gameScreen.scrollIntoView({behavior:'smooth',block:'center',inline:'nearest'}));
     if(!game){
       fitLogicalViewport();
@@ -2168,7 +2309,7 @@
   let lastRunInfo='';
   if(REPORTES_URL)document.querySelectorAll('.report-open').forEach(b=>{b.hidden=false;b.addEventListener('click',()=>{$('reportStatus').textContent='';reportLayer.classList.add('open');setTimeout(()=>$('reportMessage').focus(),60);});});
   $('reportClose').addEventListener('click',()=>reportLayer.classList.remove('open'));
-  window.addEventListener('is:run-start',e=>{const d=e.detail||{};lastRunInfo=`${d.infection||''} · ${d.infectionDifficulty||''} · ${d.evolutionDifficulty||''}${d.debug?' · laboratorio':''}`;});
+  window.addEventListener('is:run-start',e=>{const d=e.detail||{};lastRunInfo=`${d.modo||d.infection||''} · ${d.map||''} · ${d.infectionDifficulty||''} · ${d.evolutionDifficulty||''}${d.debug?' · laboratorio':''}`;});
   $('reportForm').addEventListener('submit',async ev=>{
     ev.preventDefault();
     const status=$('reportStatus'),mensaje=$('reportMessage').value.trim();
@@ -2188,10 +2329,75 @@
     }catch(_){status.textContent='No se pudo enviar. Revisá la conexión y probá de nuevo.';}
     finally{button.disabled=false;}
   });
+
+  // ---- Ranking de MedMar ----
+  // El juego comparte origen con la web (medmar.com.ar/juegos/…): supabase-js lee la misma sesión del
+  // localStorage. Se carga recién al terminar una partida (no pesa en la carga del juego). El puntaje lo
+  // valida y recalcula el servidor (acción guardarPuntaje); nunca se escribe directo en la base.
+  const MEDMAR_SUPABASE_URL='https://ekfwdrsehhmrqxxlefyx.supabase.co';
+  const MEDMAR_PUBLISHABLE_KEY='sb_publishable_ZZQREdrsOfFn8vIOaO3S0w_S7NKP9KS';
+  const SUPABASE_JS_URL='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js';
+  const SUPABASE_JS_SRI='sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK';
+  const MEDMAR_SESSION_KEY='sb-ekfwdrsehhmrqxxlefyx-auth-token';
+  function storedSession(){try{const v=JSON.parse(localStorage.getItem(MEDMAR_SESSION_KEY)||'null');return v&&v.refresh_token?v:null;}catch(_){return null;}}
+  function cachedPseudonym(session){try{const email=String(session?.user?.email||'').toLowerCase();const c=JSON.parse(localStorage.getItem('medmar:perfil:'+email)||'null');return String(c?.data?.perfil?.pseudonimo||'');}catch(_){return '';}}
+  let supabaseLoading=null,medmarClient=null;
+  function loadSupabase(){
+    if(window.supabase?.createClient)return Promise.resolve(window.supabase);
+    if(!supabaseLoading)supabaseLoading=new Promise((resolve,reject)=>{const sc=document.createElement('script');sc.src=SUPABASE_JS_URL;sc.integrity=SUPABASE_JS_SRI;sc.crossOrigin='anonymous';sc.onload=()=>resolve(window.supabase);sc.onerror=()=>{supabaseLoading=null;reject(new Error('supabase-js'));};document.head.appendChild(sc);});
+    return supabaseLoading;
+  }
+  async function medmarApi(accion,params){
+    const lib=await loadSupabase();
+    if(!medmarClient)medmarClient=lib.createClient(MEDMAR_SUPABASE_URL,MEDMAR_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+    const {data}=await medmarClient.auth.getSession();
+    if(!data?.session)return {ok:false,error:'sesion_invalida'};
+    const r=await medmarClient.functions.invoke('api',{body:{accion,...params}});
+    if(r.error)return {ok:false,error:'conexion'};
+    return r.data||{ok:false,error:'servidor'};
+  }
+  function setRich(el,parts){el.textContent='';for(const p of parts){if(typeof p==='string'){el.appendChild(document.createTextNode(p));continue;}const n=document.createElement(p.tag);n.textContent=p.text;if(p.href)n.href=p.href;el.appendChild(n);}}
+  function renderRankingStatus(){
+    const box=$('rankingStatus'),session=storedSession();
+    box.classList.toggle('ok',!!session);
+    if(session){const name=cachedPseudonym(session);setRich(box,name?['Jugás como ',{tag:'strong',text:name},': tus puntajes entran al ranking de MedMar.']:['Sesión de MedMar activa: tus puntajes entran al ranking.']);}
+    else setRich(box,['Sin sesión de MedMar: tus récords quedan solo en este dispositivo. ',{tag:'a',text:'Iniciá sesión',href:'/'},' para entrar al ranking.']);
+  }
+  // Entrada de partida firmada por el servidor (iniciarPartida): sin ella no se puede guardar el puntaje.
+  let rankingTicket=null;
+  function startRankingTicket(settings){
+    rankingTicket=null;
+    if(settings.debugMode||!storedSession())return;
+    const modo=settings.modo==='nucleo'?`nucleo-${settings.nucleo}`:'sandbox';
+    rankingTicket=medmarApi('iniciarPartida',{juego:'inmune-survivors',modo}).then(r=>r.ok?{modo,partida:r.partida}:{modo,error:r.error||'servidor'}).catch(()=>null);
+  }
+  async function submitRanking(payload){
+    const box=$('rankResult');box.textContent='';
+    if(!payload)return;
+    const link={tag:'a',text:'Ver ranking',href:`/?vista=juegos&ranking=${encodeURIComponent(payload.modo)}`};
+    if(!storedSession()){setRich(box,['Para aparecer en el ranking de MedMar, ',{tag:'a',text:'iniciá sesión',href:'/'},' y volvé a jugar.']);return;}
+    box.textContent='Guardando tu puntaje en el ranking…';
+    try{
+      const ticket=rankingTicket?await rankingTicket:null;rankingTicket=null;
+      if(ticket?.error==='accion_invalida'){box.textContent='El ranking de MedMar todavía no está activo. Tu récord local quedó guardado.';return;}
+      if(ticket?.error==='sesion_invalida'){setRich(box,['Tu sesión de MedMar venció. ',{tag:'a',text:'Volvé a iniciar sesión',href:'/'},' para guardar los próximos puntajes.']);return;}
+      if(!ticket||!ticket.partida||ticket.modo!==payload.modo){box.textContent='No se pudo registrar el inicio de esta partida en MedMar (¿sin conexión?), así que no entra al ranking.';return;}
+      const r=await medmarApi('guardarPuntaje',{...payload,partida:ticket.partida});
+      if(r.ok){
+        const pos=Number(r.posicion)||0,total=Number(r.total)||0,best=Number(r.mejor)||0;
+        setRich(box,[r.record?'🏆 ¡Nuevo récord en el ranking! ':'Puntaje guardado. ','Estás ',{tag:'strong',text:`#${pos}`},` de ${total} en ${modeLabel(payload.modo)} (tu mejor: ${best.toLocaleString('es-AR')}). `,link]);
+      }else if(r.error==='sesion_invalida')setRich(box,['Tu sesión de MedMar venció. ',{tag:'a',text:'Volvé a iniciar sesión',href:'/'},' para guardar los próximos puntajes.']);
+      else if(r.error==='rate_limit')box.textContent='Guardaste muchas partidas seguidas: esta no entró al ranking. Probá de nuevo en un rato.';
+      else if(r.error==='partida_invalida'||r.error==='partida_sin_inicio')box.textContent='El servidor no pudo validar esta partida, así que no entró al ranking.';
+      else box.textContent='No se pudo guardar en el ranking. Tu récord local quedó guardado.';
+    }catch(_){box.textContent='No se pudo conectar con MedMar. Tu récord local quedó guardado.';}
+  }
+  window.addEventListener('storage',e=>{if(e.key===MEDMAR_SESSION_KEY||String(e.key||'').startsWith('medmar:perfil:'))renderRankingStatus();});
+  renderRankingStatus();syncMenu();
   $('startButton').addEventListener('click',()=>launchGame(false));
   $('debugStartButton').addEventListener('click',()=>launchGame(true));
   $('restartButton').addEventListener('click',()=>launchGame(false));
-  $('menuButton').addEventListener('click',()=>{exitMobileFullscreen();closeLayer(questionLayer);closeLayer(upgradeLayer);closeLayer(focusEvolutionLayer);closeLayer(gameOverLayer);closeLayer(pauseLayer);$('debugPanel').classList.remove('open');if(game){game.scene.stop('Arena');game.loop.sleep();}gameScreen.style.display='none';menuScreen.style.display='block';window.scrollTo({top:0,behavior:'smooth'});});
+  $('menuButton').addEventListener('click',()=>{exitGameFullscreen();closeLayer(questionLayer);closeLayer(upgradeLayer);closeLayer(focusEvolutionLayer);closeLayer(gameOverLayer);closeLayer(pauseLayer);$('debugPanel').classList.remove('open');if(game){game.scene.stop('Arena');game.loop.sleep();}gameScreen.style.display='none';menuScreen.style.display='block';window.scrollTo({top:0,behavior:'smooth'});});
   $('pauseButton').addEventListener('click',()=>window.IS_ACTIONS?.pauseGame?.());
   $('resumeButton').addEventListener('click',()=>window.IS_ACTIONS?.resumeGame?.());
   $('pauseMenuButton').addEventListener('click',()=>{window.IS_ACTIONS?.resumeGame?.();$('menuButton').click();});
@@ -2297,9 +2503,10 @@
     crisisBannerTimer=setTimeout(()=>{banner.style.display='none';},7200);
   });
   window.addEventListener('is:game-over',e=>{
-    const d=e.detail;$('gameOverText').textContent=`${d.infection} · ${d.map} · Infección ${d.infectionDifficulty} · Evolución ${d.evolutionDifficulty} · ×${d.multiplier.toFixed(2).replace('.',',')}`;
+    const d=e.detail;renderLocalRecords();$('gameOverText').textContent=`${d.infection} · ${d.map} · Infección ${d.infectionDifficulty} · Evolución ${d.evolutionDifficulty} · ×${d.multiplier.toFixed(2).replace('.',',')}`;
     renderRunReport('gameover',d);
-    $('bestScoreText').textContent=d.isRecord?`¡Nuevo récord personal! Tu mejor puntuación para este perfil es ${d.best.toLocaleString('es-AR')}.`:`Mejor puntuación local de este perfil: ${d.best.toLocaleString('es-AR')}.`;
+    $('bestScoreText').textContent=d.isRecord?`¡Nuevo récord en este dispositivo! Tu mejor puntuación con esta configuración es ${d.best.toLocaleString('es-AR')}.`:`Tu mejor puntuación en este dispositivo con esta configuración: ${d.best.toLocaleString('es-AR')}.`;
     openLayer(gameOverLayer);
+    submitRanking(d.ranking);
   });
 })();

@@ -1,7 +1,7 @@
 # Plan: modo Sandbox y focos por núcleo de ADN
 
-Estado: **etapas 1 y 2 hechas** (2026-11-21). El catálogo de núcleos y agentes está en `src/data/agentes.js`, con
-tests en `tests/agentes-datos.test.cjs`. El juego todavía no lo usa.
+Estado: **etapas 1 a 4 hechas** (v3.8, 2026-11-22). El catálogo está en `src/data/agentes.js` y los modos en
+`src/core/modos.js`, con tests en `tests/agentes-datos.test.cjs` y `tests/modos.test.cjs`.
 
 ## Decisiones tomadas
 
@@ -13,7 +13,8 @@ tests en `tests/agentes-datos.test.cjs`. El juego todavía no lo usa.
 3. **Artrópodos grandes: ninguno.** Quedan afuera los vectores, los ponzoñosos y los insectos ectoparásitos
    (piojos, *Tunga*, *Dermatobia*). Se mantiene *Sarcoptes*, que es microscópico. El núcleo de vectores se juega con
    los agentes que transmiten (rasgo `vector`: entran en oleadas desde el borde).
-4. **Sandbox totalmente libre**, como el Laboratorio: mezcla agentes de todos los núcleos y no guarda nada.
+4. **Sandbox totalmente libre**, como el modo actual: mezcla agentes y jefes de todos los núcleos. Es infinito y
+   tiene ranking propio (decisión del 2026-11-22). El Laboratorio sigue aparte, sin puntaje.
 5. **Sprites por morfología con variación por código**, horneados en una textura por especie (ver más abajo).
 
 6. **Digestivo y urinario van juntos** en el núcleo 6: el urinario (6.1) solo trae bacterias en el material.
@@ -32,12 +33,10 @@ Dos formas de jugar desde el menú:
 
 1. **Foco por núcleo** (con puntaje): elegís un núcleo y aparecen **solo los agentes de ese núcleo**, con preguntas
    de ese núcleo, el tejido que corresponde y un jefe emblemático.
-2. **Sandbox** (sin puntaje): el Laboratorio rediseñado para jugadores. Elegís núcleo, agentes, ritmo y habilidades
-   para experimentar y estudiar.
+2. **Sandbox infinito** (con puntaje): todos los núcleos mezclados.
 
-Los núcleos 1 a 5 (microbiología general, inmunidad, inmunizaciones, nutrición e inmunonutrición) no tienen una
-lista de agentes propia. Quedan como modo **Fundamentos**: el juego actual, con enemigos genéricos y preguntas de
-esos núcleos.
+Los núcleos 1 a 5 (microbiología general, inmunidad, inmunizaciones, nutrición e inmunonutrición) no tienen modo propio:
+a lo sumo aportan preguntas de defensa contra virus, bacterias, parásitos y hongos al banco general.
 
 ## Núcleos con agentes (PTD 2026)
 
@@ -250,9 +249,9 @@ Todo en `src/data/` (UMD, con tests), separado del motor:
    autor el 2026-11-21.
 2. ✅ **Identidad con los sprites actuales** (v3.7): horneado por especie (tinte y variaciones), nombre al aparecer y
    bestiario con las fichas en la pausa y al terminar la partida.
-3. **Modo Foco por núcleo**: selector en el menú, enemigos y preguntas filtrados, tejido y jefe del núcleo,
-   récord por núcleo.
-4. **Sandbox**: Laboratorio para jugadores que mezcla todo, sin puntaje.
+3. ✅ **Modo Foco por núcleo** (v3.8): selector en el menú, enemigos del núcleo, tejido y jefe del núcleo, ranking por
+   núcleo. Falta filtrar las preguntas (etapa 7).
+4. ✅ **Sandbox infinito** (v3.8): mezcla agentes y jefes de todos los núcleos, con ranking general.
 5. **Las 12 piezas nuevas** de sprite.
 6. **Rasgos de comportamiento**, uno por vez, con tests en el arnés.
 7. **Preguntas por núcleo**, más el banco general de defensa contra agentes.

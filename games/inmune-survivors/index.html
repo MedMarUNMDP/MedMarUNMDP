@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <!-- CSP: el juego comparte origen (y localStorage, con la sesión de MedMar) con la web.
        Phaser carga las imágenes por XHR y las usa como blob:. Si sumás un CDN, agregalo acá. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' data: blob: https://script.google.com https://script.googleusercontent.com; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/ https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' data: blob: https://ekfwdrsehhmrqxxlefyx.supabase.co https://script.google.com https://script.googleusercontent.com; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="theme-color" content="#091525">
   <!-- Instalable: desde la pantalla de inicio abre sin barras (la única pantalla completa posible en iPhone). -->
@@ -15,7 +15,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Inmune Survivors">
   <link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
-  <title>Inmune Survivors v3.7 — Agentes de ADN</title>
+  <title>Inmune Survivors v3.8 — Modos y ranking</title>
   <style>
     :root {
       --bg: #07111f; --panel: #101f33; --panel2: #142942; --line: #29415b;
@@ -51,6 +51,34 @@
     .choice-icon { display:grid; place-items:center; width:40px; height:40px; margin-bottom:8px; font-size:26px; border-radius:12px; background:#21394e; }
     .choice strong { display:block; font-size:14px; }
     .choice small { display:block; margin-top:4px; color:#9bb0c7; font-size:11px; line-height:1.35; padding-right:8px; }
+    .mode-grid .choice { padding:14px; }
+    .nucleo-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(165px,1fr)); gap:8px; }
+    .nucleo-choice { text-align:left; padding:10px 11px; border-radius:12px; border:1px solid #29435c; background:#0b1a2b; color:var(--ink); min-width:0; transition:border-color .15s, background .15s; }
+    .nucleo-choice:hover { border-color:#5d8da2; }
+    .nucleo-choice.selected { border-color:var(--mint2); background:linear-gradient(145deg,#15382f,#10293a); box-shadow:inset 0 0 0 1px #55d7b055; }
+    .nucleo-choice b { display:block; font-size:11px; color:var(--mint); letter-spacing:.06em; text-transform:uppercase; }
+    .nucleo-choice span { display:block; margin-top:2px; font-size:12.5px; font-weight:800; line-height:1.25; }
+    .nucleo-choice small { display:block; margin-top:4px; color:#9bb0c7; font-size:10.5px; line-height:1.3; }
+    .ranking-status { margin-top:16px; padding:10px 12px; border-radius:12px; border:1px solid #2f4b63; background:#0a1929; color:#b9cbe0; font-size:12px; line-height:1.45; }
+    .ranking-status:empty { display:none; }
+    .ranking-status a { color:var(--mint); font-weight:800; }
+    .ranking-status.ok { border-color:#3d8f74; }
+    .menu-links { display:flex; gap:8px; margin-top:9px; }
+    .menu-links > * { flex:1; text-align:center; text-decoration:none; font-size:13px; display:inline-flex; align-items:center; justify-content:center; gap:6px; }
+    .records { display:grid; gap:6px; margin-bottom:14px; }
+    .record-row { display:flex; justify-content:space-between; gap:10px; padding:8px 10px; border-radius:10px; background:#0a1929; border:1px solid #223a52; font-size:12px; color:#b9cbe0; }
+    .record-row strong { color:var(--yellow); font-variant-numeric:tabular-nums; }
+    .record-row.actual { border-color:#55d7b0aa; }
+    .howto-box { margin-top:4px; }
+    .howto-box > summary { cursor:pointer; list-style:none; margin-bottom:12px; }
+    .howto-box > summary::-webkit-details-marker { display:none; }
+    .howto-box > summary::after { content:"▾"; margin-left:auto; color:var(--muted); transition:transform .15s; }
+    .howto-box:not([open]) > summary::after { transform:rotate(-90deg); }
+    .rank-result { margin-top:12px; padding:11px 13px; border-radius:12px; border:1px solid #2f4b63; background:#0a1929; color:#cfe0f1; font-size:13px; line-height:1.45; }
+    .rank-result:empty { display:none; }
+    .rank-result strong { color:var(--yellow); }
+    .rank-result a { color:var(--mint); font-weight:800; }
+    /* Pantalla completa (celular y PC): el marco del juego ocupa toda la ventana. */
     .cell-card { display:flex; gap:13px; align-items:center; padding:13px; background:#0b1a2b; border:1px solid #356d67; border-radius:15px; }
     .cell-visual { flex:0 0 69px; height:69px; border-radius:19px; background:radial-gradient(circle at 35% 25%,#f2fff9 0 6%,#c7ffe9 7% 25%,#80e5c4 26% 59%,#2c918f 60% 100%); position:relative; box-shadow:inset -7px -8px 0 #226d78, 0 4px 24px #5be3bb2a; }
     .cell-visual:before { content:""; position:absolute; width:26px; height:16px; background:#7864b5; border-radius:45% 55% 50% 50%; top:26px; left:20px; transform:rotate(-28deg); box-shadow:9px -2px 0 -3px #9c8de0; }
@@ -96,15 +124,16 @@
       #gameFrame { width:min(100%, 1040px); aspect-ratio:16 / 10; max-height:calc(100vh - 150px); }
     }
     #gameContainer canvas { touch-action:none; }
-    body.mobile-game-fullscreen { overflow:hidden; overscroll-behavior:none; }
-    body.mobile-game-fullscreen .shell { width:100%; height:100vh; height:100dvh; min-height:0; margin:0; padding:0; }
-    body.mobile-game-fullscreen header, body.mobile-game-fullscreen footer { display:none; }
-    body.mobile-game-fullscreen #gameScreen { display:block!important; position:fixed; inset:0; z-index:2000; padding:0; background:#071321; }
-    body.mobile-game-fullscreen .game-topline { position:absolute; z-index:30; top:auto; bottom:calc(env(safe-area-inset-bottom,0px) + 8px); left:0; right:0; justify-content:flex-end; margin:0; padding:8px max(10px,env(safe-area-inset-right,0px)) 0 10px; pointer-events:none; }
-    body.mobile-game-fullscreen .game-topline > div:first-child { display:none; }
-    body.mobile-game-fullscreen .game-topline > div:last-child { pointer-events:auto; }
-    body.mobile-game-fullscreen .game-topline .btn-secondary { padding:8px 11px; border-color:#b7d6c677; background:#071321d9; box-shadow:0 2px 12px #0008; }
+    body.game-fullscreen { overflow:hidden; overscroll-behavior:none; }
+    body.game-fullscreen .shell { width:100%; height:100vh; height:100dvh; min-height:0; margin:0; padding:0; }
+    body.game-fullscreen header, body.game-fullscreen footer { display:none; }
+    body.game-fullscreen #gameScreen { display:block!important; position:fixed; inset:0; z-index:2000; padding:0; background:#071321; }
+    body.game-fullscreen .game-topline { position:absolute; z-index:30; top:auto; bottom:calc(env(safe-area-inset-bottom,0px) + 8px); left:0; right:0; justify-content:flex-end; margin:0; padding:8px max(10px,env(safe-area-inset-right,0px)) 0 10px; pointer-events:none; }
+    body.game-fullscreen .game-topline > div:first-child { display:none; }
+    body.game-fullscreen .game-topline > div:last-child { pointer-events:auto; }
+    body.game-fullscreen .game-topline .btn-secondary { padding:8px 11px; border-color:#b7d6c677; background:#071321d9; box-shadow:0 2px 12px #0008; }
     #fullscreenButton { display:none; }
+    @media (pointer: fine) { #fullscreenButton.pc-visible { display:inline-flex; } }
     .install-hint { display:none; position:fixed; z-index:2300; left:12px; right:12px; bottom:calc(env(safe-area-inset-bottom,0px) + 64px); padding:14px 16px; border:1px solid #63e6bd88; border-radius:14px; background:#081522f2; color:#dce9f7; font-size:13px; line-height:1.45; box-shadow:0 8px 30px #000a; }
     .install-hint.open { display:block; }
     .report-label { display:block; margin:10px 0 5px; color:#9fb6cc; font-size:12px; font-weight:800; }
@@ -116,9 +145,9 @@
     .install-hint strong { color:#9df2ce; }
     .install-hint button { margin-top:10px; }
     #fullscreenButton.recovery-visible { display:inline-flex; }
-    body.mobile-game-fullscreen #gameFrame { width:100vw; max-width:none; height:100vh; height:100dvh; aspect-ratio:auto; margin:0; border:0; border-radius:0; box-shadow:none; }
-    body.mobile-game-fullscreen .game-controls { display:none; }
-    body.mobile-game-fullscreen .modal-layer { z-index:2100; }
+    body.game-fullscreen #gameFrame { width:100vw; max-width:none; max-height:none; height:100vh; height:100dvh; aspect-ratio:auto; margin:0; border:0; border-radius:0; box-shadow:none; }
+    body.game-fullscreen .game-controls { display:none; }
+    body.game-fullscreen .modal-layer { z-index:2100; }
     #debugPanel { display:none; position:absolute; z-index:90; left:8px; bottom:8px; width:min(255px,58vw); max-height:64%; overflow:auto; padding:9px; border:1px solid #ab91ff99; border-radius:12px; background:#0a1024eF; color:#f2edff; font-size:10px; box-shadow:0 8px 28px #0008; }
     #debugPanel.open { display:block; }
     #debugPanel.compact { width:190px; max-height:48px; overflow:hidden; }
@@ -219,58 +248,62 @@
         <div class="brand-mark" aria-hidden="true"></div>
         <div><div class="eyebrow">MedMar · Prototipo jugable</div><h1>INMUNE SURVIVORS</h1></div>
       </div>
-      <div class="top-tag">v3.7 · AGENTES DE ADN</div>
+      <div class="top-tag">v3.8 · MODOS Y RANKING</div>
     </header>
 
     <section id="menuScreen">
       <div class="intro">
         <h2>El tejido está bajo ataque.</h2>
-        <p>Controlá un progenitor hematopoyético en una infección creciente. En partida normal, cada foco saneado permite desbloquear o evolucionar habilidades; el laboratorio ofrece controles manuales independientes.</p>
+        <p>Sos un progenitor hematopoyético frente a los agentes de ADN. Atacás solo: vos te movés, saneás focos y respondés preguntas para evolucionar.</p>
       </div>
       <div class="layout">
         <main class="panel">
           <div class="panel-inner">
-            <h3 class="section-title"><span>1</span> Elegí la infección</h3>
-            <div class="infection-grid" id="infectionChoices">
-              <button class="choice selected" data-infection="bacteriana"><span class="choice-icon">🧫</span><strong>Bacteriana</strong><small>Endotelio vascular o mucosa; predominan bacterias, sin excluir otras familias.</small></button>
-              <button class="choice" data-infection="viral"><span class="choice-icon">🦠</span><strong>Viral</strong><small>Epitelio respiratorio o tejido nervioso; virus veloces y variantes de mayor tamaño.</small></button>
-              <button class="choice" data-infection="fungica"><span class="choice-icon">🍄</span><strong>Fúngica</strong><small>Dermis o epitelio alveolar; hongos resistentes y nubes de esporas.</small></button>
-              <button class="choice" data-infection="parasitaria"><span class="choice-icon">🐛</span><strong>Parasitaria</strong><small>Protozoos con formas distintas y helmintos grandes que aceleran en línea recta, pero giran con dificultad.</small></button>
+            <h3 class="section-title"><span>1</span> Elegí el modo</h3>
+            <div class="infection-grid mode-grid" id="modeChoices">
+              <button class="choice selected" data-mode="sandbox"><span class="choice-icon">♾️</span><strong>Sandbox infinito</strong><small>Agentes de todos los núcleos mezclados y los jefes de cada uno. Ranking general.</small></button>
+              <button class="choice" data-mode="nucleo"><span class="choice-icon">🎯</span><strong>Foco por núcleo</strong><small>Solo los agentes de un núcleo, en su tejido y contra su jefe. Ranking por núcleo.</small></button>
             </div>
-            <h3 class="section-title" style="margin-top:20px"><span>2</span> Elegí la célula</h3>
-            <div class="cell-card">
-              <div class="cell-visual" aria-hidden="true"></div>
-              <div class="cell-copy"><strong>Progenitor hematopoyético</strong><p>Una célula pluripotente en desarrollo. Comienza con desgranulación y adquiere funciones inmunitarias al sanar focos.</p><div class="stats"><span class="stat-pill">VIDA · 5/10</span><span class="stat-pill">VELOCIDAD · 9/10</span><span class="stat-pill">DAÑO · 6/10</span><span class="stat-pill">ALCANCE · 4/10</span></div></div>
+            <div class="nucleo-picker" id="nucleoPicker" hidden>
+              <p class="muted" style="margin:12px 0 8px">¿Qué núcleo querés repasar?</p>
+              <div class="nucleo-grid" id="nucleoChoices" role="radiogroup" aria-label="Núcleo"></div>
             </div>
-            <p class="small-note">Esta primera prueba incluye un personaje jugable. Las demás células se incorporarán cuando validemos la mecánica central.</p>
-            <h3 class="section-title" style="margin-top:20px"><span>3</span> Elegí la presión de infección</h3>
+            <h3 class="section-title" style="margin-top:20px"><span>2</span> Presión de infección</h3>
             <div class="difficulty-list" id="infectionDifficultyChoices">
               <button class="diff-choice" data-infection-difficulty="ambulatorio"><span class="diff-dot"></span><span class="diff-text"><strong>Ambulatorio</strong><small>Modo accesible: menos vida y daño enemigos, menor velocidad y oleadas más espaciadas.</small></span><span class="multiplier">×0,75</span></button>
               <button class="diff-choice selected" data-infection-difficulty="internado"><span class="diff-dot"></span><span class="diff-text"><strong>Internado</strong><small>Presión estándar con escalado durante la partida.</small></span><span class="multiplier">×1,00</span></button>
               <button class="diff-choice" data-infection-difficulty="inmunosuprimido"><span class="diff-dot"></span><span class="diff-text"><strong>Inmunosuprimido</strong><small>Mayor densidad, velocidad, vida y daño enemigo.</small></span><span class="multiplier">×1,50</span></button>
             </div>
-            <h3 class="section-title" style="margin-top:18px"><span>4</span> Elegí la dificultad de evolución</h3>
+            <h3 class="section-title" style="margin-top:18px"><span>3</span> Nivel de las preguntas</h3>
             <div class="difficulty-list" id="evolutionDifficultyChoices">
               <button class="diff-choice" data-evolution-difficulty="no_curse"><span class="diff-dot"></span><span class="diff-text"><strong>No cursé</strong><small>Banco FÁCIL · defensas del cuerpo, microbios y prevención; nivel secundario.</small></span><span class="multiplier">×0,75</span></button>
               <button class="diff-choice selected" data-evolution-difficulty="estudiante"><span class="diff-dot"></span><span class="diff-text"><strong>Estudiante</strong><small>Banco NORMAL · teoría frecuente, mecanismos y aplicación.</small></span><span class="multiplier">×1,00</span></button>
               <button class="diff-choice" data-evolution-difficulty="infectologo"><span class="diff-dot"></span><span class="diff-text"><strong>Infectólogo</strong><small>Banco DIFÍCIL · detalles finos y razonamiento diagnóstico.</small></span><span class="multiplier">×1,50</span></button>
             </div>
-            <p class="small-note">Banco total: 83 preguntas, con explicación y referencia en cada respuesta.</p>
-            <button class="btn-primary" id="startButton" style="margin-top:18px">INICIAR PARTIDA ↗</button><button class="btn-lab" id="debugStartButton">ABRIR LABORATORIO DE PRUEBAS</button><p class="small-note">El laboratorio es independiente: no usa preguntas ni oleadas automáticas y permite ajustar la partida en cualquier momento.</p>
+            <div class="ranking-status" id="rankingStatus" aria-live="polite"></div>
+            <button class="btn-primary" id="startButton" style="margin-top:14px">JUGAR ↗</button>
+            <div class="menu-links">
+              <a class="btn-secondary" id="rankingLink" href="/?vista=juegos">🏆 Ver ranking</a>
+              <button class="btn-secondary" id="debugStartButton" title="Controles manuales, sin preguntas ni puntaje">🧪 Laboratorio</button>
+            </div>
           </div>
         </main>
         <aside class="panel">
           <div class="panel-inner">
-            <h3 class="section-title">Cómo se juega</h3>
-            <ul class="howto">
-              <li><span class="howto-icon">🕹️</span><span><strong>Movete y saná focos</strong><br>WASD / flechas, o mantené apretado el mouse hacia donde querés ir (ESC o P pausa); en celular, tocá y arrastrá en cualquier parte de la arena. El joystick aparece bajo tu dedo y se oculta al soltar. Quedate encima de una colonia para iniciar la sanación automáticamente.</span></li>
-              <li><span class="howto-icon">✦</span><span><strong>Atacá automáticamente</strong><br>La desgranulación es el ataque inicial. Fagocitosis y NETosis se desbloquean al sanar focos infecciosos.</span></li>
-              <li><span class="howto-icon">🧬</span><span><strong>Elegí una estrategia</strong><br>Homeostasis, Citotoxicidad o Quimiotaxis. Cada elección refuerza parámetros; cada tercera de la misma vía suma una evolución avanzada.</span></li>
-              <li><span class="howto-icon">🧨</span><span><strong>Notá el cambio en combate</strong><br>Salvas múltiples, gránulos mayores y de otros colores, explosiones en cadena, una célula más resistente o estelas de movimiento. Las colonias sanadas restauran vida y experiencia.</span></li>
-              <li><span class="howto-icon">☠️</span><span><strong>Jefes y multirresistencia</strong><br>Los jefes emergen en el centro de la arena, anuncian su entrada y atacan de formas distintas. Al agotarse las preguntas comienza una crisis de oleadas continuas con enemigos de mayor resistencia.</span></li>
-            </ul>
-            <div class="tip-box"><strong>Sobre la dificultad</strong><div class="muted">Infección modifica vida, daño, velocidad, densidad y oleadas. Evolución cambia el nivel del banco de preguntas. Ambos perfiles multiplican el puntaje de forma independiente.</div></div>
-            <p class="small-note">*El juego no usa cuentas ni conexiones de MedMar. Phaser se carga desde CDN, así que hace falta conexión a internet al abrirlo. Las preguntas de esta demo son provisionales y deben verificarse con la bibliografía indicada antes de una publicación educativa.</p>
+            <h3 class="section-title">Tus récords</h3>
+            <div class="records" id="localRecords"></div>
+            <details class="howto-box" id="howtoBox">
+              <summary class="section-title">Cómo se juega</summary>
+              <ul class="howto">
+                <li><span class="howto-icon">🕹️</span><span><strong>Movete y saná focos</strong><br>WASD / flechas, o mantené apretado el mouse hacia donde querés ir (ESC o P pausa, F pantalla completa). En celular, tocá y arrastrá en cualquier parte de la arena. Quedate encima de una colonia para sanarla.</span></li>
+                <li><span class="howto-icon">✦</span><span><strong>Atacás automáticamente</strong><br>La desgranulación es el ataque inicial. Fagocitosis y NETosis se desbloquean al sanar focos. Los pseudópodos buscan a los agentes que podés fagocitar.</span></li>
+                <li><span class="howto-icon">🧬</span><span><strong>Respondé y elegí una estrategia</strong><br>Al subir de nivel aparece una pregunta: si acertás, elegís Homeostasis, Citotoxicidad o Quimiotaxis; si fallás, llega una oleada extra.</span></li>
+                <li><span class="howto-icon">📖</span><span><strong>Bestiario</strong><br>Cada agente nuevo aparece con su nombre. En la pausa y al terminar tenés la ficha de cada uno.</span></li>
+                <li><span class="howto-icon">☠️</span><span><strong>Jefes y multirresistencia</strong><br>Los jefes emergen en el centro de la arena. Al agotarse las preguntas empieza una crisis de oleadas continuas.</span></li>
+              </ul>
+            </details>
+            <div class="tip-box"><strong>Puntaje</strong><div class="muted">10 por agente eliminado, 2 por segundo y 25 por respuesta correcta, multiplicado por la presión de infección y el nivel de las preguntas.</div></div>
+            <p class="small-note">Si iniciaste sesión en medmar.com.ar, tus puntajes entran al ranking con tu pseudónimo. El Laboratorio no suma puntaje. Si ves un error en una pregunta, reportalo.</p>
           </div>
         </aside>
       </div>
@@ -325,6 +358,7 @@
       <details class="run-upgrade-log bestiary" open><summary>Bestiario de la partida · <span id="finalBestiaryCount">0</span> agentes</summary><div id="finalBestiary" class="bestiary-list"></div></details>
       <details class="run-upgrade-log"><summary>Ver mejoras de la partida</summary><ol id="finalUpgradeList"></ol></details>
       <p id="bestScoreText" class="muted"></p>
+      <div class="rank-result" id="rankResult" aria-live="polite"></div>
       <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:18px"><button id="restartButton" class="btn-primary" style="flex:1">JUGAR OTRA VEZ</button><button type="button" class="btn-secondary report-open" hidden>Reportar o sugerir</button><button id="menuButton" class="btn-secondary">Menú</button></div>
     </div>
   </div>
@@ -376,12 +410,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js"
           integrity="sha512-/tJYyDCrI7hnHWp45P189aOwPa6lTREosRhlxEIqx8skB4A3a3rD3iz4o335SJd4sORqjVHw5y1S2hq4hciwLw=="
           crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="./src/core/runtime-services.js?build=3.7.2"></script>
-  <script src="./src/config/game-balance.js?build=3.7.2"></script>
-  <script src="./src/core/lab-actions.js?build=3.7.2"></script>
-  <script src="./src/data/agentes.js?build=3.7.2"></script>
-  <script src="./src/data/fichas.js?build=3.7.2"></script>
-  <script src="./game.js?build=3.7.2"></script>
+  <script src="./src/core/runtime-services.js?build=3.8.0"></script>
+  <script src="./src/config/game-balance.js?build=3.8.0"></script>
+  <script src="./src/core/lab-actions.js?build=3.8.0"></script>
+  <script src="./src/data/agentes.js?build=3.8.0"></script>
+  <script src="./src/data/fichas.js?build=3.8.0"></script>
+  <script src="./src/core/modos.js?build=3.8.0"></script>
+  <script src="./game.js?build=3.8.0"></script>
 </body>
 </html>
 

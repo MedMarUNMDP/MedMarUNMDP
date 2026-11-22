@@ -53,21 +53,23 @@ Los bugs JUEGO-01 a 14 se corrigieron en v3.5. Queda pendiente:
       simulación con semilla), extraer datos a `src/data/`, estado inicial único (sin `|| valorPorDefecto`), sistemas con tests.
 
 **Inmune Survivors — modos por núcleo de ADN** (plan en `games/inmune-survivors/docs/plan-modos-nucleos.md`)
-- [ ] Etapa 3: modo Foco por núcleo (selector en el menú, agentes y preguntas del núcleo, tejido y jefe propios,
-      récord por núcleo). Las etapas 1 y 2 (catálogo, especies, horneado y bestiario) ya están en v3.7.
-- [ ] 12 piezas de sprite nuevas (bacilo ácido-alcohol resistente, retrovirus, *Plasmodium*, *Pneumocystis*…).
-- [ ] Modo Foco por núcleo (agentes y preguntas del núcleo) y Sandbox (Laboratorio para jugadores).
+- [x] Etapas 1 a 4 (v3.7–v3.8): catálogo, especies, bestiario, Sandbox infinito y Foco por núcleo con ranking.
+- [ ] Etapa 7: preguntas por núcleo (etiquetar el banco y sumar ~15 por núcleo y dificultad con `revisor-contenido-medico`)
+      para que el Foco por núcleo también filtre las preguntas.
+- [ ] 12 piezas de sprite nuevas (bacilo ácido-alcohol resistente, retrovirus, *Plasmodium*, *Pneumocystis*…) y un
+      jefe propio para el quiste hidatídico (hoy el núcleo 11 usa el gusano cestodo).
+- [ ] Rasgos de comportamiento (cápsula, toxina, intracelular…), uno por vez con tests.
 
 **Reportes anónimos**
 - [ ] Instalar el Apps Script (`tools/reportes-apps-script/README.md`) y pegar la URL en `REPORTES_URL`
       (`web/js/app.js` y `games/inmune-survivors/game.js`). Hasta entonces la opción no se muestra.
 
 **Integración**
-- [ ] Integrar Inmune Survivors en la sección Juegos (`#vistaJuegos` → link/iframe a `/juegos/inmune-survivors/`).
-      Mientras tanto, la tarjeta de Inicio no debería prometer un ranking.
-- [ ] Ranking: tabla `puntajes_juegos` (RLS: select autenticados, sin insert directo) + acción `guardarPuntaje`
-      con validación de plausibilidad (puntaje máximo por segundo jugado, duración mínima, rate limit) + `rankingJuego`.
-      Las partidas del Laboratorio no deben poder enviar puntaje.
+- [x] Sección Juegos con acceso a Inmune Survivors y ranking por modo (búsqueda por pseudónimo, tu posición).
+- [x] Ranking: tabla `puntajes_juegos` + acciones `guardarPuntaje` (recalcula y valida) y `rankingJuego`.
+- [ ] El ranking confía en los componentes que manda el cliente (eliminaciones, segundos, respuestas): los topes de
+      plausibilidad frenan lo burdo, no a alguien que arme una partida creíble. Si hace falta más, firmar eventos de la
+      partida o validar duración contra la hora de inicio registrada en el servidor.
 
 ## Backend
 - [ ] Quitar `legacyLogin` (acción, RPC `get_legacy_password` y tabla `private.legacy_password_migrations`, que ya

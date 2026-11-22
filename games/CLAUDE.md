@@ -5,7 +5,7 @@ Cada juego es una carpeta **autocontenida y estática** (`games/<slug>/`) que se
 
 | Slug | Estado | Motor |
 |---|---|---|
-| `inmune-survivors` | en desarrollo (v3.7) | Phaser 3.90 por CDN |
+| `inmune-survivors` | en desarrollo (v3.8) | Phaser 3.90 por CDN |
 
 ## Contrato común de un juego
 
@@ -18,11 +18,12 @@ Cada juego es una carpeta **autocontenida y estática** (`games/<slug>/`) que se
 - Nada de secretos. Archivos de desarrollo local (`*.bat`, `*.py`, `tests/`, `docs/`) no se publican (ver workflow).
 - Assets: preferí `.webp`; los `.png` de 1–2 MB pesan en móviles y en el egress.
 
-## Integración con la web (planificada, ver `docs/roadmap.md`)
+## Integración con la web
 
 Los juegos se sirven en el mismo origen que la web, así que pueden leer la sesión de Supabase
-(supabase-js guarda la sesión en `localStorage`). El ranking se haría con una acción nueva del API
-(`guardarPuntaje`) con validaciones de plausibilidad en servidor y una tabla `puntajes_juegos` con RLS.
-Nunca escribir puntajes directo a la tabla desde el juego.
+(supabase-js guarda la sesión en `localStorage`). El ranking usa la acción `guardarPuntaje` del API
+(recalcula el puntaje y valida plausibilidad) y la tabla `puntajes_juegos` (mejor puntaje por usuario, juego y modo; RLS
+de solo lectura). La web lo muestra en `#vistaJuegos` con `rankingJuego`. El juego carga supabase-js (con SRI) recién al
+terminar una partida. Nunca escribir puntajes directo a la tabla desde el juego.
 
 Skills: `/nuevo-juego` (scaffold con este contrato) y `/publicar-juego` (versión + checks).
