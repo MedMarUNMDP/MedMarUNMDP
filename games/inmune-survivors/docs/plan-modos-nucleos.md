@@ -252,7 +252,7 @@ Todo en `src/data/` (UMD, con tests), separado del motor:
 3. ✅ **Modo Foco por núcleo** (v3.8): selector en el menú, enemigos del núcleo, tejido y jefe del núcleo, ranking por
    núcleo. Falta filtrar las preguntas (etapa 7).
 4. ✅ **Sandbox infinito** (v3.8): mezcla agentes y jefes de todos los núcleos, con ranking general.
-5. **Las 12 piezas nuevas** de sprite.
+5. **Las 12 piezas nuevas** de sprite. Los 9 jefes de núcleo ya tienen arte propio y mecánica (v3.9).
 6. **Rasgos de comportamiento**, uno por vez, con tests en el arnés.
 7. **Preguntas por núcleo**, más el banco general de defensa contra agentes.
 

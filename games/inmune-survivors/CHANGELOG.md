@@ -2,6 +2,22 @@
 
 Formato: la versión más nueva arriba. Al publicar una versión, agregá una sección nueva acá y subí `?build=` en index.html (ver CLAUDE.md del juego). El historial previo a v3.1 está en `README.txt`.
 
+## v3.9
+
+**Jefes de núcleo con arte propio** (`assets/boss_*.webp`, recortados de `docs/arte/jefes-nucleo-3x3.png`). Todos
+miden lo mismo en pantalla y llevan el contorno de su silueta. Cada uno tiene una mecánica ligada a su biología:
+- *E. coli* STEC: nubes de toxina Shiga que dañan y frenan, y embestidas con los flagelos.
+- Granuloma tuberculoso: se encapsula (recibe ~15 % del daño) y se abre por necrosis caseosa liberando bacilos.
+- *N. meningitidis*: cápsula que absorbe daño; al romperse suelta endotoxina y se regenera a los 9 s.
+- VIH: variación antigénica (cambia de color, queda inmune un momento y brotan viriones) y una latencia a poca vida.
+- *Toxoplasma gondii*: se desliza en línea recta y cada tres movimientos invade una célula y sale con taquizoítos.
+- *Plasmodium*: el glóbulo rojo se hincha y estalla en merozoítos (esquizogonia y fiebre).
+- Quiste hidatídico: fijo; suelta protoescólices y a mitad de vida se rompe con una onda de shock.
+- *C. perfringens*: burbujas de gas que se hinchan y explotan.
+- *Pneumocystis jirovecii*: fijo; un aura de exudado frena al jugador y ataca más rápido si tenés poca vida.
+
+**Laboratorio**: selector para invocar cualquier jefe (clásicos y de núcleo) sin avanzar la secuencia.
+
 ## v3.8.1
 
 - **Pseudópodos de fagocitosis rehechos**: siempre son los mismos dos. Antes el englobamiento dibujaba otros aparte

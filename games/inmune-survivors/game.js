@@ -291,7 +291,25 @@
   const AGENTES_DATA = globalThis.InmuneAgentes || null;
   const FICHAS_DATA = globalThis.InmuneFichas || null;
   const MODOS_API = globalThis.InmuneModos || null;
-  const GAME_VERSION = '3.8.1';
+  const GAME_VERSION = '3.9.0';
+  // Arte propio de los jefes de núcleo (assets/boss_*.webp, recortados de docs/arte/jefes-nucleo-3x3.png).
+  const BOSS_ART = {
+    'escherichia-coli':'boss_stec', 'mycobacterium-tuberculosis':'boss_granuloma', 'neisseria-meningitidis':'boss_meningococo',
+    'vih':'boss_vih', 'toxoplasma-gondii':'boss_toxoplasma', 'plasmodium':'boss_plasmodium',
+    'echinococcus-granulosus':'boss_hidatidico', 'clostridium-perfringens':'boss_perfringens', 'pneumocystis-jirovecii':'boss_pneumocystis'
+  };
+  // Mecánica propia de cada jefe de núcleo (implementadas en updateBossMechanic). firstMs: primer uso tras aparecer.
+  const BOSS_MECHANICS = {
+    'escherichia-coli':{color:'#ffb36b'},
+    'mycobacterium-tuberculosis':{color:'#d9d2ff',ring:{color:0xb9a8e0,fill:0.03},firstMs:5000},
+    'neisseria-meningitidis':{color:'#9fdcff',ring:{color:0x6fd2ff,fill:0.05}},
+    'vih':{color:'#ff9ec4',firstMs:5000},
+    'toxoplasma-gondii':{color:'#ffe2a0'},
+    'plasmodium':{color:'#ff8fa0',firstMs:5000},
+    'echinococcus-granulosus':{color:'#ffe7b5',firstMs:3500},
+    'clostridium-perfringens':{color:'#e6dcff',firstMs:1500},
+    'pneumocystis-jirovecii':{color:'#cfe6ff',ring:{color:0x9fc8ff,radius:230,fill:0.07,stroke:2,depth:16}}
+  };
   const SPECIES_TEXTURE_SIZE = 256;
   const randomItem = (rng, list) => rng.pick(list);
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
@@ -318,6 +336,7 @@
       for (const key of ['helminth_nematode_head','helminth_tapeworm_scolex']) this.load.image(key, `assets/${key}.webp`);
       for (const boss of BOSS_MORPHOLOGIES) this.load.image(boss.texture, `assets/${boss.texture}.webp`);
       this.load.image('boss_spore','assets/boss_spore.webp');
+      for (const spec of this.bossSpecs||[]) if (spec.art) this.load.image(spec.art, `assets/${spec.art}.webp`);
       for (const key of ['focus_viral','focus_bacterial','focus_fungal','focus_parasitic']) this.load.image(key, `assets/${key}.webp`);
       const tissueKey=TISSUE_TEXTURES[this.map.id]||'tissue_vascular';
       this.load.image(tissueKey,`assets/${tissueKey}.webp`);
@@ -364,7 +383,7 @@
       this.activeSkills=new Set(['granules']);this.skillLevels={granules:1};this.skillEvolution={};this.skillTimers={};this.bMinions=[];this.macrophages=[];this.skillProjectiles=[];this.differentiationSpecies=null;this.differentiationStreak=0;this.patternBonus=0;this.minionMode='M1';this.debugSpawnLimit=140;
       this.lastStrategy=null;
       this.speciesLog={};this.speciesOrder=[];
-      this.phagoHintsLeft=3;this.lastPhagoHintAt=-99;this.pseudopods=null;this.phagoEngulf=null;this.pseudopodLast=null;
+      this.phagoHintsLeft=3;this.lastPhagoHintAt=-99;this.pseudopods=null;this.phagoEngulf=null;this.pseudopodLast=null;this.playerSlow=1;this.auraSlowUntil=-1;this.forcedSpawnAgente=null;
       this.progressionMilestone = 0;
       this.enemies = []; this.playerBullets = []; this.enemyProjectiles = []; this.helpers = []; this.nets = [];this.activeEnemyCount=0;
       this.usedQuestionIds = new Set(); this.currentQuestion = null; this.currentUpgrades = []; this.questionTopicCounts={}; this.lastQuestionTopic=null;
@@ -916,8 +935,11 @@
     bossSpecFromAgente(jefe){
       const a=AGENTES_DATA.agente(jefe.agente);if(!a)return null;
       const gusano=AGENTES_DATA.MORFOLOGIAS[a.morfologia]?.gusano;
-      const spec={id:`jefe-${a.id}`,type:a.familia,label:gusano?a.nombre:jefe.titulo,radius:55,color:a.tinte??0xffa52f,outline:0x26103e,boss:true,agente:a.id,agenteJefe:a.id,stationary:a.familia==='fungus'};
-      if(gusano)Object.assign(spec,{texture:'boss_helminth',worm:true,wormKind:gusano==='tapeworm'?'cestode':'nematode',headTexture:gusano==='tapeworm'?'helminth_tapeworm_scolex':'helminth_nematode_head',cruiseSpeed:245,bodyLength:1500});
+      const art=BOSS_ART[a.id]||null;
+      const spec={id:`jefe-${a.id}`,type:a.familia,label:gusano&&!art?a.nombre:jefe.titulo,radius:55,color:a.tinte??0xffa52f,outline:0x26103e,boss:true,agente:a.id,agenteJefe:a.id,stationary:a.familia==='fungus'||a.id==='echinococcus-granulosus',art,mechanic:BOSS_MECHANICS[a.id]?a.id:null};
+      // Todos los jefes con arte propio miden lo mismo en pantalla (~300 px), sea cual sea su familia.
+      if(art)spec.sizeScale=82/this.enemyBaseVisualSize(a.familia);
+      else if(gusano)Object.assign(spec,{texture:'boss_helminth',worm:true,wormKind:gusano==='tapeworm'?'cestode':'nematode',headTexture:gusano==='tapeworm'?'helminth_tapeworm_scolex':'helminth_nematode_head',cruiseSpeed:245,bodyLength:1500});
       return spec;
     }
 
@@ -926,11 +948,19 @@
       return (this.modo?.id==='sandbox'?seq.slice(0,4):seq).map(b=>b.id);
     }
 
-    spawnBoss() {
+    // Laboratorio: jefe elegido por id (los clásicos por su id; los de núcleo como `jefe-<agente>`).
+    spawnBossById(id){
+      let spec=(this.bossSpecs||[]).concat(BOSS_MORPHOLOGIES).find(b=>b.id===id);
+      if(!spec&&String(id).startsWith('jefe-')){const n=AGENTES_DATA?.NUCLEOS.find(x=>x.jefe.agente===id.slice(5));if(n)spec=this.bossSpecFromAgente({agente:n.jefe.agente,titulo:n.jefe.titulo});}
+      if(spec)this.spawnBoss(spec);
+    }
+
+    spawnBoss(chosen=null) {
       const seq=this.bossSpecs||BOSS_MORPHOLOGIES;
-      let spec=seq[this.bossSequenceIndex%seq.length];
-      // La textura de la especie se hornea recién acá (en init todavía no están cargadas las piezas base).
-      if(spec.agenteJefe&&!spec.worm)spec={...spec,texture:this.getSpeciesTexture(AGENTES_DATA.agente(spec.agenteJefe))};
+      let spec=chosen||seq[this.bossSequenceIndex%seq.length];
+      // Arte propio si está cargado; si no, la textura de la especie se hornea acá (en init no hay piezas base).
+      if(spec.art&&this.textures.exists(spec.art))spec={...spec,texture:spec.art};
+      else if(spec.agenteJefe&&!spec.worm)spec={...spec,texture:this.getSpeciesTexture(AGENTES_DATA.agente(spec.agenteJefe))};
       const spawnAt={x:CENTER,y:CENTER};
       const boss=this.spawnEnemy(spec.type,true,spawnAt,spec);
       if(!boss)return;
@@ -938,7 +968,7 @@
       // durante la entrada no hacen daño por contacto y aparecen semitransparentes.
       boss.spawnGrace=BOSS_SPAWN_GRACE_MS;
       if(boss.obj)this.tweens.add({targets:boss.obj,alpha:{from:0.35,to:1},duration:BOSS_SPAWN_GRACE_MS,ease:'Sine.Out'});
-      this.bossCount++;this.bossSequenceIndex++;
+      this.bossCount++;if(!chosen)this.bossSequenceIndex++;
       this.cameras.main.shake(260,0.0045);
       this.flashPlayerOutline(0xffd875,650);
       this.showToast(`ALERTA · ${spec.label.toUpperCase()} EMERGE EN EL CENTRO DE LA ARENA`);
@@ -953,7 +983,8 @@
         // Identidad: cada enemigo común es una especie concreta del catálogo del modo. Primero la especie y después
         // la forma, así un núcleo sin gusanos no los genera. Los gusanos tienen tope y no nacen junto a otro enemigo.
         const allowWorm=type==='parasite'&&!spawnAt&&this.enemies.reduce((n,e)=>n+(!e.dead&&e.isWorm?1:0),0)<(this.lowPerformanceDevice?2:3);
-        let agente=this.pickAgente(type,allowWorm);
+        let agente=this.forcedSpawnAgente?AGENTES_DATA?.agente(this.forcedSpawnAgente):this.pickAgente(type,allowWorm);
+        if(agente&&this.forcedSpawnAgente)type=agente.familia;
         // Núcleo cuyos parásitos son todos gusanos (p. ej. zoonosis) con el tope lleno: sale otra familia del núcleo.
         if(!agente&&this.modo&&!forceType){for(const t of ['bacteria','virus','fungus']){agente=this.pickAgente(t,false);if(agente){type=t;break;}}}
         if(agente)morphology=this.morphologyForAgente(type,agente,this.baseMorphologyForAgente(type,agente));
@@ -971,7 +1002,7 @@
       };
       const variant = archetypes[archetype] || archetypes.standard;
       const stage = Math.floor(this.elapsed / 45);
-      let size = bossSpec?2.45*1.5:variant.size;
+      let size = bossSpec?2.45*1.5*(bossSpec.sizeScale||1):variant.size;
       const data = {
         bacteria: { hp:28, speed:54, damage:10, radius:morphology.radius },
         virus:    { hp:19, speed:83, damage:8, radius:morphology.radius },
@@ -1034,8 +1065,131 @@
         for (let i=0; i<samples; i++) e.trail.push({ x:e.x-Math.cos(heading)*i*e.trailStep, y:e.y-Math.sin(heading)*i*e.trailStep });
         this.drawWorm(e);
       }
+      if(bossSpec)this.initBossMechanic(e,bossSpec);
       this.enemies.push(e);if(e.agente)this.registerSpecies(e);this.activeEnemyCount++;
       return e;
+    }
+
+    // ---------- Jefes de núcleo: mecánicas propias ----------
+    // Cada jefe de núcleo tiene una mecánica ligada a su biología (ver BOSS_MECHANICS). Usan piezas comunes:
+    // zonas de peligro (las mismas del biofilm), ráfagas radiales de proyectiles, súbditos de una especie y
+    // modificadores de daño recibido (cápsula, encapsulamiento, invulnerabilidad breve).
+    initBossMechanic(e,spec){
+      const id=spec.mechanic;if(!id||!BOSS_MECHANICS[id])return;
+      e.mechanic=id;e.mech={clock:BOSS_MECHANICS[id].firstMs||2600,clock2:4200,count:0,damageTaken:1,invulnUntil:-1,pulse:1};
+      if(id==='neisseria-meningitidis'){e.mech.shieldMax=e.maxHp*0.28;e.mech.shield=e.mech.shieldMax;}
+      if(id==='mycobacterium-tuberculosis')e.mech.phase='abierto';
+      const ring=BOSS_MECHANICS[id].ring;
+      if(ring){e.mechRing=this.add.circle(e.x,e.y,ring.radius||e.visualSize*0.6,ring.color,ring.fill??0.06).setStrokeStyle(ring.stroke??4,ring.color,0.8).setDepth(ring.depth??23);}
+    }
+
+    bossMechanicText(e,text,color){this.showFloatingText(e.x,e.y-e.visualSize*0.55,text,color||BOSS_MECHANICS[e.mechanic]?.color||'#ffe39a',12);}
+
+    // Zona de peligro en el piso (comparte la lista y el dibujo con el biofilm). mine: explota al terminar la cuenta.
+    spawnHazard(x,y,o){
+      if(this.biofilmZones.length>=16)return null;
+      const g=this.add.graphics().setDepth(17);
+      g.fillStyle(o.color,o.mine?0.30:0.20);g.fillCircle(0,0,o.radius);g.lineStyle(3,o.color,0.65);g.strokeCircle(0,0,o.radius);
+      const obj=this.add.container(x,y,[g]).setAlpha(0.92);
+      const z={x,y,obj,radius:o.radius,life:o.life||9000,tick:0,damage:o.damage,slow:o.slow||0,label:o.label||'',labelColor:o.labelColor||'#ffd0a0',mine:o.mine?{t:o.mine.t,radius:o.mine.radius,total:o.mine.t}:null};
+      this.biofilmZones.push(z);return z;
+    }
+
+    // Ráfaga radial de proyectiles (merozoítos, endotoxina, protoescólices…). Usa el mismo ciclo que las esporas.
+    spawnBossBurst(e,count,o){
+      const off=this.rng.float(0,Math.PI*2),speed=o.speed||150;
+      for(let i=0;i<count&&this.enemyProjectiles.length<70;i++){
+        const a=off+Math.PI*2*i/count,obj=this.add.container(e.x+Math.cos(a)*e.radius*0.6,e.y+Math.sin(a)*e.radius*0.6).setDepth(30);
+        obj.add([this.add.circle(0,0,(o.size||6)+3,o.color,0.18),this.add.circle(0,0,o.size||6,o.color,1).setStrokeStyle(1.8,0x24113d,0.95),this.add.circle(-1.5,-1.5,1.6,0xffffff,0.9)]);
+        this.enemyProjectiles.push({obj,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,damage:o.damage,life:o.life||4200,radius:o.size||6,homing:!!o.homing});
+      }
+      this.burstEffect(e.x,e.y,o.color,Math.min(140,e.visualSize*0.5));
+    }
+
+    // Súbditos de una especie concreta alrededor del jefe (más chicos y frágiles que un enemigo común).
+    spawnBossMinions(e,agenteId,count){
+      const agente=AGENTES_DATA?.agente(agenteId);if(!agente)return;
+      this.forcedSpawnAgente=agenteId;
+      try{
+        for(let i=0;i<count;i++){
+          const a=Math.PI*2*i/count+this.rng.float(0,0.5),p={x:e.x+Math.cos(a)*(e.radius+50),y:e.y+Math.sin(a)*(e.radius+50)};
+          const m=this.spawnEnemy(agente.familia,false,p);if(!m)continue;
+          m.minion=true;m.hp=m.maxHp=Math.max(24,e.maxHp*0.006);m.damage=Math.max(6,e.damage*0.12);
+        }
+      }finally{this.forcedSpawnAgente=null;}
+    }
+
+    updateBossMechanic(e,dtMs,dt,dx,dy,d){
+      const m=e.mech,t=this.elapsed,crisis=this.multiResistance?0.7:1;
+      m.clock-=dtMs;m.clock2-=dtMs;
+      switch(e.mechanic){
+        case 'escherichia-coli': // toxina Shiga + embestidas con flagelos
+          if(m.clock<=0){m.clock=4200*crisis;this.spawnHazard(e.x,e.y,{radius:80,color:0xff8a2a,damage:6+t*0.01,slow:0.72,life:9000,label:'TOXINA SHIGA',labelColor:'#ffb36b'});this.bossMechanicText(e,'TOXINA SHIGA');}
+          if(m.clock2<=0){m.clock2=6200*crisis;m.dashUntil=t+0.9;this.bossMechanicText(e,'FLAGELOS: EMBESTIDA','#ffd27a');}
+          e.mechSpeed=t<(m.dashUntil||0)?2.7:1;break;
+        case 'mycobacterium-tuberculosis': // granuloma: se encapsula y después se abre por necrosis caseosa
+          e.mechSpeed=0.45;
+          if(m.clock<=0&&m.phase==='abierto'){m.phase='cerrado';m.clock=4200;m.damageTaken=0.15;this.bossMechanicText(e,'GRANULOMA: CÁPSULA FIBROSA','#d9d2ff');}
+          else if(m.clock<=0){m.phase='abierto';m.clock=6500*crisis;m.damageTaken=1;this.spawnBossMinions(e,'mycobacterium-tuberculosis',this.multiResistance?4:3);this.bossMechanicText(e,'NECROSIS CASEOSA: LIBERA BACILOS','#ffb0c8');}
+          break;
+        case 'neisseria-meningitidis': // cápsula que absorbe daño; al romperse, endotoxina
+          e.mechSpeed=1.2;
+          if(m.shield<=0&&m.clock<=0){m.shield=m.shieldMax;this.bossMechanicText(e,'CÁPSULA REGENERADA','#9fdcff');}
+          break;
+        case 'vih': // variación antigénica (inmune un momento, cambia de color, suelta viriones) y una latencia
+          if(m.clock<=0){m.clock=7000*crisis;m.count++;m.invulnUntil=t+1.4;m.tint=[0xffffff,0x9fffe0,0xffc36b,0xc59bff][m.count%4];this.spawnVirusMinions(e);this.bossMechanicText(e,'VARIACIÓN ANTIGÉNICA','#ff9ec4');}
+          if(!m.latencyUsed&&e.hp<e.maxHp*0.35){m.latencyUsed=true;m.invulnUntil=t+3;e.hp=Math.min(e.maxHp,e.hp+e.maxHp*0.08);this.bossMechanicText(e,'LATENCIA: SE OCULTA EN EL RESERVORIO','#ffd0e4');}
+          e.mechSpeed=t<m.invulnUntil?0.5:1;break;
+        case 'toxoplasma-gondii': // motilidad por deslizamiento e invasión celular
+          if(m.clock<=0){
+            m.clock=3600*crisis;m.count++;
+            if(m.count%3===0){m.invulnUntil=t+1.5;m.invadeAt=t+1.5;this.bossMechanicText(e,'INVASIÓN CELULAR','#ffd27a');}
+            else{m.dashUntil=t+1;m.dashAngle=Math.atan2(dy,dx);this.bossMechanicText(e,'DESLIZAMIENTO','#ffe2a0');}
+          }
+          if(m.invadeAt&&t>=m.invadeAt){m.invadeAt=0;this.spawnBossMinions(e,'toxoplasma-gondii',this.multiResistance?4:3);}
+          if(t<(m.dashUntil||0)){e.x+=Math.cos(m.dashAngle)*e.speed*3.2*dt;e.y+=Math.sin(m.dashAngle)*e.speed*3.2*dt;e.heading=m.dashAngle;e.mechSpeed=0;}
+          else e.mechSpeed=t<m.invulnUntil?0.3:1;
+          break;
+        case 'plasmodium': { // ciclo eritrocítico: el glóbulo rojo se hincha y estalla en merozoítos
+          const cycle=7000*crisis,swell=1600;
+          m.pulse=m.clock<swell?1+0.14*(1-Math.max(0,m.clock)/swell):1;
+          if(m.clock<=0){m.clock=cycle;this.spawnBossBurst(e,this.multiResistance?20:16,{color:0xff5a6e,speed:155,damage:9+t*0.01,size:6});this.cameras.main.flash(180,255,80,80,false);this.bossMechanicText(e,'ESQUIZOGONIA · FIEBRE','#ff8fa0');}
+          break;
+        }
+        case 'echinococcus-granulosus': // quiste fijo: protoescólices y rotura a mitad de vida
+          if(m.clock<=0){m.clock=6000*crisis;this.spawnBossBurst(e,8,{color:0xffe2a6,speed:85,damage:10+t*0.01,size:7,homing:true,life:7000});this.bossMechanicText(e,'PROTOESCÓLICES','#ffe7b5');}
+          if(!m.ruptured&&e.hp<e.maxHp*0.5){
+            m.ruptured=true;const radius=300;
+            const wave=this.add.circle(e.x,e.y,20,0xffe2a6,0.12).setStrokeStyle(6,0xfff0c8,0.9).setDepth(29);
+            this.tweens.add({targets:wave,radius,alpha:0,duration:520,ease:'Cubic.Out',onComplete:()=>wave.destroy()});
+            if(Math.hypot(this.player.x-e.x,this.player.y-e.y)<radius+this.playerRadius)this.damagePlayer(e.damage*0.55);
+            this.spawnBossBurst(e,18,{color:0xffe2a6,speed:140,damage:10+t*0.01,size:6});
+            this.cameras.main.shake(320,0.008);this.bossMechanicText(e,'ROTURA DEL QUISTE · ANAFILAXIA','#fff0c8');
+          }
+          break;
+        case 'clostridium-perfringens': // gangrena gaseosa: burbujas de gas que explotan
+          if(m.clock<=0){m.clock=2300*crisis;m.count++;this.spawnHazard(e.x+this.rng.float(-40,40),e.y+this.rng.float(-40,40),{radius:30,color:0xd9c8ff,damage:13+t*0.012,life:2600,mine:{t:1700,radius:95},label:'GAS',labelColor:'#e6dcff'});if(m.count%4===1)this.bossMechanicText(e,'GANGRENA GASEOSA','#e6dcff');}
+          break;
+        case 'pneumocystis-jirovecii': { // fijo: aura que frena y, si tenés poca vida, ataca más (oportunista)
+          if(d<230)this.auraSlowUntil=t+0.12;
+          const oportunista=this.stats.health<this.stats.maxHealth*0.45;
+          if(m.clock<=0){m.clock=(oportunista?1600:2850)*crisis;for(let i=0;i<(oportunista?5:3);i++)this.spawnBossSpore(e);this.bossMechanicText(e,oportunista?'OPORTUNISTA: TU INMUNIDAD CAE':'QUISTES Y TROFOZOÍTOS',oportunista?'#ff9ec4':'#cfe6ff');}
+          break;
+        }
+      }
+    }
+
+    // Lo visual de cada mecánica, en el mismo paso que el resto del dibujo del enemigo.
+    renderBossMechanic(e){
+      const m=e.mech,t=this.elapsed,invuln=t<m.invulnUntil;
+      if(e.spawnGrace<=0)e.obj.setAlpha(invuln?0.38+0.12*Math.sin(t*14):1);
+      if(e.outlineSprite?.active&&invuln)e.outlineSprite.setTint(0xffffff).setAlpha(0.5);
+      if(m.tint&&!e.tintActive&&e.hitFlash<=0)e.obj.setTint(m.tint);
+      if(!e.mechRing?.active)return;
+      e.mechRing.setPosition(e.x,e.y);
+      if(e.mechanic==='neisseria-meningitidis'){const r=clamp(m.shield/m.shieldMax,0,1);e.mechRing.setVisible(r>0).setStrokeStyle(3+4*r,0x6fd2ff,0.35+0.55*r).setScale(1+0.03*Math.sin(t*3));}
+      else if(e.mechanic==='mycobacterium-tuberculosis'){const closed=m.phase==='cerrado';e.mechRing.setStrokeStyle(closed?9:3,closed?0xd9d2ff:0xb9a8e0,closed?0.95:0.35).setFillStyle(0xd9d2ff,closed?0.16:0.03);}
+      else if(e.mechanic==='pneumocystis-jirovecii')e.mechRing.setAlpha(0.55+0.2*Math.sin(t*1.6));
     }
 
     spawnEnemyProjectile(enemy) {
@@ -1075,11 +1229,28 @@
     }
 
     updateBiofilm(dtMs) {
-      for(let i=this.biofilmZones.length-1;i>=0;i--){const z=this.biofilmZones[i];z.life-=dtMs;z.tick-=dtMs;z.obj.setAlpha(Math.min(0.92,z.life/1200));
-        if(Math.hypot(this.player.x-z.x,this.player.y-z.y)<z.radius+this.playerRadius&&z.tick<=0){z.tick=960;this.damagePlayer(7+this.elapsed*0.012);this.showFloatingText(this.player.x,this.player.y-35,'BIOFILM TÓXICO','#def579',11);if(this.gameEnded)return;}
+      this.playerSlow=1;
+      for(let i=this.biofilmZones.length-1;i>=0;i--){const z=this.biofilmZones[i];z.life-=dtMs;z.tick-=dtMs;
+        const near=Math.hypot(this.player.x-z.x,this.player.y-z.y);
+        if(z.mine){
+          // burbuja de gas: se hincha y titila hasta explotar
+          z.mine.t-=dtMs;const k=1-Math.max(0,z.mine.t)/z.mine.total;z.obj.setScale(1+k*0.6).setAlpha(0.55+0.45*Math.abs(Math.sin(k*k*16)));
+          if(z.mine.t<=0){
+            this.burstEffect(z.x,z.y,0xd9c8ff,z.mine.radius);z.obj.destroy();this.biofilmZones.splice(i,1);
+            if(near<z.mine.radius+this.playerRadius){this.damagePlayer(z.damage);this.showFloatingText(this.player.x,this.player.y-35,z.label||'EXPLOSIÓN',z.labelColor,11);if(this.gameEnded)return;}
+          }
+          continue;
+        }
+        z.obj.setAlpha(Math.min(0.92,z.life/1200));
+        const inside=near<z.radius+this.playerRadius;
+        if(inside&&z.slow)this.playerSlow=Math.min(this.playerSlow,z.slow);
+        if(inside&&z.tick<=0){z.tick=960;this.damagePlayer(z.damage??(7+this.elapsed*0.012));this.showFloatingText(this.player.x,this.player.y-35,z.label||'BIOFILM TÓXICO',z.labelColor||'#def579',11);if(this.gameEnded)return;}
         if(z.life<=0){z.obj.destroy();this.biofilmZones.splice(i,1);}
       }
     }
+
+    // Freno del jugador por zonas (toxina Shiga) o auras (exudado de Pneumocystis).
+    playerSpeedFactor(){return Math.min(this.playerSlow??1,(this.auraSlowUntil??-1)>this.elapsed?0.72:1);}
 
     spawnPlayerProjectile(target) {
       const angle=Math.atan2(target.y-this.player.y,target.x-this.player.x), count=this.stats.projectileCount;
@@ -1442,6 +1613,7 @@
       else if(action==='enemy')for(let i=0;i<(this.debugSpawnCount||1);i++)this.spawnEnemy(this.debugType==='mixed'?null:this.debugType||null,false);
       else if(action==='large')for(let i=0;i<(this.debugSpawnCount||1);i++)this.spawnEnemy(this.debugType==='mixed'?null:this.debugType||null,true);
       else if(action==='boss')this.spawnBoss();
+      else if(action.startsWith('boss:'))this.spawnBossById(action.slice(5));
       else if(action==='focus')this.spawnColony();
       else if(action==='primary-menu'){
         this.questionPaused=true;
@@ -1533,7 +1705,7 @@
         }else this.mouseSteer=false;
       }
       const len=Math.hypot(dx,dy);if(len>1){dx/=len;dy/=len;}
-      const next=this.constrainToArena(this.player.x+dx*this.stats.moveSpeed*dt,this.player.y+dy*this.stats.moveSpeed*dt,this.playerRadius+10);
+      const speedNow=this.stats.moveSpeed*this.playerSpeedFactor(),next=this.constrainToArena(this.player.x+dx*speedNow*dt,this.player.y+dy*speedNow*dt,this.playerRadius+10);
       this.player.setPosition(next.x,next.y);
       this.playerTrailClock-=dtMs;
       if(this.stats.agilityLevel>0&&len>0.15&&this.playerTrailClock<=0){
@@ -1709,6 +1881,14 @@
       if(this.activeSkills.has('differentiation')&&this.differentiationSpecies===e.type)dealt*=1+Math.min(.9,this.differentiationStreak*(this.differentiationBonus||.055)*(this.skillLevels.differentiation||1));
       if(this.activeSkills.has('pattern')&&this.patternSpecies===e.type)dealt*=1+Math.min(.45,(this.patternCount||0)*.045*(this.skillLevels.pattern||1));
       if(source==='minion'&&this.activeSkills.has('differential_profile'))dealt*=1+(this.minionDamageBonus||.25);
+      if(e.mech){
+        if(this.elapsed<e.mech.invulnUntil){if(this.elapsed-(e.mech.lastImmuneText??-9)>0.8){e.mech.lastImmuneText=this.elapsed;this.showFloatingText(e.x,e.y-e.visualSize*0.4,'INMUNE','#ffffff',11);}return;}
+        dealt*=e.mech.damageTaken;
+        if(e.mech.shield>0){
+          const absorbed=Math.min(e.mech.shield,dealt);e.mech.shield-=absorbed;dealt-=absorbed;
+          if(e.mech.shield<=0){e.mech.clock=9000;this.spawnBossBurst(e,14,{color:0xff6f6f,speed:170,damage:10+this.elapsed*0.01});this.bossMechanicText(e,'CÁPSULA ROTA · ENDOTOXINA','#ffb0b0');}
+        }
+      }
       e.hp-=dealt;e.hitFlash=155;
       if(e.outlineSprite?.active)e.outlineSprite.setTint(0xffedb1).setAlpha(1);
       if(!e.isWorm){ e.obj.setTintFill(0xfff0b5); e.obj.setScale(e.visualScale*1.07); e.tintActive=true; }
@@ -1726,20 +1906,21 @@
         if(e.stationary&&e.stationaryAnchor){e.x=e.stationaryAnchor.x;e.y=e.stationaryAnchor.y;}
         const dx=this.player.x-e.x,dy=this.player.y-e.y,d=Math.hypot(dx,dy)||1;
         const gait=1+Math.sin(this.elapsed*e.animFrequency+e.animPhase)*e.animSquash;
-        e.speedNow=e.speed*gait;
+        e.speedNow=e.speed*gait*(e.mechSpeed??1);
+        if(e.mechanic&&e.spawnGrace<=0)this.updateBossMechanic(e,dtMs,dt,dx,dy,d);
         if(e.type==='parasite') this.updateParasite(e,dt,dtMs,dx,dy,d);
         else if(e.type==='fungus'){
           if(!e.stationary&&d>145){e.x+=dx/d*e.speedNow*dt;e.y+=dy/d*e.speedNow*dt;}
-          if(e.isBoss){e.bossAttackClock-=dtMs;if(e.bossAttackClock<=0){for(let i=0;i<(this.multiResistance?5:3);i++)this.spawnBossSpore(e);e.bossAttackClock=this.multiResistance?1850:2850;this.showFloatingText(e.x,e.y-e.visualSize*0.50,'LIBERACIÓN DE CONIDIOS','#dcff7e',11);}}
+          if(e.isBoss&&!e.mechanic){e.bossAttackClock-=dtMs;if(e.bossAttackClock<=0){for(let i=0;i<(this.multiResistance?5:3);i++)this.spawnBossSpore(e);e.bossAttackClock=this.multiResistance?1850:2850;this.showFloatingText(e.x,e.y-e.visualSize*0.50,'LIBERACIÓN DE CONIDIOS','#dcff7e',11);}}
           else{e.sporeCooldown-=dtMs;if(e.sporeCooldown<=0&&d<340&&this.enemyProjectiles.length<12){this.spawnEnemyProjectile(e);e.sporeCooldown=Math.max(1150,2600-this.elapsed*1.6);this.showFloatingText(e.x,e.y-e.radius-8,'ESPORAS','#c8ff9c',10);}}
         }else if(e.type==='virus'){
           const weave=Math.sin(this.elapsed*3.4+(e.x*0.01))*0.26;
           e.x+=(dx/d+(-dy/d)*weave)*e.speedNow*dt;e.y+=(dy/d+(dx/d)*weave)*e.speedNow*dt;
-          if(e.isBoss){e.bossAttackClock-=dtMs;if(e.bossAttackClock<=0){this.spawnVirusMinions(e);e.bossAttackClock=this.multiResistance?7200:10200;}}
+          if(e.isBoss&&!e.mechanic){e.bossAttackClock-=dtMs;if(e.bossAttackClock<=0){this.spawnVirusMinions(e);e.bossAttackClock=this.multiResistance?7200:10200;}}
         }else{
           const weave=Math.sin(this.elapsed*2.3+e.x*0.013)*0.08;
           e.x+=(dx/d+(-dy/d)*weave)*e.speedNow*dt;e.y+=(dy/d+(dx/d)*weave)*e.speedNow*dt;
-          if(e.isBoss&&e.type==='bacteria'){e.biofilmClock-=dtMs;if(e.biofilmClock<=0){this.leaveBiofilm(e);e.biofilmClock=this.multiResistance?1050:1550;}}
+          if(e.isBoss&&e.type==='bacteria'&&!e.mechanic){e.biofilmClock-=dtMs;if(e.biofilmClock<=0){this.leaveBiofilm(e);e.biofilmClock=this.multiResistance?1050:1550;}}
         }
         const bounded=this.constrainToArena(e.x,e.y,e.isWorm?e.wormWidth+8:e.radius+4);e.x=bounded.x;e.y=bounded.y;
         if(e.hitFlash>0)e.hitFlash=Math.max(0,e.hitFlash-dtMs);
@@ -1783,7 +1964,7 @@
               if(!e.isBoss&&e.sporeCooldown<450)pulse*=1+0.16*(1-Math.max(0,e.sporeCooldown)/450); // se hincha antes de soltar esporas
             }
           }
-          if(e.isBoss)pulse*=1+Math.sin(this.elapsed*1.8)*0.03;
+          if(e.isBoss)pulse*=(1+Math.sin(this.elapsed*1.8)*0.03)*(e.mech?.pulse||1);
           if(e.hitFlash<=0&&!e.tintActive)e.obj.setScale(e.visualScale*(1+Math.max(0,gait-1))*pulse,e.visualScale*(1-Math.max(0,gait-1)*0.55)*pulse);
           if(e.outlineSprite?.active){e.outlineSprite.setPosition(e.x,e.y+e.animBob).setRotation(e.obj.rotation).setScale(e.obj.scaleX,e.obj.scaleY).setTint(e.hitFlash>0?0xffedb1:e.healthOutlineColor).setAlpha(e.hitFlash>0?1:0.88);}
         }
@@ -1794,6 +1975,7 @@
           if(eligible&&e.phagoMarker.texture.key!==frame)e.phagoMarker.setTexture(frame);
         }
         if(e.bossRing?.active)e.bossRing.setPosition(e.x,e.y).setScale(1+Math.sin(this.elapsed*3.4)*0.035).setAlpha(0.58+Math.sin(this.elapsed*3.4)*0.20);
+        if(e.mech)this.renderBossMechanic(e);
         if(e.bossLabel?.active)e.bossLabel.setPosition(e.x,e.y-e.visualSize*0.72);
         if (e.healthBar?.active) e.healthBar.setPosition(e.x, e.y);
         const healthRatio=clamp(e.hp/e.maxHp,0,1),healthBand=healthRatio>0.66?3:healthRatio>0.33?2:1;
@@ -1864,8 +2046,8 @@
       const fromCenter=Math.hypot(e.x-CENTER,e.y-CENTER);
       if(fromCenter>ARENA_RADIUS-(e.isWorm?190:90)){const inward=Math.atan2(CENTER-e.y,CENTER-e.x);e.heading+=clampAngle(wrapAngle(inward-e.heading),1.25*dt);}
       const wiggle=Math.sin(this.elapsed*(e.isWorm?3.3:2.1)+e.x*0.018)*(e.isWorm?0.18:0.06);
-      e.x+=(Math.cos(e.heading)-Math.sin(e.heading)*wiggle)*(e.speedNow||e.speed)*dt;
-      e.y+=(Math.sin(e.heading)+Math.cos(e.heading)*wiggle)*(e.speedNow||e.speed)*dt;
+      e.x+=(Math.cos(e.heading)-Math.sin(e.heading)*wiggle)*(e.speedNow??e.speed)*dt;
+      e.y+=(Math.sin(e.heading)+Math.cos(e.heading)*wiggle)*(e.speedNow??e.speed)*dt;
     }
 
     drawWorm(e) {
@@ -1910,7 +2092,7 @@
       if(e.agente&&this.speciesLog?.[e.agente])this.speciesLog[e.agente].eliminados++;
       if(e.antibodyDots)for(const dot of e.antibodyDots)dot.obj?.destroy();
       if(e.outlineSprite?.active)e.outlineSprite.destroy();if(e.healthBar?.active)e.healthBar.destroy();
-      if(e.phagoMarker?.active)e.phagoMarker.destroy();if(e.bossRing?.active)e.bossRing.destroy();
+      if(e.phagoMarker?.active)e.phagoMarker.destroy();if(e.bossRing?.active)e.bossRing.destroy();if(e.mechRing?.active)e.mechRing.destroy();
       if(e.bossLabel?.active)this.tweens.add({targets:e.bossLabel,alpha:0,y:e.bossLabel.y-18,duration:190,onComplete:()=>e.bossLabel?.destroy()});
       this.kills+=1;if(this.activeSkills.has('macrophage_activation')&&this.activeSkills.has('polarization')&&this.minionMode==='M1'){this.macrophageM2Charge=(this.macrophageM2Charge||0)+1;const requiredKills=Math.min(180,Math.round(34+this.elapsed*0.11));const attackDuration=this.elapsed-(this.macrophageAttackSince??0);if(this.macrophageM2Charge>=requiredKills&&attackDuration>=90){this.minionMode='M2';this.macrophageM2Until=this.elapsed+24;this.macrophageM2HealClock=0;this.showToast(`POLARIZACIÓN M2 · ${requiredKills} BAJAS / 90 s`);this.burstEffect(this.player.x,this.player.y,0x80caff,58);}}if(e.isBoss){this.bossKills++;this.defeatedBossIds.add(e.morphology?.id||'');}this.activeEnemyCount=Math.max(0,this.activeEnemyCount-1);
       if(this.activeSkills.has('differentiation')){if(this.differentiationSpecies===e.type)this.differentiationStreak++;else{this.differentiationSpecies=e.type;this.differentiationStreak=1;}if(this.differentiationStreak%4===0)this.showFloatingText(this.player.x,this.player.y-56,`ADAPTACIÓN ${e.type.toUpperCase()} ×${this.differentiationStreak}`,'#ffc8ff',10);}
@@ -2422,8 +2604,13 @@
   function renderSkillProps(){const id=$('debugSkillSelect').value,keys=debugSkillProps[id]||['nivel'];$('debugSkillStats').innerHTML=keys.map(k=>`<div class=\"debug-row\"><span style=\"flex:2\">${k}</span><button data-skillstat=\"${k}\" data-dir=\"down\">−</button><button data-skillstat=\"${k}\" data-dir=\"up\">+</button></div>`).join('');}
   renderSkillProps();$('debugSkillSelect').addEventListener('change',renderSkillProps);$('debugSpawnCount').addEventListener('change',e=>window.IS_ACTIONS?.debug?.(`spawn-count:${e.target.value}`));$('debugQuestion').addEventListener('change',e=>window.debugQuestionCategory=e.target.value);
   const props={phagocytosis:['phagoRadius','phagoInterval','phagoHeal'],netosis:['netRadius','netCooldown','netDamage'],antibodies:['antibodyDamage','antibodyInterval','antibodyCount'],complement:['complementChance'],macrophage_activation:['macrophageCap'],tb_collaboration:['bCellCap'],immunoregulation:['regulationDamage','regulationInterval'],cytokines:['cytokineDamage','cytokineInterval','cytokineCount']};function renderProps(){const a=$('debugSkillSelect').value;$('debugSkillStats').innerHTML=(props[a]||['nivel']).map(k=>`<div class=\"debug-row\"><span>${k}</span><button data-skillstat=\"${k}\" data-dir=\"down\">−</button><button data-skillstat=\"${k}\" data-dir=\"up\">+</button></div>`).join('');}renderProps();$('debugSkillSelect').addEventListener('change',renderProps);$('debugSpawnCount').addEventListener('change',e=>window.IS_ACTIONS?.debug?.(`spawn-count:${e.target.value}`));$('debugToggle').addEventListener('click',()=>{const panel=$('debugPanel');panel.classList.toggle('compact');$('debugToggle').textContent=panel.classList.contains('compact')?'Abrir':'Cerrar';});
-  $('debugPanel').addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;if(btn.dataset.debug){const selected=$('debugSkillSelect').value,op=btn.dataset.debug;if(op==='skill-add')window.IS_ACTIONS?.debug?.(`skill:${selected}:up`);else if(op==='question')window.IS_ACTIONS?.debug?.(`question:${$('debugQuestion').value}`);else if(op==='skill-remove')window.IS_ACTIONS?.debug?.(`skill:${selected}:remove`);else window.IS_ACTIONS?.debug?.(op);}else if(btn.dataset.stat)window.IS_ACTIONS?.debug?.(`stat:${btn.dataset.stat}:${btn.dataset.dir}`);else if(btn.dataset.skillstat)window.IS_ACTIONS?.debug?.(`skillstat:${btn.dataset.skillstat}:${btn.dataset.dir}`);else if(btn.dataset.debug==='question')window.IS_ACTIONS?.debug?.(`question:${$('debugQuestion').value}`);else if(btn.dataset.skillstat)window.IS_ACTIONS?.debug?.(`skillstat:${btn.dataset.skillstat}:${btn.dataset.dir}`);else if(btn.dataset.debug==='question')window.IS_ACTIONS?.debug?.(`question:${$('debugQuestion').value}`);});
+  $('debugPanel').addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;if(btn.dataset.debug){const selected=$('debugSkillSelect').value,op=btn.dataset.debug;if(op==='skill-add')window.IS_ACTIONS?.debug?.(`skill:${selected}:up`);else if(op==='question')window.IS_ACTIONS?.debug?.(`question:${$('debugQuestion').value}`);else if(op==='skill-remove')window.IS_ACTIONS?.debug?.(`skill:${selected}:remove`);else if(op==='boss'&&$('debugBossSelect').value)window.IS_ACTIONS?.debug?.(`boss:${$('debugBossSelect').value}`);else window.IS_ACTIONS?.debug?.(op);}else if(btn.dataset.stat)window.IS_ACTIONS?.debug?.(`stat:${btn.dataset.stat}:${btn.dataset.dir}`);else if(btn.dataset.skillstat)window.IS_ACTIONS?.debug?.(`skillstat:${btn.dataset.skillstat}:${btn.dataset.dir}`);else if(btn.dataset.debug==='question')window.IS_ACTIONS?.debug?.(`question:${$('debugQuestion').value}`);else if(btn.dataset.skillstat)window.IS_ACTIONS?.debug?.(`skillstat:${btn.dataset.skillstat}:${btn.dataset.dir}`);else if(btn.dataset.debug==='question')window.IS_ACTIONS?.debug?.(`question:${$('debugQuestion').value}`);});
   $('debugTypeSelect').addEventListener('change',e=>window.IS_ACTIONS?.debug?.(`type:${e.target.value}`));
+  // Laboratorio: elegir qué jefe aparece (vacío = el siguiente de la secuencia).
+  {const sel=$('debugBossSelect'),opt=(value,text)=>{const o=document.createElement('option');o.value=value;o.textContent=text;sel.appendChild(o);};
+    opt('','Jefe: siguiente de la secuencia');
+    for(const b of BOSS_MORPHOLOGIES)opt(b.id,`Clásico · ${b.label}`);
+    for(const n of (globalThis.InmuneAgentes?.NUCLEOS||[]))opt(`jefe-${n.jefe.agente}`,`Núcleo ${n.id} · ${n.jefe.titulo}`);}
   window.addEventListener('is:focus-evolution',e=>{const box=$('focusEvolutionButtons');box.innerHTML='';for(const option of e.detail.options){const b=document.createElement('button');b.className='upgrade-btn skill-evolution-card';const sprite=document.createElement('span');sprite.className='evolution-sprite';const image=document.createElement('img');image.src=`assets/skills/${option.skill}.svg`;image.alt='';sprite.appendChild(image);const strong=document.createElement('strong');strong.textContent=`${option.label.name} · ${option.upgrade?`EVOLUCIÓN N${option.level}`:'NUEVA HABILIDAD'}`;const span=document.createElement('span');span.className='evolution-impact';span.textContent=option.label.desc;b.append(sprite,strong,span);b.addEventListener('click',()=>window.IS_ACTIONS?.chooseFocusEvolution?.(option.id));box.appendChild(b);}openLayer(focusEvolutionLayer);});
   window.addEventListener('is:close-focus-evolution',()=>closeLayer(focusEvolutionLayer));
   window.addEventListener('is:debug-status',e=>{const levels=e.detail.levels||{};$('debugStatus').textContent=e.detail.skills.map(id=>`${debugSkillNames[id]||'Desgranulación'} N${levels[id]||1}`).join(' · ');

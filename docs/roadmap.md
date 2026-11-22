@@ -57,7 +57,7 @@ Los bugs JUEGO-01 a 14 se corrigieron en v3.5. Queda pendiente:
 - [ ] Etapa 7: preguntas por núcleo (etiquetar el banco y sumar ~15 por núcleo y dificultad con `revisor-contenido-medico`)
       para que el Foco por núcleo también filtre las preguntas.
 - [ ] 12 piezas de sprite nuevas (bacilo ácido-alcohol resistente, retrovirus, *Plasmodium*, *Pneumocystis*…) y un
-      jefe propio para el quiste hidatídico (hoy el núcleo 11 usa el gusano cestodo).
+      (los 9 jefes de núcleo ya tienen arte y mecánica propios desde v3.9).
 - [ ] Rasgos de comportamiento (cápsula, toxina, intracelular…), uno por vez con tests.
 
 **Reportes anónimos**
