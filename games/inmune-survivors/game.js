@@ -12,7 +12,9 @@
   let W = 480, H = 800, RENDER_RES = 1;
   const WORLD = 3000, CENTER = WORLD / 2, ARENA_RADIUS = 1110;
   const BOSS_SPAWN_GRACE_MS = 1600;
-  const PHAGO_LARGE_TIER = 2; // sizeTier de los arquetipos bruto y élite (los comunes son 0)
+  const PHAGO_LARGE_TIER = 2;
+  const PHAGO_SWARM_LIMIT = 4; // fagocitables cerca a partir de los cuales los proyectiles también les disparan
+  const PHAGO_SEEK_RANGE = 220; // más allá del alcance, distancia a la que los pseudópodos ya apuntan a un fagocitable // sizeTier de los arquetipos bruto y élite (los comunes son 0)
   const INFECTIONS = {
     bacteriana: {
       label: 'Infección bacteriana', bg: 0x071724, field: 0x0e2d3b, border: 0x63b8ba, accent: 0x8cf2c9,
@@ -704,6 +706,18 @@
       return this.add.image(x, y, morphology.texture).setOrigin(0.5).setDepth(20).setScale(visual/maxSide);
     }
 
+    // Copia de la imagen con alfa binarizado (umbral ~16 %). Sin canvas 2D disponible devuelve la imagen original.
+    makeSolidMask(source,width,height){
+      const mask=typeof document!=='undefined'?document.createElement('canvas'):null;
+      const mctx=mask&&typeof mask.getContext==='function'?mask.getContext('2d',{willReadFrequently:true}):null;
+      if(!mctx)return source;
+      mask.width=width;mask.height=height;mctx.drawImage(source,0,0,width,height);
+      const img=mctx.getImageData(0,0,width,height),d=img.data;
+      for(let i=0;i<d.length;i+=4){const on=d[i+3]>40;d[i]=d[i+1]=d[i+2]=255;d[i+3]=on?255:0;}
+      mctx.putImageData(img,0,0);
+      return mask;
+    }
+
     getEnemyOutlineTexture(textureKey) {
       const key=`enemy-silhouette-${textureKey}`;
       if(this.textures.exists(key))return key;
@@ -715,9 +729,12 @@
       if(!texture)return textureKey;
       const ctx=texture.context,cx=width/2+pad,cy=height/2+pad;
       ctx.clearRect(0,0,width+pad*2,height+pad*2);
-      for(let i=0;i<16;i++){const a=Math.PI*2*i/16;ctx.drawImage(source,cx-width/2+Math.cos(a)*pad,cy-height/2+Math.sin(a)*pad,width,height);}
+      // Máscara sólida (alfa 0 o 1): con la transparencia tal cual, las zonas semitransparentes (halo de cápsula,
+      // bordes suaves) dejaban un disco relleno en vez de un anillo de contorno.
+      const shape=this.makeSolidMask(source,width,height);
+      for(let i=0;i<16;i++){const a=Math.PI*2*i/16;ctx.drawImage(shape,cx-width/2+Math.cos(a)*pad,cy-height/2+Math.sin(a)*pad,width,height);}
       ctx.globalCompositeOperation='source-in';ctx.fillStyle='#ffffff';ctx.fillRect(0,0,width+pad*2,height+pad*2);
-      ctx.globalCompositeOperation='destination-out';ctx.drawImage(source,pad,pad,width,height);
+      ctx.globalCompositeOperation='destination-out';ctx.drawImage(shape,pad,pad,width,height);
       ctx.globalCompositeOperation='source-over';texture.refresh();
       return key;
     }
@@ -1077,10 +1094,16 @@
 
     closestAttackTarget(maxRange = Infinity) {
       let best=null,bestDistance=maxRange;
+      // Con Fagocitosis, los proyectiles no gastan daño en patógenos que podés englobar: se los dejan a los
+      // pseudópodos. Excepción: si se juntan demasiados cerca (la fagocitosis engloba de a uno), se les dispara.
+      const phago=this.activeSkills.has('phagocytosis');
+      const canEngulf=e=>phago&&!e.isBoss&&e.phagoEligible&&e.sizeTier<=this.stats.phagoMaxTier;
+      let crowd=0;
+      if(phago){const r2=(this.stats.phagoRadius+60)**2;for(const e of this.enemies)if(!e.dead&&canEngulf(e)&&dist2(e,this.player)<r2)crowd++;}
+      const spareEngulfable=crowd<PHAGO_SWARM_LIMIT;
       for(const e of this.enemies){
         if(e.dead)continue;
-        const phagoReady=this.activeSkills.has('phagocytosis')&&this.phagoClock<=0&&!e.isBoss&&e.phagoEligible&&e.sizeTier<=this.stats.phagoMaxTier&&this.distanceToEnemy(this.player,e)<=this.stats.phagoRadius+23;
-        if(phagoReady)continue;
+        if(spareEngulfable&&canEngulf(e))continue;
         let aimX=e.x,aimY=e.y,distance;
         if(e.isWorm&&e.trail.length>1){
           let nearestSq=Infinity;
@@ -1132,33 +1155,43 @@
       g.fillStyle(0x8fffd9,ready?0.12:0.06);g.fillCircle(target.x,target.y,r);
     }
 
-    updatePhagoTendrils(){
+    // Pseudópodos: apuntan al patógeno fagocitable más cercano y lo siguen. Cada punta guarda su posición
+    // relativa a la célula y se acerca a la deseada con un suavizado exponencial (no salta de un lugar a otro).
+    //  - fagocitable al alcance: lo rodean (una punta a cada lado);
+    //  - fagocitable más lejos (hasta PHAGO_SEEK_RANGE): se estiran apuntándolo;
+    //  - ninguno: tantean alrededor de la membrana.
+    updatePhagoTendrils(dt=1/60){
       if(!this.phagoTendrils?.active)return;
       const g=this.phagoTendrils;g.clear();
       if(!this.activeSkills.has('phagocytosis'))return;
-      const target=this.closestEnemy(this.stats.phagoRadius+45,e=>!e.isBoss&&e.phagoEligible&&e.sizeTier<=this.stats.phagoMaxTier);
+      const reachRange=this.stats.phagoRadius+45,seekRange=reachRange+PHAGO_SEEK_RANGE;
+      const target=this.closestEnemy(seekRange,e=>!e.isBoss&&e.phagoEligible&&e.sizeTier<=this.stats.phagoMaxTier);
       const ready=this.phagoClock<=0&&!this.phagoPending;
       const px=this.player.x,py=this.player.y,t=this.elapsed;
-      for(const side of [-1,1]){
-        let ex,ey,a;
+      const dist=target?Math.hypot(target.x-px,target.y-py):Infinity,inReach=dist<=reachRange;
+      if(!this.pseudopods)this.pseudopods=[-1,1].map(side=>({side,ox:Math.cos(side>0?0:Math.PI)*36,oy:0}));
+      const follow=1-Math.exp(-dt*(target?7:3.5));
+      for(const p of this.pseudopods){
+        const side=p.side;let gx,gy;
         if(target){
-          // Los dos pseudópodos se abren y rodean al blanco, como en un fagocitosis real.
-          const dx=target.x-px,dy=target.y-py,d=Math.hypot(dx,dy)||1,base=Math.atan2(dy,dx),ux=dx/d,uy=dy/d;
-          a=base+side*0.55;
-          // Punta a un costado del patógeno (un poco antes del centro): los dos lo envuelven.
-          const tr=Math.max(10,(target.visualSize||40)*0.32),gx=target.x-ux*tr*0.25-uy*side*tr*0.85,gy=target.y-uy*tr*0.25+ux*side*tr*0.85;
-          const stretch=0.86+0.14*Math.sin(t*5+side),sx0=px+Math.cos(a)*19,sy0=py+Math.sin(a)*19;
-          ex=sx0+(gx-sx0)*stretch;ey=sy0+(gy-sy0)*stretch;
+          const dx=target.x-px,dy=target.y-py,d=dist||1,ux=dx/d,uy=dy/d;
+          if(inReach){
+            const tr=Math.max(10,(target.visualSize||40)*0.32);
+            gx=dx-ux*tr*0.25-uy*side*tr*0.85;gy=dy-uy*tr*0.25+ux*side*tr*0.85;
+          }else{
+            const reach=Math.max(34,this.stats.phagoRadius*0.9),a=Math.atan2(dy,dx)+side*0.26;
+            gx=Math.cos(a)*reach;gy=Math.sin(a)*reach;
+          }
+          const k=0.9+0.1*Math.sin(t*5+side);gx*=k;gy*=k;
         }else{
-          // Sin blanco: tantean alrededor de la membrana, se estiran y se retraen.
-          a=t*0.9+(side>0?0:Math.PI)+Math.sin(t*1.3+side)*0.6;
-          const reach=30+10*Math.sin(t*1.7+side*1.9)+6*Math.sin(t*3.1+side);
-          ex=px+Math.cos(a)*(18+reach);ey=py+Math.sin(a)*(18+reach);
+          const a=t*0.9+(side>0?0:Math.PI)+Math.sin(t*1.3+side)*0.6,reach=48+10*Math.sin(t*1.7+side*1.9)+6*Math.sin(t*3.1+side);
+          gx=Math.cos(a)*reach;gy=Math.sin(a)*reach;
         }
-        const sx=px+Math.cos(a)*19,sy=py+Math.sin(a)*19;
-        this.drawPseudopod(g,sx,sy,ex,ey,{side,phase:side*1.7,amp:target?4.5:6.5,bend:target?14:8,alpha:target?(ready?1:0.75):0.62});
+        p.ox+=(gx-p.ox)*follow;p.oy+=(gy-p.oy)*follow;
+        const a=Math.atan2(p.oy,p.ox)+(target?side*0.55:0),sx=px+Math.cos(a)*19,sy=py+Math.sin(a)*19;
+        this.drawPseudopod(g,sx,sy,px+p.ox,py+p.oy,{side,phase:side*1.7,amp:target?4.5:6.5,bend:target?14:8,alpha:target?(inReach?(ready?1:0.8):0.72):0.62});
       }
-      if(target){
+      if(target&&inReach){
         this.drawPhagoLock(g,target,ready);
         // Las primeras veces se nombra lo que pasa: el jugador aprende qué buscan los pseudópodos.
         if(this.phagoHintsLeft>0&&this.elapsed-(this.lastPhagoHintAt??-99)>4){
@@ -1447,7 +1480,7 @@
       this.playerHalo.setPosition(this.player.x,this.player.y).setScale(1+Math.sin(this.elapsed*3)*0.05).setAlpha(this.colonyShelter?0.24:0.045);
       this.playerOutline.setPosition(this.player.x,this.player.y);
       this.phagoAura.setPosition(this.player.x,this.player.y).setRadius(this.stats.phagoRadius+18).setVisible(this.activeSkills.has('phagocytosis')).setAlpha(this.phagoClock<80?0.44:0.20);
-      this.updatePhagoTendrils();
+      this.updatePhagoTendrils(dt);
       this.xpMagnetAura.setPosition(this.player.x,this.player.y).setRadius(this.stats.xpPickupRadius).setVisible(this.stats.xpPickupRadius>82);
       this.playerHurtGlow.setPosition(this.player.x,this.player.y).setAlpha(this.invulnerable>0?0.65:0);
       this.joystickClock -= dtMs;

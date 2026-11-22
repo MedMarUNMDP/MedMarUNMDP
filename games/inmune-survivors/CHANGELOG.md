@@ -2,6 +2,16 @@
 
 Formato: la versión más nueva arriba. Al publicar una versión, agregá una sección nueva acá y subí `?build=` en index.html (ver CLAUDE.md del juego). El historial previo a v3.1 está en `README.txt`.
 
+## v3.7.1
+
+- **Contornos**: la silueta se arma con una máscara sólida. Las zonas semitransparentes (halo de la cápsula, bordes
+  suaves) dejaban un disco relleno en vez de un anillo. Se borró una mancha suelta de `virus_spiked.webp` que aparecía
+  como un punto al lado del virus.
+- **Pseudópodos**: apuntan al patógeno fagocitable más cercano (hasta 220 px más allá del alcance) y lo siguen. Giran y
+  se estiran de forma gradual (suavizado exponencial) en vez de saltar. Al alcance lo rodean y aparece la mira.
+- **Fagocitosis aprovechada**: gránulos, anticuerpos y citocinas no apuntan a patógenos que podés englobar. Solo les
+  disparan si se juntan 4 o más cerca, porque la fagocitosis engloba de a uno.
+
 ## v3.7
 
 **Agentes de ADN**

@@ -323,3 +323,49 @@ test('bestiario: registra cada especie una vez, cuenta vistos y eliminados y tra
   assert.ok(fila.eliminados >= 1 && fila.vistos >= fila.eliminados);
   assert.ok(fila.ficha && fila.ficha.clase && fila.ficha.cuadro && fila.ficha.clave);
 });
+
+// ---------- v3.7.1: fagocitosis aprovechada ----------
+
+function escenaConFagocitosis(seed) {
+  const h = createScene({ seed });
+  const s = h.scene;
+  s.activeSkills.add('phagocytosis');
+  s.skillLevels.phagocytosis = 1;
+  return h;
+}
+const ponerEnemigo = (s, dx, dy, fagocitable) => {
+  s.spawnEnemy('bacteria', false, { x: s.player.x + dx, y: s.player.y + dy });
+  const e = s.enemies[s.enemies.length - 1];
+  e.x = s.player.x + dx; e.y = s.player.y + dy;
+  e.phagoEligible = fagocitable; e.sizeTier = fagocitable ? 0 : 2; e.isBoss = false;
+  return e;
+};
+
+test('los proyectiles no apuntan a patógenos que se pueden fagocitar', () => {
+  const { scene: s } = escenaConFagocitosis(19);
+  const cerca = ponerEnemigo(s, 70, 0, true);
+  const lejos = ponerEnemigo(s, 200, 0, false);
+  assert.equal(s.closestAttackTarget(400).target, lejos, 'debería ignorar al fagocitable aunque esté más cerca');
+  s.activeSkills.delete('phagocytosis');
+  assert.equal(s.closestAttackTarget(400).target, cerca, 'sin fagocitosis vuelve al más cercano');
+});
+
+test('con un enjambre de fagocitables cerca, los proyectiles también les disparan', () => {
+  const { scene: s } = escenaConFagocitosis(20);
+  for (let i = 0; i < 4; i++) ponerEnemigo(s, 40 + i * 10, i * 8, true);
+  const objetivo = s.closestAttackTarget(400);
+  assert.ok(objetivo && objetivo.target.phagoEligible, 'con 4 o más cerca, se defiende disparándoles');
+});
+
+test('los pseudópodos giran de forma gradual hacia el fagocitable y terminan apuntándolo', () => {
+  const { scene: s } = escenaConFagocitosis(21);
+  const e = ponerEnemigo(s, 0, -200, true); // arriba, fuera de alcance pero dentro del rango de búsqueda
+  s.updatePhagoTendrils(1 / 60);
+  const angulo = (p) => Math.atan2(p.oy, p.ox);
+  const objetivo = Math.atan2(e.y - s.player.y, e.x - s.player.x);
+  const errorInicial = s.pseudopods.map((p) => Math.abs(Math.atan2(Math.sin(angulo(p) - objetivo), Math.cos(angulo(p) - objetivo))));
+  for (let i = 0; i < 90; i++) s.updatePhagoTendrils(1 / 60);
+  const errorFinal = s.pseudopods.map((p) => Math.abs(Math.atan2(Math.sin(angulo(p) - objetivo), Math.cos(angulo(p) - objetivo))));
+  assert.ok(errorInicial.some((x) => x > 0.6), 'en el primer frame todavía no apuntan (no saltan)');
+  for (const x of errorFinal) assert.ok(x < 0.45, `después de 1,5 s apuntan al blanco (error ${x.toFixed(2)} rad)`);
+});
