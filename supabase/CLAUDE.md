@@ -54,10 +54,14 @@ limpieza periódica (`cleanup_expired_data`), dedupe/caché en el frontend, evit
 
 Con Supabase CLI (`npx supabase …`, requiere `supabase login` + `supabase link --project-ref ekfwdrsehhmrqxxlefyx`):
 
-```bash
-npx supabase functions deploy api
-npx supabase functions deploy maintenance
+```powershell
+# En Windows, npx.cmd (PowerShell bloquea npx.ps1). --use-api empaqueta en el servidor (no hace falta Docker).
+# verify_jwt está en false en las dos funciones: la API valida la sesión por su cuenta.
+npx.cmd -y supabase@2.48.3 functions deploy api --project-ref ekfwdrsehhmrqxxlefyx --no-verify-jwt --use-api
+npx.cmd -y supabase@2.48.3 functions deploy maintenance --project-ref ekfwdrsehhmrqxxlefyx --no-verify-jwt --use-api
 ```
+
+No uses `deploy_edge_function` del MCP para `api`: habría que pegar el archivo entero (~70 KB) a mano.
 
 Migraciones: el MCP en modo escritura aplica DDL simple, pero **rechaza solo** el SQL que considera destructivo
 (`drop`, `revoke`, `update`, `delete`): eso se pega en el SQL Editor. Todos los archivos de `migrations/` son idempotentes. El MCP de Supabase está configurado en **solo lectura**
