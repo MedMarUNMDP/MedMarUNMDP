@@ -58,6 +58,8 @@ const RATE_LIMITS: Record<string, [number, number]> = {
   agregarMaterial: [30, 600],
   quitarMaterial: [30, 600],
   quitarPuntaje: [30, 600],
+  ocultarPuntaje: [60, 600],
+  puntajesOcultos: [60, 600],
   desafioModeracion: [20, 600],
   abrirSesionModeracion: [10, 600],
   registrarLlave: [3, 3600],
@@ -997,29 +999,32 @@ function enteroNoNegativo(value: unknown) {
   return Number.isInteger(n) && n >= 0 && n <= 10_000_000 ? n : null
 }
 
-function validarPartida(body: any) {
+// Devuelve la partida validada o { motivo } con la regla que no cumplió (el juego la muestra al jugador).
+function validarPartida(body: any): any {
   const juego = String(body?.juego || '')
   const modo = String(body?.modo || '')
-  if (!JUEGOS_RANKING.has(juego) || !MODO_RANKING.test(modo)) return null
+  if (!JUEGOS_RANKING.has(juego) || !MODO_RANKING.test(modo)) return { motivo: 'modo' }
   const dificultadInfeccion = String(body?.dificultadInfeccion || '')
   const dificultadEvolucion = String(body?.dificultadEvolucion || '')
-  if (!(dificultadInfeccion in MULT_INFECCION) || !(dificultadEvolucion in MULT_EVOLUCION)) return null
+  if (!(dificultadInfeccion in MULT_INFECCION) || !(dificultadEvolucion in MULT_EVOLUCION)) return { motivo: 'dificultad' }
   const segundos = enteroNoNegativo(body?.segundos)
   const kills = enteroNoNegativo(body?.kills)
   const correctas = enteroNoNegativo(body?.correctas)
   const preguntas = enteroNoNegativo(body?.preguntas)
   const jefes = enteroNoNegativo(body?.jefes)
-  if (segundos === null || kills === null || correctas === null || preguntas === null || jefes === null) return null
-  // Plausibilidad: el arnés de simulación da ~0,8 eliminaciones por segundo y el máximo real en producción fue ~1,4/s
-  // (nov 2026). Tope: 3/s + 60, el doble del máximo observado. Antes era 6/s, y dejaba inflar el ranking sin jugar.
+  if (segundos === null || kills === null || correctas === null || preguntas === null || jefes === null) return { motivo: 'datos' }
+  // Plausibilidad: el arnés de simulación da ~0,8 eliminaciones por segundo y el máximo real en partidas cortas fue
+  // ~1,4/s (nov 2026), pero el ritmo crece mucho después del minuto 15 (oleadas grandes y jugador fuerte): el tope
+  // de 3/s rechazaba partidas reales largas. Tope: 6/s + 60. Los puntajes sospechosos dentro del tope los esconde o
+  // quita un moderador (ocultarPuntaje / quitarPuntaje).
   // Además: no hay partidas de menos de 20 s, ni más preguntas que una cada ~10 s, ni más de un jefe cada ~25 s.
-  if (segundos < PARTIDA_MIN_SEGUNDOS || segundos > PARTIDA_MAX_SEGUNDOS) return null
-  if (kills > segundos * 3 + 60) return null
-  if (preguntas > Math.floor(segundos / 10) + 5 || correctas > preguntas) return null
-  if (jefes > Math.floor(segundos / 25) + 3) return null
+  if (segundos < PARTIDA_MIN_SEGUNDOS || segundos > PARTIDA_MAX_SEGUNDOS) return { motivo: 'duracion' }
+  if (kills > segundos * 6 + 60) return { motivo: 'eliminaciones' }
+  if (preguntas > Math.floor(segundos / 10) + 5 || correctas > preguntas) return { motivo: 'preguntas' }
+  if (jefes > Math.floor(segundos / 25) + 3) return { motivo: 'jefes' }
   const puntaje = Math.floor((kills * 10 + segundos * 2 + correctas * 25) * MULT_INFECCION[dificultadInfeccion] * MULT_EVOLUCION[dificultadEvolucion])
   // Si el cliente dice otro puntaje, la partida no se corresponde con lo que se jugó (o se modificó).
-  if (body?.puntaje !== undefined && Number(body.puntaje) !== puntaje) return null
+  if (body?.puntaje !== undefined && Number(body.puntaje) !== puntaje) return { motivo: 'puntaje' }
   const version = String(body?.version || '').slice(0, 20)
   return { juego, modo, segundos, puntaje, detalle: { kills, correctas, preguntas, jefes, dificultadInfeccion, dificultadEvolucion, version } }
 }
@@ -1044,15 +1049,24 @@ async function iniciarPartida(user: User, body: any) {
 
 async function guardarPuntaje(user: User, client: SupabaseClient, admin: SupabaseClient, body: any) {
   const partida = validarPartida(body)
-  if (!partida) return json({ ok: false, error: 'partida_invalida' })
+  if (partida.motivo) {
+    console.warn('partida_invalida', partida.motivo, user.id)
+    return json({ ok: false, error: 'partida_invalida', motivo: partida.motivo })
+  }
   const { juego, modo, segundos, puntaje, detalle } = partida
   const entrada = await verificarEntradaPartida(body?.partida, user.id, juego, modo)
-  if (!entrada) return json({ ok: false, error: 'partida_sin_inicio' })
+  if (!entrada) {
+    console.warn('partida_sin_inicio', user.id)
+    return json({ ok: false, error: 'partida_sin_inicio' })
+  }
   // Reintento de la misma partida: misma respuesta, sin volver a sumar.
   const operationId = entrada.id
   const previa = await getIdempotent(admin, user.id, operationId, 'guardarPuntaje')
   if (previa) return json(previa)
-  if (segundos > (Date.now() - entrada.inicio) / 1000 + PARTIDA_TOLERANCIA_S) return json({ ok: false, error: 'partida_invalida' })
+  if (segundos > (Date.now() - entrada.inicio) / 1000 + PARTIDA_TOLERANCIA_S) {
+    console.warn('partida_invalida', 'tiempo', user.id)
+    return json({ ok: false, error: 'partida_invalida', motivo: 'tiempo' })
+  }
   let record = false
   let mejor = puntaje
   for (let intento = 0; intento < 2; intento++) {
@@ -1081,6 +1095,15 @@ async function guardarPuntaje(user: User, client: SupabaseClient, admin: Supabas
   const respuesta = { ok: true, puntaje, mejor, record, posicion, total, modo }
   await saveIdempotent(admin, user.id, 'guardarPuntaje', operationId, respuesta)
   return json(respuesta)
+}
+
+// Perfil por pseudónimo exacto (sin distinguir mayúsculas). undefined = pseudónimo inválido; null = no existe.
+async function perfilPorPseudonimo(admin: SupabaseClient, valor: unknown) {
+  const pseudonimo = String(valor || '').trim().normalize('NFC')
+  if (!/^[A-Za-zÀ-ÿ0-9 _.-]{3,24}$/.test(pseudonimo)) return undefined
+  const { data, error } = await admin.from('profiles').select('id').ilike('pseudonimo', pseudonimo.replace(/[\\%_]/g, (c) => '\\' + c)).maybeSingle()
+  if (error) throw error
+  return data as { id: string } | null
 }
 
 async function rankingJuego(user: User, client: SupabaseClient, body: any) {
@@ -1470,10 +1493,8 @@ async function handle(req: Request, body: any) {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
       const juego=String(body.juego||''),modo=String(body.modo||'')
-      const pseudonimo=String(body.pseudonimo||'').trim().normalize('NFC')
-      if(!JUEGOS_RANKING.has(juego)||!MODO_RANKING.test(modo)||!/^[A-Za-zÀ-ÿ0-9 _.-]{3,24}$/.test(pseudonimo))return json({ok:false,error:'datos_invalidos'})
-      const {data:perfil,error:errPerfil}=await admin.from('profiles').select('id').ilike('pseudonimo',pseudonimo.replace(/[\\%_]/g,(c)=>'\\'+c)).maybeSingle()
-      if(errPerfil)throw errPerfil
+      const perfil=await perfilPorPseudonimo(admin,body.pseudonimo)
+      if(!JUEGOS_RANKING.has(juego)||!MODO_RANKING.test(modo)||perfil===undefined)return json({ok:false,error:'datos_invalidos'})
       if(!perfil)return json({ok:false,error:'no_encontrado'})
       const {data:borrados,error}=await admin.from('puntajes_juegos').delete().eq('user_id',perfil.id).eq('juego',juego).eq('modo',modo).select('puntaje,segundos,detalle')
       if(error)throw error
@@ -1481,6 +1502,34 @@ async function handle(req: Request, body: any) {
       const b:any=borrados[0]
       await auditar(admin,user.id,auth.llaveId,'quitar_puntaje',{usuario:String(perfil.id),juego,modo,puntaje:b.puntaje,segundos:b.segundos,kills:b.detalle?.kills??null})
       return json({ok:true})
+    }
+    case 'ocultarPuntaje': {
+      // Esconde (o vuelve a mostrar) un puntaje sin borrarlo: deja de contar para el ranking y se puede deshacer.
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      const juego=String(body.juego||''),modo=String(body.modo||''),oculto=body.oculto!==false
+      const perfil=await perfilPorPseudonimo(admin,body.pseudonimo)
+      if(!JUEGOS_RANKING.has(juego)||!MODO_RANKING.test(modo)||perfil===undefined)return json({ok:false,error:'datos_invalidos'})
+      if(!perfil)return json({ok:false,error:'no_encontrado'})
+      const {data:filas,error}=await admin.from('puntajes_juegos').update({oculto,oculto_at:oculto?new Date().toISOString():null})
+        .eq('user_id',perfil.id).eq('juego',juego).eq('modo',modo).select('puntaje,segundos,detalle')
+      if(error)throw error
+      if(!filas||!filas.length)return json({ok:false,error:'no_encontrado'})
+      const f:any=filas[0]
+      await auditar(admin,user.id,auth.llaveId,oculto?'ocultar_puntaje':'mostrar_puntaje',{usuario:String(perfil.id),juego,modo,puntaje:f.puntaje,segundos:f.segundos,kills:f.detalle?.kills??null})
+      return json({ok:true,oculto})
+    }
+    case 'puntajesOcultos': {
+      // Lista para moderadores: puntajes escondidos de un modo, con el detalle de la partida para decidir.
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      const juego=String(body.juego||''),modo=String(body.modo||'')
+      if(!JUEGOS_RANKING.has(juego)||!MODO_RANKING.test(modo))return json({ok:false,error:'modo_invalido'})
+      const {data,error}=await admin.from('puntajes_juegos').select('user_id,puntaje,segundos,detalle,oculto_at')
+        .eq('juego',juego).eq('modo',modo).eq('oculto',true).order('puntaje',{ascending:false}).limit(50)
+      if(error)throw error
+      const nombres=await profileMap(admin,(data||[]).map((r:any)=>String(r.user_id)))
+      return json({ok:true,ocultos:(data||[]).map((r:any)=>({pseudonimo:nombres.get(String(r.user_id))?.pseudonimo||'Estudiante',puntaje:Number(r.puntaje),segundos:Number(r.segundos),kills:Number(r.detalle?.kills??0),fecha:r.oculto_at}))})
     }
     case 'desafioModeracion': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl

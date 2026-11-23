@@ -25,7 +25,7 @@ con `publicarNoticia`; select solo propias, en Realtime) · `materiales` (catál
 `aportes_material` (aportes de estudiantes por link de Drive o sugerencia, revisados por moderadores; anti-spam en
 `enviarAporte`: rate limit, tope diario y de pendientes, solo Drive, trampa y tiempo mínimo) · `llaves_moderacion` (llaves públicas ECDSA P-256 de moderadores/admins; segundo factor:
 toda acción de moderación pasa por `autorizarModeracion` y exige rol + llave activa + token de 30 min; llaves de admin solo
-por SQL; ADR `docs/decisiones/0004`) · `registro_moderacion` (auditoría, 180 días) · `puntajes_juegos` (ranking: mejor puntaje por usuario/juego/modo, RPC `ranking_juego`) ·
+por SQL; ADR `docs/decisiones/0004`) · `registro_moderacion` (auditoría, 180 días) · `puntajes_juegos` (ranking: mejor puntaje por usuario/juego/modo, RPC `ranking_juego`; `oculto` = escondido por un moderador con `ocultarPuntaje`, no cuenta en el ranking; `quitarPuntaje` lo borra) ·
 `notificacion_queue` · `idempotency_keys` · `rate_limit_buckets` · `private.legacy_password_migrations`.
 
 Funciones clave: `is_moderator`, `is_admin`, `prevent_role_escalation`, `consume_rate_limit`, `finalize_exchange`,
