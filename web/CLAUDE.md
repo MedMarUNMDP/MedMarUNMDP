@@ -6,6 +6,11 @@ Sitio estático servido en https://medmar.com.ar (GitHub Pages). Sin framework, 
 
 - `index.html` — solo estructura (pantallas y modales). Cada vista es un `<div id="vista…">` que se muestra/oculta por JS.
 - `css/styles.css` — todos los estilos. Secciones marcadas con `/* ---------- NOMBRE ---------- */`.
+  Arranca con el bloque **TOKENS**: única fuente de colores (roles como `--surface`, `--brand`, `--ink-soft`,
+  `--link`), radios y sombras. Las reglas usan esos tokens, no colores sueltos. El modo oscuro es
+  `body.temaOscuro` y solo redefine tokens. Ojo: un rol que se arma con otro token (`--bg: var(--teal-50)`)
+  se resuelve donde se declara, así que también hay que redeclararlo en `body.temaOscuro`.
+  Propuesta de rediseño completa (fases 1 a 4): https://claude.ai/artifact/4otTuteGcULkAH8pDeYwii
 - `js/app.js` — toda la lógica, **script clásico** (no módulo): las funciones y `const` de nivel superior son globales.
   Secciones marcadas con `// ==================== NOMBRE ====================`:
   selector personalizado, mensajes de error, historial de navegación, modales, sesión local,

@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-22-juegos"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-tokens"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.

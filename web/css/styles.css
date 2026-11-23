@@ -1,17 +1,105 @@
-
+        /* ---------- TOKENS ----------
+           Única fuente de colores, radios y sombras. Las reglas usan los roles (--surface, --brand, --ink…);
+           --teal-*, --gold-* y --red-* son la paleta base. Modo oscuro: body.temaOscuro (lo pone
+           aplicarTemaGlobal en app.js) redefine solo tokens. No agregues colores sueltos en las reglas. */
         :root {
-            --teal-950: #0F332F;
-            --teal-900: #123A38;
-            --teal-700: #245954;
-            --teal-100: #E4EEEC;
-            --teal-50:  #F5F7F6;
-            --gold-500: #CE9F42;
-            --gold-600: #B4872F;
-            --ink: #16221F;
-            --ink-soft: #57655F;
-            --line: #D8E1DE;
+            /* Paleta base */
+            --teal-950: #003b39;
+            --teal-900: #07514e;
+            --teal-700: #17665f;
+            --teal-100: #e2eeeb;
+            --teal-50:  #f5f8f6;
+            --gold-500: #b89b31;
+            --gold-600: #927710;
+            --ink: #172421;
+            --ink-soft: #4d6059;
+            --line: #d5e0db;
             --red-600: #A3402E;
             --red-700: #8A3526;
+
+            /* Roles */
+            --bg: var(--teal-50);
+            --surface: #ffffff;
+            --surface-2: #e8efec;
+            --surface-sunken: #eff4ef;
+            --ink-3: #66756f;
+            --line-soft: #e1e7e4;
+            --line-strong: #a9c2b9;
+            --brand: var(--teal-900);
+            --brand-hover: var(--teal-700);
+            --on-brand: #ffffff;
+            --brand-soft: var(--teal-100);
+            --brand-soft-hover: #d2e4e1;
+            --link: var(--teal-700);
+            --on-gold: var(--teal-950);
+            --gold-soft: #f2e6c9;
+            --on-danger: #ffffff;
+            --like: #c74343;
+            --like-soft: #f8e8e7;
+            --podio-1: #fff3c9;
+            --podio-2: #eef1f4;
+            --podio-3: #f8e6d6;
+            --podio-propio: #fff6d8;
+            --chat-propio: var(--teal-100);
+            --overlay: rgba(8, 20, 18, .55);
+            /* El hero es siempre oscuro: sus textos no cambian con el tema. */
+            --hero-bg: var(--teal-900);
+            --on-hero: #fffdf4;
+            --on-hero-soft: #d3e1dc;
+
+            /* Forma */
+            --r-sm: 8px;
+            --r-md: 12px;
+            --r-lg: 16px;
+            --r-pill: 999px;
+            --sombra-1: 0 1px 2px rgba(18, 40, 33, .05);
+            --sombra-2: 0 6px 22px rgba(0, 40, 38, .06);
+        }
+
+        body.temaOscuro {
+            --teal-950: #061f1e;
+            --teal-900: #0b302e;
+            --teal-700: #8fc5ba;
+            --teal-100: #263e3a;
+            --teal-50:  #101917;
+            --gold-500: #d2bd65;
+            --gold-600: #e1cf83;
+            --ink: #f0f5f2;
+            --ink-soft: #c0cec8;
+            --line: #3b4c46;
+            --red-600: #ef8c7c;
+            --red-700: #d97566;
+
+            --bg: var(--teal-50);
+            --brand-soft: var(--teal-100);
+            --surface: #1b2723;
+            --surface-2: #24332e;
+            --surface-sunken: #17221f;
+            --ink-3: #9fb0a9;
+            --line-soft: #34443f;
+            --line-strong: #52645c;
+            --brand: #8fc5ba;
+            --brand-hover: #a9d9cc;
+            --on-brand: #0b2a26;
+            --brand-soft-hover: #2f4a44;
+            --link: #a9d9cc;
+            --on-gold: #18251d;
+            --gold-soft: #3a331a;
+            --on-danger: #2a0f0a;
+            --like: #f08a94;
+            --like-soft: rgba(240, 138, 148, .14);
+            --podio-1: #3d3519;
+            --podio-2: #2c3338;
+            --podio-3: #3b2c22;
+            --podio-propio: #3a331a;
+            --chat-propio: #244b42;
+            --overlay: rgba(0, 0, 0, .72);
+            --hero-bg: #073b39;
+            --sombra-1: none;
+            --sombra-2: none;
+            color-scheme: dark;
+            background: var(--bg);
+            color: var(--ink);
         }
 
         * {
@@ -22,7 +110,7 @@
             font-family: "Public Sans", Arial, sans-serif;
             color: var(--ink);
             margin: 0;
-            background: var(--teal-50);
+            background: var(--bg);
         }
 
         .pagina {
@@ -59,7 +147,7 @@
         /* ---------- HERO ---------- */
 
         .hero {
-            background: var(--teal-900);
+            background: var(--hero-bg);
         }
 
         .hero-inner {
@@ -92,7 +180,7 @@
             .hero-inner p {
                 margin: 6px 0 0;
                 font-size: 0.92rem;
-                color: #C9D9D6;
+                color: var(--on-hero-soft);
                 max-width: 42ch;
             }
 
@@ -154,7 +242,7 @@
             font-family: inherit;
             font-size: 0.95rem;
             color: var(--ink);
-            background: white;
+            background: var(--surface);
             border: 1px solid var(--line);
             border-radius: 6px;
             resize: vertical;
@@ -211,7 +299,7 @@
         /* ---------- LOGIN ---------- */
 
         #loginScreen {
-            background: white;
+            background: var(--surface);
             border: 1px solid var(--line);
             border-radius: 10px;
             padding: 24px;
@@ -241,7 +329,7 @@
             }
 
             .tabs button.tabActiva {
-                background: white;
+                background: var(--surface);
                 box-shadow: 0 1px 2px rgba(15, 51, 47, 0.12);
             }
 
@@ -321,7 +409,7 @@
             border: 1px solid var(--line);
             border-radius: 10px;
             padding: 14px;
-            background: white;
+            background: var(--surface);
         }
 
         .chatCabecera {
@@ -429,7 +517,7 @@
                 padding: 6px 12px;
                 font-size: 0.82rem;
                 font-weight: 500;
-                background: white;
+                background: var(--surface);
                 color: var(--ink-soft);
                 border: 1px solid var(--line);
             }
@@ -543,12 +631,12 @@
             }
 
                 .editarBtn:hover {
-                    background: #D2E4E1;
+                    background: var(--brand-soft-hover);
                 }
 
             .borrarItemBtn {
                 background: var(--red-600);
-                color: white;
+                color: var(--on-danger);
             }
 
                 .borrarItemBtn:hover {
@@ -608,8 +696,8 @@
         .btnChatIntercambio {
             width: auto;
             padding: 7px 11px;
-            background: var(--teal-700);
-            color: white;
+            background: var(--brand);
+            color: var(--on-brand);
             font-size: 0.82rem;
         }
 
@@ -630,7 +718,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 12px 14px;
-            background: white;
+            background: var(--surface);
             border: 1px solid var(--line);
             border-radius: 10px;
             font-family: inherit;
@@ -667,7 +755,7 @@
             left: 0;
             right: 0;
             z-index: 40;
-            background: white;
+            background: var(--surface);
             border: 1px solid var(--line);
             border-radius: 10px;
             box-shadow: 0 10px 28px rgba(15, 51, 47, 0.18);
@@ -688,7 +776,7 @@
         .selectorBusqueda {
             position: sticky;
             top: 0;
-            background: white;
+            background: var(--surface);
             padding: 8px;
             border-bottom: 1px solid var(--line);
         }
@@ -775,7 +863,7 @@
             }
 
         .modalCaja {
-            background: white;
+            background: var(--surface);
             width: 100%;
             max-width: 600px;
             max-height: 88vh;
@@ -884,7 +972,7 @@
             flex-direction: column;
             align-items: flex-start;
             gap: 10px;
-            background: white;
+            background: var(--surface);
             border: 1px solid var(--line);
             border-radius: 14px;
             padding: 18px 15px;
@@ -916,7 +1004,7 @@
         }
 
             .iconoInicio.dorado {
-                background: #F2E6C9;
+                background: var(--gold-soft);
                 color: var(--gold-600);
             }
 
@@ -1140,8 +1228,8 @@
         }
 
         .likeButton:hover {
-            background: #F8E8E7;
-            color: #C74343;
+            background: var(--like-soft);
+            color: var(--like);
         }
 
         .likeButton .corazonLike {
@@ -1152,7 +1240,7 @@
         }
 
         .likeButton.activo {
-            color: #C74343;
+            color: var(--like);
         }
 
         .likeButton.pulsando .corazonLike {
@@ -1280,7 +1368,7 @@
         }
 
             .etiquetaChip:hover {
-                background: #D2E4E1;
+                background: var(--brand-soft-hover);
             }
 
         .ayudaFiltroEtiqueta {
@@ -1301,7 +1389,7 @@
             display: block;
             margin-top: 10px;
             padding: 0;
-            background: white;
+            background: var(--surface);
             border: 1px solid var(--line);
             border-radius: 12px;
             overflow: hidden;
@@ -1375,7 +1463,7 @@
         .linkPreviewEmbed.spotify {
             aspect-ratio: auto;
             height: 152px;
-            background: white;
+            background: white; /* el reproductor de Spotify necesita fondo blanco fijo */
         }
 
         .linkPreviewCompact .linkPreviewPlay {
@@ -1504,7 +1592,7 @@
 
             .btnEliminarPublicacion {
                 background: var(--red-600);
-                color: white;
+                color: var(--on-danger);
             }
 
                 .btnEliminarPublicacion:hover {
@@ -1525,7 +1613,7 @@
                 padding: 5px 10px;
                 font-size: 0.78rem;
                 background: var(--red-600);
-                color: white;
+                color: var(--on-danger);
             }
 
         /* ---------- FIRMA ---------- */
@@ -1535,7 +1623,7 @@
             display: flex;
             align-items: center;
             gap: 16px;
-            background: white;
+            background: var(--surface);
             padding: 14px 16px;
             border-radius: 8px;
             border: 1px solid var(--line);
@@ -1579,7 +1667,7 @@
             margin: 16px 24px 0;
             font-size: 0.78rem;
             color: var(--ink-soft);
-            background: white;
+            background: var(--surface);
             padding: 16px;
             border-radius: 8px;
             border: 1px solid var(--line);
@@ -1639,9 +1727,7 @@
 
 
         /* Foro renovado: feed compacto inspirado en Reddit, manteniendo identidad MedMar */
-        #vistaForo { --foro-bg:#f5f8f6; --foro-card:#ffffff; --foro-text:#182522; --foro-muted:#66736e; --foro-line:#dce4e1; --foro-accent:#07514e; }
-        #vistaForo.foroTemaOscuro { --foro-bg:#111817; --foro-card:#1b2422; --foro-text:#edf3f1; --foro-muted:#a5b3ae; --foro-line:#33413d; --foro-accent:#82b9ae; }
-        #vistaForo { color:var(--foro-text); background:var(--foro-bg); border-radius:16px; padding:12px; transition:background .2s,color .2s; }
+        #vistaForo { color:var(--foro-text); }
         #vistaForo .foroCabecera { align-items:center; }
         #vistaForo .notaForo, #vistaForo .ayudaFiltroEtiqueta { color:var(--foro-muted); }
         #vistaForo #filtroEtiqueta { display:flex; gap:8px; flex-wrap:wrap; }
@@ -1661,7 +1747,7 @@
         #vistaForo .btnTemaForo { border:1px solid var(--foro-line); color:var(--foro-text); background:var(--foro-card); border-radius:999px; width:38px; height:38px; font-size:19px; cursor:pointer; }
         #vistaForo .linkPreview, #vistaForo .enlaceForo { color:var(--foro-accent); overflow-wrap:anywhere; }
         .contenidoForoRich { white-space:normal; overflow-wrap:anywhere; line-height:1.6; }
-        .contenidoForoRich .imagenExternaForo { display:block; max-width:100%; max-height:560px; object-fit:contain; border-radius:12px; margin:10px 0; border:1px solid var(--foro-line,#dce4e1); }
+        .contenidoForoRich .imagenExternaForo { display:block; max-width:100%; max-height:560px; object-fit:contain; border-radius:12px; margin:10px 0; border:1px solid var(--foro-line, var(--line)); }
         .contenidoForoRich .imagenPendiente { display:inline-block; padding:8px 10px; border:1px solid var(--foro-line); border-radius:8px; }
         .bloqueSensible { position:relative; }
         .bloqueSensible.ocultoSensible .contenidoForoRich { filter:blur(18px); user-select:none; pointer-events:none; max-height:260px; overflow:hidden; }
@@ -1672,91 +1758,77 @@
         .setupPerfilCaja input[type=text] { width:100%; }
         .setupAvatarTitulo { font-weight:600; margin:18px 0 10px; }
         .setupAvatares { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; }
-        .setupAvatarOpcion { display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 4px; border:1px solid var(--line); border-radius:12px; background:#fff; cursor:pointer; color:var(--ink); }
+        .setupAvatarOpcion { display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 4px; border:1px solid var(--line); border-radius:12px; background:var(--surface); cursor:pointer; color:var(--ink); }
         .setupAvatarOpcion img,.avatarSinFoto { width:54px; height:54px; border-radius:50%; object-fit:cover; }
-        .avatarSinFoto { display:grid; place-items:center; background:#e7eeeb; color:#245954; font-size:24px; }
+        .avatarSinFoto { display:grid; place-items:center; background:var(--surface-2); color:var(--link); font-size:24px; }
         .setupAvatarOpcion.seleccionado { border:2px solid var(--teal-700); background:var(--teal-100); }
         .setupAvatarOpcion small { font-size:11px; }
         .setupContinuar { width:100%; margin-top:14px; }
         #msgSetupPerfil { color:var(--red-600); min-height:20px; }
         @media(max-width:420px) { .setupAvatares { grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; } .setupAvatarOpcion img,.avatarSinFoto { width:46px;height:46px; } #vistaForo { padding:8px; } #vistaForo .hiloItem { padding:12px; } }
-        @media(prefers-color-scheme:dark) { #vistaForo.autoTemaOscuro { --foro-bg:#111817; --foro-card:#1b2422; --foro-text:#edf3f1; --foro-muted:#a5b3ae; --foro-line:#33413d; --foro-accent:#82b9ae; } }
 
 
         /* Sistema global de tema: misma preferencia para todas las vistas. */
-        body.temaOscuro {
-            --teal-950:#071b19; --teal-900:#102b28; --teal-700:#83b8ad;
-            --teal-100:#233a36; --teal-50:#111917; --gold-500:#d4ad5b;
-            --gold-600:#e0bd73; --ink:#edf2ef; --ink-soft:#aab8b2;
-            --line:#34443f; --red-600:#ef8c7c; --red-700:#d97566;
-            color-scheme:dark;
-            background:#111917; color:var(--ink);
-        }
-        body.temaOscuro .hero { background:#0c2522; }
-        body.temaOscuro .hero-inner p { color:#bdcfca; }
         body.temaOscuro #loginScreen, body.temaOscuro .panelChat,
         body.temaOscuro .selectorTrigger, body.temaOscuro .selectorPanel,
         body.temaOscuro .selectorBusqueda, body.temaOscuro .linkPreview,
         body.temaOscuro #firma, body.temaOscuro #disclaimer,
-        body.temaOscuro .tabs button.tabActiva { background:#1b2723; color:var(--ink); border-color:var(--line); }
+        body.temaOscuro .tabs button.tabActiva { background:var(--surface); color:var(--ink); border-color:var(--line); }
         body.temaOscuro .tabs button { color:var(--ink-soft); }
-        body.temaOscuro #userBar button { background:#24332e; color:var(--ink); border-color:var(--line); }
-        body.temaOscuro .linkPreview { color:#b7d8cf; }
+        body.temaOscuro #userBar button { background:var(--surface-2); color:var(--ink); border-color:var(--line); }
+        body.temaOscuro .linkPreview { color:var(--link); }
         body.temaOscuro .linkPreviewHost, body.temaOscuro .ayudaPerfil,
         body.temaOscuro .ayudaLink, body.temaOscuro .estadoOptimista { color:var(--ink-soft); }
-        body.temaOscuro .btn-primario { color:#142521; }
-        body.temaOscuro .selectorOpcion:hover, body.temaOscuro .selectorOpcion.seleccionada { background:#2b4039; color:var(--ink); }
+        body.temaOscuro .btn-primario { color:var(--on-gold); }
+        body.temaOscuro .selectorOpcion:hover, body.temaOscuro .selectorOpcion.seleccionada { background:var(--surface-2); color:var(--ink); }
         body.temaOscuro .chatCabecera, body.temaOscuro .chatPie { border-color:var(--line); }
-        body.temaOscuro .mensajePropio { background:#244b42; color:#edf7f2; }
-        body.temaOscuro .mensajeOtro { background:#26332f; color:var(--ink); }
+        body.temaOscuro .mensajePropio { background:var(--chat-propio); color:var(--ink); }
+        body.temaOscuro .mensajeOtro { background:var(--surface-2); color:var(--ink); }
         body.temaOscuro .contenido, body.temaOscuro #app { color:var(--ink); }
         body.temaOscuro .tarjetaInicio, body.temaOscuro .card, body.temaOscuro .hiloItem,
         body.temaOscuro .respuestaItem, body.temaOscuro #detalleHiloContenido,
         body.temaOscuro .modalCaja, body.temaOscuro .setupPerfilCaja,
         body.temaOscuro .bloqueTarjeta, body.temaOscuro .configTema {
-            background:#1b2723 !important; color:var(--ink) !important; border-color:var(--line) !important;
+            background:var(--surface) !important; color:var(--ink) !important; border-color:var(--line) !important;
         }
         body.temaOscuro input, body.temaOscuro select, body.temaOscuro textarea,
         body.temaOscuro .campoPassword input {
-            background:#17221f; color:var(--ink); border-color:var(--line);
+            background:var(--surface-sunken); color:var(--ink); border-color:var(--line);
         }
-        body.temaOscuro input::placeholder, body.temaOscuro textarea::placeholder { color:#91a19a; }
+        body.temaOscuro input::placeholder, body.temaOscuro textarea::placeholder { color:var(--ink-3); }
         body.temaOscuro .btn-secundario, body.temaOscuro .btnMostrarPassword,
-        body.temaOscuro .setupAvatarOpcion { background:#24332e; color:var(--ink); border-color:#40534c; }
+        body.temaOscuro .setupAvatarOpcion { background:var(--surface-2); color:var(--ink); border-color:var(--line-strong); }
         body.temaOscuro #disclaimer, body.temaOscuro #firma, body.temaOscuro .notaForo,
-        body.temaOscuro .notaPrivacidadIntercambio { background:#17221f; color:var(--ink-soft); border-color:var(--line); }
-        body.temaOscuro a { color:#a6d2c5; }
-        body.temaOscuro .navTarget, body.temaOscuro .navInferior { background:#17221f; border-color:var(--line); }
+        body.temaOscuro .notaPrivacidadIntercambio { background:var(--surface-sunken); color:var(--ink-soft); border-color:var(--line); }
+        body.temaOscuro a { color:var(--link); }
+        body.temaOscuro .navTarget, body.temaOscuro .navInferior { background:var(--surface-sunken); border-color:var(--line); }
         body.temaOscuro .pasos li, body.temaOscuro .composePie { border-color:var(--line); }
         body.temaOscuro .seccion-titulo, body.temaOscuro h2, body.temaOscuro h3,
         body.temaOscuro label, body.temaOscuro .hiloAutor { color:var(--ink); }
-        body.temaOscuro .foroCabeceraAcciones .linkModeracion { color:#e0bd73; }
-        body.temaOscuro .setupAvatarOpcion.seleccionado { background:#29433c; border-color:#83b8ad; }
-        body.temaOscuro .modalFondo { background:rgba(0,0,0,.72); }
-        body.temaOscuro .chatMensaje, body.temaOscuro .burbujaMensaje { background:#24332e; color:var(--ink); }
+        body.temaOscuro .foroCabeceraAcciones .linkModeracion { color:var(--gold-600); }
+        body.temaOscuro .setupAvatarOpcion.seleccionado { background:var(--brand-soft); border-color:var(--line-strong); }
+        body.temaOscuro .modalFondo { background:var(--overlay); }
+        body.temaOscuro .chatMensaje, body.temaOscuro .burbujaMensaje { background:var(--surface-2); color:var(--ink); }
 
         /* Foro: una acción primaria, búsqueda unificada y menos ruido visual. */
-        #vistaForo { --foro-bg:transparent; --foro-card:#fff; --foro-text:#182522; --foro-muted:#697771; --foro-line:#e1e7e4; --foro-accent:#245954; background:transparent; padding:0; border-radius:0; }
-        body.temaOscuro #vistaForo { --foro-card:#1b2723; --foro-text:#edf2ef; --foro-muted:#aab8b2; --foro-line:#34443f; --foro-accent:#9acbbd; }
+        #vistaForo { --foro-bg:transparent; --foro-card:var(--surface); --foro-text:var(--ink); --foro-muted:var(--ink-soft); --foro-line:var(--line-soft); --foro-accent:var(--link); background:transparent; padding:0; border-radius:0; }
         #vistaForo .notaForo { margin:8px 0 14px; padding:0; border:0; background:transparent; font-size:.82rem; line-height:1.45; color:var(--foro-muted); }
         #vistaForo .foroCabecera { margin-bottom:0; }
         #vistaForo .foroCabeceraAcciones { gap:9px; }
-        #vistaForo .btnPublicarForo { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:10px 15px; border-radius:12px; background:var(--teal-900); color:#fff; box-shadow:0 2px 5px rgba(12,40,35,.12); }
+        #vistaForo .btnPublicarForo { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:10px 15px; border-radius:12px; background:var(--brand); color:var(--on-brand); box-shadow:var(--sombra-1); }
         #vistaForo .btnPublicarForo svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
-        #vistaForo .btnPublicarForo:hover { background:var(--teal-700); }
-        body.temaOscuro #vistaForo .btnPublicarForo { background:#9acbbd; color:#102b28; }
+        #vistaForo .btnPublicarForo:hover { background:var(--brand-hover); }
         #vistaForo .busquedaForo { display:flex; align-items:center; gap:9px; margin:0 0 16px; padding:5px 6px 5px 12px; min-height:50px; border:1px solid var(--foro-line); border-radius:14px; background:var(--foro-card); box-shadow:0 1px 2px rgba(0,0,0,.025); }
         #vistaForo .busquedaForoIcono { display:flex; color:var(--foro-muted); flex:0 0 auto; }
         #vistaForo .busquedaForoIcono svg { width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; }
         #vistaForo #inputBuscarForo { flex:1; min-width:0; margin:0; padding:9px 2px; border:0; outline:0; box-shadow:none; background:transparent; color:var(--foro-text); font-size:.93rem; }
         #vistaForo #inputBuscarForo:focus { box-shadow:none; }
-        #vistaForo #btnBuscarForo { width:auto; margin:0; padding:9px 13px; border-radius:10px; background:#e8efec; color:#24453e; font-size:.85rem; }
-        body.temaOscuro #vistaForo #btnBuscarForo { background:#2b4039; color:#e5f1ec; }
+        #vistaForo #btnBuscarForo { width:auto; margin:0; padding:9px 13px; border-radius:10px; background:var(--surface-2); color:var(--ink); font-size:.85rem; }
         #vistaForo .btnLimpiarBusqueda { width:30px; height:30px; padding:0; border-radius:50%; background:transparent; color:var(--foro-muted); font-size:21px; }
         #vistaForo .ayudaFiltroEtiqueta { margin: -8px 0 12px; color:var(--foro-muted); font-size:.78rem; }
         #vistaForo .hiloItem, #vistaForo .respuestaItem, #vistaForo #detalleHiloContenido { background:var(--foro-card); color:var(--foro-text); border:1px solid var(--foro-line); border-radius:15px; padding:15px; margin:10px 0; box-shadow:0 1px 2px rgba(18,40,33,.035); }
         #vistaForo .hiloItem { cursor:pointer; }
-        #vistaForo .hiloItem:hover { border-color:#a9c2b9; transform:none; box-shadow:0 3px 12px rgba(18,40,33,.055); }
+        #vistaForo .hiloItem:hover { border-color:var(--line-strong); transform:none; box-shadow:0 3px 12px rgba(18,40,33,.055); }
         #vistaForo .hiloTitulo, #vistaForo #detalleHiloContenido h3 { color:var(--foro-text); font-size:1.12rem; line-height:1.35; margin:7px 0 9px; }
         #vistaForo .hiloResumen, #vistaForo .cuerpoHilo { color:var(--foro-text); line-height:1.58; }
         #vistaForo .hiloPie { display:flex; align-items:center; gap:7px; flex-wrap:wrap; color:var(--foro-muted); font-size:.8rem; }
@@ -1764,15 +1836,15 @@
         #vistaForo .hiloRespuestasCount svg { width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
         #vistaForo .hiloLikeBar { display:flex; justify-content:flex-start; border-top:1px solid var(--foro-line); padding-top:8px; margin-top:10px; }
         #vistaForo .likeButton { min-width:54px; min-height:34px; justify-content:center; gap:6px; padding:5px 9px; border:1px solid transparent; border-radius:9px; color:var(--foro-muted); }
-        #vistaForo .likeButton:hover { background:rgba(197,78,87,.09); color:#c65360; }
-        #vistaForo .likeButton.activo { color:#c65360; background:rgba(197,78,87,.08); }
+        #vistaForo .likeButton:hover { background:var(--like-soft); color:var(--like); }
+        #vistaForo .likeButton.activo { color:var(--like); background:var(--like-soft); }
         #vistaForo .likeButton .corazonLike { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
         #vistaForo .likeButton.activo .corazonLike, #vistaForo .likeButton .corazonLike.relleno { fill:currentColor; }
         #vistaForo .likeButton .likeCount { font-size:.82rem; }
         #vistaForo .etiquetaChip { background:rgba(36,89,84,.09); color:var(--foro-accent); border-radius:7px; padding:4px 8px; font-size:.72rem; }
         #vistaForo #btnCargarMas { display:block; width:100%; margin:14px 0; }
         #vistaForo .btnTemaForo { display:none !important; }
-        .configTema { display:grid; grid-template-columns:1fr minmax(145px, .6fr); align-items:center; gap:8px 16px; margin:18px 0 24px; padding:15px; border:1px solid var(--line); border-radius:14px; background:#fff; }
+        .configTema { display:grid; grid-template-columns:1fr minmax(145px, .6fr); align-items:center; gap:8px 16px; margin:18px 0 24px; padding:15px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
         .configTemaTexto { grid-column:1/-1; }
         .configTemaTexto h3 { margin:0; font-size:1.05rem; }
         .configTemaTexto p { margin:4px 0 0; }
@@ -1786,76 +1858,47 @@
             #vistaForo #btnBuscarForo { padding:9px 10px; }
         }
 
-        /* Contraste reforzado y paleta afinada a la identidad de Medicina UNMDP. */
-        :root {
-            --teal-950: #003b39;
-            --teal-900: #07514e;
-            --teal-700: #17665f;
-            --teal-100: #e2eeeb;
-            --teal-50: #f5f8f6;
-            --gold-500: #b89b31;
-            --gold-600: #927710;
-            --ink: #172421;
-            --ink-soft: #4d6059;
-            --line: #d5e0db;
-        }
 
         /* El token --teal-50 cambia en modo oscuro; el título del hero necesita
            conservar un color claro independiente del color de las superficies. */
-        .hero-inner { color: #f7f7ef; }
-        .hero-inner h1 { color: #fffdf4; }
-        .hero-inner p { color: #d3e1dc; }
+        .hero-inner { color: var(--on-hero); }
+        .hero-inner h1 { color: var(--on-hero); }
+        .hero-inner p { color: var(--on-hero-soft); }
 
-        body.temaOscuro {
-            --teal-950: #061f1e;
-            --teal-900: #0b302e;
-            --teal-700: #8fc5ba;
-            --teal-100: #263e3a;
-            --teal-50: #101917;
-            --gold-500: #d2bd65;
-            --gold-600: #e1cf83;
-            --ink: #f0f5f2;
-            --ink-soft: #c0cec8;
-            --line: #3b4c46;
-        }
 
-        body.temaOscuro .hero { background: #073b39; }
         @media (max-width: 480px) {
             .heroLogo { width: 72px; height: 72px; flex-basis: 72px; }
             .hero-inner { gap: 13px; padding: 22px 18px 20px; }
             .hero-inner h1 { font-size: 1.42rem; }
             .hero-inner p { font-size: .84rem; line-height: 1.45; }
         }
-        body.temaOscuro .hero-inner,
-        body.temaOscuro .hero-inner h1 { color: #fffdf4; }
-        body.temaOscuro .hero-inner p { color: #d3e1dc; }
         body.temaOscuro #userBar {
-            background: #1a302b;
-            color: #f0f5f2;
-            border: 1px solid #385048;
+            background: var(--surface);
+            color: var(--ink);
+            border: 1px solid var(--line);
         }
-        body.temaOscuro #userBar button { color: #f0f5f2; }
+        body.temaOscuro #userBar button { color: var(--ink); }
         body.temaOscuro .btnVolverInicio,
-        body.temaOscuro .btnVolverInicio:visited { color: #e3eee8 !important; }
-        body.temaOscuro .btnVolverInicio:hover { color: #fffdf4 !important; }
-        body.temaOscuro .pasos li { color: #eff5f2; }
+        body.temaOscuro .btnVolverInicio:visited { color: var(--ink) !important; }
+        body.temaOscuro .btnVolverInicio:hover { color: var(--ink) !important; }
+        body.temaOscuro .pasos li { color: var(--ink); }
         body.temaOscuro .paso-numero {
             background: #28564b;
-            color: #fffdf4;
+            color: var(--ink);
             border: 1px solid #4d796b;
         }
-        body.temaOscuro .tarjetaInicio { color: #f0f5f2; }
-        body.temaOscuro .tarjetaInicio .tituloInicio { color: #f5f7f2; }
-        body.temaOscuro .tarjetaInicio .descInicio { color: #bdcbc5; }
-        body.temaOscuro .setupAvatarOpcion { background: #1a2a27; color: #edf4f0; }
-        body.temaOscuro .setupAvatarOpcion small { color: #d0dcd6; }
+        body.temaOscuro .tarjetaInicio { color: var(--ink); }
+        body.temaOscuro .tarjetaInicio .tituloInicio { color: var(--ink); }
+        body.temaOscuro .tarjetaInicio .descInicio { color: var(--ink-soft); }
+        body.temaOscuro .setupAvatarOpcion { background: var(--surface); color: var(--ink); }
+        body.temaOscuro .setupAvatarOpcion small { color: var(--ink-soft); }
         body.temaOscuro .setupAvatarOpcion.seleccionado {
             background: #24473e;
             border-color: #d3b457;
             box-shadow: 0 0 0 2px rgba(211, 180, 87, .18);
         }
-        body.temaOscuro .btn-primario { color: #18251d; }
-        body.temaOscuro .linkAuth { color: #a9d9cc; }
+        body.temaOscuro .btn-primario { color: var(--on-gold); }
+        body.temaOscuro .linkAuth { color: var(--link); }
 
         /* Respuestas vinculadas y compositor siempre disponible en el hilo. */
         #foroDetalle { padding-bottom: 210px; }
@@ -1885,14 +1928,14 @@
             padding:12px 15px;
             border:1px solid var(--line);
             border-radius:23px;
-            background:#fff;
+            background:var(--surface);
             color:var(--ink);
             font:inherit;
             font-size:.93rem;
             line-height:1.4;
             overflow-y:auto;
         }
-        #inputRespuesta::placeholder { color:#66756f; }
+        #inputRespuesta::placeholder { color:var(--ink-3); }
         .btnEnviarRespuesta {
             display:inline-flex;
             align-items:center;
@@ -1910,7 +1953,7 @@
         .respuestaContexto { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 8px 48px; color:var(--ink-soft); font-size:.82rem; }
         .respuestaContexto[hidden] { display:none; }
         #btnCancelarRespuesta { width:28px; min-height:28px; padding:0; border-radius:50%; background:var(--teal-100); color:var(--teal-900); font-size:20px; line-height:1; }
-        .notaImagenes { display:flex; align-items:flex-start; gap:7px; margin:9px 0 12px; padding:9px 11px; border:1px solid #dce5df; border-radius:10px; background:#eff4ef; color:#435850; font-size:.78rem; line-height:1.45; }
+        .notaImagenes { display:flex; align-items:flex-start; gap:7px; margin:9px 0 12px; padding:9px 11px; border:1px solid var(--line-soft); border-radius:10px; background:var(--surface-sunken); color:var(--ink-soft); font-size:.78rem; line-height:1.45; }
         .notaImagenes > span:first-child { flex:0 0 auto; color:var(--teal-700); font-weight:700; }
         .notaImagenes a { color:var(--teal-900); font-weight:700; text-underline-offset:2px; }
         .notaImagenesComposer { margin:7px 0 0 48px; padding:5px 0 0; border:0; background:transparent; font-size:.72rem; }
@@ -1928,17 +1971,17 @@
         .btnResponderRespuesta { width:auto; margin:0; padding:5px 8px; border:0; border-radius:7px; background:transparent; color:var(--teal-700); font-size:.78rem; font-weight:700; }
         .btnResponderRespuesta:hover { background:var(--teal-100); }
         .hiloAcciones .btnResponderRespuesta { margin-right:4px; }
-        body.temaOscuro .composerRespuesta { border-color:#3b4c46; background:rgba(15, 27, 24, .97); box-shadow:0 -10px 30px rgba(0,0,0,.32); }
-        body.temaOscuro #inputRespuesta { border-color:#465952; background:#1a2925; color:#f0f5f2; }
-        body.temaOscuro #inputRespuesta::placeholder { color:#bdcbc5; }
-        body.temaOscuro .respuestaContexto { color:#d0dcd6; }
-        body.temaOscuro #btnCancelarRespuesta { background:#29413b; color:#f2f5ee; }
-        body.temaOscuro .notaImagenes { border-color:#394b44; background:#1a2925; color:#d0dcd6; }
-        body.temaOscuro .notaImagenes a { color:#b5ded0; }
+        body.temaOscuro .composerRespuesta { border-color:var(--line); background:rgba(15, 27, 24, .97); box-shadow:0 -10px 30px rgba(0,0,0,.32); }
+        body.temaOscuro #inputRespuesta { border-color:var(--line-strong); background:var(--surface-sunken); color:var(--ink); }
+        body.temaOscuro #inputRespuesta::placeholder { color:var(--ink-soft); }
+        body.temaOscuro .respuestaContexto { color:var(--ink-soft); }
+        body.temaOscuro #btnCancelarRespuesta { background:var(--surface-2); color:var(--ink); }
+        body.temaOscuro .notaImagenes { border-color:var(--line); background:var(--surface-sunken); color:var(--ink-soft); }
+        body.temaOscuro .notaImagenes a { color:var(--link); }
         body.temaOscuro .notaImagenesComposer { border:0; background:transparent; }
-        body.temaOscuro .imagenExternaNoDisponible { border-color:#52645c; background:#1a2925; color:#d0dcd6; }
-        body.temaOscuro .btnResponderRespuesta { color:#a9d9cc; }
-        body.temaOscuro .btnResponderRespuesta:hover { background:#29413b; }
+        body.temaOscuro .imagenExternaNoDisponible { border-color:var(--line-strong); background:var(--surface-sunken); color:var(--ink-soft); }
+        body.temaOscuro .btnResponderRespuesta { color:var(--link); }
+        body.temaOscuro .btnResponderRespuesta:hover { background:var(--surface-2); }
         @media (max-width:480px) {
             #foroDetalle { padding-bottom:220px; }
             .composerRespuesta { padding:9px 12px calc(10px + env(safe-area-inset-bottom, 0px)); }
@@ -1982,7 +2025,7 @@
         .campoTrampa { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 
         /* ---------- JUEGOS Y RANKING ---------- */
-        .juegoCard { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 16px; padding: 16px; margin-bottom: 18px; border: 1px solid var(--line); border-radius: 16px; background: #fff; box-shadow: 0 6px 22px rgba(0, 40, 38, .06); }
+        .juegoCard { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 16px; padding: 16px; margin-bottom: 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: 0 6px 22px rgba(0, 40, 38, .06); }
         .juegoPortada { position: relative; display: grid; place-items: center; min-height: 132px; border-radius: 14px; overflow: hidden; background: radial-gradient(circle at 35% 30%, #3a2a7a 0%, #16224a 55%, #0a1426 100%); }
         .juegoPortada::before { content: "🦠"; position: absolute; font-size: 54px; opacity: .55; }
         .juegoPortada img { position: relative; width: 86%; height: auto; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .45)); }
@@ -1991,7 +2034,7 @@
         .juegoInfo p { margin: 0; color: var(--ink-soft); font-size: .92rem; line-height: 1.5; }
         .juegoJugar { display: inline-flex; justify-content: center; align-items: center; width: auto; min-width: 170px; margin-top: 12px; padding: 11px 22px; border-radius: 12px; font-weight: 800; text-decoration: none; }
         .juegoNota { margin-top: 8px !important; font-size: .8rem !important; }
-        .rankingJuego { padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: #fff; }
+        .rankingJuego { padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
         .rankingCabecera { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
         .rankingCabecera h3 { margin: 0; font-size: 1.1rem; color: var(--ink); }
         .rankingSelector select { min-width: 220px; max-width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--teal-50); color: var(--ink); font: inherit; font-size: .9rem; }
@@ -2007,10 +2050,10 @@
         .rankingResultados .rankingSubtitulo { margin: 0 0 6px; font-size: .78rem; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .04em; }
         .rankingLista { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
         .rankingFila { display: grid; grid-template-columns: 44px 34px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: var(--teal-50); }
-        .rankingFila.propia { background: #fff6d8; box-shadow: inset 0 0 0 2px var(--gold-500); }
-        .rankingFila.podio1 { background: linear-gradient(90deg, #fff3c9, var(--teal-50)); }
-        .rankingFila.podio2 { background: linear-gradient(90deg, #eef1f4, var(--teal-50)); }
-        .rankingFila.podio3 { background: linear-gradient(90deg, #f8e6d6, var(--teal-50)); }
+        .rankingFila.propia { background: var(--podio-propio); box-shadow: inset 0 0 0 2px var(--gold-500); }
+        .rankingFila.podio1 { background: linear-gradient(90deg, var(--podio-1), var(--teal-50)); }
+        .rankingFila.podio2 { background: linear-gradient(90deg, var(--podio-2), var(--teal-50)); }
+        .rankingFila.podio3 { background: linear-gradient(90deg, var(--podio-3), var(--teal-50)); }
         .rankingPos { font-weight: 800; font-size: 1rem; text-align: center; color: var(--teal-900); font-variant-numeric: tabular-nums; }
         .rankingFila .avatar { width: 34px; height: 34px; }
         .rankingNombre { min-width: 0; }
@@ -2022,11 +2065,6 @@
         .rankingMsg:empty { display: none; }
         .rankingAyuda { margin-top: 12px; font-size: .8rem; }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
-        body.temaOscuro .juegoCard, body.temaOscuro .rankingJuego { background: #18221f; box-shadow: none; }
-        body.temaOscuro .rankingFila.propia { background: #3a331a; }
-        body.temaOscuro .rankingFila.podio1 { background: linear-gradient(90deg, #3d3519, var(--teal-50)); }
-        body.temaOscuro .rankingFila.podio2 { background: linear-gradient(90deg, #2c3338, var(--teal-50)); }
-        body.temaOscuro .rankingFila.podio3 { background: linear-gradient(90deg, #3b2c22, var(--teal-50)); }
         body.temaOscuro .rankingPropio strong, body.temaOscuro .rankingPropio a, body.temaOscuro .rankingPos, body.temaOscuro .rankingPuntos { color: var(--gold-600); }
         @media (max-width: 480px) {
             .juegoCard { grid-template-columns: 1fr; }
