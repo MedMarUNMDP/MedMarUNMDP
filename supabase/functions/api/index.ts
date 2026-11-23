@@ -46,6 +46,9 @@ const RATE_LIMITS: Record<string, [number, number]> = {
   iniciarPartida: [60, 3600],
   guardarPuntaje: [30, 3600],
   rankingJuego: [60, 300],
+  notificaciones: [60, 300],
+  marcarNotificacionesLeidas: [60, 300],
+  publicarNoticia: [5, 3600],
 }
 
 const ALLOWED_HOSTS = [
@@ -83,6 +86,67 @@ function corsHeadersFor(req: Request): Record<string, string> {
     'Access-Control-Max-Age': '86400',
     'Vary': 'Origin',
   }
+}
+
+// ==================== NOTIFICACIONES (campana) ====================
+// Las filas las crean triggers de la base (respuestas, mensajes, intercambios) y publicarNoticia.
+// Ver supabase/migrations/20261123180000_notificaciones.sql.
+
+const MAX_NOTIFICACIONES = 30
+const MAX_NOTICIA_TITULO = 80
+const MAX_NOTICIA_CUERPO = 400
+
+async function listarNotificaciones(user: User, client: SupabaseClient) {
+  const [lista, sinLeer] = await Promise.all([
+    client.from('notificaciones')
+      .select('id,tipo,actor,contexto,cuerpo,link,ref_id,cantidad,leida,created_at,updated_at')
+      .eq('user_id', user.id).order('updated_at', { ascending: false }).limit(MAX_NOTIFICACIONES),
+    client.from('notificaciones').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('leida', false),
+  ])
+  if (lista.error) throw lista.error
+  if (sinLeer.error) throw sinLeer.error
+  return json({ ok: true, notificaciones: lista.data || [], sinLeer: sinLeer.count || 0 })
+}
+
+async function marcarNotificacionesLeidas(user: User, admin: SupabaseClient, body: any) {
+  // Sin ids = todas. Con ids: hasta 50 y siempre filtradas por el usuario de la sesión.
+  const ids = Array.isArray(body.ids) ? body.ids.map(uuidOrEmpty).filter(Boolean).slice(0, 50) : null
+  if (ids && !ids.length) return json({ ok: false, error: 'datos_invalidos' })
+  let q = admin.from('notificaciones').update({ leida: true }).eq('user_id', user.id).eq('leida', false)
+  if (ids) q = q.in('id', ids)
+  const { error } = await q
+  if (error) throw error
+  return json({ ok: true })
+}
+
+// Link de una noticia: una ruta del sitio ("/juegos/…") o una URL https. null = inválido.
+function linkNoticiaValido(valor: string) {
+  if (!valor) return ''
+  if (valor.startsWith('/') && !valor.startsWith('//')) return /^[\w\-./?=&%#]+$/.test(valor) ? valor : null
+  try {
+    const u = new URL(valor)
+    return u.protocol === 'https:' ? u.toString() : null
+  } catch { return null }
+}
+
+async function publicarNoticia(admin: SupabaseClient, body: any) {
+  const titulo = String(body.titulo || '').trim()
+  const cuerpo = String(body.cuerpo || '').trim()
+  const link = linkNoticiaValido(String(body.link || '').trim())
+  if (!titulo || titulo.length > MAX_NOTICIA_TITULO || cuerpo.length > MAX_NOTICIA_CUERPO || link === null || link.length > 300) {
+    return json({ ok: false, error: 'datos_invalidos' })
+  }
+  const noticiaId = crypto.randomUUID()
+  const { data: perfiles, error: errPerfiles } = await admin.from('profiles').select('id')
+  if (errPerfiles) throw errPerfiles
+  const filas = (perfiles || []).map((p: any) => ({
+    user_id: p.id, tipo: 'noticia', contexto: titulo, cuerpo: cuerpo || null, link: link || null, ref_id: noticiaId,
+  }))
+  for (let i = 0; i < filas.length; i += 500) {
+    const { error } = await admin.from('notificaciones').insert(filas.slice(i, i + 500))
+    if (error) throw error
+  }
+  return json({ ok: true, destinatarios: filas.length })
 }
 
 function json(body: unknown, status = 200) {
@@ -971,6 +1035,19 @@ async function handle(req: Request, body: any) {
     case 'rankingJuego': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       return rankingJuego(user,client,body)
+    }
+    case 'notificaciones': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return listarNotificaciones(user,client)
+    }
+    case 'marcarNotificacionesLeidas': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return marcarNotificacionesLeidas(user,admin,body)
+    }
+    case 'publicarNoticia': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      if(!(await isAdmin(admin,user.id)))return json({ok:false,error:'no_autorizado'})
+      return publicarNoticia(admin,body)
     }
     case 'soyModerador': { const rl=await rateLimit(admin,action,user.id);if(rl)return rl; return json({ok:true,esModerador:await isModerator(admin,user.id),esAdmin:await isAdmin(admin,user.id)}) }
     case 'listarModeradores': {

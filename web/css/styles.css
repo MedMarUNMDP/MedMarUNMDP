@@ -2613,3 +2613,203 @@
         .novedadHilo:hover { background: var(--surface-2); }
         .novedadHilo b { font-size: .92rem; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .novedadHilo span { font-size: .8rem; color: var(--ink-soft); }
+
+        /* ---------- NOTIFICACIONES (CAMPANA) ----------
+           Botón en la barra superior (celular) y en el riel (PC). El panel es una hoja bajo la barra en el
+           celular y un panel flotante junto al riel en PC. Insignia con la cantidad sin leer (máx. «9+»). */
+
+        .botonNotif[hidden], .navItem.botonNotif[hidden] { display: none !important; }
+
+        .barraApp .barraNotif {
+            position: relative;
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            margin: 0 0 0 auto;
+            padding: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--ink-soft);
+        }
+
+        .barraApp .barraNotif:hover, .barraNotif[aria-expanded="true"] { background: var(--surface-2); color: var(--ink); }
+
+        .barraNotif svg, .navItem.botonNotif svg {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .barraApp { gap: 4px; }
+
+        .insigniaNotif {
+            position: absolute;
+            top: 6px;
+            right: 5px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: var(--r-pill);
+            background: var(--red-600);
+            color: var(--on-danger);
+            box-shadow: 0 0 0 2px var(--surface);
+            font-size: .68rem;
+            font-weight: 700;
+            line-height: 18px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .navItem.botonNotif { position: relative; }
+        .navItem.botonNotif .insigniaNotif { position: static; margin-left: auto; box-shadow: none; }
+
+        .panelNotif {
+            position: fixed;
+            z-index: 60;
+            top: calc(var(--alto-barra-app) + env(safe-area-inset-top, 0px));
+            left: 0;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100dvh - var(--alto-barra-app) - var(--alto-nav-app) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+            background: var(--surface);
+            border-bottom: 1px solid var(--line);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, .14);
+        }
+
+        .panelNotif[hidden] { display: none; }
+
+        .panelNotifCabecera {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 12px 10px 16px;
+            border-bottom: 1px solid var(--line-soft);
+        }
+
+        .panelNotifCabecera h2 { margin-right: auto; font-size: 1.15rem; }
+
+        .panelNotifAccion {
+            width: auto;
+            margin: 0;
+            padding: 6px 10px;
+            background: transparent;
+            color: var(--link);
+            font-size: .82rem;
+            font-weight: 600;
+            border-radius: var(--r-sm);
+        }
+
+        .panelNotifAccion:hover { background: var(--surface-2); }
+
+        .panelNotifCerrar {
+            width: 40px;
+            height: 40px;
+            margin: 0;
+            padding: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--ink-soft);
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .panelNotifCerrar:hover { background: var(--surface-2); }
+
+        .listaNotif {
+            margin: 0;
+            padding: 6px;
+            list-style: none;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+
+        .itemNotif {
+            display: grid;
+            grid-template-columns: 36px minmax(0, 1fr) 10px;
+            gap: 12px;
+            align-items: start;
+            width: 100%;
+            margin: 0;
+            padding: 10px;
+            border-radius: var(--r-md);
+            background: transparent;
+            color: var(--ink);
+            font-weight: 400;
+            text-align: left;
+        }
+
+        .itemNotif:hover { background: var(--surface-2); }
+        .itemNotif.sinLeer { background: var(--brand-soft); }
+        .itemNotif.sinLeer:hover { background: var(--brand-soft-hover); }
+
+        .iconoNotif {
+            display: grid;
+            place-items: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            color: var(--brand);
+        }
+
+        .itemNotif.sinLeer .iconoNotif { background: var(--surface); }
+        .iconoNotif.tipo-intercambio, .iconoNotif.tipo-noticia { color: var(--gold-600); }
+
+        .iconoNotif svg {
+            width: 19px;
+            height: 19px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .textoNotif {
+            display: grid;
+            gap: 3px;
+            font-size: .9rem;
+            line-height: 1.4;
+            overflow-wrap: anywhere;
+        }
+
+        .textoNotif time { font-size: .78rem; color: var(--ink-soft); }
+        .notifCuerpo { display: block; margin-top: 2px; color: var(--ink-soft); font-size: .86rem; }
+        .panelNotifAccion { white-space: nowrap; }
+
+        .puntoNotif {
+            width: 10px;
+            height: 10px;
+            margin-top: 6px;
+            border-radius: 50%;
+            background: var(--brand);
+        }
+
+        .notifVacia {
+            display: grid;
+            gap: 6px;
+            padding: 28px 18px;
+            text-align: center;
+            color: var(--ink-soft);
+            font-size: .9rem;
+        }
+
+        .notifVacia b { color: var(--ink); font-size: 1rem; }
+
+        @media (min-width: 900px) {
+            .panelNotif {
+                top: 16px;
+                left: calc(var(--ancho-riel) + 12px);
+                right: auto;
+                width: 400px;
+                max-height: calc(100dvh - 32px);
+                border: 1px solid var(--line);
+                border-radius: var(--r-lg);
+            }
+        }

@@ -48,7 +48,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261123f">
+    <link rel="stylesheet" href="/css/styles.css?v=20261123g">
 </head>
 
 <body>
@@ -149,6 +149,10 @@
                     <img src="/assets/brand/isotipo-medmar.png" alt="" width="32" height="32">
                     <span>MedMar</span>
                 </button>
+                <button type="button" class="botonNotif barraNotif" data-notif aria-label="Notificaciones" aria-haspopup="dialog" aria-expanded="false" aria-controls="panelNotificaciones" hidden>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5a2 2 0 1 1 4 0 7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg>
+                    <span class="insigniaNotif" hidden></span>
+                </button>
                 <button type="button" class="barraPerfil" data-nav="configuracion" aria-label="Tu perfil">
                     <span id="avatarBarraApp" aria-hidden="true"></span>
                 </button>
@@ -179,7 +183,23 @@
                     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
                     <span>Perfil</span>
                 </button>
+                <button type="button" class="navItem navSoloRiel botonNotif" data-notif aria-haspopup="dialog" aria-expanded="false" aria-controls="panelNotificaciones" hidden>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5a2 2 0 1 1 4 0 7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg>
+                    <span>Notificaciones</span>
+                    <span class="insigniaNotif" hidden></span>
+                </button>
             </nav>
+
+            <!-- Panel de notificaciones: hoja bajo la barra en el celular, panel flotante junto al riel en PC.
+                 Lo arma app.js (renderizarNotificaciones). -->
+            <section id="panelNotificaciones" class="panelNotif" role="dialog" aria-labelledby="tituloNotif" hidden>
+                <header class="panelNotifCabecera">
+                    <h2 id="tituloNotif">Notificaciones</h2>
+                    <button type="button" id="btnLeerTodas" class="panelNotifAccion" aria-label="Marcar todas como leídas">Marcar leídas</button>
+                    <button type="button" id="btnCerrarNotif" class="panelNotifCerrar" aria-label="Cerrar notificaciones">×</button>
+                </header>
+                <ul id="listaNotificaciones" class="listaNotif"></ul>
+            </section>
 
             <div id="userBar">
                 <button type="button" id="btnIrInicio" class="btnVolverInicio">
@@ -480,6 +500,19 @@
 
                     <div id="listaModeradores"></div>
 
+                    <h2 class="seccion-titulo">Publicar una noticia</h2>
+                    <p class="ayudaPerfil">Le llega a todas las cuentas como notificación. Usalo para novedades importantes de MedMar.</p>
+                    <form id="formNoticia">
+                        <label for="noticiaTitulo">Título</label>
+                        <input type="text" id="noticiaTitulo" maxlength="80" required>
+                        <label for="noticiaCuerpo">Texto (opcional)</label>
+                        <textarea id="noticiaCuerpo" maxlength="400" rows="3"></textarea>
+                        <label for="noticiaLink">Enlace (opcional)</label>
+                        <input type="text" id="noticiaLink" maxlength="300" placeholder="/?vista=juegos o https://…">
+                        <button type="submit" class="btn-secundario">Publicar noticia</button>
+                    </form>
+                    <p id="msgNoticia" aria-live="polite"></p>
+
                 </div>
 
             </div>
@@ -764,7 +797,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261123f"></script>
+    <script src="/js/app.js?v=20261123g"></script>
 
 
 </body>

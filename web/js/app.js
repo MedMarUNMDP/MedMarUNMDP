@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-foro-inicio"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-notificaciones"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -39,7 +39,7 @@ const hiloCacheCliente = new Map()
 const ACCIONES_LECTURA_DEDUPE = new Set([
     "bootstrap", "foroBootstrap", "listarEtiquetas", "listarHilos", "verHilo",
     "misSolicitudes", "misIntercambios", "miPerfil", "obtenerChat", "listarDenuncias",
-    "listarModeradores", "soyModerador", "rankingJuego"
+    "listarModeradores", "soyModerador", "rankingJuego", "notificaciones"
 ])
 const FRESCURA_FORO_CLIENTE_MS = 20000
 const FRESCURA_USUARIO_CLIENTE_MS = 20000
@@ -2956,6 +2956,7 @@ async function cargarBootstrap() {
 
             await cargarBootstrap()
             iniciarRealtimeUsuario()
+            cargarNotificaciones(true)
             iniciarActualizacionPeriodica()
         }
 
@@ -2973,6 +2974,7 @@ async function cargarBootstrap() {
             app.style.display = "none"
             loginScreen.style.display = "block"
             document.body.classList.remove("enApp")
+            try { detenerNotificaciones() } catch (_) {}
             seccionActual = "inicio"
             resetearHistorialPorLogout()
             actualizarVisibilidadPie()
@@ -4128,6 +4130,251 @@ async function cargarBootstrap() {
                 if (ir) mostrarSeccion(ir.dataset.ir, "up")
             })
         })
+
+        // ==================== NOTIFICACIONES (CAMPANA) ====================
+        // Las crea la base (triggers en respuestas, mensajes e intercambios) y la acción publicarNoticia.
+        // Se cargan al entrar, al volver a la pestaña (si pasó 1 min) y en vivo por Realtime.
+        // Si la API todavía no tiene la acción (accion_invalida), la campana queda oculta.
+
+        let notificacionesUI = []
+        let notificacionesSinLeer = 0
+        let notificacionesActivas = false
+        let notificacionesCargadasEn = 0
+        let notificacionesCanal = null
+        let focoAntesNotif = null
+
+        const panelNotificaciones = document.getElementById("panelNotificaciones")
+        const listaNotificaciones = document.getElementById("listaNotificaciones")
+        const botonesNotif = document.querySelectorAll("[data-notif]")
+        const TITULO_BASE = document.title
+
+        const ICONOS_NOTIF = {
+            respuesta: '<path d="M5 6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-4 3V6Z"/>',
+            respuesta_a_respuesta: '<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v5"/>',
+            mensaje: '<path d="M4 6h16v10H8l-4 4V6Z"/><path d="M8 10h8M8 13h5"/>',
+            intercambio: '<path d="M4 8h13m-4-4 4 4-4 4M20 16H7m4-4-4 4 4 4"/>',
+            noticia: '<path d="M4 6h13v12H6a2 2 0 0 1-2-2V6Z"/><path d="M17 9h3v7a2 2 0 0 1-2 2M7 9h7M7 12h7M7 15h4"/>'
+        }
+
+        function tiempoRelativo(fecha) {
+            const seg = Math.max(0, (Date.now() - new Date(fecha).getTime()) / 1000)
+            if (seg < 60) return "recién"
+            if (seg < 3600) return "hace " + Math.floor(seg / 60) + " min"
+            if (seg < 86400) return "hace " + Math.floor(seg / 3600) + " h"
+            if (seg < 172800) return "ayer"
+            return new Date(fecha).toLocaleDateString("es-AR", { day: "numeric", month: "short" })
+        }
+
+        function textoNotificacion(n) {
+            const actor = "<b>" + escapeHtml(n.actor || "Alguien") + "</b>"
+            const contexto = n.contexto ? "«" + escapeHtml(n.contexto) + "»" : ""
+            const varias = n.cantidad > 1
+            switch (n.tipo) {
+                case "respuesta":
+                    return varias ? "<b>" + n.cantidad + " respuestas nuevas</b> en " + contexto : actor + " respondió en " + contexto
+                case "respuesta_a_respuesta":
+                    return varias ? "<b>" + n.cantidad + " respuestas</b> a tu comentario en " + contexto : actor + " respondió tu comentario en " + contexto
+                case "mensaje":
+                    return varias
+                        ? "<b>" + n.cantidad + " mensajes nuevos</b> de " + escapeHtml(n.actor || "tu compañero") + " · " + escapeHtml(n.contexto || "chat")
+                        : actor + " te escribió · " + escapeHtml(n.contexto || "chat")
+                case "intercambio":
+                    return "<b>¡Encontramos un intercambio!</b> " + escapeHtml(n.contexto || "")
+                case "noticia":
+                    return "<b>" + escapeHtml(n.contexto || "Novedad de MedMar") + "</b>" +
+                        (n.cuerpo ? "<span class='notifCuerpo'>" + escapeHtml(n.cuerpo) + "</span>" : "")
+                default:
+                    return escapeHtml(n.contexto || "")
+            }
+        }
+
+        function actualizarInsigniaNotif() {
+            const texto = notificacionesSinLeer > 9 ? "9+" : String(notificacionesSinLeer)
+            document.querySelectorAll(".insigniaNotif").forEach(function (b) {
+                b.textContent = texto
+                b.hidden = notificacionesSinLeer === 0
+            })
+            botonesNotif.forEach(function (btn) {
+                btn.setAttribute("aria-label", notificacionesSinLeer
+                    ? "Notificaciones, " + notificacionesSinLeer + " sin leer"
+                    : "Notificaciones")
+            })
+            document.title = (notificacionesSinLeer ? "(" + texto + ") " : "") + TITULO_BASE
+        }
+
+        function renderizarNotificaciones() {
+            if (!listaNotificaciones) return
+            if (!notificacionesUI.length) {
+                listaNotificaciones.innerHTML = "<li class='notifVacia'><b>Estás al día</b><span>Acá vas a ver respuestas a tus publicaciones, mensajes de chat, intercambios y novedades de MedMar.</span></li>"
+            } else {
+                listaNotificaciones.innerHTML = notificacionesUI.map(function (n) {
+                    return "<li><button type='button' class='itemNotif" + (n.leida ? "" : " sinLeer") + "' data-id='" + escapeAttr(n.id) + "'>" +
+                        "<span class='iconoNotif tipo-" + escapeAttr(n.tipo) + "' aria-hidden='true'><svg viewBox='0 0 24 24'>" + (ICONOS_NOTIF[n.tipo] || ICONOS_NOTIF.noticia) + "</svg></span>" +
+                        "<span class='textoNotif'><span class='notifMensaje'>" + textoNotificacion(n) + "</span>" +
+                        "<time datetime='" + escapeAttr(n.updated_at || n.created_at) + "'>" + tiempoRelativo(n.updated_at || n.created_at) + "</time></span>" +
+                        (n.leida ? "" : "<span class='puntoNotif'><span class='sr-only'>Sin leer</span></span>") +
+                        "</button></li>"
+                }).join("")
+            }
+            document.getElementById("btnLeerTodas").hidden = notificacionesSinLeer === 0
+            actualizarInsigniaNotif()
+        }
+
+        async function cargarNotificaciones(forzar) {
+            if (!sesion) return
+            if (!forzar && Date.now() - notificacionesCargadasEn < 60000) return
+            notificacionesCargadasEn = Date.now()
+            const r = await llamar("notificaciones", {})
+            if (!r.ok) {
+                // La API todavía no tiene la acción: la campana no se muestra.
+                if (r.error === "accion_invalida") botonesNotif.forEach(function (b) { b.hidden = true })
+                return
+            }
+            notificacionesActivas = true
+            botonesNotif.forEach(function (b) { b.hidden = false })
+            notificacionesUI = Array.isArray(r.notificaciones) ? r.notificaciones : []
+            notificacionesSinLeer = Number(r.sinLeer || 0)
+            renderizarNotificaciones()
+            suscribirNotificaciones()
+        }
+
+        // Canal propio (no el de solicitudes): si la tabla no estuviera en Realtime, no afecta a lo demás.
+        function suscribirNotificaciones() {
+            if (notificacionesCanal || !sesion || !sesion.userId) return
+            notificacionesCanal = supabaseClient
+                .channel("notificaciones-" + sesion.userId)
+                .on("postgres_changes", {
+                    event: "*", schema: "public", table: "notificaciones", filter: "user_id=eq." + sesion.userId
+                }, function (payload) {
+                    const n = payload.new || {}
+                    if (!n.id) return
+                    // Si ya estás mirando ese hilo o ese chat, el aviso se da por leído.
+                    const yaLoVes = !n.leida && ((n.tipo === "mensaje" && chatAbiertoId && String(chatAbiertoId) === String(n.ref_id)) ||
+                        ((n.tipo === "respuesta" || n.tipo === "respuesta_a_respuesta") && hiloAbiertoId && String(hiloAbiertoId) === String(n.ref_id) && seccionActual === "foro"))
+                    if (yaLoVes) { marcarNotificacionesLeidas([n.id]); return }
+                    const nuevo = payload.eventType === "INSERT" || (payload.eventType === "UPDATE" && !n.leida)
+                    cargarNotificaciones(true).then(function () {
+                        if (nuevo && !n.leida && panelNotificaciones.hidden) {
+                            const tmp = document.createElement("div")
+                            tmp.innerHTML = textoNotificacion(n)
+                            mostrarAviso(tmp.textContent)
+                        }
+                    })
+                })
+                .subscribe()
+        }
+
+        function detenerNotificaciones() {
+            if (notificacionesCanal) { supabaseClient.removeChannel(notificacionesCanal); notificacionesCanal = null }
+            notificacionesUI = []
+            notificacionesSinLeer = 0
+            notificacionesActivas = false
+            notificacionesCargadasEn = 0
+            cerrarPanelNotificaciones(false)
+            renderizarNotificaciones()
+        }
+
+        function marcarNotificacionesLeidas(ids) {
+            let cambio = 0
+            notificacionesUI.forEach(function (n) {
+                if (!n.leida && (!ids || ids.indexOf(n.id) !== -1)) { n.leida = true; cambio++ }
+            })
+            notificacionesSinLeer = ids ? Math.max(0, notificacionesSinLeer - cambio) : 0
+            renderizarNotificaciones()
+            llamar("marcarNotificacionesLeidas", ids ? { ids: ids } : {})
+        }
+
+        function abrirPanelNotificaciones() {
+            focoAntesNotif = document.activeElement
+            panelNotificaciones.hidden = false
+            botonesNotif.forEach(function (b) { b.setAttribute("aria-expanded", "true") })
+            cargarNotificaciones(true)
+            requestAnimationFrame(function () {
+                const primero = panelNotificaciones.querySelector(".itemNotif, #btnLeerTodas:not([hidden]), #btnCerrarNotif")
+                if (primero) primero.focus()
+            })
+        }
+
+        function cerrarPanelNotificaciones(devolverFoco) {
+            if (!panelNotificaciones || panelNotificaciones.hidden) return
+            panelNotificaciones.hidden = true
+            botonesNotif.forEach(function (b) { b.setAttribute("aria-expanded", "false") })
+            if (devolverFoco !== false && focoAntesNotif && document.contains(focoAntesNotif)) focoAntesNotif.focus()
+        }
+
+        function irANotificacion(n) {
+            cerrarPanelNotificaciones(false)
+            if (n.tipo === "respuesta" || n.tipo === "respuesta_a_respuesta") {
+                mostrarSeccion("foro", "up")
+                if (n.ref_id) abrirHilo(n.ref_id)
+            } else if (n.tipo === "mensaje") {
+                mostrarSeccion("intercambios", "down")
+                if (n.ref_id) abrirChat(n.ref_id)
+            } else if (n.tipo === "intercambio") {
+                mostrarSeccion("intercambios", "down")
+            } else if (n.tipo === "noticia" && n.link) {
+                if (n.link.charAt(0) === "/") location.href = n.link
+                else window.open(n.link, "_blank", "noopener")
+            }
+        }
+
+        botonesNotif.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                if (panelNotificaciones.hidden) abrirPanelNotificaciones()
+                else cerrarPanelNotificaciones()
+            })
+        })
+
+        if (panelNotificaciones) {
+            document.getElementById("btnCerrarNotif").addEventListener("click", function () { cerrarPanelNotificaciones() })
+            document.getElementById("btnLeerTodas").addEventListener("click", function () { marcarNotificacionesLeidas(null) })
+            listaNotificaciones.addEventListener("click", function (e) {
+                const item = e.target.closest(".itemNotif")
+                if (!item) return
+                const n = notificacionesUI.find(function (x) { return x.id === item.dataset.id })
+                if (!n) return
+                if (!n.leida) marcarNotificacionesLeidas([n.id])
+                irANotificacion(n)
+            })
+            document.addEventListener("keydown", function (e) {
+                if (e.key === "Escape" && !panelNotificaciones.hidden) cerrarPanelNotificaciones()
+            })
+            document.addEventListener("click", function (e) {
+                if (panelNotificaciones.hidden) return
+                if (panelNotificaciones.contains(e.target) || e.target.closest("[data-notif]")) return
+                cerrarPanelNotificaciones(false)
+            })
+            document.addEventListener("visibilitychange", function () {
+                if (document.visibilityState === "visible" && sesion && notificacionesActivas) cargarNotificaciones(false)
+            })
+        }
+
+        // Moderación (solo admins): publicar una noticia para todas las cuentas.
+        const formNoticia = document.getElementById("formNoticia")
+        if (formNoticia) {
+            formNoticia.addEventListener("submit", async function (e) {
+                e.preventDefault()
+                const msgNoticia = document.getElementById("msgNoticia")
+                const datos = {
+                    titulo: document.getElementById("noticiaTitulo").value.trim(),
+                    cuerpo: document.getElementById("noticiaCuerpo").value.trim(),
+                    link: document.getElementById("noticiaLink").value.trim()
+                }
+                if (!datos.titulo) { msgNoticia.textContent = "Poné un título."; return }
+                msgNoticia.textContent = "Publicando…"
+                const r = await llamar("publicarNoticia", datos)
+                if (!r.ok) {
+                    msgNoticia.textContent = r.error === "datos_invalidos"
+                        ? "Revisá los datos: el enlace tiene que empezar con / o con https://."
+                        : mensajeError(r.error)
+                    return
+                }
+                msgNoticia.textContent = ""
+                formNoticia.reset()
+                mostrarAviso("Noticia publicada para " + r.destinatarios + " cuentas.")
+                cargarNotificaciones(true)
+            })
+        }
 
         async function cargarRankingJuego(forzar) {
             if (!rankingModo || !sesion) return
