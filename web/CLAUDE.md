@@ -34,7 +34,8 @@ Para ubicarte: `Grep "// ====" web/js/app.js` y leé solo el rango que necesitá
   `Permissions-Policy` con una regla de Transform (Rules → Response Header). RUM/Web Analytics desactivado a propósito.
 - **CAPTCHA**: login, registro, recuperación y cambio de contraseña usan Cloudflare Turnstile (`TURNSTILE_SITE_KEY`,
   sección CAPTCHA de `app.js`). Una llamada nueva a `signInWithPassword`/`signUp`/`resetPasswordForEmail` necesita `captchaToken`.
-- **Ranking**: moderadores pueden quitar puntajes sospechosos (`quitarPuntaje`, con llave y auditoría).
+- **Ranking**: moderadores pueden esconder (`ocultarPuntaje`, reversible desde «Puntajes escondidos») o anular (`quitarPuntaje`, borra) puntajes sospechosos, con llave y auditoría.
+- **Inicio**: portada (`.portadaInicio`: saludo según la hora, fecha y accesos rápidos `[data-accion-inicio]`), «Tu actividad» (`renderizarNovedades`) y «Explorá MedMar» (tarjetas).
 - supabase-js va con versión fija + `integrity` (SRI). Para actualizarlo: cambiar la versión en la URL y recalcular con
   `curl -s <url> | openssl dgst -sha384 -binary | openssl base64 -A`.
 - Las escrituras a la base van siempre por la API: las políticas RLS no permiten escribir desde el navegador.

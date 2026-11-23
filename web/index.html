@@ -49,7 +49,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261125c">
+    <link rel="stylesheet" href="/css/styles.css?v=20261126a">
 </head>
 
 <body>
@@ -224,19 +224,31 @@
 
             <div id="vistaInicio">
 
-                <div id="saludoInicio">
-                    <span id="avatarUserBar"></span>
-                    <div class="saludoTexto">
-                        <h2 id="tituloSaludo" class="tituloSaludo">Hola</h2>
-                        <p>Conectado como <b id="userEmail"></b></p>
+                <!-- Portada: saludo según la hora, fecha y accesos rápidos a lo que más se usa. -->
+                <section id="saludoInicio" class="portadaInicio" aria-labelledby="tituloSaludo">
+                    <img class="portadaMarca" src="/assets/brand/isotipo-medmar.png" alt="" width="180" height="180" aria-hidden="true">
+                    <div class="portadaCabecera">
+                        <span id="avatarUserBar"></span>
+                        <div class="saludoTexto">
+                            <p class="portadaFecha" id="fechaInicio"></p>
+                            <h2 id="tituloSaludo" class="tituloSaludo">Hola</h2>
+                        </div>
                     </div>
-                </div>
+                    <p class="portadaBajada">Comisiones, foro, material y juegos de la carrera, hechos por y para estudiantes.</p>
+                    <div class="portadaAcciones">
+                        <button type="button" class="portadaAccion principal" data-accion-inicio="preguntar">Preguntar en el foro</button>
+                        <button type="button" class="portadaAccion" data-accion-inicio="intercambios">Cambiar de comisión</button>
+                        <button type="button" class="portadaAccion" data-accion-inicio="material">Buscar material</button>
+                    </div>
+                    <p class="portadaCuenta">Conectado como <b id="userEmail"></b></p>
+                </section>
 
-                <!-- Novedades: se arman en app.js (renderizarNovedades) con datos que ya están cargados,
+                <!-- Tu actividad: se arma en app.js (renderizarNovedades) con datos que ya están cargados,
                      sin pedidos extra a la API. -->
-                <section id="novedadesInicio" class="novedades" aria-label="Novedades"></section>
+                <h3 class="etiquetaSeccion">Tu actividad</h3>
+                <section id="novedadesInicio" class="novedades" aria-label="Tu actividad"></section>
 
-                <h3 class="etiquetaSeccion">Accesos</h3>
+                <h3 class="etiquetaSeccion">Explorá MedMar</h3>
 
                 <div class="menuInicio">
 
@@ -775,6 +787,11 @@
                     <ol class="rankingLista" id="rankingLista" aria-label="Mejores puntajes"></ol>
                     <p class="rankingMsg" id="rankingMsg" aria-live="polite"></p>
 
+                    <div class="rankingModeracion" id="rankingModeracion" hidden>
+                        <button type="button" class="btn-secundario" id="rankingVerOcultos">Puntajes escondidos de este modo</button>
+                        <div id="rankingOcultos" aria-live="polite"></div>
+                    </div>
+
                     <p class="ayudaPerfil rankingAyuda">Cuenta tu mejor partida de cada modo. Puntaje: 10 por agente eliminado, 2 por segundo y 25 por respuesta correcta, multiplicado por la dificultad. El Laboratorio no suma.</p>
                 </section>
 
@@ -1034,7 +1051,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261125c"></script>
+    <script src="/js/app.js?v=20261126a"></script>
 
     <!-- CAPTCHA anti-bots (Cloudflare Turnstile) para login, registro y recuperación. Sin SRI: Cloudflare lo actualiza
          solo y su documentación pide no fijarlo. Se renderiza recién cuando el formulario se usa. -->

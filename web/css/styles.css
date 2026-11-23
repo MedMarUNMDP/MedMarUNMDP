@@ -2391,6 +2391,93 @@
             overflow-wrap: anywhere;
         }
 
+        /* Portada de Inicio: bloque de marca (siempre oscuro, como el hero del login) con saludo, fecha y accesos
+           rápidos. Le da a Inicio cara de página de inicio en vez de arrancar directo con los widgets. */
+        .portadaInicio {
+            position: relative;
+            overflow: hidden;
+            display: grid;
+            gap: 14px;
+            padding: 22px 20px 18px;
+            border-radius: var(--r-lg);
+            background:
+                radial-gradient(120% 140% at 100% 0%, rgba(184, 155, 49, .22) 0%, rgba(184, 155, 49, 0) 55%),
+                linear-gradient(135deg, var(--teal-950) 0%, var(--hero-bg) 55%, var(--teal-700) 100%);
+            color: var(--on-hero);
+            box-shadow: var(--sombra-2);
+        }
+        #saludoInicio.portadaInicio { display: grid; align-items: stretch; margin-top: 0; }
+        .portadaMarca {
+            position: absolute;
+            right: -34px;
+            bottom: -40px;
+            width: 180px;
+            height: 180px;
+            opacity: .13;
+            pointer-events: none;
+            user-select: none;
+        }
+        .portadaCabecera { display: flex; align-items: center; gap: 12px; min-width: 0; position: relative; }
+        .portadaCabecera #avatarUserBar { flex-shrink: 0; border-radius: 50%; box-shadow: 0 0 0 3px rgba(255, 253, 244, .25); }
+        #saludoInicio .portadaFecha {
+            margin: 0 0 2px;
+            font-size: .78rem;
+            font-weight: 700;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--on-hero-soft);
+        }
+        .portadaInicio .tituloSaludo { margin: 0; color: var(--on-hero); font-size: 1.7rem; }
+        #saludoInicio .portadaBajada { position: relative; margin: 0; max-width: 46ch; white-space: normal; overflow: visible; color: var(--on-hero-soft); font-size: .95rem; line-height: 1.45; }
+        .portadaAcciones { position: relative; display: flex; flex-wrap: wrap; gap: 8px; }
+        .portadaAccion {
+            width: auto;
+            min-height: 40px;
+            margin: 0;
+            padding: 8px 14px;
+            border: 1px solid rgba(255, 253, 244, .35);
+            border-radius: var(--r-pill);
+            background: rgba(255, 253, 244, .08);
+            color: var(--on-hero);
+            font-weight: 700;
+            font-size: .88rem;
+            cursor: pointer;
+            transition: background .15s ease, border-color .15s ease;
+        }
+        .portadaAccion:hover, .portadaAccion:focus-visible { background: rgba(255, 253, 244, .18); border-color: rgba(255, 253, 244, .6); }
+        .portadaAccion.principal { background: var(--gold-500); border-color: var(--gold-500); color: var(--on-gold); }
+        .portadaAccion.principal:hover, .portadaAccion.principal:focus-visible { background: #c9ab3d; border-color: #c9ab3d; }
+        .portadaAccion:focus-visible { outline: 2px solid var(--on-hero); outline-offset: 2px; }
+        #saludoInicio .portadaCuenta {
+            position: relative;
+            margin: 2px 0 0;
+            font-size: .8rem;
+            color: var(--on-hero-soft);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .portadaCuenta b { font-weight: 600; color: var(--on-hero); }
+
+        @media (max-width: 639px) {
+            .portadaInicio { gap: 12px; padding: 18px 16px 16px; }
+            .portadaInicio .tituloSaludo { font-size: 1.45rem; }
+            .portadaAccion { min-height: 36px; padding: 6px 12px; font-size: .82rem; }
+        }
+        @media (min-width: 640px) {
+            .portadaInicio { padding: 28px 28px 22px; }
+            .portadaInicio .tituloSaludo { font-size: 2rem; }
+            .portadaMarca { width: 220px; height: 220px; right: -20px; bottom: -50px; }
+        }
+
+        /* Secciones de Inicio: títulos con aire y la grilla de accesos en 3 columnas en pantallas anchas. */
+        #vistaInicio .etiquetaSeccion { margin-top: 26px; }
+        #vistaInicio .novedades { margin-top: 10px; }
+        @media (min-width: 1100px) {
+            body.enApp #vistaInicio .menuInicio { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            body.enApp #vistaInicio .tarjetaReportes { grid-column: auto; }
+        }
+
         .novedades {
             display: grid;
             gap: 12px;
@@ -3232,9 +3319,19 @@
             font-size: .8rem;
         }
 
-        .rankingQuitar:hover { border-color: var(--red-600); color: var(--red-600); }
-        .rankingFila:has(.rankingQuitar) { grid-template-columns: 44px 34px minmax(0, 1fr) auto auto; }
-        @media (max-width: 520px) { .rankingFila:has(.rankingQuitar) { grid-template-columns: 36px 30px minmax(0, 1fr) auto auto; } .rankingQuitar { margin-left: 0; } }
+        .rankingQuitar:hover { border-color: var(--brand); color: var(--brand); }
+        .rankingQuitar.peligro:hover { border-color: var(--red-600); color: var(--red-600); }
+        .rankingMod { display: inline-flex; gap: 6px; margin-left: 8px; }
+        .rankingMod .rankingQuitar { margin: 0; }
+        .rankingFila:has(.rankingMod) { grid-template-columns: 44px 34px minmax(0, 1fr) auto auto; }
+        .rankingModeracion { margin-top: 16px; padding-top: 12px; border-top: 1px dashed var(--line-strong); }
+        .rankingModeracion > .btn-secundario { width: auto; }
+        .rankingOcultosLista { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 8px; }
+        .rankingOcultosLista li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: .92rem; }
+        @media (max-width: 520px) {
+            .rankingFila:has(.rankingMod) { grid-template-columns: 36px 30px minmax(0, 1fr) auto; }
+            .rankingFila .rankingMod { grid-column: 3 / -1; margin-left: 0; }
+        }
 
 
         /* ---------- CAPTCHA (TURNSTILE) ---------- */

@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-25-captcha"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-26-inicio"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -2722,6 +2722,20 @@ async function cargarBootstrap() {
 
         })
 
+        // Accesos rápidos de la portada de Inicio.
+        const portadaInicio = document.getElementById("saludoInicio")
+        if (portadaInicio) portadaInicio.addEventListener("click", function (e) {
+            const btn = e.target.closest("[data-accion-inicio]")
+            if (!btn) return
+            const accion = btn.dataset.accionInicio
+            if (accion === "preguntar") {
+                mostrarSeccion("foro", "up")
+                btnAbrirCompose.click()
+                return
+            }
+            mostrarSeccion(accion, "down")
+        })
+
         btnIrInicio.addEventListener("click", function () {
             mostrarSeccion("inicio", "up")
         })
@@ -3183,10 +3197,24 @@ async function cargarBootstrap() {
 
         // ==================== PERFIL / PSEUDÓNIMO / FOTO ====================
 
+        // Portada de Inicio: "Buen día / Buenas tardes / Buenas noches" y la fecha de hoy.
+        function saludoSegunHora() {
+            const h = new Date().getHours()
+            return h >= 6 && h < 13 ? "Buen día" : h >= 13 && h < 20 ? "Buenas tardes" : "Buenas noches"
+        }
+
+        function actualizarFechaInicio() {
+            const el = document.getElementById("fechaInicio")
+            if (!el) return
+            const texto = new Date().toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" })
+            el.textContent = texto.charAt(0).toUpperCase() + texto.slice(1)
+        }
+
         function actualizarAvataresEnPantalla(nombre) {
 
             avatarUserBar.innerHTML = avatarHtml(nombre, fotoActual, "avatarMediano")
-            if (tituloSaludo) tituloSaludo.textContent = nombre && nombre !== "Vos" ? "Hola, " + nombre : "Hola"
+            if (tituloSaludo) tituloSaludo.textContent = saludoSegunHora() + (nombre && nombre !== "Vos" ? ", " + nombre : "")
+            actualizarFechaInicio()
             if (avatarBarraApp) avatarBarraApp.innerHTML = avatarHtml(nombre, fotoActual, "")
             avatarConfigPreview.innerHTML = avatarHtml(nombre, fotoActual, "avatarGrande")
 
@@ -4031,9 +4059,13 @@ async function cargarBootstrap() {
                 "<span class='rankingNombre'><b>" + escapeHtml(f.pseudonimo) + (f.esPropio ? " (vos)" : "") + "</b>" +
                 "<small>" + escapeHtml(formatearDuracion(f.segundos)) + " de partida</small></span>" +
                 "<span class='rankingPuntos'>" + escapeHtml(Number(f.puntaje).toLocaleString("es-AR")) + "</span>" +
-                // Moderación: sacar del ranking un puntaje que parezca trampa (pide la llave y queda en la auditoría).
+                // Moderación: esconder (reversible) o anular (borra) un puntaje que parezca trampa. Piden la llave y quedan
+                // en la auditoría.
                 ((esModeradorActual || esAdminActual) && !f.esPropio
-                    ? "<button type='button' class='rankingQuitar' data-quitar-puntaje='" + escapeAttr(f.pseudonimo) + "' aria-label='Quitar del ranking el puntaje de " + escapeAttr(f.pseudonimo) + "'>Quitar</button>"
+                    ? "<span class='rankingMod'>" +
+                        "<button type='button' class='rankingQuitar' data-ocultar-puntaje='" + escapeAttr(f.pseudonimo) + "' aria-label='Esconder del ranking el puntaje de " + escapeAttr(f.pseudonimo) + "'>Esconder</button>" +
+                        "<button type='button' class='rankingQuitar peligro' data-quitar-puntaje='" + escapeAttr(f.pseudonimo) + "' aria-label='Anular el puntaje de " + escapeAttr(f.pseudonimo) + "'>Anular</button>" +
+                      "</span>"
                     : "") +
                 "</li>"
         }
@@ -4911,7 +4943,9 @@ async function cargarBootstrap() {
             resolver_aporte: "resolvió un aporte", agregar_material: "agregó material", quitar_material: "quitó material",
             publicar_noticia: "publicó una noticia", asignar_moderador: "dio rol de moderador", quitar_moderador: "quitó un moderador",
             asignar_admin: "dio rol de administrador", quitar_admin: "quitó un administrador",
-            quitar_puntaje: "quitó un puntaje del ranking"
+            quitar_puntaje: "anuló un puntaje del ranking",
+            ocultar_puntaje: "escondió un puntaje del ranking",
+            mostrar_puntaje: "volvió a mostrar un puntaje del ranking"
         }
 
         async function cargarRegistro() {
@@ -5260,6 +5294,7 @@ async function cargarBootstrap() {
 
         async function cargarRankingJuego(forzar) {
             if (!rankingModo || !sesion) return
+            actualizarModeracionRanking()
             const modo = rankingModo.value
             const buscar = rankingBuscar.value.trim()
             if (buscar && buscar.length < 2) { rankingResultados.innerHTML = "<p class='rankingSubtitulo'>Escribí al menos 2 letras.</p>"; return }
@@ -5280,22 +5315,61 @@ async function cargarBootstrap() {
             renderizarRanking(r)
         }
 
-        async function quitarPuntajeRanking(e) {
-            const boton = e.target.closest("[data-quitar-puntaje]")
-            if (!boton) return
-            const pseudonimo = boton.dataset.quitarPuntaje
-            const modo = rankingModo.value
-            if (!confirm("¿Quitar del ranking de " + etiquetaModoRanking(modo) + " el puntaje de " + pseudonimo + "?\n\nUsalo solo si parece trampa. No se puede deshacer y queda en el registro de moderación.")) return
-            boton.disabled = true
-            const r = await llamarModeracion("quitarPuntaje", { juego: JUEGO_RANKING, modo: modo, pseudonimo: pseudonimo })
-            if (!r.ok) { boton.disabled = false; mostrarAviso(mensajeError(r.error)); return }
-            mostrarAviso("Puntaje quitado del ranking.")
-            rankingCache.clear()
-            cargarRankingJuego(true)
+        // ---- Moderación del ranking: esconder (reversible), mostrar de nuevo y anular (borra) ----
+
+        const rankingOcultos = document.getElementById("rankingOcultos")
+
+        function actualizarModeracionRanking() {
+            const caja = document.getElementById("rankingModeracion")
+            if (caja) caja.hidden = !(esModeradorActual || esAdminActual)
         }
 
-        if (rankingLista) rankingLista.addEventListener("click", quitarPuntajeRanking)
-        if (rankingResultados) rankingResultados.addEventListener("click", quitarPuntajeRanking)
+        async function cargarPuntajesOcultos() {
+            if (!rankingOcultos) return
+            rankingOcultos.innerHTML = "<p class='rankingSubtitulo'>Cargando…</p>"
+            const modo = rankingModo.value
+            const r = await llamarModeracion("puntajesOcultos", { juego: JUEGO_RANKING, modo: modo })
+            if (!r.ok) { rankingOcultos.innerHTML = "<p class='rankingSubtitulo'>" + escapeHtml(mensajeError(r.error)) + "</p>"; return }
+            const ocultos = Array.isArray(r.ocultos) ? r.ocultos : []
+            rankingOcultos.innerHTML = ocultos.length
+                ? "<ul class='rankingOcultosLista'>" + ocultos.map(function (o) {
+                    const ritmo = o.segundos > 0 ? (Number(o.kills) / o.segundos).toFixed(1) : "0"
+                    return "<li><span><b>" + escapeHtml(o.pseudonimo) + "</b> · " + escapeHtml(Number(o.puntaje).toLocaleString("es-AR")) + " pts · " +
+                        escapeHtml(formatearDuracion(o.segundos)) + " · " + escapeHtml(ritmo) + " elim./s</span>" +
+                        "<span class='rankingMod'><button type='button' class='rankingQuitar' data-mostrar-puntaje='" + escapeAttr(o.pseudonimo) + "'>Mostrar</button>" +
+                        "<button type='button' class='rankingQuitar peligro' data-quitar-puntaje='" + escapeAttr(o.pseudonimo) + "'>Anular</button></span></li>"
+                }).join("") + "</ul>"
+                : "<p class='rankingSubtitulo'>No hay puntajes escondidos en " + escapeHtml(etiquetaModoRanking(modo)) + ".</p>"
+        }
+
+        async function moderarPuntajeRanking(e) {
+            const boton = e.target.closest("[data-quitar-puntaje],[data-ocultar-puntaje],[data-mostrar-puntaje]")
+            if (!boton) return
+            const modo = rankingModo.value
+            const d = boton.dataset
+            let accion, params, aviso
+            if (d.quitarPuntaje !== undefined) {
+                if (!confirm("¿Anular el puntaje de " + d.quitarPuntaje + " en " + etiquetaModoRanking(modo) + "?\n\nSe borra y no se puede deshacer (si querés poder revertirlo, usá Esconder). Queda en el registro de moderación.")) return
+                accion = "quitarPuntaje"; params = { pseudonimo: d.quitarPuntaje }; aviso = "Puntaje anulado."
+            } else if (d.ocultarPuntaje !== undefined) {
+                accion = "ocultarPuntaje"; params = { pseudonimo: d.ocultarPuntaje, oculto: true }; aviso = "Puntaje escondido. Lo podés volver a mostrar desde «Puntajes escondidos»."
+            } else {
+                accion = "ocultarPuntaje"; params = { pseudonimo: d.mostrarPuntaje, oculto: false }; aviso = "Puntaje visible de nuevo."
+            }
+            boton.disabled = true
+            const r = await llamarModeracion(accion, Object.assign({ juego: JUEGO_RANKING, modo: modo }, params))
+            if (!r.ok) { boton.disabled = false; mostrarAviso(mensajeError(r.error)); return }
+            mostrarAviso(aviso)
+            rankingCache.clear()
+            cargarRankingJuego(true)
+            if (rankingOcultos && rankingOcultos.innerHTML) cargarPuntajesOcultos()
+        }
+
+        if (rankingLista) rankingLista.addEventListener("click", moderarPuntajeRanking)
+        if (rankingResultados) rankingResultados.addEventListener("click", moderarPuntajeRanking)
+        if (rankingOcultos) rankingOcultos.addEventListener("click", moderarPuntajeRanking)
+        const botonVerOcultos = document.getElementById("rankingVerOcultos")
+        if (botonVerOcultos) botonVerOcultos.addEventListener("click", cargarPuntajesOcultos)
 
         if (rankingModo) {
             rankingModo.addEventListener("change", function () {
