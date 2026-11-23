@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-inicio"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-accesibilidad"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -630,14 +630,24 @@ const hilosPendientesConfirmacion = new Map()
 
         // ==================== MODALES ====================
 
+        // Al abrir un modal el foco entra en él; al cerrarlo vuelve al control que lo abrió.
+        let focoAntesDelModal = null
+
         function abrirModal(modal) {
+            focoAntesDelModal = document.activeElement
             modal.classList.add("abierto")
             document.addEventListener("keydown", cerrarModalConEscape)
+            requestAnimationFrame(function () {
+                const primero = modal.querySelector("textarea, input:not([type=hidden]), select, button:not(.modalCerrar)")
+                if (primero && !modal.contains(document.activeElement)) primero.focus()
+            })
         }
 
         function cerrarModal(modal) {
             modal.classList.remove("abierto")
             document.removeEventListener("keydown", cerrarModalConEscape)
+            if (focoAntesDelModal && document.contains(focoAntesDelModal)) focoAntesDelModal.focus()
+            focoAntesDelModal = null
         }
 
         // El modal de bienvenida es obligatorio: no se cierra con Escape ni tocando afuera
@@ -1048,6 +1058,8 @@ async function cargarBootstrap() {
         tabLogin.addEventListener("click", function () {
             tabLogin.classList.add("tabActiva")
             tabRegistro.classList.remove("tabActiva")
+            tabLogin.setAttribute("aria-pressed", "true")
+            tabRegistro.setAttribute("aria-pressed", "false")
             formLogin.style.display = "block"
             formRegistro.style.display = "none"
             panelRecuperarPassword.style.display = "none"
@@ -1057,6 +1069,8 @@ async function cargarBootstrap() {
         tabRegistro.addEventListener("click", function () {
             tabRegistro.classList.add("tabActiva")
             tabLogin.classList.remove("tabActiva")
+            tabRegistro.setAttribute("aria-pressed", "true")
+            tabLogin.setAttribute("aria-pressed", "false")
             formRegistro.style.display = "block"
             formLogin.style.display = "none"
             panelRecuperarPassword.style.display = "none"

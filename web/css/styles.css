@@ -2587,3 +2587,10 @@
             .novedadesCompactas .novedad { padding: 14px; }
             .novedadesCompactas .novedadTitulo { font-size: .98rem; }
         }
+
+        /* ---------- AUDITORÍA DE ACCESIBILIDAD (rediseño, fase 4) ---------- */
+        /* body.temaOscuro a {color} le ganaba por especificidad y dejaba el texto ilegible (1,2:1). */
+        body .saltarContenido, body.temaOscuro .saltarContenido {
+            color: var(--on-brand);
+            box-shadow: 0 0 0 2px var(--on-hero), 0 6px 18px rgba(0, 0, 0, .25);
+        }

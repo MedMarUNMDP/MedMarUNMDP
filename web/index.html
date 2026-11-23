@@ -48,7 +48,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261123d">
+    <link rel="stylesheet" href="/css/styles.css?v=20261123e">
 </head>
 
 <body>
@@ -77,8 +77,8 @@
             <div class="separador">o con email y contraseña</div>
 
             <div class="tabs">
-                <button type="button" id="tabLogin" class="tabActiva">Iniciar sesión</button>
-                <button type="button" id="tabRegistro">Crear cuenta</button>
+                <button type="button" id="tabLogin" class="tabActiva" aria-pressed="true">Iniciar sesión</button>
+                <button type="button" id="tabRegistro" aria-pressed="false">Crear cuenta</button>
             </div>
 
             <form id="formLogin">
@@ -604,11 +604,11 @@
 
                 <p id="msgFoto"></p>
 
-                <h3 class="seccion-titulo">Tu pseudónimo</h3>
-                <p class="ayudaPerfil">Así te van a ver otros estudiantes en el foro y en los juegos.</p>
+                <h3 class="seccion-titulo" id="tituloPseudonimo">Tu pseudónimo</h3>
+                <p class="ayudaPerfil" id="ayudaPseudonimo">Así te van a ver otros estudiantes en el foro y en los juegos.</p>
 
                 <form id="formPerfil">
-                    <input type="text" id="inputPseudonimo" maxlength="24" required>
+                    <input type="text" id="inputPseudonimo" maxlength="24" required aria-labelledby="tituloPseudonimo" aria-describedby="ayudaPseudonimo">
                     <button type="submit" class="btn-secundario">Guardar pseudónimo</button>
                 </form>
 
@@ -712,11 +712,11 @@
 
     <!-- ==================== MODAL: PUBLICAR EN EL FORO ==================== -->
 
-    <div id="modalCompose" class="modalFondo">
+    <div id="modalCompose" class="modalFondo" role="dialog" aria-modal="true" aria-labelledby="tituloCompose">
         <div class="modalCaja">
 
             <div class="modalEncabezado">
-                <h2>Publicar en el foro</h2>
+                <h2 id="tituloCompose">Publicar en el foro</h2>
                 <button type="button" class="modalCerrar" id="btnCerrarCompose" aria-label="Cerrar">×</button>
             </div>
 
@@ -764,7 +764,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261123d"></script>
+    <script src="/js/app.js?v=20261123e"></script>
 
 
 </body>
