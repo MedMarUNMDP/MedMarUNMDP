@@ -73,12 +73,13 @@
   }
 
   // Mismos topes que valida el servidor (guardarPuntaje): una partida que no los cumple no entra al ranking.
+  // No hay tope de eliminaciones por segundo (un jugador muy fuerte elimina muchísimo): las trampas se detectan con
+  // las estadísticas del ranking que ven los moderadores.
   function esPartidaPlausible(p) {
     const n = (v) => (Number.isInteger(v) && v >= 0 ? v : -1);
     const segundos = n(p.segundos), kills = n(p.kills), correctas = n(p.correctas), preguntas = n(p.preguntas), jefes = n(p.jefes);
     if ([segundos, kills, correctas, preguntas, jefes].some((v) => v < 0)) return false;
     if (segundos < 20 || segundos > 4 * 3600) return false;
-    if (kills > segundos * 6 + 60) return false;
     if (preguntas > Math.floor(segundos / 10) + 5 || correctas > preguntas) return false;
     return jefes <= Math.floor(segundos / 25) + 3;
   }

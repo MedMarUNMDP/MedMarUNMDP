@@ -3326,6 +3326,17 @@
         .rankingFila:has(.rankingMod) { grid-template-columns: 44px 34px minmax(0, 1fr) auto auto; }
         .rankingModeracion { margin-top: 16px; padding-top: 12px; border-top: 1px dashed var(--line-strong); }
         .rankingModeracion > .btn-secundario { width: auto; }
+        .rankingModBotones { display: flex; flex-wrap: wrap; gap: 8px; }
+        .rankingModBotones .btn-secundario { width: auto; margin: 0; }
+        #rankingEstadisticas:not(:empty) { margin-top: 12px; }
+        .rankingTablaScroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; }
+        .rankingTabla { width: 100%; border-collapse: collapse; font-size: .85rem; margin-top: 10px; }
+        .rankingTablaScroll .rankingTabla { margin-top: 0; }
+        .rankingTablaAncha { min-width: 640px; }
+        .rankingTabla caption { text-align: left; font-weight: 700; color: var(--ink-soft); padding-bottom: 6px; }
+        .rankingTabla th, .rankingTabla td { padding: 6px 8px; border-bottom: 1px solid var(--line-soft); text-align: left; white-space: nowrap; }
+        .rankingTabla th { font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-3); }
+        .rankingTabla .filaInusual td { background: var(--gold-soft); }
         .rankingOcultosLista { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 8px; }
         .rankingOcultosLista li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: .92rem; }
         @media (max-width: 520px) {

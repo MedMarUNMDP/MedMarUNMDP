@@ -328,7 +328,7 @@
   const FICHAS_DATA = globalThis.InmuneFichas || null;
   const MODOS_API = globalThis.InmuneModos || null;
   const PREGUNTAS_DATA = globalThis.InmunePreguntasNucleos || null;
-  const GAME_VERSION = '3.11.0';
+  const GAME_VERSION = '3.11.1';
   // Arte propio de los jefes de núcleo (assets/boss_*.webp, recortados de docs/arte/jefes-nucleo-3x3.png).
   const BOSS_ART = {
     'escherichia-coli':'boss_stec', 'mycobacterium-tuberculosis':'boss_granuloma', 'neisseria-meningitidis':'boss_meningococo',

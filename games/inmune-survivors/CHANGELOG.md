@@ -2,12 +2,15 @@
 
 Formato: la versión más nueva arriba. Al publicar una versión, agregá una sección nueva acá y subí `?build=` en index.html (ver CLAUDE.md del juego). El historial previo a v3.1 está en `README.txt`.
 
-## v3.11
+## v3.11.1
 
 **Ranking**
-- El tope de eliminaciones por segundo que valida el servidor pasó de 3/s a 6/s: rechazaba partidas reales largas
-  (después del minuto 15 el ritmo crece mucho). El juego usa el mismo tope y, si el servidor rechaza una partida,
-  ahora dice por qué.
+- Sin tope de eliminaciones por segundo: un jugador muy fuerte puede eliminar muchísimo y el tope rechazaba
+  partidas reales. Cada partida guardada queda en un historial y los moderadores ven estadísticas por modo
+  (ritmo típico según la duración) con los puntajes fuera de lo común marcados. Si el servidor rechaza una
+  partida por otro motivo, el juego dice cuál.
+
+## v3.11
 
 **Enemigos y jefes**
 - Parte de los enemigos aparece dentro de la pantalla (lejos del jugador) con un fundido de 0,7 s, sin hacer daño

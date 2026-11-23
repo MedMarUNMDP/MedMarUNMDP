@@ -59,6 +59,7 @@ const RATE_LIMITS: Record<string, [number, number]> = {
   quitarMaterial: [30, 600],
   quitarPuntaje: [30, 600],
   ocultarPuntaje: [60, 600],
+  estadisticasRanking: [30, 600],
   puntajesOcultos: [60, 600],
   desafioModeracion: [20, 600],
   abrirSesionModeracion: [10, 600],
@@ -1013,20 +1014,18 @@ function validarPartida(body: any): any {
   const preguntas = enteroNoNegativo(body?.preguntas)
   const jefes = enteroNoNegativo(body?.jefes)
   if (segundos === null || kills === null || correctas === null || preguntas === null || jefes === null) return { motivo: 'datos' }
-  // Plausibilidad: el arnés de simulación da ~0,8 eliminaciones por segundo y el máximo real en partidas cortas fue
-  // ~1,4/s (nov 2026), pero el ritmo crece mucho después del minuto 15 (oleadas grandes y jugador fuerte): el tope
-  // de 3/s rechazaba partidas reales largas. Tope: 6/s + 60. Los puntajes sospechosos dentro del tope los esconde o
-  // quita un moderador (ocultarPuntaje / quitarPuntaje).
-  // Además: no hay partidas de menos de 20 s, ni más preguntas que una cada ~10 s, ni más de un jefe cada ~25 s.
+  // Plausibilidad. Sin tope de eliminaciones por segundo: un jugador muy fuerte puede eliminar muchísimo y el tope
+  // rechazaba partidas reales. Las sospechosas se detectan con estadísticas (partidas_juegos, estadisticasRanking) y
+  // las esconde o anula un moderador. Sí se controla: no hay partidas de menos de 20 s, ni más preguntas que una
+  // cada ~10 s, ni más de un jefe cada ~25 s, y el puntaje tiene que coincidir con la fórmula.
   if (segundos < PARTIDA_MIN_SEGUNDOS || segundos > PARTIDA_MAX_SEGUNDOS) return { motivo: 'duracion' }
-  if (kills > segundos * 6 + 60) return { motivo: 'eliminaciones' }
   if (preguntas > Math.floor(segundos / 10) + 5 || correctas > preguntas) return { motivo: 'preguntas' }
   if (jefes > Math.floor(segundos / 25) + 3) return { motivo: 'jefes' }
   const puntaje = Math.floor((kills * 10 + segundos * 2 + correctas * 25) * MULT_INFECCION[dificultadInfeccion] * MULT_EVOLUCION[dificultadEvolucion])
   // Si el cliente dice otro puntaje, la partida no se corresponde con lo que se jugó (o se modificó).
   if (body?.puntaje !== undefined && Number(body.puntaje) !== puntaje) return { motivo: 'puntaje' }
   const version = String(body?.version || '').slice(0, 20)
-  return { juego, modo, segundos, puntaje, detalle: { kills, correctas, preguntas, jefes, dificultadInfeccion, dificultadEvolucion, version } }
+  return { juego, modo, segundos, puntaje, kills, detalle: { kills, correctas, preguntas, jefes, dificultadInfeccion, dificultadEvolucion, version } }
 }
 
 async function posicionEnRanking(client: SupabaseClient, userId: string, juego: string, modo: string) {
@@ -1045,6 +1044,76 @@ async function iniciarPartida(user: User, body: any) {
   const inicio = Date.now()
   const firma = await firmaPartida(`${id}.${user.id}.${juego}.${modo}.${inicio}`)
   return json({ ok: true, partida: `${id}.${inicio}.${firma}` })
+}
+
+// Historial de partidas para las estadísticas del ranking. Si falla (p. ej. la migración todavía no se aplicó), el
+// puntaje se guarda igual: el historial es secundario.
+async function registrarPartida(admin: SupabaseClient, userId: string, p: any) {
+  const d = p.detalle
+  const { error } = await admin.from('partidas_juegos').insert({
+    user_id: userId, juego: p.juego, modo: p.modo, puntaje: p.puntaje, segundos: p.segundos, kills: d.kills,
+    correctas: d.correctas, preguntas: d.preguntas, jefes: d.jefes, dificultad_infeccion: d.dificultadInfeccion,
+    dificultad_evolucion: d.dificultadEvolucion, version: d.version,
+  })
+  if (error) console.warn('partida_sin_historial', error.message)
+}
+
+// Estadísticas de un modo para moderadores: ritmo de eliminaciones por segundo (mediana, p90 y p99) por tramo de
+// duración, y los mejores puntajes con el detalle de su partida. Una partida se marca "inusual" cuando su ritmo
+// queda muy por encima de lo habitual para partidas de duración parecida (con al menos 15 de referencia).
+const TRAMOS_DURACION = [
+  { id: 'corta', etiqueta: 'Hasta 5 min', hasta: 300 },
+  { id: 'media', etiqueta: '5 a 15 min', hasta: 900 },
+  { id: 'larga', etiqueta: '15 a 30 min', hasta: 1800 },
+  { id: 'muy_larga', etiqueta: 'Más de 30 min', hasta: Infinity },
+]
+const MIN_PARTIDAS_REFERENCIA = 15
+function tramoDe(segundos: number) { return TRAMOS_DURACION.find((t) => segundos <= t.hasta)! }
+function percentil(ordenados: number[], q: number) {
+  if (!ordenados.length) return null
+  const i = Math.min(ordenados.length - 1, Math.max(0, Math.ceil(q * ordenados.length) - 1))
+  return Math.round(ordenados[i] * 100) / 100
+}
+function resumenRitmos(valores: number[]) {
+  const o = [...valores].sort((a, b) => a - b)
+  return { partidas: o.length, mediana: percentil(o, 0.5), p90: percentil(o, 0.9), p99: percentil(o, 0.99), maximo: o.length ? Math.round(o[o.length - 1] * 100) / 100 : null }
+}
+
+async function estadisticasRanking(admin: SupabaseClient, body: any) {
+  const juego = String(body?.juego || ''), modo = String(body?.modo || '')
+  if (!JUEGOS_RANKING.has(juego) || !MODO_RANKING.test(modo)) return json({ ok: false, error: 'modo_invalido' })
+  const { data: partidas, error } = await admin.from('partidas_juegos').select('segundos,kills')
+    .eq('juego', juego).eq('modo', modo).order('created_at', { ascending: false }).limit(3000)
+  if (error) throw error
+  const porTramo: Record<string, number[]> = Object.fromEntries(TRAMOS_DURACION.map((t) => [t.id, []]))
+  const todos: number[] = []
+  for (const p of partidas || []) {
+    const s = Number(p.segundos), k = Number(p.kills)
+    if (!(s >= 60)) continue
+    const r = k / s
+    todos.push(r); porTramo[tramoDe(s).id].push(r)
+  }
+  const tramos = TRAMOS_DURACION.map((t) => ({ id: t.id, etiqueta: t.etiqueta, ...resumenRitmos(porTramo[t.id]) }))
+  const general = resumenRitmos(todos)
+  const { data: mejores, error: errMejores } = await admin.from('puntajes_juegos')
+    .select('user_id,puntaje,segundos,detalle,oculto,partidas,logrado_at')
+    .eq('juego', juego).eq('modo', modo).order('puntaje', { ascending: false }).limit(25)
+  if (errMejores) throw errMejores
+  const nombres = await profileMap(admin, (mejores || []).map((r: any) => String(r.user_id)))
+  const top = (mejores || []).map((r: any) => {
+    const segundos = Number(r.segundos), d = r.detalle || {}, kills = Number(d.kills ?? 0)
+    const ritmo = segundos > 0 ? Math.round(kills / segundos * 100) / 100 : 0
+    const tramo = tramos.find((t) => t.id === tramoDe(segundos).id)!
+    const ref = tramo.partidas >= MIN_PARTIDAS_REFERENCIA ? tramo : general.partidas >= MIN_PARTIDAS_REFERENCIA ? general : null
+    const inusual = !!ref && ref.p90 !== null && ref.p99 !== null && ritmo > Math.max(ref.p99 * 1.2, ref.p90 * 1.6)
+    return {
+      pseudonimo: nombres.get(String(r.user_id))?.pseudonimo || 'Estudiante', puntaje: Number(r.puntaje), segundos, kills, ritmo,
+      correctas: Number(d.correctas ?? 0), preguntas: Number(d.preguntas ?? 0), jefes: Number(d.jefes ?? 0),
+      dificultad: [d.dificultadInfeccion, d.dificultadEvolucion].filter(Boolean).join(' · '), version: String(d.version || ''),
+      partidas: Number(r.partidas || 1), oculto: !!r.oculto, fecha: r.logrado_at, tramo: tramo.etiqueta, inusual,
+    }
+  })
+  return json({ ok: true, juego, modo, general, tramos, top, minimoReferencia: MIN_PARTIDAS_REFERENCIA })
 }
 
 async function guardarPuntaje(user: User, client: SupabaseClient, admin: SupabaseClient, body: any) {
@@ -1067,6 +1136,7 @@ async function guardarPuntaje(user: User, client: SupabaseClient, admin: Supabas
     console.warn('partida_invalida', 'tiempo', user.id)
     return json({ ok: false, error: 'partida_invalida', motivo: 'tiempo' })
   }
+  await registrarPartida(admin, user.id, partida)
   let record = false
   let mejor = puntaje
   for (let intento = 0; intento < 2; intento++) {
@@ -1518,6 +1588,11 @@ async function handle(req: Request, body: any) {
       const f:any=filas[0]
       await auditar(admin,user.id,auth.llaveId,oculto?'ocultar_puntaje':'mostrar_puntaje',{usuario:String(perfil.id),juego,modo,puntaje:f.puntaje,segundos:f.segundos,kills:f.detalle?.kills??null})
       return json({ok:true,oculto})
+    }
+    case 'estadisticasRanking': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      return estadisticasRanking(admin,body)
     }
     case 'puntajesOcultos': {
       // Lista para moderadores: puntajes escondidos de un modo, con el detalle de la partida para decidir.

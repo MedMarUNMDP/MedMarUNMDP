@@ -91,5 +91,4 @@ test('una partida larga real (bot invulnerable, 6 min, inmunosuprimido) pasa los
   const p = h.scene.getRankingPayload(h.scene.getScore());
   assert.ok(p.segundos >= 300, `la partida se trabó a los ${p.segundos} s`);
   assert.ok(Modos.esPartidaPlausible(p), `partida rechazada: ${JSON.stringify(p)}`);
-  assert.ok(p.kills < p.segundos * 4, `ritmo de eliminaciones muy cerca del tope: ${p.kills} en ${p.segundos} s`);
 });

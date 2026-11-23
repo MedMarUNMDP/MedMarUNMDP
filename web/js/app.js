@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-26-inicio"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-26-estadisticas"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -5368,6 +5368,50 @@ async function cargarBootstrap() {
         if (rankingLista) rankingLista.addEventListener("click", moderarPuntajeRanking)
         if (rankingResultados) rankingResultados.addEventListener("click", moderarPuntajeRanking)
         if (rankingOcultos) rankingOcultos.addEventListener("click", moderarPuntajeRanking)
+        // Estadísticas para moderadores: ritmo de eliminaciones típico por duración y el detalle de los mejores
+        // puntajes, con los fuera de lo común marcados. No hay tope automático: esto ayuda a decidir a mano.
+        const rankingEstadisticas = document.getElementById("rankingEstadisticas")
+
+        function numeroCorto(n, dec) {
+            return n === null || n === undefined ? "—" : Number(n).toLocaleString("es-AR", { maximumFractionDigits: dec === undefined ? 2 : dec })
+        }
+
+        async function cargarEstadisticasRanking() {
+            if (!rankingEstadisticas) return
+            rankingEstadisticas.innerHTML = "<p class='rankingSubtitulo'>Calculando…</p>"
+            const modo = rankingModo.value
+            const r = await llamarModeracion("estadisticasRanking", { juego: JUEGO_RANKING, modo: modo })
+            if (!r.ok) { rankingEstadisticas.innerHTML = "<p class='rankingSubtitulo'>" + escapeHtml(mensajeError(r.error)) + "</p>"; return }
+            const g = r.general || {}
+            const tramos = (r.tramos || []).filter(function (t) { return t.partidas > 0 })
+            const resumen = "<p class='rankingSubtitulo'>" + escapeHtml(numeroCorto(g.partidas, 0)) + " partidas registradas en " + escapeHtml(etiquetaModoRanking(modo)) +
+                (g.partidas ? " · eliminaciones por segundo: mediana " + escapeHtml(numeroCorto(g.mediana)) + ", 9 de cada 10 por debajo de " + escapeHtml(numeroCorto(g.p90)) + ", máximo " + escapeHtml(numeroCorto(g.maximo)) : "") +
+                ".</p>"
+            const tablaTramos = tramos.length
+                ? "<div class='rankingTablaScroll'><table class='rankingTabla'><caption>Ritmo típico por duración (eliminaciones/s)</caption><thead><tr><th>Duración</th><th>Partidas</th><th>Mediana</th><th>p90</th><th>p99</th></tr></thead><tbody>" +
+                    tramos.map(function (t) {
+                        return "<tr><td>" + escapeHtml(t.etiqueta) + "</td><td>" + escapeHtml(numeroCorto(t.partidas, 0)) + "</td><td>" + escapeHtml(numeroCorto(t.mediana)) + "</td><td>" + escapeHtml(numeroCorto(t.p90)) + "</td><td>" + escapeHtml(numeroCorto(t.p99)) + "</td></tr>"
+                    }).join("") + "</tbody></table></div>"
+                : ""
+            const top = Array.isArray(r.top) ? r.top : []
+            const tablaTop = top.length
+                ? "<div class='rankingTablaScroll'><table class='rankingTabla rankingTablaAncha'><caption>Mejores puntajes con el detalle de la partida</caption><thead><tr><th>Jugador</th><th>Puntos</th><th>Duración</th><th>Elim.</th><th>Elim./s</th><th>Preguntas</th><th>Jefes</th><th>Dificultad</th></tr></thead><tbody>" +
+                    top.map(function (f) {
+                        const marca = f.inusual ? " <span class='estadoChip estadoAviso' title='Muy por encima de lo habitual para partidas de duración parecida'>Inusual</span>" : ""
+                        const oculto = f.oculto ? " <span class='estadoChip'>Escondido</span>" : ""
+                        return "<tr" + (f.inusual ? " class='filaInusual'" : "") + "><td><b>" + escapeHtml(f.pseudonimo) + "</b>" + marca + oculto + "</td><td>" + escapeHtml(numeroCorto(f.puntaje, 0)) +
+                            "</td><td>" + escapeHtml(formatearDuracion(f.segundos)) + "</td><td>" + escapeHtml(numeroCorto(f.kills, 0)) + "</td><td>" + escapeHtml(numeroCorto(f.ritmo)) +
+                            "</td><td>" + escapeHtml(f.correctas + "/" + f.preguntas) + "</td><td>" + escapeHtml(numeroCorto(f.jefes, 0)) + "</td><td>" + escapeHtml(f.dificultad) + "</td></tr>"
+                    }).join("") + "</tbody></table></div>"
+                : "<p class='rankingSubtitulo'>Todavía no hay puntajes en este modo.</p>"
+            const nota = g.partidas < (r.minimoReferencia || 15)
+                ? "<p class='ayudaPerfil'>Con menos de " + escapeHtml(String(r.minimoReferencia || 15)) + " partidas todavía no se marcan puntajes inusuales: hacen falta más datos para saber qué es normal.</p>"
+                : "<p class='ayudaPerfil'>«Inusual» = ritmo de eliminaciones muy por encima de lo habitual para partidas de duración parecida. Es una pista, no una prueba: mirá el resto del detalle antes de esconder o anular.</p>"
+            rankingEstadisticas.innerHTML = resumen + tablaTramos + tablaTop + nota
+        }
+
+        const botonVerEstadisticas = document.getElementById("rankingVerEstadisticas")
+        if (botonVerEstadisticas) botonVerEstadisticas.addEventListener("click", cargarEstadisticasRanking)
         const botonVerOcultos = document.getElementById("rankingVerOcultos")
         if (botonVerOcultos) botonVerOcultos.addEventListener("click", cargarPuntajesOcultos)
 
