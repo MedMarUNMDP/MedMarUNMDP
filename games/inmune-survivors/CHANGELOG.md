@@ -2,6 +2,46 @@
 
 Formato: la versión más nueva arriba. Al publicar una versión, agregá una sección nueva acá y subí `?build=` en index.html (ver CLAUDE.md del juego). El historial previo a v3.1 está en `README.txt`.
 
+## v3.11
+
+**Ranking**
+- El tope de eliminaciones por segundo que valida el servidor pasó de 3/s a 6/s: rechazaba partidas reales largas
+  (después del minuto 15 el ritmo crece mucho). El juego usa el mismo tope y, si el servidor rechaza una partida,
+  ahora dice por qué.
+
+**Enemigos y jefes**
+- Parte de los enemigos aparece dentro de la pantalla (lejos del jugador) con un fundido de 0,7 s, sin hacer daño
+  mientras aparecen.
+- Mutación cada 10 minutos: los enemigos nuevos nacen con ×1,65 de vida y ×1,3 de daño, acumulativo.
+- Los jefes atacan más seguido y con más proyectiles a medida que avanza la partida. El Micelio ancestral dispara
+  esporas que salen en una dirección al azar y después persiguen al jugador; a los 16 minutos lanza muchas más.
+- Si se acaban las preguntas sin haber derrotado a todos los jefes, aparecen cada 2 minutos en vez de cada 4.
+- Helminto colosal: sin el anillo circular (no encajaba con un gusano), los anticuerpos se pegan al segmento del
+  cuerpo que tocan y, al derrotarlo, devuelve toda la experiencia que robó.
+- Con muchos anticuerpos encima, el jefe ya no queda blanco fijo: el daño periódico no destella y el destello de
+  los jefes se espacia.
+
+**Jugador y habilidades**
+- Sin el halo ni el contorno fijos alrededor del jugador: el contorno solo destella al recibir daño, y el halo
+  solo aparece en el refugio de una colonia.
+- La fagocitosis cura desde una reserva (10% de la vida máxima, se recarga 1,2% por segundo): ya no cura sin límite.
+- No se ofrecen habilidades ni mejoras que ya llegaron a su tope (complemento, linfocitos B, macrófagos, gránulos,
+  perforación, NETosis).
+- Los macrófagos amigos buscan blancos distintos y se mantienen separados.
+
+**Experiencia**
+- Dura 45 s en el piso (antes 30). La que cae encima de otra se suma, y la que vence se fusiona con la más cercana
+  en vez de perderse.
+- Una vez atraída, acelera hasta alcanzar al jugador: con quimiotaxis alta ya no se la puede dejar atrás.
+
+**Preguntas**
+- No se repiten: al agotarse las de tu dificultad siguen las del nivel siguiente.
+- «No cursé» suma 15 preguntas de datos curiosos (historia de la medicina y datos generales).
+
+**Controles**
+- Menús con teclado en PC: flechas o WASD para moverse, Enter o Espacio para elegir. Al abrirse una pregunta o
+  una mejora, la primera opción ya queda marcada.
+
 ## v3.10
 
 **Preguntas por núcleo** (415 en total: 55 del núcleo 6 y 45 de cada uno de los demás).

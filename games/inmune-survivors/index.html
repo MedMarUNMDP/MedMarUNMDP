@@ -17,7 +17,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Inmune Survivors">
   <link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
-  <title>Inmune Survivors v3.10 — Preguntas por núcleo</title>
+  <title>Inmune Survivors v3.11 — Jefes, mutaciones y menús con teclado</title>
   <style>
     :root {
       --bg: #07111f; --panel: #101f33; --panel2: #142942; --line: #29415b;
@@ -241,6 +241,8 @@
       .choice-icon { width:35px; height:35px; font-size:23px; }
       .modal { padding:17px; }
     }
+    /* Navegación con teclado (flechas/WASD + Enter/Espacio): la opción con foco se marca bien. */
+    .modal-layer button:focus-visible, #menuScreen button:focus-visible, #menuScreen select:focus-visible, #menuScreen a:focus-visible, #menuScreen input:focus-visible { outline: 3px solid #ffd875; outline-offset: 3px; box-shadow: 0 0 0 6px rgba(255,216,117,.22); }
   </style>
 </head>
 <body>
@@ -412,14 +414,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js"
           integrity="sha512-/tJYyDCrI7hnHWp45P189aOwPa6lTREosRhlxEIqx8skB4A3a3rD3iz4o335SJd4sORqjVHw5y1S2hq4hciwLw=="
           crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="./src/core/runtime-services.js?build=3.10.0"></script>
-  <script src="./src/config/game-balance.js?build=3.10.0"></script>
-  <script src="./src/core/lab-actions.js?build=3.10.0"></script>
-  <script src="./src/data/agentes.js?build=3.10.0"></script>
-  <script src="./src/data/fichas.js?build=3.10.0"></script>
-  <script src="./src/data/preguntas-nucleos.js?build=3.10.0"></script>
-  <script src="./src/core/modos.js?build=3.10.0"></script>
-  <script src="./game.js?build=3.10.0"></script>
+  <script src="./src/core/runtime-services.js?build=3.11.0"></script>
+  <script src="./src/config/game-balance.js?build=3.11.0"></script>
+  <script src="./src/core/lab-actions.js?build=3.11.0"></script>
+  <script src="./src/data/agentes.js?build=3.11.0"></script>
+  <script src="./src/data/fichas.js?build=3.11.0"></script>
+  <script src="./src/data/preguntas-nucleos.js?build=3.11.0"></script>
+  <script src="./src/core/modos.js?build=3.11.0"></script>
+  <script src="./game.js?build=3.11.0"></script>
 </body>
 </html>
 

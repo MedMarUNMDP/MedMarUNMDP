@@ -2,7 +2,7 @@
 
 Survivor de arena (estilo "bullet heaven") educativo: un progenitor hematopoyético defiende un tejido
 infectado. Ataque automático; el jugador solo se mueve. Subir de nivel = responder una pregunta de
-inmunología/microbiología (acierto → mejora de vía; error → oleada extra). Versión actual: **3.10**. Modos: **Sandbox infinito** y **Foco por núcleo**,
+inmunología/microbiología (acierto → mejora de vía; error → oleada extra). Versión actual: **3.11**. Modos: **Sandbox infinito** y **Foco por núcleo**,
 con ranking en MedMar.
 
 ## Archivos
@@ -10,7 +10,7 @@ con ranking en MedMar.
 - `index.html` — entrada, UI de menús/HUD en HTML+CSS, carga Phaser 3.90 (cdnjs) y los scripts con `?build=`.
 - `game.js` — escena Phaser `Arena` (~1.900 líneas, muchas muy largas) + tablas de datos al principio:
   `INFECTIONS`, `TISSUE_VISUALS`, `INFECTION_DIFFICULTIES`, `EVOLUTION_DIFFICULTIES`, `MORPHOLOGY`,
-  `BOSS_MORPHOLOGIES`, `QUESTION_BANK` (83 preguntas), `PLAUSIBLE_OPTIONS`, `EVOLUTION_STRATEGIES`.
+  `BOSS_MORPHOLOGIES`, `QUESTION_BANK` (98 preguntas), `PLAUSIBLE_OPTIONS`, `EVOLUTION_STRATEGIES`.
 - `src/config/game-balance.js` — límites, multiplicadores y efectos por vía (fuente única de verdad de las tarjetas).
 - `src/core/runtime-services.js` — `Rng`, `Clock`, `Storage` inyectables (tests reproducibles).
 - `src/core/lab-actions.js` — acciones del modo Laboratorio.

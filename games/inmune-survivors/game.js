@@ -12,6 +12,26 @@
   let W = 480, H = 800, RENDER_RES = 1;
   const WORLD = 3000, CENTER = WORLD / 2, ARENA_RADIUS = 1110;
   const BOSS_SPAWN_GRACE_MS = 1600;
+  // Apariciones dentro de la pantalla: proporción, distancia mínima al jugador y duración del fundido (sin daño).
+  const ON_SCREEN_SPAWN_CHANCE = 0.45;
+  const ON_SCREEN_SPAWN_MIN_DIST = 230;
+  const SPAWN_FADE_MS = 700;
+  // Mutación de los patógenos: cada ENEMY_TIER_SECONDS los enemigos nuevos nacen con más vida y daño (acumulativo).
+  const ENEMY_TIER_SECONDS = 600;
+  const ENEMY_TIER_HP = 1.65;
+  const ENEMY_TIER_DAMAGE = 1.3;
+  // Jefes: cada cuánto aparecen (y cada cuánto cuando ya no quedan preguntas nuevas).
+  const BOSS_INTERVAL_MS = 240000;
+  const BOSS_INTERVAL_SIN_PREGUNTAS_MS = 120000;
+  // Fagocitosis: la curación sale de una reserva que se recarga (tope de curación por tiempo).
+  const PHAGO_HEAL_BUDGET_FRACTION = 0.10; // reserva máxima: 10% de la vida máxima
+  const PHAGO_HEAL_REGEN_FRACTION = 0.012; // recarga por segundo: 1,2% de la vida máxima
+  // Separación mínima entre macrófagos amigos.
+  const MACROPHAGE_SPACING = 46;
+  // Experiencia: cuánto dura en el piso, a qué distancia se suma con otra al caer y a cuál busca antes de desaparecer.
+  const XP_DROP_LIFE_MS = 45000;
+  const XP_MERGE_RADIUS = 30;
+  const XP_EXPIRE_MERGE_RADIUS = 420;
   const PHAGO_LARGE_TIER = 2;
   const PHAGO_SWARM_LIMIT = 4; // fagocitables cerca a partir de los cuales los proyectiles también les disparan
   const PHAGO_SEEK_RANGE = 220; // más allá del alcance, distancia a la que los pseudópodos ya apuntan a un fagocitable // sizeTier de los arquetipos bruto y élite (los comunes son 0)
@@ -138,6 +158,22 @@
     { id:'easy-basic-23', difficulty:'facil', topic:'Antibióticos', q:'¿Los antibióticos curan un resfrío causado por un virus?', a:['No; los antibióticos no actúan contra los virus','Sí; todos los resfríos se curan con antibióticos','Sí, pero solo si se toman una vez','No, porque los resfríos son causados por hongos'], c:0, exp:'Los antibióticos no tratan infecciones virales como muchos resfríos.', source:'CDC · conceptos básicos de inmunidad, vacunación, prevención y antibióticos' },
     { id:'easy-basic-24', difficulty:'facil', topic:'Antibióticos', q:'¿Por qué no conviene tomar antibióticos por cuenta propia?', a:['Porque no sirven para todas las infecciones y su uso innecesario puede causar problemas','Porque debilitan siempre los huesos','Porque solo funcionan con alimentos dulces','Porque reemplazan a las vacunas'], c:0, exp:'Los antibióticos deben utilizarse cuando son necesarios; el uso innecesario puede causar efectos adversos y favorecer resistencia.', source:'CDC · conceptos básicos de inmunidad, vacunación, prevención y antibióticos' },
     { id:'easy-basic-25', difficulty:'facil', topic:'Inmunología básica', q:'¿Qué puede indicar la fiebre durante una infección?', a:['Que el cuerpo está respondiendo a un problema, aunque no revela por sí sola la causa','Que la infección siempre es bacteriana','Que el sistema inmunitario dejó de funcionar','Que los antibióticos son siempre necesarios'], c:0, exp:'La fiebre puede acompañar distintas infecciones y otras condiciones; por sí sola no permite saber qué microbio la causó.', source:'MedlinePlus · fiebre y respuesta del organismo' },
+    // Datos curiosos (No cursé): siguen siendo generales pero piden algo más que sentido común.
+    { id:'easy-curious-01', difficulty:'facil', topic:'Datos curiosos', q:'¿Quién desarrolló a fines del siglo XVIII la primera vacuna, contra la viruela?', a:['Edward Jenner','Louis Pasteur','Alexander Fleming','Robert Koch'], c:0, exp:'Edward Jenner usó material de la viruela bovina (1796) para proteger contra la viruela humana. De ahí viene la palabra vacuna (de vaca).', source:'Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray' },
+    { id:'easy-curious-02', difficulty:'facil', topic:'Datos curiosos', q:'¿Qué científico descubrió la penicilina en 1928 al ver que un hongo frenaba el crecimiento de bacterias?', a:['Alexander Fleming','Edward Jenner','Marie Curie','Ignaz Semmelweis'], c:0, exp:'Fleming notó que el moho Penicillium inhibía cultivos de estafilococos: fue el punto de partida de los antibióticos.', source:'Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray' },
+    { id:'easy-curious-03', difficulty:'facil', topic:'Datos curiosos', q:'¿Cuál es la única enfermedad humana que la OMS declaró erradicada del mundo?', a:['La viruela','La poliomielitis','El sarampión','La tuberculosis'], c:0, exp:'La OMS declaró erradicada la viruela en 1980 gracias a la vacunación masiva. La polio sigue circulando en pocos países.', source:'Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray' },
+    { id:'easy-curious-04', difficulty:'facil', topic:'Datos curiosos', q:'Según las estimaciones actuales, ¿cuántas bacterias viven en el cuerpo humano comparadas con nuestras propias células?', a:['Una cantidad parecida a la de células humanas','Cien veces más que células humanas','Menos de mil en total','Ninguna: el cuerpo sano es estéril'], c:0, exp:'Estimaciones recientes (Sender y col., 2016) calculan una proporción cercana a 1 a 1. La vieja cifra de 10 bacterias por célula resultó exagerada.', source:'Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray' },
+    { id:'easy-curious-05', difficulty:'facil', topic:'Datos curiosos', q:'¿En qué órgano maduran los linfocitos T (la T viene de su nombre)?', a:['En el timo','En el hígado','En el páncreas','En los riñones'], c:0, exp:'Los linfocitos T nacen en la médula ósea pero maduran en el timo, un órgano ubicado detrás del esternón.', source:'Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray' },
+    { id:'easy-curious-06', difficulty:'facil', topic:'Datos curiosos', q:'¿Qué órgano filtra la sangre, elimina glóbulos rojos viejos y está lleno de linfocitos?', a:['El bazo','La vesícula biliar','El apéndice','La tiroides'], c:0, exp:'El bazo, arriba a la izquierda del abdomen, filtra la sangre y aloja muchas células inmunitarias.', source:'Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray' },
+    { id:'easy-curious-07', difficulty:'facil', topic:'Datos curiosos', q:'¿Quién creó la vacuna contra la rabia, aplicada por primera vez a un niño en 1885?', a:['Louis Pasteur','Edward Jenner','Robert Koch','Santiago Ramón y Cajal'], c:0, exp:'Louis Pasteur también desarrolló la pasteurización y defendió que muchas enfermedades las causan microorganismos.', source:'Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray' },
+    { id:'easy-curious-08', difficulty:'facil', topic:'Datos curiosos', q:'¿Qué causa la malaria (paludismo)?', a:['Un parásito que se transmite por la picadura de ciertos mosquitos','Un virus que se contagia por el aire','Una bacteria que vive en el agua','Una alergia a los mosquitos'], c:0, exp:'La malaria la causan parásitos del género Plasmodium, transmitidos por la picadura de mosquitos hembra del género Anopheles.', source:'Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray' },
+    { id:'easy-curious-09', difficulty:'facil', topic:'Datos curiosos', q:'¿Cómo se llama la reacción alérgica grave y rápida que puede comprometer la respiración y la presión arterial?', a:['Anafilaxia','Anemia','Hipotermia','Inflamación crónica'], c:0, exp:'La anafilaxia es una emergencia: suele aparecer en minutos tras el contacto con el alérgeno y se trata con adrenalina intramuscular.', source:'Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray' },
+    { id:'easy-curious-10', difficulty:'facil', topic:'Datos curiosos', q:'¿Qué es un prión?', a:['Una proteína mal plegada capaz de causar enfermedad','Un virus muy pequeño con ADN','Una bacteria sin pared','Un tipo de glóbulo blanco'], c:0, exp:'Los priones no tienen material genético: son proteínas con una forma anómala que inducen el mismo cambio en otras proteínas.', source:'Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray' },
+    { id:'easy-curious-11', difficulty:'facil', topic:'Datos curiosos', q:'¿Quién describió la fagocitosis al observar células que englobaban partículas en larvas de estrella de mar?', a:['Élie Metchnikoff','Alexander Fleming','Gregor Mendel','Charles Darwin'], c:0, exp:'Metchnikoff describió los fagocitos a fines del siglo XIX y recibió el Nobel de Medicina en 1908, compartido con Paul Ehrlich.', source:'Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray' },
+    { id:'easy-curious-12', difficulty:'facil', topic:'Datos curiosos', q:'¿A qué células del sistema inmunitario ataca principalmente el VIH?', a:['A los linfocitos T CD4','A los glóbulos rojos','A las plaquetas','A las neuronas'], c:0, exp:'El VIH infecta sobre todo linfocitos T CD4. Sin tratamiento, su descenso lleva al sida.', source:'Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray' },
+    { id:'easy-curious-13', difficulty:'facil', topic:'Datos curiosos', q:'¿Por qué la leche materna ayuda a proteger al bebé de infecciones?', a:['Porque contiene anticuerpos de la madre','Porque es estéril y no tiene células','Porque reemplaza las vacunas','Porque le pasa al bebé glóbulos rojos de la madre'], c:0, exp:'La leche materna aporta anticuerpos (sobre todo IgA secretora), células y otros factores antimicrobianos que protegen las mucosas del bebé.', source:'Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray' },
+    { id:'easy-curious-14', difficulty:'facil', topic:'Datos curiosos', q:'¿Qué parte del cerebro funciona como termostato y sube la temperatura durante la fiebre?', a:['El hipotálamo','El cerebelo','La corteza visual','El bulbo olfatorio'], c:0, exp:'Ante una infección, algunas sustancias de la inflamación hacen que el hipotálamo suba la temperatura de referencia.', source:'Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray' },
+    { id:'easy-curious-15', difficulty:'facil', topic:'Datos curiosos', q:'¿Qué médico propuso en el siglo XIX lavarse las manos para reducir las muertes por fiebre puerperal?', a:['Ignaz Semmelweis','Louis Pasteur','Joseph Lister','William Harvey'], c:0, exp:'Semmelweis mostró que el lavado de manos bajaba mucho la mortalidad, aunque en su época sus colegas lo rechazaron.', source:'Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray' },
     // NORMAL · mecanismos y primeras interpretaciones.
     { id:'b-spn-01', difficulty:'normal', topic:'Bacteriología', q:'¿Qué factor de Streptococcus pneumoniae contribuye especialmente a evitar la fagocitosis?', a:['La cápsula polisacárida','La proteína M de Streptococcus pyogenes','La neuraminidasa de influenza','La pared de quitina'], c:0, exp:'La cápsula polisacárida es un importante factor antifagocítico del neumococo.', source:'Cuadernillo ADN 2026 · p. 17, morfología bacteriana y agentes asociados' },
     { id:'b-spy-01', difficulty:'normal', topic:'Bacteriología', q:'¿Qué factor de Streptococcus pyogenes se relaciona clásicamente con evasión de la fagocitosis?', a:['Proteína M','Proteína M2 de influenza','Disco adhesivo ventral','Ergosterol'], c:0, exp:'La proteína M contribuye a la evasión de mecanismos opsónicos y fagocíticos.', source:'Cuadernillo ADN 2026 · factores de virulencia bacteriana; validar con la bibliografía principal' },
@@ -250,7 +286,7 @@
       {name:'Fagocitosis eficaz',requires:'phagocytosis',desc:'+18% de radio de captura.',apply:r=>{r.stats.phagoRadius*=1.18;}},
       {name:'Reserva celular',desc:'Reduce 3,5% el daño recibido.',apply:r=>{r.stats.defenseLevel++;}},
       {name:'Asimilación reparadora',requires:'phagocytosis',desc:'+2 de curación instantánea por fagocitosis.',apply:r=>{r.stats.phagoHeal+=2;}},
-      {name:'Ritmo fagocítico',requires:'phagocytosis',desc:'La fagocitosis se activa 8% más seguido.',apply:r=>{r.stats.phagoInterval=Math.max(GAME_BALANCE.LIMITS.minimumPhagocytosisIntervalMs,r.stats.phagoInterval*.92);}}
+      {name:'Ritmo fagocítico',requires:'phagocytosis',maxed:r=>r.stats.phagoInterval<=GAME_BALANCE.LIMITS.minimumPhagocytosisIntervalMs,desc:'La fagocitosis se activa 8% más seguido.',apply:r=>{r.stats.phagoInterval=Math.max(GAME_BALANCE.LIMITS.minimumPhagocytosisIntervalMs,r.stats.phagoInterval*.92);}}
     ], advanced:[
       {name:'Fagocitosis expansiva',requires:'phagocytosis',desc:'Permite englobar patógenos grandes (brutos y élite) y +18% de radio.',apply:r=>{r.stats.phagoMaxTier=Math.max(r.stats.phagoMaxTier,PHAGO_LARGE_TIER);r.stats.phagoRadius*=1.18;}},
       {name:'Respuesta reparadora',requires:['phagocytosis','polarization'],desc:'La curación recibida aumenta 30%.',apply:r=>{r.stats.healingReceivedMultiplier*=1.30;}},
@@ -264,19 +300,19 @@
       {name:'Lisis concentrada',desc:'+15% de daño.',apply:r=>{r.stats.attackDamage*=1.15;r.stats.granuleLevel++;}},
       {name:'Gránulos reforzados',desc:'+9% de daño de desgranulación.',apply:r=>{r.stats.attackDamage*=1.09;r.stats.granuleLevel++;}}
     ], advanced:[
-      {name:'Salva alveolar',desc:'+2 gránulos por disparo; la salva se abre en abanico.',apply:r=>{r.stats.projectileCount=Math.min(10,r.stats.projectileCount+2);r.stats.granuleLevel++;}},
-      {name:'Membrana perforante',desc:'Cada gránulo atraviesa un patógeno adicional.',apply:r=>{r.stats.projectilePierce=Math.min(8,r.stats.projectilePierce+1);}},
+      {name:'Salva alveolar',maxed:r=>r.stats.projectileCount>=10,desc:'+2 gránulos por disparo; la salva se abre en abanico.',apply:r=>{r.stats.projectileCount=Math.min(10,r.stats.projectileCount+2);r.stats.granuleLevel++;}},
+      {name:'Membrana perforante',maxed:r=>r.stats.projectilePierce>=8,desc:'Cada gránulo atraviesa un patógeno adicional.',apply:r=>{r.stats.projectilePierce=Math.min(8,r.stats.projectilePierce+1);}},
       {name:'Lisis en cadena',desc:'Las bajas explotan con más radio y daño.',apply:r=>{r.stats.blastRadius+=28;r.stats.blastDamage+=11;}},
-      {name:'Descarga hipertrófica',desc:'+2 proyectiles y gránulos de aspecto más intenso.',apply:r=>{r.stats.projectileCount=Math.min(10,r.stats.projectileCount+2);r.stats.granuleLevel+=2;}}
+      {name:'Descarga hipertrófica',maxed:r=>r.stats.projectileCount>=10,desc:'+2 proyectiles y gránulos de aspecto más intenso.',apply:r=>{r.stats.projectileCount=Math.min(10,r.stats.projectileCount+2);r.stats.granuleLevel+=2;}}
     ]},
     { id:'chemotaxis', name:'Quimiotaxis', role:'AGILIDAD', icon:'➤', color:'#80caff', desc:'Reposicionate, reuní recursos y extendé las NETosis.', basics:[
       {name:'Gradiente quimiotáctico',desc:'+15% de velocidad; estelas más visibles.',apply:r=>{r.stats.moveSpeed*=1.15;r.stats.agilityLevel++;}},
       {name:'Rastreo celular',desc:'+32 al radio de recolección de ADN/ARN.',apply:r=>{r.stats.xpPickupRadius+=32;}},
       {name:'NETosis precisa',requires:'netosis',desc:'+15% de radio de red.',apply:r=>{r.stats.netRadius*=1.15;r.stats.agilityLevel++;}},
-      {name:'Despliegue rápido',requires:'netosis',desc:'La NETosis se prepara 7% más rápido.',apply:r=>{r.stats.netCooldown=Math.max(GAME_BALANCE.LIMITS.minimumNetCooldownMs,r.stats.netCooldown*.93);}},
+      {name:'Despliegue rápido',requires:'netosis',maxed:r=>r.stats.netCooldown<=GAME_BALANCE.LIMITS.minimumNetCooldownMs,desc:'La NETosis se prepara 7% más rápido.',apply:r=>{r.stats.netCooldown=Math.max(GAME_BALANCE.LIMITS.minimumNetCooldownMs,r.stats.netCooldown*.93);}},
       {name:'Pulso extracelular',requires:'netosis',desc:'+1 de daño por pulso de NETosis.',apply:r=>{r.stats.netDamage+=1;}}
     ], advanced:[
-      {name:'Redes simultáneas',requires:'netosis',desc:'+1 NETosis auxiliar simultánea.',apply:r=>{r.stats.maxNetHelpers=Math.min(GAME_BALANCE.LIMITS.maximumNetHelpers,r.stats.maxNetHelpers+1);}},
+      {name:'Redes simultáneas',requires:'netosis',maxed:r=>r.stats.maxNetHelpers>=GAME_BALANCE.LIMITS.maximumNetHelpers,desc:'+1 NETosis auxiliar simultánea.',apply:r=>{r.stats.maxNetHelpers=Math.min(GAME_BALANCE.LIMITS.maximumNetHelpers,r.stats.maxNetHelpers+1);}},
       {name:'Tormenta de NETosis',requires:'netosis',desc:'La red aparece más seguido y cubre un área mayor.',apply:r=>{r.stats.netCooldown=Math.max(GAME_BALANCE.LIMITS.minimumNetCooldownMs,r.stats.netCooldown*.82);r.stats.netRadius*=1.22;}},
       {name:'Quimiotaxis voraz',desc:'+55 al radio de recolección y +10% de velocidad.',apply:r=>{r.stats.xpPickupRadius+=55;r.stats.moveSpeed*=1.10;r.stats.agilityLevel++;}},
       {name:'Malla citotóxica',requires:'netosis',desc:'+35% de daño y +25% de duración de NETosis.',apply:r=>{r.stats.netDamage*=1.35;r.stats.netDuration*=1.25;r.stats.netTickInterval=Math.max(230,r.stats.netTickInterval*.88);}}
@@ -292,7 +328,7 @@
   const FICHAS_DATA = globalThis.InmuneFichas || null;
   const MODOS_API = globalThis.InmuneModos || null;
   const PREGUNTAS_DATA = globalThis.InmunePreguntasNucleos || null;
-  const GAME_VERSION = '3.10.0';
+  const GAME_VERSION = '3.11.0';
   // Arte propio de los jefes de núcleo (assets/boss_*.webp, recortados de docs/arte/jefes-nucleo-3x3.png).
   const BOSS_ART = {
     'escherichia-coli':'boss_stec', 'mycobacterium-tuberculosis':'boss_granuloma', 'neisseria-meningitidis':'boss_meningococo',
@@ -387,7 +423,7 @@
       this.phagoHintsLeft=3;this.lastPhagoHintAt=-99;this.pseudopods=null;this.phagoEngulf=null;this.pseudopodLast=null;this.playerSlow=1;this.auraSlowUntil=-1;this.forcedSpawnAgente=null;
       this.progressionMilestone = 0;
       this.enemies = []; this.playerBullets = []; this.enemyProjectiles = []; this.helpers = []; this.nets = [];this.activeEnemyCount=0;
-      this.usedQuestionIds = new Set(); this.questionPoolCache = null; this.currentQuestion = null; this.currentUpgrades = []; this.questionTopicCounts={}; this.lastQuestionTopic=null;
+      this.usedQuestionIds = new Set(); this.questionPoolCache = null; this.currentQuestion = null; this.currentUpgrades = []; this.questionTopicCounts={}; this.lastQuestionTopic=null; this.questionCategory=null; this.questionsExhausted=false; this.phagoHealBudget=undefined; this.announcedEnemyTier=0;
       this.stats = { health:100, maxHealth:100, moveSpeed:190, attackDamage:21, attackInterval:520, attackRange:260, projectileSpeed:470, projectileCount:1, projectilePierce:0, blastRadius:0, blastDamage:0, swarmLevel:0, granuleLevel:0, defenseLevel:0, agilityLevel:0, dodgeWindow:620, phagoRadius:50, phagoInterval:800, phagoHeal:0, healingReceivedMultiplier:1, phagoMaxTier:0, xpPickupRadius:82, netCooldown:10800, netRadius:88, netDuration:7600, netDamage:5.5, netTickInterval:430, maxNetHelpers:2, netHelperDuration:4400, antibodyDamage:10, antibodyInterval:1900, antibodyCount:2, regulationDamage:4, regulationInterval:15000, cytokineDamage:6, cytokineInterval:5400, xpMultiplier:1 };
       this.createXpTexture(); this.createBackdrop(); this.createPlayer(); this.createCamera(); this.createHud(); this.createControls(); this.setupHudCamera();
       this.updateHud();
@@ -532,7 +568,8 @@
       this.phagoAura = this.add.circle(CENTER, CENTER, this.stats.phagoRadius + 18, 0x74ffd0, 0.025).setStrokeStyle(2, 0x9bffdc, 0.38).setDepth(27).setVisible(false);
       this.phagoTendrils=this.add.graphics().setDepth(38);
       this.xpMagnetAura = this.add.circle(CENTER,CENTER,this.stats.xpPickupRadius,0x80caff,0.025).setStrokeStyle(1.5,0x9bdcff,0.24).setDepth(25).setVisible(false);
-      this.playerOutline = this.add.circle(CENTER, CENTER, 30, 0x000000, 0).setStrokeStyle(2.6, 0xa8ffe0, 0.95).setDepth(39);
+      // Contorno del jugador: invisible en reposo (confundía, no delimita nada); solo destella al recibir daño o eventos.
+      this.playerOutline = this.add.circle(CENTER, CENTER, 30, 0x000000, 0).setStrokeStyle(2.6, 0xa8ffe0, 0.95).setDepth(39).setAlpha(0);
       this.playerOutlineTween = null;
       this.playerHealthBar = this.add.container(this.player.x, this.player.y).setDepth(80);
       this.playerHealthBarGraphic = this.add.graphics();
@@ -722,6 +759,23 @@
       const r = Math.hypot(x - CENTER, y - CENTER);
       if (r > ARENA_RADIUS - 70) { x = CENTER + (x - CENTER) / r * (ARENA_RADIUS - 70); y = CENTER + (y - CENTER) / r * (ARENA_RADIUS - 70); }
       return { x, y };
+    }
+
+    // Escalón de mutación: 0 hasta el minuto 10, 1 hasta el 20, etc. El Laboratorio no muta.
+    enemyTier(){return this.debugMode?0:Math.floor(this.elapsed/ENEMY_TIER_SECONDS);}
+
+    // Ritmo de ataque de los jefes: crece con el tiempo de partida (1 al inicio, 2 a los 10 min, tope 3,2).
+    bossTempo(){return Math.min(3.2,1+this.elapsed/600);}
+
+    // Punto dentro de la vista pero a distancia prudente del jugador (para las apariciones con fundido).
+    randomVisibleSpawnPoint() {
+      const cam=this.cameras.main,zoom=cam.zoom||1,halfW=W/2/zoom,halfH=H/2/zoom;
+      const minD=Math.max(ON_SCREEN_SPAWN_MIN_DIST,this.playerRadius+120);
+      for(let i=0;i<24;i++){
+        const x=this.player.x+this.rng.float(-halfW+40,halfW-40),y=this.player.y+this.rng.float(-halfH+40,halfH-40);
+        if(Math.hypot(x-this.player.x,y-this.player.y)>=minD&&this.isInsideArena(x,y,60))return {x,y};
+      }
+      return this.randomSpawnPoint();
     }
 
     enemyBaseVisualSize(type) {
@@ -992,7 +1046,9 @@
         else{const options=(MORPHOLOGY[type]||MORPHOLOGY.bacteria).filter(m=>allowWorm||!m.worm);morphology=randomItem(this.rng,options);}
       }
       const isWorm=morphology.worm===true;
-      const p=spawnAt?this.constrainToArena(spawnAt.x,spawnAt.y,bossSpec?Math.max(160,this.playerRadius+20):150):(bossSpec?this.randomSpawnPoint(560,760):(isWorm?this.randomSpawnPoint(235,390):this.randomSpawnPoint()));
+      // Comunes: parte aparece dentro de la pantalla (lejos del jugador) con un fundido; el resto entra desde afuera.
+      const onScreen=!spawnAt&&!bossSpec&&!isWorm&&this.rng.next()<ON_SCREEN_SPAWN_CHANCE;
+      const p=spawnAt?this.constrainToArena(spawnAt.x,spawnAt.y,bossSpec?Math.max(160,this.playerRadius+20):150):(bossSpec?this.randomSpawnPoint(560,760):(isWorm?this.randomSpawnPoint(235,390):onScreen?this.randomVisibleSpawnPoint():this.randomSpawnPoint()));
 
       const archetype = this.chooseEnemyArchetype(forcedLarge);
       const archetypes = {
@@ -1014,7 +1070,8 @@
       const buildPressure=this.getBuildPressure();
       const crisisHp=this.multiResistance?1+Math.min(4.2,0.34+(this.elapsed-this.multiResistanceAt)/105):1;
       const crisisDamage=this.multiResistance?1+Math.min(2.1,0.24+(this.elapsed-this.multiResistanceAt)/190):1;
-      const hpScale=timeScale*(1+buildPressure*0.31)*crisisHp;
+      const tier=this.enemyTier(),tierHp=Math.pow(ENEMY_TIER_HP,tier),tierDamage=Math.pow(ENEMY_TIER_DAMAGE,tier);
+      const hpScale=timeScale*(1+buildPressure*0.31)*crisisHp*(bossSpec?1:tierHp);
       if(!bossSpec){const hpDrivenSize=clamp(1+Math.log2(Math.max(1,variant.hp*hpScale))*0.13,1,1.34);size*=hpDrivenSize;
         // Preserve the broad biological visual hierarchy while retaining archetype variation.
         const taxonomySize={parasite:1.30,bacteria:1.00,fungus:0.91,virus:0.72}[type]||1; size*=taxonomySize;}
@@ -1027,7 +1084,7 @@
         obj:this.makeEnemyArt(type, morphology, p.x, p.y, size),
         hp:bossSpec?bossHp:data.hp * variant.hp * hpScale*this.infectionDiff.hp, maxHp:bossSpec?bossHp:data.hp * variant.hp * hpScale*this.infectionDiff.hp,
         speed:bossSpec?(bossSpec.stationary?0:Math.max(58,data.speed*1.02*this.infectionDiff.speed)):data.speed * variant.speed * (1 + Math.min(1.10, stage * 0.065)) * this.infectionDiff.speed * this.rng.float(0.87,1.13) * clamp(1.12-(size-1)*0.24,0.72,1.25),
-        damage:(bossSpec?data.damage*5.2:data.damage * variant.damage)*(1+Math.pow(this.elapsed/240,0.72)*0.45)*(1+buildPressure*0.18)*this.infectionDiff.damage*crisisDamage, radius:bossSpec?Math.max(data.radius*1.55,this.enemyBaseVisualSize(type)*0.42*size):(morphology.worm ? (archetype==='brute'?34:archetype==='elite'?31:archetype==='runner'?24:28) : Math.max(data.radius * size, this.enemyBaseVisualSize(type) * 0.40 * size)),
+        damage:(bossSpec?data.damage*5.2:data.damage * variant.damage)*(1+Math.pow(this.elapsed/240,0.72)*0.45)*(1+buildPressure*0.18)*this.infectionDiff.damage*crisisDamage*tierDamage, radius:bossSpec?Math.max(data.radius*1.55,this.enemyBaseVisualSize(type)*0.42*size):(morphology.worm ? (archetype==='brute'?34:archetype==='elite'?31:archetype==='runner'?24:28) : Math.max(data.radius * size, this.enemyBaseVisualSize(type) * 0.40 * size)),
         sizeTier:bossSpec?2:variant.tier, size, visualSize:bossSpec ? this.enemyBaseVisualSize(type)*size : Math.min(morphology.worm ? (archetype==='brute'?86:archetype==='elite'?78:archetype==='runner'?66:74) : this.enemyBaseVisualSize(type) * size, 42),
         visualScale:morphology.worm?1:this.enemyBaseVisualSize(type) * size / Math.max((this.textures.get(morphology.texture)?.getSourceImage()?.width||256),(this.textures.get(morphology.texture)?.getSourceImage()?.height||256)),
         color:morphology.color, outlineColor:archetype==='elite'?0xffdf75:morphology.outline, healthOutlineColor:0x55f0ba, healthOutlineBand:3,
@@ -1046,7 +1103,7 @@
       if(!e.isWorm){const outlineTexture=this.getEnemyOutlineTexture(morphology.texture);e.outlineSprite=this.add.image(e.x,e.y,outlineTexture).setOrigin(0.5).setScale(e.visualScale).setTint(e.healthOutlineColor).setAlpha(0.92).setDepth(e.obj.depth-0.5);}
       e.phagoEligible=!e.isBoss&&(type==='bacteria'||type==='fungus');
       e.phagoMarker=e.phagoEligible?this.makePhagoMarker(e):null;
-      e.bossRing=e.isBoss?this.add.circle(e.x,e.y,e.visualSize*0.56,0xffd875,0.07).setStrokeStyle(4,0xffd875,0.82).setDepth(18):null;
+      e.bossRing=e.isBoss&&!e.isWorm?this.add.circle(e.x,e.y,e.visualSize*0.56,0xffd875,0.07).setStrokeStyle(4,0xffd875,0.82).setDepth(18):null;
       e.healthBar = null;
       e.healthBarGraphic = null;
       e.healthBarVisibleUntil = 0;
@@ -1067,6 +1124,7 @@
         this.drawWorm(e);
       }
       if(bossSpec)this.initBossMechanic(e,bossSpec);
+      if(onScreen){e.fadeIn=SPAWN_FADE_MS;e.spawnGrace=SPAWN_FADE_MS;e.obj.setAlpha(0);if(e.outlineSprite)e.outlineSprite.setAlpha(0);if(e.phagoMarker)e.phagoMarker.setAlpha(0);}
       this.enemies.push(e);if(e.agente)this.registerSpecies(e);this.activeEnemyCount++;
       return e;
     }
@@ -1106,6 +1164,7 @@
 
     // Ráfaga radial de proyectiles (merozoítos, endotoxina, protoescólices…). Usa el mismo ciclo que las esporas.
     spawnBossBurst(e,count,o){
+      count=Math.round(count*Math.sqrt(this.bossTempo()));
       const off=this.rng.float(0,Math.PI*2),speed=o.speed||150;
       for(let i=0;i<count&&this.enemyProjectiles.length<70;i++){
         const a=off+Math.PI*2*i/count,obj=this.add.container(e.x+Math.cos(a)*e.radius*0.6,e.y+Math.sin(a)*e.radius*0.6).setDepth(30);
@@ -1144,7 +1203,8 @@
     }
 
     updateBossMechanic(e,dtMs,dt,dx,dy,d){
-      const m=e.mech,t=this.elapsed,crisis=this.multiResistance?0.7:1;
+      // crisis < 1 acorta los tiempos entre ataques: multirresistencia y, además, el tiempo de partida.
+      const m=e.mech,t=this.elapsed,crisis=(this.multiResistance?0.7:1)/Math.pow(this.bossTempo(),0.6);
       m.clock-=dtMs;m.clock2-=dtMs;
       switch(e.mechanic){
         case 'escherichia-coli': // toxina Shiga + embestidas con flagelos
@@ -1241,8 +1301,9 @@
     }
 
     spawnBossSpore(enemy) {
-      if(this.enemyProjectiles.filter(p=>p.kind==='spore').length>=28)return;
-      const angle=Math.atan2(this.player.y-enemy.y,this.player.x-enemy.x)+this.rng.float(-0.42,0.42),speed=105+Math.min(55,this.elapsed*0.025);
+      if(this.enemyProjectiles.filter(p=>p.kind==='spore').length>=48)return;
+      // Salen en una dirección al azar y después persiguen al jugador (son teledirigidas).
+      const angle=this.rng.float(0,Math.PI*2),speed=105+Math.min(55,this.elapsed*0.025);
       const obj=this.add.image(enemy.x,enemy.y,'boss_spore').setScale(0.025).setRotation(angle+Math.PI/2).setDepth(30);
       this.enemyProjectiles.push({obj,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,damage:13+this.elapsed*0.014,life:9000,radius:13,hp:1,kind:'spore',homing:true});
       this.burstEffect(enemy.x,enemy.y,0xbaff49,16);
@@ -1312,9 +1373,9 @@
       if (this.playerOutlineTween) this.playerOutlineTween.stop();
       this.playerOutline.setStrokeStyle(3.5, color, 1).setAlpha(1).setScale(1.08);
       this.playerOutlineTween = this.tweens.add({
-        targets:this.playerOutline, alpha:0.62, scale:1, duration, ease:'Cubic.Out',
+        targets:this.playerOutline, alpha:0, scale:1, duration:duration+220, ease:'Cubic.In',
         onComplete:() => {
-          if (this.playerOutline?.active && !this.gameEnded) this.playerOutline.setStrokeStyle(2.6, 0xa8ffe0, 0.95).setAlpha(1).setScale(1);
+          if (this.playerOutline?.active && !this.gameEnded) this.playerOutline.setStrokeStyle(2.6, 0xa8ffe0, 0.95).setAlpha(0).setScale(1);
           this.playerOutlineTween = null;
         }
       });
@@ -1504,7 +1565,7 @@
           this.player.setScale(1.18);this.tweens.add({targets:this.player,scale:1,duration:220,ease:'Back.Out'});this.flashPlayerOutline(0x70ffc4,310);
           this.showFloatingText(target.x,target.y-24,'FAGOCITOSIS  +XP','#baffdf',13);this.showToast('FAGOCITOSIS: patógeno englobado');this.killEnemy(target,true);
           if(this.activeSkills.has('respiratory_burst')){const burstLevel=this.skillLevels.respiratory_burst||1,radius=95+burstLevel*17;this.burstEffect(target.x,target.y,0xffae68,radius);for(const e of this.enemies){if(!e.dead&&dist2(e,target)<radius*radius){this.damageEnemy(e,7+burstLevel*4,false);if(e.hp<=0)this.killEnemy(e,false);}}}
-          if(this.stats.phagoHeal>0){const healAmount=this.stats.phagoHeal*this.stats.healingReceivedMultiplier,healed=Math.min(healAmount,this.stats.maxHealth-this.stats.health);this.stats.health=Math.min(this.stats.maxHealth,this.stats.health+healAmount);if(healed>0)this.showFloatingText(this.player.x,this.player.y-38,`+${Math.round(healed)} SALUD`,'#8dffd0',11);}
+          if(this.stats.phagoHeal>0){const budgetCap=this.stats.maxHealth*PHAGO_HEAL_BUDGET_FRACTION;this.phagoHealBudget=Math.min(budgetCap,this.phagoHealBudget??budgetCap);const healAmount=Math.min(this.phagoHealBudget,this.stats.phagoHeal*this.stats.healingReceivedMultiplier);this.phagoHealBudget-=Math.min(healAmount,this.stats.maxHealth-this.stats.health);const healed=Math.min(healAmount,this.stats.maxHealth-this.stats.health);this.stats.health=Math.min(this.stats.maxHealth,this.stats.health+healAmount);if(healed>0)this.showFloatingText(this.player.x,this.player.y-38,`+${Math.round(healed)} SALUD`,'#8dffd0',11);}
         }
       }});
     }
@@ -1514,10 +1575,18 @@
       this.questionPaused=true;this.tweens.pauseAll();
       const hasAlliedCells=this.activeSkills.has('tb_collaboration')||this.activeSkills.has('macrophage_activation');
       const pool=['phagocytosis','netosis','immunoregulation','differentiation','antibodies','complement','tb_collaboration','macrophage_activation','differential_profile','pattern','cytokines','polarization'].filter(id=>id==='polarization'?this.activeSkills.has('macrophage_activation'):id==='differential_profile'?hasAlliedCells:true);
-      const candidates=pool.map(id=>{const upgrade=this.activeSkills.has(id);return {id:`${id}:${upgrade?'upgrade':'unlock'}`,skill:id,upgrade,level:upgrade?(this.skillLevels[id]||1)+1:1,label:this.skillOptionLabel(id,upgrade)};});
+      const candidates=pool.filter(id=>!(this.activeSkills.has(id)&&this.isSkillMaxed(id))).map(id=>{const upgrade=this.activeSkills.has(id);return {id:`${id}:${upgrade?'upgrade':'unlock'}`,skill:id,upgrade,level:upgrade?(this.skillLevels[id]||1)+1:1,label:this.skillOptionLabel(id,upgrade)};});
       const weighted=[...candidates.filter(o=>o.upgrade),...candidates.filter(o=>!o.upgrade)],selected=[];
       while(weighted.length&&selected.length<3){selected.push(weighted.splice(this.rng.integer(0,weighted.length-1),1)[0]);}
       this.pendingFocusOptions=selected;this.emit('is:focus-evolution',{options:selected});
+    }
+
+    // Habilidades que llegaron a su tope: mejorarlas no cambia nada, así que no se ofrecen más.
+    isSkillMaxed(id){
+      if(id==='complement')return (this.complementChance||.18)>=.7-1e-9;
+      if(id==='tb_collaboration')return Math.max(2,this.bCellCap||2)>=8;
+      if(id==='macrophage_activation')return (this.macrophageCap||1)>=5;
+      return false;
     }
 
     skillOptionLabel(id,upgrade){
@@ -1632,7 +1701,19 @@
         if(this.elapsed>=this.macrophageM2Until){this.minionMode='M1';this.macrophageM2Charge=0;this.macrophageAttackSince=this.elapsed;this.showToast('MACRÓFAGOS · PERFIL M1');this.burstEffect(this.player.x,this.player.y,0x71c6a0,34);}
         else{this.macrophageM2HealClock=(this.macrophageM2HealClock||0)-dtMs;for(let i=0;i<this.macrophages.length;i++){const m=this.macrophages[i];m.angle=(m.angle||i*Math.PI*2/this.macrophages.length)+dt*1.25;m.obj.setPosition(this.player.x+Math.cos(m.angle)*76,this.player.y+Math.sin(m.angle)*58);m.obj.setAlpha(.76+.18*Math.sin(this.elapsed*4+m.angle));}if(this.macrophageM2HealClock<=0){this.macrophageM2HealClock=850;this.stats.health=Math.min(this.stats.maxHealth,this.stats.health+Math.max(1,this.stats.maxHealth*.006));this.updateHud();this.burstEffect(this.player.x,this.player.y,0x86e5bf,23);}return;}
       }
-      for(const m of this.macrophages){m.clock-=dtMs;m.dash=Math.max(0,m.dash-dtMs);let t=this.closestEnemy(440);if(!t){const a=this.elapsed*1.1+(m.heading||0);m.obj.setPosition(this.player.x+Math.cos(a)*48,this.player.y+Math.sin(a)*38);continue;}let dx=t.x-m.obj.x,dy=t.y-m.obj.y,d=Math.hypot(dx,dy)||1;if(m.dash>0){const q=this.constrainToArena(m.obj.x+Math.cos(m.heading)*330*dt,m.obj.y+Math.sin(m.heading)*330*dt,26);m.obj.setPosition(q.x,q.y);continue;}m.heading=Math.atan2(dy,dx);m.obj.x+=dx/d*210*dt;m.obj.y+=dy/d*210*dt;if(d<t.radius+20&&m.clock<=0){if(this.minionMode==='M2'){const heal=Math.min(2,this.stats.maxHealth-this.stats.health);this.stats.health+=heal;this.burstEffect(this.player.x,this.player.y,0x92e9c7,18);}else{this.damageEnemy(t,16+(this.skillLevels.macrophage_activation||1)*5,false,'minion');if(t.hp<=0)this.killEnemy(t,false);}this.burstEffect(m.obj.x,m.obj.y,0x91e0b5,20);m.dash=330;m.clock=500;m.heading+=this.rng.float(-.55,.55);}}
+      const taken=new Set();
+      for(let mi=0;mi<this.macrophages.length;mi++){const m=this.macrophages[mi];m.clock-=dtMs;m.dash=Math.max(0,m.dash-dtMs);let t=this.closestEnemy(440,e=>!taken.has(e))||this.closestEnemy(440);if(t)taken.add(t);if(!t){const a=this.elapsed*1.1+mi*Math.PI*2/this.macrophages.length;m.obj.setPosition(this.player.x+Math.cos(a)*48,this.player.y+Math.sin(a)*38);continue;}let dx=t.x-m.obj.x,dy=t.y-m.obj.y,d=Math.hypot(dx,dy)||1;if(m.dash>0){const q=this.constrainToArena(m.obj.x+Math.cos(m.heading)*330*dt,m.obj.y+Math.sin(m.heading)*330*dt,26);m.obj.setPosition(q.x,q.y);continue;}m.heading=Math.atan2(dy,dx);m.obj.x+=dx/d*210*dt;m.obj.y+=dy/d*210*dt;if(d<t.radius+20&&m.clock<=0){if(this.minionMode==='M2'){const heal=Math.min(2,this.stats.maxHealth-this.stats.health);this.stats.health+=heal;this.burstEffect(this.player.x,this.player.y,0x92e9c7,18);}else{this.damageEnemy(t,16+(this.skillLevels.macrophage_activation||1)*5,false,'minion');if(t.hp<=0)this.killEnemy(t,false);}this.burstEffect(m.obj.x,m.obj.y,0x91e0b5,20);m.dash=330;m.clock=500;m.heading+=this.rng.float(-.55,.55);}}
+      this.separateMacrophages();
+    }
+
+    separateMacrophages(){
+      const list=this.macrophages;
+      for(let i=0;i<list.length;i++)for(let j=i+1;j<list.length;j++){
+        const a=list[i].obj,b=list[j].obj;let dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);
+        if(d>=MACROPHAGE_SPACING)continue;
+        if(d<0.01){const ang=(i+1)*2.39;dx=Math.cos(ang);dy=Math.sin(ang);d=1;}
+        const push=(MACROPHAGE_SPACING-d)/2;a.x-=dx/d*push;a.y-=dy/d*push;b.x+=dx/d*push;b.y+=dy/d*push;
+      }
     }
 
     removeDebugSkill(id){
@@ -1726,6 +1807,7 @@
       const dtMs=Math.min(delta,42), dt=dtMs/1000;
       this.elapsed+=dt;
       this.invulnerable=Math.max(0,this.invulnerable-dtMs); this.phagoClock=Math.max(0,this.phagoClock-dtMs);
+      if(this.phagoHealBudget!==undefined)this.phagoHealBudget=Math.min(this.stats.maxHealth*PHAGO_HEAL_BUDGET_FRACTION,this.phagoHealBudget+this.stats.maxHealth*PHAGO_HEAL_REGEN_FRACTION*dt);
       this.attackClock-=dtMs; this.netClock-=dtMs;
       this.directorPressure+=(this.getBuildPressure()-this.directorPressure)*Math.min(1,dt*0.20);
 
@@ -1754,7 +1836,8 @@
       }
       this.playerHealthBar.setPosition(this.player.x, this.player.y);
       this.player.rotation+=(dx*0.38-this.player.rotation)*Math.min(1,dt*3);
-      this.playerHalo.setPosition(this.player.x,this.player.y).setScale(1+Math.sin(this.elapsed*3)*0.05).setAlpha(this.colonyShelter?0.24:0.045);
+      // El halo solo marca el refugio de una colonia; fuera de eso no se dibuja.
+      this.playerHalo.setVisible(!!this.colonyShelter);if(this.colonyShelter)this.playerHalo.setPosition(this.player.x,this.player.y).setScale(1+Math.sin(this.elapsed*3)*0.05).setAlpha(0.24);
       this.playerOutline.setPosition(this.player.x,this.player.y);
       this.phagoAura.setPosition(this.player.x,this.player.y).setRadius(this.stats.phagoRadius+18).setVisible(this.activeSkills.has('phagocytosis')).setAlpha(this.phagoClock<80?0.44:0.20);
       this.updatePhagoTendrils(dt);
@@ -1771,7 +1854,8 @@
 
       // Gameplay difficulty rises with survival time. Quiz difficulty does not affect combat.
       if(!this.debugMode)this.updateProgressionMilestones();
-      if(!this.debugMode){this.bossClock-=dtMs;if(this.bossClock<=0){this.spawnBoss();this.bossClock=this.multiResistance?28000:240000;}
+      if(!this.debugMode){const tier=this.enemyTier();if(tier>(this.announcedEnemyTier||0)){this.announcedEnemyTier=tier;this.cameras.main.flash(380,120,30,70,false);this.showToast(`MUTACIÓN ${tier} · LOS PATÓGENOS NUEVOS SON MÁS RESISTENTES Y DAÑINOS`);}}
+      if(!this.debugMode){this.bossClock-=dtMs;if(this.bossClock<=0){this.spawnBoss();this.bossClock=this.multiResistance?28000:(this.questionsExhausted?BOSS_INTERVAL_SIN_PREGUNTAS_MS:BOSS_INTERVAL_MS);}
       if(this.multiResistance){this.resistanceBossClock-=dtMs;if(this.resistanceBossClock<=0){this.spawnBoss();if(this.rng.next()<0.42)this.spawnBoss();this.resistanceBossClock=34000;}}
       this.waveClock-=dtMs;if(this.waveClock<=0){const baseWave=this.multiResistance?Math.min(34,12+Math.floor((this.elapsed-this.multiResistanceAt)/18)):Math.min(12,3+Math.floor(this.elapsed/90)+Math.floor(this.directorPressure*1.2));const wave=Math.max(2,Math.round(baseWave*this.infectionDiff.waves));for(let i=0;i<wave;i++)this.spawnEnemy(null,i<Math.floor(wave/3));this.waveClock=(this.multiResistance?Math.max(9500,19000-(this.elapsed-this.multiResistanceAt)*8):Math.max(44000,68000-this.elapsed*12))*this.infectionDiff.spawn;this.showToast(this.multiResistance?`MULTIRRESISTENCIA · BROTE ${wave}×`:`BROTE ${wave}× · oleada mixta`);}}
       const interval = Math.max(this.multiResistance?180:470, (1380 - this.elapsed * 2.75)/(1+this.directorPressure*0.20)*(this.multiResistance?0.47:1)*this.infectionDiff.spawn);
@@ -1834,7 +1918,10 @@
       if(!e.antibodyDots)e.antibodyDots=[];
       const angle=Math.atan2(-bullet.vy,-bullet.vx),level=this.skillLevels.antibodies||1;
       let dot=e.antibodyDots.find(d=>d.angle===angle);
+      if(!dot&&e.isWorm&&e.antibodyDots.length>=8)dot=e.antibodyDots[0];
       if(!dot){const obj=this.makeImmuneSprite('antibody',e.x,e.y,.38);dot={obj,angle,life:0,tick:0};e.antibodyDots.push(dot);}
+      // En los gusanos el anticuerpo se pega al segmento del cuerpo que tocó (si no, queda flotando junto a la cabeza).
+      if(e.isWorm&&e.trail?.length){let best=0,bd=Infinity;for(let i=0;i<e.trail.length;i+=2){const t=e.trail[i],dd=(t.x-bullet.obj.x)**2+(t.y-bullet.obj.y)**2;if(dd<bd){bd=dd;best=i;}}dot.trailIndex=best;}
       dot.life=5200+level*1500;dot.tick=430;dot.angle=Math.atan2(bullet.obj.y-e.y,bullet.obj.x-e.x);
       const offset=Math.max(8,e.radius*.82);dot.obj.setPosition(e.x+Math.cos(angle)*offset,e.y+Math.sin(angle)*offset).setDepth(39);
     }
@@ -1845,8 +1932,16 @@
         let nearest=this.xpDrops[0],best=Infinity;for(const drop of this.xpDrops){const d=dist2(drop,{x,y});if(d<best){best=d;nearest=drop;}}
         if(nearest){nearest.amount+=amount;nearest.life=Math.max(nearest.life,18000);nearest.obj.setDisplaySize(Math.min(42,nearest.size*2.5+Math.sqrt(nearest.amount)*0.25),Math.min(42,nearest.size*2.5+Math.sqrt(nearest.amount)*0.25));return;}
       }
+      // Si cae encima de otra, se suman (menos objetos y la experiencia junta no se pierde).
+      for(const drop of this.xpDrops){if(!drop.collected&&(drop.x-x)**2+(drop.y-y)**2<XP_MERGE_RADIUS**2){this.growXpDrop(drop,amount);return;}}
       const size=9+Math.min(13,Math.sqrt(amount)*0.9),obj=this.add.image(x,y,'xp_dna').setDisplaySize(size*2.8,size*2.8).setDepth(57);
-      this.xpDrops.push({x,y,obj,amount,size,baseSize:size*2.8,baseScale:size*2.8/48,phase:this.rng.float(0,Math.PI*2),pulseClock:0,life:30000,collected:false});
+      this.xpDrops.push({x,y,obj,amount,size,baseSize:size*2.8,baseScale:size*2.8/48,phase:this.rng.float(0,Math.PI*2),pulseClock:0,life:XP_DROP_LIFE_MS,collected:false,pull:0});
+    }
+
+    growXpDrop(drop,amount){
+      drop.amount+=amount;drop.life=Math.max(drop.life,XP_DROP_LIFE_MS*0.6);
+      drop.size=9+Math.min(15,Math.sqrt(drop.amount)*0.9);drop.baseSize=drop.size*2.8;drop.baseScale=drop.baseSize/48;
+      drop.obj.setDisplaySize(drop.baseSize,drop.baseSize);
     }
 
     updateXpDrops(dtMs,dt) {
@@ -1854,10 +1949,14 @@
       for(let i=this.xpDrops.length-1;i>=0;i--){
         const drop=this.xpDrops[i];if(drop.collected)continue;
         drop.life-=dtMs;drop.pulseClock-=dtMs;if(drop.pulseClock<=0){drop.pulseClock=120;drop.obj.setScale(drop.baseScale*(1+Math.sin(this.elapsed*3.2+drop.phase)*0.045));}
-        if(devourer&&!drop.parasitized&&this.distanceToEnemy({x:drop.x,y:drop.y},devourer)<drop.size+18){const stolen=drop.amount*0.32;drop.amount-=stolen;drop.parasitized=true;devourer.hp=Math.min(devourer.maxHp,devourer.hp+stolen*0.18);this.showFloatingText(drop.x,drop.y-16,'ADN PARASITADO −32%','#ff9cb8',10);this.showEnemyHealthBar(devourer);}
+        if(devourer&&!drop.parasitized&&this.distanceToEnemy({x:drop.x,y:drop.y},devourer)<drop.size+18){const stolen=drop.amount*0.32;drop.amount-=stolen;drop.parasitized=true;devourer.stolenXp=(devourer.stolenXp||0)+stolen;devourer.hp=Math.min(devourer.maxHp,devourer.hp+stolen*0.18);this.showFloatingText(drop.x,drop.y-16,'ADN PARASITADO −32%','#ff9cb8',10);this.showEnemyHealthBar(devourer);}
         const dx=this.player.x-drop.x,dy=this.player.y-drop.y,d=Math.hypot(dx,dy)||1;
-        if(d<=this.stats.xpPickupRadius){
-          const speed=180+260*(1-d/this.stats.xpPickupRadius),step=Math.min(d, speed*dt);
+        if(d<=this.stats.xpPickupRadius||drop.pull>0){
+          // Una vez atraída, acelera sin parar y nunca va más lenta que el jugador: con quimiotaxis alta (radio
+          // grande) antes se la podía dejar atrás.
+          drop.pull=(drop.pull||0)+dt;
+          const playerSpeed=this.stats.moveSpeed*this.playerSpeedFactor();
+          const speed=Math.max(playerSpeed*1.35,180+260*(1-Math.min(1,d/this.stats.xpPickupRadius)))+900*drop.pull*drop.pull,step=Math.min(d, speed*dt);
           drop.x+=dx/d*step;drop.y+=dy/d*step;drop.obj.setPosition(drop.x,drop.y);
         }
         if(d<=this.playerRadius+drop.size+4){
@@ -1866,7 +1965,12 @@
           this.showFloatingText(this.player.x,this.player.y-40,`+${Math.round(drop.amount)} XP`,'#aaffdf',12);
           this.updateHud();
         }else if(drop.life<=0){
-          drop.obj.destroy();drop.collected=true;
+          // Antes de desaparecer se fusiona con la más cercana (si hay alguna razonablemente cerca).
+          let target=null,best=XP_EXPIRE_MERGE_RADIUS**2;
+          for(const other of this.xpDrops){if(other===drop||other.collected)continue;const dd=(other.x-drop.x)**2+(other.y-drop.y)**2;if(dd<best){best=dd;target=other;}}
+          if(target){this.growXpDrop(target,drop.amount);const fx=drop.obj;this.tweens.add({targets:fx,x:target.x,y:target.y,alpha:0,duration:260,onComplete:()=>fx.destroy()});}
+          else drop.obj.destroy();
+          drop.collected=true;
         }
         if(this.xpDrops[i]===drop&&drop.collected)this.xpDrops.splice(i,1);
       }
@@ -1939,10 +2043,16 @@
           if(e.mech.shield<=0&&e.mech.phase==='capsula')this.releaseCapsule(e,true);
         }
       }
-      e.hp-=dealt;e.hitFlash=155;
-      if(e.outlineSprite?.active)e.outlineSprite.setTint(0xffedb1).setAlpha(1);
-      if(!e.isWorm){ e.obj.setTintFill(0xfff0b5); e.obj.setScale(e.visualScale*1.07); e.tintActive=true; }
-      else this.drawWorm(e);
+      e.hp-=dealt;
+      // Destello de impacto. El daño periódico (anticuerpos) no destella, y en jefes el destello se espacia: con
+      // muchos impactos seguidos el sprite quedaba blanco todo el tiempo.
+      const flashes=source!=='antibodies'&&(!e.isBoss||this.elapsed-(e.lastFlashAt??-9)>=0.32);
+      if(flashes){
+        e.hitFlash=e.isBoss?110:155;e.lastFlashAt=this.elapsed;
+        if(e.outlineSprite?.active)e.outlineSprite.setTint(0xffedb1).setAlpha(1);
+        if(!e.isWorm){ e.obj.setTintFill(0xfff0b5); e.obj.setScale(e.visualScale*1.07); e.tintActive=true; }
+        else this.drawWorm(e);
+      }
       this.showEnemyHealthBar(e);
       this.damageTotal+=Math.max(0,dealt);
       const textGap=e.isBoss?0.18:0.38;
@@ -1952,7 +2062,7 @@
     updateEnemies(dtMs,dt) {
       for(const e of this.enemies){
         if(e.dead)continue;
-        if(e.antibodyDots?.length){for(let i=e.antibodyDots.length-1;i>=0;i--){const d=e.antibodyDots[i];d.life-=dtMs;d.tick-=dtMs;const offset=Math.max(8,e.radius*.82);d.obj.setPosition(e.x+Math.cos(d.angle)*offset,e.y+Math.sin(d.angle)*offset);if(d.tick<=0){d.tick=430;this.damageEnemy(e,(this.stats.antibodyDamage||10)*0.42,false,'antibodies');if(e.hp<=0)this.killEnemy(e,false);}if(d.life<=0){d.obj.destroy();e.antibodyDots.splice(i,1);}}}
+        if(e.antibodyDots?.length){for(let i=e.antibodyDots.length-1;i>=0;i--){const d=e.antibodyDots[i];d.life-=dtMs;d.tick-=dtMs;const seg=d.trailIndex!==undefined?e.trail?.[Math.min(d.trailIndex,e.trail.length-1)]:null;if(seg){const off=e.wormWidth*0.45;d.obj.setPosition(seg.x+Math.cos(d.angle)*off,seg.y+Math.sin(d.angle)*off);}else{const offset=Math.max(8,e.radius*.82);d.obj.setPosition(e.x+Math.cos(d.angle)*offset,e.y+Math.sin(d.angle)*offset);}if(d.tick<=0){d.tick=430;this.damageEnemy(e,(this.stats.antibodyDamage||10)*0.42,false,'antibodies');if(e.hp<=0)this.killEnemy(e,false);}if(d.life<=0){d.obj.destroy();e.antibodyDots.splice(i,1);}}}
         if(e.stationary&&e.stationaryAnchor){e.x=e.stationaryAnchor.x;e.y=e.stationaryAnchor.y;}
         const dx=this.player.x-e.x,dy=this.player.y-e.y,d=Math.hypot(dx,dy)||1;
         const gait=1+Math.sin(this.elapsed*e.animFrequency+e.animPhase)*e.animSquash;
@@ -1961,12 +2071,12 @@
         if(e.type==='parasite') this.updateParasite(e,dt,dtMs,dx,dy,d);
         else if(e.type==='fungus'){
           if(!e.stationary&&d>145){e.x+=dx/d*e.speedNow*dt;e.y+=dy/d*e.speedNow*dt;}
-          if(e.isBoss&&!e.mechanic){e.bossAttackClock-=dtMs;if(e.bossAttackClock<=0){for(let i=0;i<(this.multiResistance?5:3);i++)this.spawnBossSpore(e);e.bossAttackClock=this.multiResistance?1850:2850;this.showFloatingText(e.x,e.y-e.visualSize*0.50,'LIBERACIÓN DE CONIDIOS','#dcff7e',11);}}
+          if(e.isBoss&&!e.mechanic){e.bossAttackClock-=dtMs;if(e.bossAttackClock<=0){const tempo=this.bossTempo(),n=Math.min(14,Math.round(3*tempo*tempo*0.75+0.5)+(this.multiResistance?2:0));for(let i=0;i<n;i++)this.spawnBossSpore(e);e.bossAttackClock=(this.multiResistance?1850:2850)/Math.sqrt(tempo);this.showFloatingText(e.x,e.y-e.visualSize*0.50,'LIBERACIÓN DE CONIDIOS','#dcff7e',11);}}
           else{e.sporeCooldown-=dtMs;if(e.sporeCooldown<=0&&d<340&&this.enemyProjectiles.length<12){this.spawnEnemyProjectile(e);e.sporeCooldown=Math.max(1150,2600-this.elapsed*1.6);this.showFloatingText(e.x,e.y-e.radius-8,'ESPORAS','#c8ff9c',10);}}
         }else if(e.type==='virus'){
           const weave=Math.sin(this.elapsed*3.4+(e.x*0.01))*0.26;
           e.x+=(dx/d+(-dy/d)*weave)*e.speedNow*dt;e.y+=(dy/d+(dx/d)*weave)*e.speedNow*dt;
-          if(e.isBoss&&!e.mechanic){e.bossAttackClock-=dtMs;if(e.bossAttackClock<=0){this.spawnVirusMinions(e);e.bossAttackClock=this.multiResistance?7200:10200;}}
+          if(e.isBoss&&!e.mechanic){e.bossAttackClock-=dtMs;if(e.bossAttackClock<=0){this.spawnVirusMinions(e);e.bossAttackClock=(this.multiResistance?7200:10200)/Math.pow(this.bossTempo(),0.6);}}
         }else{
           const weave=Math.sin(this.elapsed*2.3+e.x*0.013)*0.08;
           e.x+=(dx/d+(-dy/d)*weave)*e.speedNow*dt;e.y+=(dy/d+(dx/d)*weave)*e.speedNow*dt;
@@ -2036,6 +2146,7 @@
           if(e.isWorm)this.drawWorm(e);
         }
         if(e.outlineSprite?.active)e.outlineSprite.setTint(e.hitFlash>0?0xfff2bb:e.healthOutlineColor).setAlpha(e.hitFlash>0?1:0.88);
+        if(e.fadeIn>0){e.fadeIn=Math.max(0,e.fadeIn-dtMs);const k=1-e.fadeIn/SPAWN_FADE_MS;e.obj.setAlpha(k);if(e.outlineSprite?.active)e.outlineSprite.setAlpha(0.88*k);if(e.phagoMarker?.active)e.phagoMarker.setAlpha(k);}
         if(e.hitFlash<=0 && e.tintActive && !e.isWorm){ e.obj.clearTint(); e.obj.setScale(e.visualScale); e.tintActive=false; }
         if(e.spawnGrace>0)e.spawnGrace-=dtMs;
         else if(this.enemyTouchesPlayer(e)&&this.invulnerable<=0){
@@ -2165,7 +2276,8 @@
       if(e.bossLabel?.active)this.tweens.add({targets:e.bossLabel,alpha:0,y:e.bossLabel.y-18,duration:190,onComplete:()=>e.bossLabel?.destroy()});
       this.kills+=1;if(this.activeSkills.has('macrophage_activation')&&this.activeSkills.has('polarization')&&this.minionMode==='M1'){this.macrophageM2Charge=(this.macrophageM2Charge||0)+1;const requiredKills=Math.min(180,Math.round(34+this.elapsed*0.11));const attackDuration=this.elapsed-(this.macrophageAttackSince??0);if(this.macrophageM2Charge>=requiredKills&&attackDuration>=90){this.minionMode='M2';this.macrophageM2Until=this.elapsed+24;this.macrophageM2HealClock=0;this.showToast(`POLARIZACIÓN M2 · ${requiredKills} BAJAS / 90 s`);this.burstEffect(this.player.x,this.player.y,0x80caff,58);}}if(e.isBoss){this.bossKills++;this.defeatedBossIds.add(e.morphology?.id||'');}this.activeEnemyCount=Math.max(0,this.activeEnemyCount-1);
       if(this.activeSkills.has('differentiation')){if(this.differentiationSpecies===e.type)this.differentiationStreak++;else{this.differentiationSpecies=e.type;this.differentiationStreak=1;}if(this.differentiationStreak%4===0)this.showFloatingText(this.player.x,this.player.y-56,`ADAPTACIÓN ${e.type.toUpperCase()} ×${this.differentiationStreak}`,'#ffc8ff',10);}
-      const base=e.isBoss?160+Math.max(0,this.bossCount-1)*80:(phagocytosed?27:12), gain=Math.ceil(base*this.stats.xpMultiplier);
+      // La experiencia que robó el Helminto colosal vuelve completa al derrotarlo.
+      const base=e.isBoss?160+Math.max(0,this.bossCount-1)*80:(phagocytosed?27:12), gain=Math.ceil(base*this.stats.xpMultiplier)+Math.round(e.stolenXp||0);
       const instantXp=gain*0.25;this.xp+=instantXp;this.spawnXpDrop(e.x,e.y,gain*0.75);
       const color=e.morphology?.color || (e.type==='bacteria'?0xffc96e:e.type==='virus'?0xb69cff:e.type==='fungus'?0x72cf91:0xff91a9);
       this.burstEffect(e.x,e.y,color,e.sizeTier===2?34:23);
@@ -2245,8 +2357,7 @@
       return this.questionPoolCache=pool;
     }
 
-    selectUnusedQuestion() {
-      const category=this.evolutionDiff.category;
+    selectUnusedQuestion(category=this.questionCategory||this.evolutionDiff.category) {
       const candidates=this.questionPool().filter(q=>!this.usedQuestionIds.has(q.id)&&q.difficulty===category);
       if(!candidates.length)return null;
       const topics=[...new Set(candidates.map(q=>q.topic))];
@@ -2288,7 +2399,16 @@
       let question=this.selectUnusedQuestion();
       if(!question){
         const requiredBosses=this.requiredBossIds(),allBossesDefeated=requiredBosses.every(id=>this.defeatedBossIds?.has(id));
-        if(!allBossesDefeated){this.usedQuestionIds.clear();question=this.selectUnusedQuestion();if(!question){this.questionPaused=false;this.pendingQuestionOutcome=null;this.tweens.resumeAll();return;}}
+        if(!allBossesDefeated){
+          // Sin repetir: se pasa al siguiente nivel de dificultad. Desde que se agota el banco propio, los jefes
+          // aparecen el doble de seguido. Solo si no queda ninguna pregunta en ningún nivel se vuelve a empezar.
+          if(!this.questionsExhausted){this.questionsExhausted=true;this.bossClock=Math.min(this.bossClock,BOSS_INTERVAL_SIN_PREGUNTAS_MS);}
+          const orden=['facil','normal','dificil'],actual=this.questionCategory||this.evolutionDiff.category;
+          for(const cat of orden.slice(orden.indexOf(actual)+1)){question=this.selectUnusedQuestion(cat);if(question){this.questionCategory=cat;this.showToast(`SE AGOTARON LAS PREGUNTAS · SIGUEN LAS DE NIVEL ${cat==='normal'?'ESTUDIANTE':'INFECTÓLOGO'} · JEFES CADA 2 MIN`);break;}}
+          if(!question){for(const cat of orden){question=this.selectUnusedQuestion(cat);if(question)break;}}
+          if(!question){this.usedQuestionIds.clear();question=this.selectUnusedQuestion(this.evolutionDiff.category);}
+          if(!question){this.questionPaused=false;this.pendingQuestionOutcome=null;this.tweens.resumeAll();return;}
+        }
         else {this.questionPaused=false;this.pendingQuestionOutcome=null;this.multiResistance=true;this.multiResistanceAt=this.elapsed;this.resistanceBossClock=26000;this.tweens.resumeAll();
         this.emit('is:close-question',{});this.emit('is:multiresistance',{time:this.elapsed});
         this.cameras.main.shake(950,0.012);this.cameras.main.flash(550,95,16,60,false);
@@ -2536,6 +2656,46 @@
     if(e.target?.closest?.('input,textarea,select')||document.querySelector('.modal-layer.open'))return;
     e.preventDefault();toggleGameFullscreen();
   });
+  // ---- Menús con teclado (PC): flechas o WASD mueven el foco, Enter o Espacio eligen ----
+  // Vale para las capas abiertas (pregunta, mejoras, evolución, pausa, fin de partida) y para el menú principal.
+  // Al abrirse una capa (o cambiar sus opciones) el foco va a la primera opción, así se puede jugar sin mouse.
+  const NAV_PREV=new Set(['ArrowUp','ArrowLeft','w','W','a','A']),NAV_NEXT=new Set(['ArrowDown','ArrowRight','s','S','d','D']);
+  function visibleFocusables(root){
+    return [...root.querySelectorAll('button,a[href],select,input:not([type=hidden]),[tabindex]:not([tabindex="-1"])')]
+      .filter(el=>!el.disabled&&el.offsetParent!==null&&!el.closest('[hidden]')&&getComputedStyle(el).visibility!=='hidden');
+  }
+  function activeMenuRoot(){
+    const layers=[...document.querySelectorAll('.modal-layer.open')];
+    if(layers.length)return layers[layers.length-1];
+    return menuScreen.style.display!=='none'?menuScreen:null;
+  }
+  function focusFirstOption(layer){
+    if(!layer.classList.contains('open')||layer.contains(document.activeElement)&&document.activeElement.offsetParent!==null&&!document.activeElement.disabled)return;
+    const items=visibleFocusables(layer);if(!items.length)return;
+    // Preferí una opción de juego (respuesta, mejora) antes que botones generales como "Salir".
+    (items.find(el=>el.matches('[data-index],[data-id],.answer,.option,.upgrade-card,.choice'))||items[0]).focus({preventScroll:true});
+  }
+  for(const layer of document.querySelectorAll('.modal-layer')){
+    new MutationObserver(()=>requestAnimationFrame(()=>focusFirstOption(layer))).observe(layer,{attributes:true,attributeFilter:['class'],childList:true,subtree:true});
+  }
+  document.addEventListener('keydown',e=>{
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    const root=activeMenuRoot();if(!root)return;
+    const typing=e.target?.closest?.('input:not([type=range]):not([type=checkbox]):not([type=radio]),textarea,select');
+    const prev=NAV_PREV.has(e.key),next=NAV_NEXT.has(e.key);
+    if(!prev&&!next){
+      // Espacio o Enter con el foco fuera de las opciones: elige la que tenga el foco o la primera.
+      if((e.key==='Enter'||e.key===' ')&&!typing&&!root.contains(document.activeElement)){const first=visibleFocusables(root)[0];if(first){e.preventDefault();first.focus({preventScroll:true});}}
+      return;
+    }
+    if(typing&&(e.key.length===1||e.target.tagName==='SELECT'))return; // escribir o cambiar un desplegable no mueve el foco
+    const items=visibleFocusables(root);if(!items.length)return;
+    e.preventDefault();
+    const i=items.indexOf(document.activeElement);
+    const target=i<0?items[0]:items[(i+(next?1:-1)+items.length)%items.length];
+    target.focus({preventScroll:false});
+  });
+
   $('installHintClose')?.addEventListener('click',()=>$('installHint').classList.remove('open'));
   document.addEventListener('webkitfullscreenchange',refreshFullscreenRecovery);
   document.addEventListener('fullscreenchange',refreshFullscreenRecovery);
@@ -2662,7 +2822,7 @@
         setRich(box,[r.record?'🏆 ¡Nuevo récord en el ranking! ':'Puntaje guardado. ','Estás ',{tag:'strong',text:`#${pos}`},` de ${total} en ${modeLabel(payload.modo)} (tu mejor: ${best.toLocaleString('es-AR')}). `,link]);
       }else if(r.error==='sesion_invalida')setRich(box,['Tu sesión de MedMar venció. ',{tag:'a',text:'Volvé a iniciar sesión',href:'/'},' para guardar los próximos puntajes.']);
       else if(r.error==='rate_limit')box.textContent='Guardaste muchas partidas seguidas: esta no entró al ranking. Probá de nuevo en un rato.';
-      else if(r.error==='partida_invalida'||r.error==='partida_sin_inicio')box.textContent='El servidor no pudo validar esta partida, así que no entró al ranking.';
+      else if(r.error==='partida_invalida'||r.error==='partida_sin_inicio'){const motivos={eliminaciones:'demasiadas eliminaciones para el tiempo jugado',preguntas:'demasiadas preguntas para el tiempo jugado',jefes:'demasiados jefes para el tiempo jugado',tiempo:'la duración no coincide con el tiempo real desde que empezó',puntaje:'el puntaje no coincide con el cálculo del servidor',duracion:'la partida duró menos de 20 s'};const m=motivos[r.motivo];box.textContent='El servidor no pudo validar esta partida'+(m?' ('+m+')':r.error==='partida_sin_inicio'?' (no se registró su inicio)':'')+', así que no entró al ranking. Si fue una partida real, avisanos desde Reportes.';}
       else box.textContent='No se pudo guardar en el ranking. Tu récord local quedó guardado.';
     }catch(_){box.textContent='No se pudo conectar con MedMar. Tu récord local quedó guardado.';}
   }

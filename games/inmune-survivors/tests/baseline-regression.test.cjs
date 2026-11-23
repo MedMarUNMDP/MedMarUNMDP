@@ -7,12 +7,12 @@ const root = path.resolve(__dirname, '..');
 const gameSource = fs.readFileSync(path.join(root, 'game.js'), 'utf8');
 const htmlSource = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 
-test('conserva el banco de 83 preguntas distribuido por dificultad', () => {
+test('conserva el banco de 98 preguntas distribuido por dificultad (25 básicas + 15 datos curiosos en fácil)', () => {
   const difficulties = [...gameSource.matchAll(/id:'[^']+', difficulty:'(facil|normal|dificil)'/g)]
     .map((match) => match[1]);
   const count = (difficulty) => difficulties.filter((value) => value === difficulty).length;
 
-  assert.equal(count('facil'), 25);
+  assert.equal(count('facil'), 40);
   assert.equal(count('normal'), 28);
   assert.equal(count('dificil'), 30);
 });

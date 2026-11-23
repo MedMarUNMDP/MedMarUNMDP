@@ -15,7 +15,7 @@ port = 8000 if mobile_mode else 0
 handler = partial(SimpleHTTPRequestHandler, directory=str(folder))
 server = ThreadingHTTPServer((host, port), handler)
 port = server.server_address[1]
-url = f"http://127.0.0.1:{port}/?build=3.10.0"
+url = f"http://127.0.0.1:{port}/?build=3.11.0"
 
 print(f"Iniciando Inmune Survivors v3.8 en {url}", flush=True)
 if mobile_mode:
@@ -29,9 +29,9 @@ if mobile_mode:
     except OSError:
         pass
     if lan_ip:
-        print(f"En el celular, conectado al mismo Wi-Fi, abrí: http://{lan_ip}:{port}/?build=3.10.0", flush=True)
+        print(f"En el celular, conectado al mismo Wi-Fi, abrí: http://{lan_ip}:{port}/?build=3.11.0", flush=True)
     else:
-        print(f"En el celular, conectado al mismo Wi-Fi, abrí http://IP-DE-ESTA-PC:{port}/?build=3.10.0. Para ver la IP, ejecutá ipconfig y buscá Dirección IPv4.", flush=True)
+        print(f"En el celular, conectado al mismo Wi-Fi, abrí http://IP-DE-ESTA-PC:{port}/?build=3.11.0. Para ver la IP, ejecutá ipconfig y buscá Dirección IPv4.", flush=True)
     print("Dejá esta ventana abierta mientras jugás. Para cerrar el servidor, presioná Ctrl+C.", flush=True)
 else:
     Timer(0.4, lambda: webbrowser.open(url)).start()

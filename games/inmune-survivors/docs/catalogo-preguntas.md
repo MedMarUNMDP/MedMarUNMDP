@@ -1,10 +1,10 @@
 # Catálogo completo de preguntas — Inmune Survivors v1.9
 
-**Total: 83 preguntas** — FÁCIL 25, NORMAL 28, DIFÍCIL 30.
+**Total: 98 preguntas** — FÁCIL 40 (25 básicas + 15 datos curiosos, v3.11), NORMAL 28, DIFÍCIL 30.
 
 FÁCIL está diseñado para personas sin cursada previa y nivel secundario. La dificultad es general; la temática funciona como subcategoría. En el juego las opciones se mezclan y las preguntas no se repiten dentro de una partida.
 
-## FÁCIL (25)
+## FÁCIL (40)
 
 **Cantidad por temática:** Antibióticos: 3 · Contagio y prevención: 5 · Inmunología básica: 9 · Microorganismos: 5 · Vacunas y prevención: 3
 
@@ -167,6 +167,100 @@ FÁCIL está diseñado para personas sin cursada previa y nivel secundario. La d
 - Respuesta correcta: Porque reduce la posibilidad de que ciertas infecciones se propaguen
 - Explicación: Al reducir el riesgo de ciertas infecciones, la vacunación puede ayudar a limitar su circulación en la comunidad.
 - Referencia: CDC · conceptos básicos de inmunidad, vacunación, prevención y antibióticos
+
+### Datos curiosos (15, desde v3.11)
+
+Generales pero más exigentes: historia de la medicina y datos de referencia. Revisadas por el revisor médico.
+
+**easy-curious-01 — ¿Quién desarrolló a fines del siglo XVIII la primera vacuna, contra la viruela?**
+
+- Respuesta correcta: Edward Jenner
+- Explicación: Edward Jenner usó material de la viruela bovina (1796) para proteger contra la viruela humana. De ahí viene la palabra vacuna (de vaca).
+- Referencia: Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray
+
+**easy-curious-02 — ¿Qué científico descubrió la penicilina en 1928 al ver que un hongo frenaba el crecimiento de bacterias?**
+
+- Respuesta correcta: Alexander Fleming
+- Explicación: Fleming notó que el moho Penicillium inhibía cultivos de estafilococos: fue el punto de partida de los antibióticos.
+- Referencia: Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray
+
+**easy-curious-03 — ¿Cuál es la única enfermedad humana que la OMS declaró erradicada del mundo?**
+
+- Respuesta correcta: La viruela
+- Explicación: La OMS declaró erradicada la viruela en 1980 gracias a la vacunación masiva. La polio sigue circulando en pocos países.
+- Referencia: Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray
+
+**easy-curious-04 — Según las estimaciones actuales, ¿cuántas bacterias viven en el cuerpo humano comparadas con nuestras propias células?**
+
+- Respuesta correcta: Una cantidad parecida a la de células humanas
+- Explicación: Estimaciones recientes (Sender y col., 2016) calculan una proporción cercana a 1 a 1. La vieja cifra de 10 bacterias por célula resultó exagerada.
+- Referencia: Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray
+
+**easy-curious-05 — ¿En qué órgano maduran los linfocitos T (la T viene de su nombre)?**
+
+- Respuesta correcta: En el timo
+- Explicación: Los linfocitos T nacen en la médula ósea pero maduran en el timo, un órgano ubicado detrás del esternón.
+- Referencia: Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray
+
+**easy-curious-06 — ¿Qué órgano filtra la sangre, elimina glóbulos rojos viejos y está lleno de linfocitos?**
+
+- Respuesta correcta: El bazo
+- Explicación: El bazo, arriba a la izquierda del abdomen, filtra la sangre y aloja muchas células inmunitarias.
+- Referencia: Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray
+
+**easy-curious-07 — ¿Quién creó la vacuna contra la rabia, aplicada por primera vez a un niño en 1885?**
+
+- Respuesta correcta: Louis Pasteur
+- Explicación: Louis Pasteur también desarrolló la pasteurización y defendió que muchas enfermedades las causan microorganismos.
+- Referencia: Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray
+
+**easy-curious-08 — ¿Qué causa la malaria (paludismo)?**
+
+- Respuesta correcta: Un parásito que se transmite por la picadura de ciertos mosquitos
+- Explicación: La malaria la causan parásitos del género Plasmodium, transmitidos por la picadura de mosquitos hembra del género Anopheles.
+- Referencia: Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray
+
+**easy-curious-09 — ¿Cómo se llama la reacción alérgica grave y rápida que puede comprometer la respiración y la presión arterial?**
+
+- Respuesta correcta: Anafilaxia
+- Explicación: La anafilaxia es una emergencia: suele aparecer en minutos tras el contacto con el alérgeno y se trata con adrenalina intramuscular.
+- Referencia: Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray
+
+**easy-curious-10 — ¿Qué es un prión?**
+
+- Respuesta correcta: Una proteína mal plegada capaz de causar enfermedad
+- Explicación: Los priones no tienen material genético: son proteínas con una forma anómala que inducen el mismo cambio en otras proteínas.
+- Referencia: Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray
+
+**easy-curious-11 — ¿Quién describió la fagocitosis al observar células que englobaban partículas en larvas de estrella de mar?**
+
+- Respuesta correcta: Élie Metchnikoff
+- Explicación: Metchnikoff describió los fagocitos a fines del siglo XIX y recibió el Nobel de Medicina en 1908, compartido con Paul Ehrlich.
+- Referencia: Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray
+
+**easy-curious-12 — ¿A qué células del sistema inmunitario ataca principalmente el VIH?**
+
+- Respuesta correcta: A los linfocitos T CD4
+- Explicación: El VIH infecta sobre todo linfocitos T CD4. Sin tratamiento, su descenso lleva al sida.
+- Referencia: Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray
+
+**easy-curious-13 — ¿Por qué la leche materna ayuda a proteger al bebé de infecciones?**
+
+- Respuesta correcta: Porque contiene anticuerpos de la madre
+- Explicación: La leche materna aporta anticuerpos (sobre todo IgA secretora), células y otros factores antimicrobianos que protegen las mucosas del bebé.
+- Referencia: Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray
+
+**easy-curious-14 — ¿Qué parte del cerebro funciona como termostato y sube la temperatura durante la fiebre?**
+
+- Respuesta correcta: El hipotálamo
+- Explicación: Ante una infección, algunas sustancias de la inflamación hacen que el hipotálamo suba la temperatura de referencia.
+- Referencia: Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray
+
+**easy-curious-15 — ¿Qué médico propuso en el siglo XIX lavarse las manos para reducir las muertes por fiebre puerperal?**
+
+- Respuesta correcta: Ignaz Semmelweis
+- Explicación: Semmelweis mostró que el lavado de manos bajaba mucho la mortalidad, aunque en su época sus colegas lo rechazaron.
+- Referencia: Historia de la medicina y datos generales · OMS, CDC, Abbas, Murray
 
 ## NORMAL (28)
 

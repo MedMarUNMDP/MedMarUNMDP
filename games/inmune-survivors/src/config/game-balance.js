@@ -121,7 +121,10 @@
   // Mejoras de vía (EVOLUTION_STRATEGIES): `requires` es una habilidad o lista de habilidades; la mejora
   // solo se ofrece si el jugador tiene al menos una. Sin `requires` es un atributo general.
   const isPathUpgradeAvailable = (scene, upgrade) => {
-    if (!upgrade || !upgrade.requires) return true;
+    if (!upgrade) return true;
+    // maxed: la mejora ya llegó a su tope (ofrecerla no cambiaría nada).
+    if (typeof upgrade.maxed === 'function' && upgrade.maxed(scene)) return false;
+    if (!upgrade.requires) return true;
     return [].concat(upgrade.requires).some((ability) => hasAbility(scene, ability));
   };
 
