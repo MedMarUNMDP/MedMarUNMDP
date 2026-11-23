@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-25-seguridad"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-25-ranking"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -3961,7 +3961,12 @@ async function cargarBootstrap() {
                 avatarHtml(f.pseudonimo, f.foto) +
                 "<span class='rankingNombre'><b>" + escapeHtml(f.pseudonimo) + (f.esPropio ? " (vos)" : "") + "</b>" +
                 "<small>" + escapeHtml(formatearDuracion(f.segundos)) + " de partida</small></span>" +
-                "<span class='rankingPuntos'>" + escapeHtml(Number(f.puntaje).toLocaleString("es-AR")) + "</span></li>"
+                "<span class='rankingPuntos'>" + escapeHtml(Number(f.puntaje).toLocaleString("es-AR")) + "</span>" +
+                // Moderación: sacar del ranking un puntaje que parezca trampa (pide la llave y queda en la auditoría).
+                ((esModeradorActual || esAdminActual) && !f.esPropio
+                    ? "<button type='button' class='rankingQuitar' data-quitar-puntaje='" + escapeAttr(f.pseudonimo) + "' aria-label='Quitar del ranking el puntaje de " + escapeAttr(f.pseudonimo) + "'>Quitar</button>"
+                    : "") +
+                "</li>"
         }
 
         function renderizarRanking(r) {
@@ -4836,7 +4841,8 @@ async function cargarBootstrap() {
             borrar_hilo: "borró una publicación", borrar_respuesta: "borró una respuesta", resolver_denuncia: "resolvió una denuncia",
             resolver_aporte: "resolvió un aporte", agregar_material: "agregó material", quitar_material: "quitó material",
             publicar_noticia: "publicó una noticia", asignar_moderador: "dio rol de moderador", quitar_moderador: "quitó un moderador",
-            asignar_admin: "dio rol de administrador", quitar_admin: "quitó un administrador"
+            asignar_admin: "dio rol de administrador", quitar_admin: "quitó un administrador",
+            quitar_puntaje: "quitó un puntaje del ranking"
         }
 
         async function cargarRegistro() {
@@ -5204,6 +5210,23 @@ async function cargarBootstrap() {
             rankingCache.set(clave, { ts: Date.now(), data: r })
             renderizarRanking(r)
         }
+
+        async function quitarPuntajeRanking(e) {
+            const boton = e.target.closest("[data-quitar-puntaje]")
+            if (!boton) return
+            const pseudonimo = boton.dataset.quitarPuntaje
+            const modo = rankingModo.value
+            if (!confirm("¿Quitar del ranking de " + etiquetaModoRanking(modo) + " el puntaje de " + pseudonimo + "?\n\nUsalo solo si parece trampa. No se puede deshacer y queda en el registro de moderación.")) return
+            boton.disabled = true
+            const r = await llamarModeracion("quitarPuntaje", { juego: JUEGO_RANKING, modo: modo, pseudonimo: pseudonimo })
+            if (!r.ok) { boton.disabled = false; mostrarAviso(mensajeError(r.error)); return }
+            mostrarAviso("Puntaje quitado del ranking.")
+            rankingCache.clear()
+            cargarRankingJuego(true)
+        }
+
+        if (rankingLista) rankingLista.addEventListener("click", quitarPuntajeRanking)
+        if (rankingResultados) rankingResultados.addEventListener("click", quitarPuntajeRanking)
 
         if (rankingModo) {
             rankingModo.addEventListener("change", function () {

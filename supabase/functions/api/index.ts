@@ -57,6 +57,7 @@ const RATE_LIMITS: Record<string, [number, number]> = {
   resolverAporte: [60, 600],
   agregarMaterial: [30, 600],
   quitarMaterial: [30, 600],
+  quitarPuntaje: [30, 600],
   desafioModeracion: [20, 600],
   abrirSesionModeracion: [10, 600],
   registrarLlave: [3, 3600],
@@ -1461,6 +1462,24 @@ async function handle(req: Request, body: any) {
       const {error}=await admin.from('materiales').update({activo:false}).eq('id',id)
       if(error)throw error
       await auditar(admin,user.id,auth.llaveId,'quitar_material',{id})
+      return json({ok:true})
+    }
+    case 'quitarPuntaje': {
+      // Antitrampa del ranking: el juego corre en el navegador, así que un puntaje inventado dentro de lo plausible
+      // no se puede distinguir de uno real. Un moderador (con llave) puede sacar del ranking el que parezca trampa.
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      const juego=String(body.juego||''),modo=String(body.modo||'')
+      const pseudonimo=String(body.pseudonimo||'').trim().normalize('NFC')
+      if(!JUEGOS_RANKING.has(juego)||!MODO_RANKING.test(modo)||!/^[A-Za-zÀ-ÿ0-9 _.-]{3,24}$/.test(pseudonimo))return json({ok:false,error:'datos_invalidos'})
+      const {data:perfil,error:errPerfil}=await admin.from('profiles').select('id').ilike('pseudonimo',pseudonimo.replace(/[\\%_]/g,(c)=>'\\'+c)).maybeSingle()
+      if(errPerfil)throw errPerfil
+      if(!perfil)return json({ok:false,error:'no_encontrado'})
+      const {data:borrados,error}=await admin.from('puntajes_juegos').delete().eq('user_id',perfil.id).eq('juego',juego).eq('modo',modo).select('puntaje,segundos,detalle')
+      if(error)throw error
+      if(!borrados||!borrados.length)return json({ok:false,error:'no_encontrado'})
+      const b:any=borrados[0]
+      await auditar(admin,user.id,auth.llaveId,'quitar_puntaje',{usuario:String(perfil.id),juego,modo,puntaje:b.puntaje,segundos:b.segundos,kills:b.detalle?.kills??null})
       return json({ok:true})
     }
     case 'desafioModeracion': {
