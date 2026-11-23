@@ -317,6 +317,8 @@ const MOD_DESAFIO_MS = 2 * 60 * 1000
 const MOD_SESION_MS = 30 * 60 * 1000
 const MOD_MENSAJE = 'medmar-moderacion-v1|'
 const MAX_LLAVES_POR_USUARIO = 2
+// Cuenta oficial de MedMar: siempre admin, no se le puede quitar el rol desde la web.
+const CUENTA_OFICIAL = 'medmarunmdp@gmail.com'
 const RE_DESAFIO = /^([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\.(\d{13})\.([A-Za-z0-9_-]{43})$/
 const RE_TOKEN_MOD = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.(moderador|admin)\.(\d{13})\.([A-Za-z0-9_-]{43})$/
 const RE_HUELLA = /^[0-9A-F]{4}(-[0-9A-F]{4}){3}$/
@@ -1535,13 +1537,52 @@ async function handle(req: Request, body: any) {
     }
     case 'soyModerador': { const rl=await rateLimit(admin,action,user.id);if(rl)return rl; return json({ok:true,esModerador:await isModerator(admin,user.id),esAdmin:await isAdmin(admin,user.id)}) }
     case 'listarModeradores': {
-      const rl=await rateLimit(admin,action,user.id);if(rl)return rl;const authL=await autorizarModeracion(admin,user,body,'admin');if(authL instanceof Response)return authL;const {data:mods,error}=await admin.from('profiles').select('id,pseudonimo,is_moderator').eq('is_moderator',true).order('pseudonimo');if(error)throw error;const users=[];for(const m of mods||[]){const u=await admin.auth.admin.getUserById(String(m.id));users.push({email:u.data.user?.email||'',pseudonimo:m.pseudonimo})}return json({ok:true,moderadores:users})
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'admin');if(auth instanceof Response)return auth
+      const {data:equipo,error}=await admin.from('profiles').select('id,pseudonimo,is_moderator,is_admin').or('is_moderator.eq.true,is_admin.eq.true').order('pseudonimo')
+      if(error)throw error
+      const miembros=[]
+      for(const m of equipo||[]){
+        const u=await admin.auth.admin.getUserById(String(m.id))
+        const email=u.data.user?.email||''
+        miembros.push({email,pseudonimo:m.pseudonimo,rol:m.is_admin?'admin':'moderador',oficial:email.toLowerCase()===CUENTA_OFICIAL,vos:String(m.id)===user.id})
+      }
+      return json({ok:true,moderadores:miembros})
     }
     case 'asignarModerador': {
-      const rl=await rateLimit(admin,action,user.id);if(rl)return rl;const authA=await autorizarModeracion(admin,user,body,'admin');if(authA instanceof Response)return authA;const email=String(body.email||'').trim().toLowerCase();const u=await findUserByEmail(admin,email);if(!u)return json({ok:false,error:'no_encontrado'});const {data,error}=await admin.from('profiles').update({is_moderator:true}).eq('id',u.id).select('id').single();if(error)throw error;await auditar(admin,user.id,authA.llaveId,'asignar_moderador',{usuario:String(u.id)});return json({ok:true})
+      // Da rol de moderador o de administrador. Un admin nuevo igual necesita una llave de admin, que solo se
+      // activa por SQL desde el dashboard: dar el rol desde la web no alcanza para administrar.
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'admin');if(auth instanceof Response)return auth
+      const rol=body.rol==='admin'?'admin':'moderador'
+      const email=String(body.email||'').trim().toLowerCase()
+      const u=await findUserByEmail(admin,email);if(!u)return json({ok:false,error:'no_encontrado'})
+      const cambios=rol==='admin'?{is_admin:true}:{is_moderator:true}
+      const {error}=await admin.from('profiles').update(cambios).eq('id',u.id).select('id').single()
+      if(error)throw error
+      await auditar(admin,user.id,auth.llaveId,rol==='admin'?'asignar_admin':'asignar_moderador',{usuario:String(u.id)})
+      return json({ok:true})
     }
     case 'quitarModerador': {
-      const rl=await rateLimit(admin,action,user.id);if(rl)return rl;const authQ=await autorizarModeracion(admin,user,body,'admin');if(authQ instanceof Response)return authQ;const email=String(body.email||'').trim().toLowerCase();const u=await findUserByEmail(admin,email);if(!u)return json({ok:false,error:'no_encontrado'});if(String(u.email).toLowerCase()==='medmarunmdp@gmail.com')return json({ok:false,error:'no_autorizado'});const {error}=await admin.from('profiles').update({is_moderator:false}).eq('id',u.id);if(error)throw error;await admin.from('llaves_moderacion').update({estado:'revocada',revocada_at:new Date().toISOString()}).eq('user_id',u.id).eq('rol','moderador').neq('estado','revocada');await auditar(admin,user.id,authQ.llaveId,'quitar_moderador',{usuario:String(u.id)});return json({ok:true})
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'admin');if(auth instanceof Response)return auth
+      const rol=body.rol==='admin'?'admin':'moderador'
+      const email=String(body.email||'').trim().toLowerCase()
+      const u=await findUserByEmail(admin,email);if(!u)return json({ok:false,error:'no_encontrado'})
+      if(String(u.email).toLowerCase()===CUENTA_OFICIAL)return json({ok:false,error:'cuenta_oficial'})
+      if(rol==='admin'){
+        if(String(u.id)===user.id)return json({ok:false,error:'no_quitarte_admin'})
+        const {count,error:errCount}=await admin.from('profiles').select('id',{count:'exact',head:true}).eq('is_admin',true)
+        if(errCount)throw errCount
+        if((count||0)<=1)return json({ok:false,error:'ultimo_admin'})
+      }
+      const cambios=rol==='admin'?{is_admin:false}:{is_moderator:false}
+      const {error}=await admin.from('profiles').update(cambios).eq('id',u.id)
+      if(error)throw error
+      // Sin el rol, sus llaves de ese rol dejan de servir.
+      await admin.from('llaves_moderacion').update({estado:'revocada',revocada_at:new Date().toISOString()}).eq('user_id',u.id).eq('rol',rol).neq('estado','revocada')
+      await auditar(admin,user.id,auth.llaveId,rol==='admin'?'quitar_admin':'quitar_moderador',{usuario:String(u.id)})
+      return json({ok:true})
     }
     case 'listarDenuncias': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl

@@ -48,7 +48,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261124a">
+    <link rel="stylesheet" href="/css/styles.css?v=20261124b">
 </head>
 
 <body>
@@ -575,9 +575,15 @@
 
                         <h3>Moderadores</h3>
                         <p class="ayudaPerfil">Para sumar a alguien: dale el rol acá, esa persona crea su llave en «Mi llave» y vos la aprobás arriba.</p>
-                    <form id="formModerador">
+                    <form id="formModerador" class="formEquipo">
+                        <label for="inputNuevoModerador">Email de la cuenta</label>
                         <input type="email" id="inputNuevoModerador" placeholder="email@ejemplo.com" required>
-                        <button type="submit" class="btn-secundario">Agregar moderador</button>
+                        <label for="rolNuevoModerador">Rol</label>
+                        <select id="rolNuevoModerador">
+                            <option value="moderador">Moderador: denuncias, aportes y material</option>
+                            <option value="admin">Administrador: además, equipo, llaves, noticias y registro</option>
+                        </select>
+                        <button type="submit" class="btn-secundario">Dar rol</button>
                     </form>
 
                     <p id="msgModerador"></p>
@@ -1023,7 +1029,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261124a"></script>
+    <script src="/js/app.js?v=20261124b"></script>
 
 
 </body>

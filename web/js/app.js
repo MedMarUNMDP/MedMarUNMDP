@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-24-llaves"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-24-equipo"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -677,6 +677,9 @@ const hilosPendientesConfirmacion = new Map()
             const mensajes = {
                 email_invalido: "El email no es válido.",
                 link_requerido: "Pegá el enlace de Google Drive del archivo.",
+                cuenta_oficial: "La cuenta oficial de MedMar no se puede modificar desde la web.",
+                no_quitarte_admin: "No podés quitarte el rol de administrador a vos mismo.",
+                ultimo_admin: "Tiene que quedar al menos un administrador.",
                 huella_no_coincide: "La huella no coincide. No apruebes la llave y hablá con esa persona.",
                 llave_requerida: "Necesitás desbloquear la moderación con tu llave.",
                 moderacion_bloqueada: "La moderación está bloqueada.",
@@ -2678,6 +2681,8 @@ async function cargarBootstrap() {
 
         function mostrarSeccion(nombre, modoNavegacion, actualizarHistorial) {
 
+            if (nombre === "moderacion" && !(esModeradorActual || esAdminActual)) nombre = "inicio"
+
             if (actualizarHistorial !== false && historialMedmarInicializado && !aplicandoEstadoHistorial) {
                 const actual = estadoActualSeguro()
                 if (!actual || actual.vista !== nombre || actual.overlay) {
@@ -2826,7 +2831,7 @@ async function cargarBootstrap() {
             listaModeradores.innerHTML = ""
 
             if (moderadores.length === 0) {
-                listaModeradores.innerHTML = "<p class='vacio'>Todavía no asignaste moderadores.</p>"
+                listaModeradores.innerHTML = "<p class='vacio'>Todavía no hay nadie en el equipo.</p>"
                 return
             }
 
@@ -2835,15 +2840,19 @@ async function cargarBootstrap() {
                 const div = document.createElement("div")
                 div.className = "moderadorItem"
 
+                const etiquetaRol = m.rol === "admin" ? "Administrador" : "Moderador"
                 div.innerHTML =
-                    "<span>" + escapeHtml(m.email) + "</span>" +
-                    "<button type='button'>Quitar</button>"
+                    "<span class='novedadFilaTexto'><b>" + escapeHtml(m.pseudonimo || m.email) + (m.vos ? " (vos)" : "") + "</b>" +
+                    "<span>" + escapeHtml(m.email) + "</span></span>" +
+                    "<span class='estadoChip " + (m.rol === "admin" ? "estado-pendiente" : "estado-aprobado") + "'>" + (m.oficial ? "Cuenta oficial" : etiquetaRol) + "</span>" +
+                    (m.oficial || m.vos ? "" : "<button type='button'>Quitar rol</button>")
 
-                div.querySelector("button").addEventListener("click", async function () {
+                const btnQuitar = div.querySelector("button")
+                if (btnQuitar) btnQuitar.addEventListener("click", async function () {
 
-                    if (!confirm("¿Sacar a " + m.email + " como moderador?")) return
+                    if (!confirm("¿Quitarle a " + m.email + " el rol de " + etiquetaRol.toLowerCase() + "? Sus llaves de ese rol dejan de funcionar.")) return
 
-                    const r = await llamarModeracion("quitarModerador", { email: m.email })
+                    const r = await llamarModeracion("quitarModerador", { email: m.email, rol: m.rol })
 
                     if (r.ok) {
                         cargarModeradores()
@@ -2864,10 +2873,14 @@ async function cargarBootstrap() {
             e.preventDefault()
             msgModerador.innerText = "Agregando..."
 
-            const r = await llamarModeracion("asignarModerador", { email: inputNuevoModerador.value.trim() })
+            const rol = document.getElementById("rolNuevoModerador").value
+            if (rol === "admin" && !confirm("¿Dar rol de ADMINISTRADOR a " + inputNuevoModerador.value.trim() + "?\n\nVa a poder ver el panel. Para administrar va a necesitar además una llave de administrador, que solo vos podés activar desde el SQL Editor de Supabase.")) { msgModerador.innerText = ""; return }
+            const r = await llamarModeracion("asignarModerador", { email: inputNuevoModerador.value.trim(), rol: rol })
 
             if (r.ok) {
-                msgModerador.innerText = "Moderador agregado."
+                msgModerador.innerText = rol === "admin"
+                    ? "Listo. Esa persona crea su llave en «Mi llave» y te pasa el SQL (o la huella) para que la actives desde Supabase."
+                    : "Listo. Esa persona crea su llave en «Mi llave» y te pasa la huella para que la apruebes arriba."
                 formModerador.reset()
                 cargarModeradores()
             } else {
@@ -4805,7 +4818,8 @@ async function cargarBootstrap() {
             registrar_llave: "registró una llave", aprobar_llave: "aprobó una llave", revocar_llave: "revocó una llave",
             borrar_hilo: "borró una publicación", borrar_respuesta: "borró una respuesta", resolver_denuncia: "resolvió una denuncia",
             resolver_aporte: "resolvió un aporte", agregar_material: "agregó material", quitar_material: "quitó material",
-            publicar_noticia: "publicó una noticia", asignar_moderador: "dio rol de moderador", quitar_moderador: "quitó un moderador"
+            publicar_noticia: "publicó una noticia", asignar_moderador: "dio rol de moderador", quitar_moderador: "quitó un moderador",
+            asignar_admin: "dio rol de administrador", quitar_admin: "quitó un administrador"
         }
 
         async function cargarRegistro() {
