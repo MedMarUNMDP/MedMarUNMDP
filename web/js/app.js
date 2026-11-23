@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-24-equipo"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-25-seguridad"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -727,6 +727,7 @@ const hilosPendientesConfirmacion = new Map()
                 pseudonimo_invalido: "El pseudónimo debe tener entre 3 y 24 caracteres.",
                 pseudonimo_en_uso: "Ese pseudónimo ya lo está usando otra persona.",
                 enlace_no_permitido: "El texto contiene un enlace a un dominio que MedMar no admite.",
+                demasiados_enlaces: "Podés incluir hasta 10 enlaces por publicación.",
                 ya_es_moderador: "Esa persona ya es moderadora.",
                 imagen_muy_grande: "La imagen es muy pesada. Probá con otra o recortala un poco."
             }
@@ -821,7 +822,7 @@ const hilosPendientesConfirmacion = new Map()
         }
 
 async function cargarBootstrap() {
-            const cacheKey = 'medmar:perfil:' + sesion.email.toLowerCase()
+            const cacheKey = 'medmar:perfil:' + sesion.userId
             try {
                 const local = JSON.parse(localStorage.getItem(cacheKey) || 'null')
                 if (local && local.data) {
@@ -1106,19 +1107,7 @@ async function cargarBootstrap() {
             const email = document.getElementById("loginEmail").value.trim()
             const password = document.getElementById("loginPassword").value
 
-            // Primero usamos Supabase Auth normal. Solo si falla, intentamos una
-            // vez la comprobación del hash legacy para migrar silenciosamente las
-            // cuentas que todavía no hicieron su primer login después del corte.
-            let login = await iniciarSesionConSupabase(email, password)
-            if (login.error) {
-                const legacy = await llamarSinSesion('legacyLogin', { email, password })
-                if (legacy && legacy.ok && legacy.handled) {
-                    login = await iniciarSesionConSupabase(email, password)
-                } else if (legacy && legacy.ok === false && legacy.error === 'credenciales_invalidas') {
-                    authMsg.innerText = 'Email o contraseña incorrectos.'
-                    return
-                }
-            }
+            const login = await iniciarSesionConSupabase(email, password)
 
             if (login.error || !login.data?.session) {
                 const message = login.error?.message || ''
@@ -1250,7 +1239,7 @@ async function cargarBootstrap() {
             inputPseudonimo.value = result.perfil.pseudonimo
             fotoActual = result.perfil.foto || ''
             actualizarAvataresEnPantalla(result.perfil.pseudonimo)
-            const cacheKey = 'medmar:perfil:' + sesion.email.toLowerCase()
+            const cacheKey = 'medmar:perfil:' + sesion.userId
             try {
                 const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null')
                 if (cached?.data?.perfil) { cached.data.perfil.pseudonimo = result.perfil.pseudonimo; cached.data.perfil.foto = result.perfil.foto; cached.data.perfil.profileCompleted = true; cached.ts = Date.now(); localStorage.setItem(cacheKey, JSON.stringify(cached)) }
@@ -2259,6 +2248,20 @@ async function cargarBootstrap() {
             return "<div class='bloqueSensible ocultoSensible' data-sensible-id='" + escapeAttr(id) + "'><button type='button' class='revelarSensible'>⚠️ Contenido sensible · Mostrar contenido</button>" + body + "</div>"
         }
 
+        // Cada previsualización es una invocación de la Edge Function: se limitan por publicación y se piden al verse.
+        const MAX_PREVIEWS_POR_PUBLICACION = 3
+        const MAX_PREVIEWS_POR_VISTA = 15
+
+        function cuandoSeaVisible(elemento, accion) {
+            if (!("IntersectionObserver" in window)) { accion(); return }
+            const observador = new IntersectionObserver(function (entradas) {
+                if (!entradas.some(function (e) { return e.isIntersecting })) return
+                observador.disconnect()
+                accion()
+            }, { rootMargin: "200px" })
+            observador.observe(elemento)
+        }
+
         function hidratarImagenesExternas(root) {
             if (!root) return
             function mostrarImagenNoDisponible(img, despuesDe) {
@@ -2279,7 +2282,14 @@ async function cargarBootstrap() {
             })
             root.querySelectorAll('.externalImageLink[data-preview-url]').forEach(function(link) {
                 if (link.dataset.previewRequested) return
+                const bloque = link.closest('.contenidoForoRich') || root
+                const posicion = Array.prototype.indexOf.call(bloque.querySelectorAll('.externalImageLink[data-preview-url]'), link)
+                if (posicion >= MAX_PREVIEWS_POR_PUBLICACION) return
+                if (root.querySelectorAll('.externalImageLink[data-preview-requested]').length >= MAX_PREVIEWS_POR_VISTA) return
                 link.dataset.previewRequested = '1'
+                cuandoSeaVisible(link, function() { resolverPreview(link) })
+            })
+            function resolverPreview(link) {
                 const url = link.dataset.previewUrl
                 // Cache por sesión: re-renderizar el hilo no vuelve a invocar la Edge Function por cada enlace.
                 if (!imagenesResueltasCliente.has(url)) {
@@ -2308,7 +2318,7 @@ async function cargarBootstrap() {
                     img.onerror = function() { mostrarImagenNoDisponible(img) }
                     link.insertAdjacentElement('afterend', img)
                 }).catch(function(){})
-            })
+            }
             root.querySelectorAll('.revelarSensible').forEach(function(button) {
                 if (button.dataset.bound) return
                 button.dataset.bound = '1'
@@ -2327,10 +2337,10 @@ async function cargarBootstrap() {
                 return "<span class='etiquetaChip'>" + escapeHtml(t) + "</span>"
             }).join("")
 
-            let acciones = "<button type='button' class='accionDenunciar' data-tipo='hilo' data-id='" + h.id + "'>Denunciar</button>"
+            let acciones = "<button type='button' class='accionDenunciar' data-tipo='hilo' data-id='" + escapeAttr(h.id) + "'>Denunciar</button>"
 
             if (h.esPropio || esModeradorActual) {
-                acciones += "<button type='button' class='accionBorrar' data-tipo='hilo' data-id='" + h.id + "'>Borrar</button>"
+                acciones += "<button type='button' class='accionBorrar' data-tipo='hilo' data-id='" + escapeAttr(h.id) + "'>Borrar</button>"
             }
 
             detalleHiloContenido.innerHTML =
@@ -2895,6 +2905,12 @@ async function cargarBootstrap() {
         // Vacía todo lo que quedó del usuario anterior: cachés en memoria, listas y vistas. Con
         // borrarAlmacenamiento también borra la caché de perfil de localStorage (solicitudes e
         // intercambios), para no dejarla en una compu compartida. El tema se conserva.
+        // Preferencias del dispositivo (no de la cuenta): sobreviven al cierre de sesión.
+        const CLAVES_LOCALES_DEL_DISPOSITIVO = ["medmar:tema", "medmar:rankingModo", "medmar:reportes"]
+        // Lo visto en el foro (para avisar «respuestas nuevas» en Inicio) se conserva: va por id de usuario, sin email.
+        // Las claves viejas que tenían el email sí se borran.
+        const RE_CLAVE_FORO_POR_ID = /^medmar:(foroResumen|foroVistos):[0-9a-f-]{36}$/
+
         function limpiarDatosDeSesion(borrarAlmacenamiento) {
             foroCacheCliente.clear()
             rankingCache.clear()
@@ -2943,7 +2959,7 @@ async function cargarBootstrap() {
                     const claves = []
                     for (let i = 0; i < localStorage.length; i++) {
                         const clave = localStorage.key(i)
-                        if (clave && clave.indexOf("medmar:perfil:") === 0) claves.push(clave)
+                        if (clave && clave.indexOf("medmar:") === 0 && !CLAVES_LOCALES_DEL_DISPOSITIVO.includes(clave) && !RE_CLAVE_FORO_POR_ID.test(clave)) claves.push(clave)
                     }
                     claves.forEach(function (clave) { localStorage.removeItem(clave) })
                 } catch (_) {}
@@ -3132,7 +3148,7 @@ async function cargarBootstrap() {
             if (!nuevo) return
             msgPerfil.innerText = "Guardando…"
             actualizarAvataresEnPantalla(nuevo)
-            try { localStorage.setItem("medmar:perfil:optimista:" + sesion.email.toLowerCase(), JSON.stringify({ pseudonimo: nuevo, foto: fotoActual })) } catch (_) {}
+            try { localStorage.setItem("medmar:perfil:optimista:" + sesion.userId, JSON.stringify({ pseudonimo: nuevo, foto: fotoActual })) } catch (_) {}
 
             const r = await llamar("actualizarPseudonimo", { pseudonimo: nuevo })
             if (r.ok) {
@@ -3140,13 +3156,13 @@ async function cargarBootstrap() {
                 msgPerfil.innerText = ""
                 mostrarAviso("Pseudónimo actualizado.")
                 try {
-                    const key = 'medmar:perfil:' + sesion.email.toLowerCase()
+                    const key = 'medmar:perfil:' + sesion.userId
                     const cached = JSON.parse(localStorage.getItem(key) || 'null') || { data: {} }
                     cached.data.perfil = cached.data.perfil || {}
                     cached.data.perfil.pseudonimo = r.pseudonimo
                     cached.data.perfil.foto = fotoActual
                     localStorage.setItem(key, JSON.stringify(cached))
-                    localStorage.removeItem("medmar:perfil:optimista:" + sesion.email.toLowerCase())
+                    localStorage.removeItem("medmar:perfil:optimista:" + sesion.userId)
                 } catch (_) {}
             } else {
                 inputPseudonimo.value = anterior
@@ -3701,7 +3717,7 @@ async function cargarBootstrap() {
         cancelarEdicionBtn.addEventListener("click", salirModoEdicion)
 
         async function cacheUserListsInvalidarCliente() {
-            try { localStorage.removeItem("medmar:perfil:" + sesion.email.toLowerCase()) } catch (_) {}
+            try { localStorage.removeItem("medmar:perfil:" + sesion.userId) } catch (_) {}
         }
 
         async function borrarSolicitudItem(id) {
@@ -3983,7 +3999,7 @@ async function cargarBootstrap() {
         const DIAS_VIGENCIA_SOLICITUD = 14
 
         function claveLocalUsuario(nombre) {
-            return sesion && sesion.email ? "medmar:" + nombre + ":" + sesion.email.toLowerCase() : null
+            return sesion && sesion.userId ? "medmar:" + nombre + ":" + sesion.userId : null
         }
 
         function leerLocal(nombre) {
@@ -4197,15 +4213,16 @@ async function cargarBootstrap() {
         function textoNotificacion(n) {
             const actor = "<b>" + escapeHtml(n.actor || "Alguien") + "</b>"
             const contexto = n.contexto ? "«" + escapeHtml(n.contexto) + "»" : ""
-            const varias = n.cantidad > 1
+            const cantidad = Math.max(0, Math.floor(Number(n.cantidad) || 0))
+            const varias = cantidad > 1
             switch (n.tipo) {
                 case "respuesta":
-                    return varias ? "<b>" + n.cantidad + " respuestas nuevas</b> en " + contexto : actor + " respondió en " + contexto
+                    return varias ? "<b>" + cantidad + " respuestas nuevas</b> en " + contexto : actor + " respondió en " + contexto
                 case "respuesta_a_respuesta":
-                    return varias ? "<b>" + n.cantidad + " respuestas</b> a tu comentario en " + contexto : actor + " respondió tu comentario en " + contexto
+                    return varias ? "<b>" + cantidad + " respuestas</b> a tu comentario en " + contexto : actor + " respondió tu comentario en " + contexto
                 case "mensaje":
                     return varias
-                        ? "<b>" + n.cantidad + " mensajes nuevos</b> de " + escapeHtml(n.actor || "tu compañero") + " · " + escapeHtml(n.contexto || "chat")
+                        ? "<b>" + cantidad + " mensajes nuevos</b> de " + escapeHtml(n.actor || "tu compañero") + " · " + escapeHtml(n.contexto || "chat")
                         : actor + " te escribió · " + escapeHtml(n.contexto || "chat")
                 case "intercambio":
                     return "<b>¡Encontramos un intercambio!</b> " + escapeHtml(n.contexto || "")
@@ -4349,8 +4366,8 @@ async function cargarBootstrap() {
             } else if (n.tipo === "noticia" && n.link) {
                 const vistaInterna = /^\/\?vista=(juegos|material|moderacion|foro|intercambios)$/.exec(n.link)
                 if (vistaInterna) mostrarSeccion(vistaInterna[1], "up")
-                else if (n.link.charAt(0) === "/") location.href = n.link
-                else window.open(n.link, "_blank", "noopener")
+                else if (/^\/(?!\/)/.test(n.link) && n.link.indexOf("\\") < 0) location.href = n.link
+                else if (/^https:\/\//i.test(n.link)) window.open(n.link, "_blank", "noopener")
             }
         }
 

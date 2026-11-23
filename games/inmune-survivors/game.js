@@ -2614,7 +2614,7 @@
   const SUPABASE_JS_SRI='sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK';
   const MEDMAR_SESSION_KEY='sb-ekfwdrsehhmrqxxlefyx-auth-token';
   function storedSession(){try{const v=JSON.parse(localStorage.getItem(MEDMAR_SESSION_KEY)||'null');return v&&v.refresh_token?v:null;}catch(_){return null;}}
-  function cachedPseudonym(session){try{const email=String(session?.user?.email||'').toLowerCase();const c=JSON.parse(localStorage.getItem('medmar:perfil:'+email)||'null');return String(c?.data?.perfil?.pseudonimo||'');}catch(_){return '';}}
+  function cachedPseudonym(session){try{const email=String(session?.user?.email||'').toLowerCase();const id=String(session?.user?.id||'');const c=JSON.parse(localStorage.getItem('medmar:perfil:'+id)||localStorage.getItem('medmar:perfil:'+email)||'null');return String(c?.data?.perfil?.pseudonimo||'');}catch(_){return '';}}
   let supabaseLoading=null,medmarClient=null;
   function loadSupabase(){
     if(window.supabase?.createClient)return Promise.resolve(window.supabase);

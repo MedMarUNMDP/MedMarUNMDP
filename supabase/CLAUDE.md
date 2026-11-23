@@ -6,7 +6,7 @@ se aplica acá impacta producción.
 ## Estructura (convención de Supabase CLI)
 
 - `functions/api/index.ts` — Edge Function principal (Deno). Un único endpoint POST que despacha por `body.accion`
-  en el `switch` de `handle()`. Acciones públicas: `health`, `legacyLogin`; el resto exige `Authorization: Bearer`.
+  en el `switch` de `handle()`. Acción pública: solo `health`; el resto exige `Authorization: Bearer` (`legacyLogin` se quitó en la auditoría de seguridad de 2026-11: la tabla legacy estaba vacía).
 - `functions/maintenance/index.ts` — invocada por cron con header `x-medmar-cron-secret`. Procesa `notificacion_queue`
   (RPC `claim_notification_batch`) y envía mails vía Gmail API con backoff exponencial.
 - `migrations/` — SQL en orden por timestamp. `…_schema_inicial.sql` es idempotente (`if not exists`, `create or replace`)

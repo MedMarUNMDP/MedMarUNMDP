@@ -6,6 +6,8 @@
   <!-- CSP: el juego comparte origen (y localStorage, con la sesión de MedMar) con la web.
        Phaser carga las imágenes por XHR y las usa como blob:. Si sumás un CDN, agregalo acá. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/ https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' data: blob: https://ekfwdrsehhmrqxxlefyx.supabase.co https://script.google.com https://script.googleusercontent.com; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <!-- Anti-clickjacking compartido con la web (en local, puerto 5501, no existe y no pasa nada). -->
+  <script src="/js/marco.js"></script>
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="theme-color" content="#091525">
   <!-- Instalable: desde la pantalla de inicio abre sin barras (la única pantalla completa posible en iPhone). -->

@@ -11,6 +11,7 @@ const MAX_CHAT_MESSAGES = 500
 const MAX_TAGS = 5
 const MAX_TAG_LENGTH = 24
 const MAX_CYCLE = 50
+const MAX_PASOS_CICLO = 50_000
 const CHAT_DAYS = 14
 
 const RATE_LIMITS: Record<string, [number, number]> = {
@@ -560,76 +561,18 @@ async function rateLimit(admin: SupabaseClient, action: string, userId: string) 
     p_window_seconds: rule[1],
   })
   if (error) {
-    // Falla abierta a propósito (disponibilidad), pero queda registrado en los logs de la función.
+    // Falla cerrada: si no se puede contar, no se deja pasar (sin la base, la acción fallaría igual).
     console.error('rate_limit_unavailable', action, error.message)
-    return null
+    return json({ ok: false, error: 'rate_limit', retryAfter: 5 }, 200)
   }
   const row = Array.isArray(data) ? data[0] : data
   if (!row?.allowed) return json({ ok: false, error: 'rate_limit', retryAfter: Number(row?.retry_after || 1) }, 200)
   return null
 }
 
-async function rateLimitKey(admin: SupabaseClient, bucket: string, limit: number, windowSeconds: number) {
-  const { data, error } = await admin.rpc('consume_rate_limit', {
-    p_bucket_key: bucket,
-    p_limit: limit,
-    p_window_seconds: windowSeconds,
-  })
-  if (error) return null
-  const row = Array.isArray(data) ? data[0] : data
-  if (!row?.allowed) return json({ ok: false, error: 'rate_limit', retryAfter: Number(row?.retry_after || 1) }, 200)
-  return null
-}
-
-async function sha256Hex(value: string) {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
-  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('')
-}
-
-function genericCredentialError() {
-  return json({ ok: false, error: 'credenciales_invalidas' }, 200)
-}
-
-async function legacyLogin(admin: SupabaseClient, emailRaw: string, password: string) {
-  const email = String(emailRaw || '').trim().toLowerCase()
-  if (!email || !password || email.length > 254) return genericCredentialError()
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return genericCredentialError()
-
-  const rl = await rateLimitKey(admin, `legacyLogin:${await sha256Hex(email)}`, 5, 600)
-  if (rl) return rl
-
-  const { data: rows, error } = await admin.rpc('get_legacy_password', { p_email: email })
-  if (error) throw error
-  const row = Array.isArray(rows) ? rows[0] : rows
-  if (!row || row.migrated_at) return json({ ok: true, handled: false }, 200)
-
-  const computed = await sha256Hex(password + '|' + String(row.legacy_salt || ''))
-  if (computed.toLowerCase() !== String(row.legacy_hash || '').toLowerCase()) return genericCredentialError()
-
-  let targetUser: User | null = null
-  for (let page = 1; page <= 10; page++) {
-    const { data, error: listError } = await admin.auth.admin.listUsers({ page, perPage: 1000 })
-    if (listError) throw listError
-    targetUser = (data.users || []).find((u: any) => String(u.email || '').toLowerCase() === email) || null
-    if (targetUser || !(data.users || []).length || (data.users || []).length < 1000) break
-  }
-
-  if (!targetUser) {
-    const { data: created, error: createError } = await admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { migrated_from_medmar: true },
-    })
-    if (createError || !created.user) throw createError || new Error('legacy_create_user_failed')
-    targetUser = created.user
-  } else {
-    const { data: updated, error: updateError } = await admin.auth.admin.updateUserById(targetUser.id, { password, email_confirm: true })
-    if (updateError || !updated.user) throw updateError || new Error('legacy_update_user_failed')
-  }
-
-  await admin.rpc('mark_legacy_password_migrated', { p_email: email })
-  return json({ ok: true, handled: true, migrated: true }, 200)
+function offsetSeguro(valor: unknown) {
+  const n = Number(valor || 0)
+  return Number.isInteger(n) && n >= 0 && n <= 10_000 ? n : 0
 }
 
 function validOperationId(value: unknown) {
@@ -663,18 +606,45 @@ function extractUrls(text: string) {
   return [...new Set((String(text || '').match(/https?:\/\/[^\s<>\"']+/gi) || []).map(x => x.replace(/[),.;!?]+$/g, '')))].slice(0, 10)
 }
 
+// Cada enlace a un host de imágenes dispara una previsualización (una invocación de resolverImagen por lector):
+// sin tope, una sola publicación podía consumir miles de invocaciones del plan.
+const MAX_ENLACES_POR_PUBLICACION = 10
 function validateContentLinks(text: string) {
   const urls = extractUrls(text)
+  if (urls.length > MAX_ENLACES_POR_PUBLICACION) return { ok: false, urls, invalid: '', demasiados: true }
   for (const raw of urls) {
-    if (!safeLink(raw)) return { ok: false, urls, invalid: raw }
+    if (!safeLink(raw)) return { ok: false, urls, invalid: raw, demasiados: false }
   }
-  return { ok: true, urls, invalid: '' }
+  return { ok: true, urls, invalid: '', demasiados: false }
 }
 
 const IMAGE_PAGE_HOSTS = ['prnt.sc','lightshot.com','lightshot.org','pinetools.com','screenapp.io','imgur.com','imgur.io','ibb.co','postimg.cc','imgbb.com','imageshack.com','imgbox.com']
 function isPrivateOrLocalHost(host: string) {
   const h = host.toLowerCase().replace(/\.$/, '')
   return h === 'localhost' || h.endsWith('.localhost') || h === '::1' || h.startsWith('127.') || h.startsWith('10.') || h.startsWith('192.168.') || /^172\.(1[6-9]|2\d|3[01])\./.test(h) || h === '0.0.0.0'
+}
+
+// Lee como mucho `tope` bytes del cuerpo y corta la descarga: response.text() bajaba la página entera antes de recortar.
+async function leerBytesConTope(response: Response, tope: number) {
+  if (!response.body) return new Uint8Array(0)
+  const reader = response.body.getReader()
+  const partes: Uint8Array[] = []
+  let total = 0
+  while (total < tope) {
+    const { done, value } = await reader.read()
+    if (done || !value) break
+    partes.push(value.subarray(0, tope - total))
+    total += Math.min(value.length, tope - total)
+  }
+  await reader.cancel().catch(() => {})
+  const junto = new Uint8Array(total)
+  let pos = 0
+  for (const p of partes) { junto.set(p, pos); pos += p.length }
+  return junto
+}
+
+async function leerTextoConTope(response: Response, tope: number) {
+  return new TextDecoder().decode(await leerBytesConTope(response, tope))
 }
 
 async function resolveExternalImage(raw: string) {
@@ -697,7 +667,7 @@ async function resolveExternalImage(raw: string) {
     const type = (response.headers.get('content-type') || '').toLowerCase()
     if (type.startsWith('image/')) return current.toString()
     if (!type.includes('text/html')) return ''
-    const html = (await response.text()).slice(0, 1_000_000)
+    const html = await leerTextoConTope(response, 1_000_000)
     const candidates = [...html.matchAll(/<meta[^>]+(?:property|name)=[\"'](?:og:image|twitter:image)[\"'][^>]+content=[\"']([^\"']+)[\"'][^>]*>/gi), ...html.matchAll(/<meta[^>]+content=[\"']([^\"']+)[\"'][^>]+(?:property|name)=[\"'](?:og:image|twitter:image)[\"'][^>]*>/gi)]
     const value = candidates[0]?.[1]
     if (!value) return ''
@@ -710,10 +680,22 @@ async function resolveExternalImage(raw: string) {
   return ''
 }
 
+// Foto subida por la propia persona: URL exacta del bucket, dentro de su carpeta, sin query, hash ni '..'.
+// (Antes alcanzaba con que el id apareciera en cualquier parte de la URL, por ejemplo en la query string.)
+function fotoPropiaValida(foto: string, userId: string) {
+  let u: URL
+  try { u = new URL(foto) } catch { return false }
+  const base = new URL(SUPABASE_URL)
+  if (u.protocol !== 'https:' || u.host !== base.host || u.username || u.password || u.search || u.hash) return false
+  const prefijo = `/storage/v1/object/public/profile-photos/${userId}/`
+  if (!u.pathname.startsWith(prefijo)) return false
+  return /^[A-Za-z0-9_-]{1,80}\.jpe?g$/.test(u.pathname.slice(prefijo.length))
+}
+
 async function profileMap(client: SupabaseClient, ids: string[]) {
   const unique = [...new Set(ids.filter(Boolean))]
   if (!unique.length) return new Map<string, any>()
-  const { data, error } = await client.from('profiles').select('id,pseudonimo,foto_url,is_moderator').in('id', unique)
+  const { data, error } = await client.from('profiles').select('id,pseudonimo,foto_url').in('id', unique)
   if (error) throw error
   return new Map((data || []).map(p => [String(p.id), p]))
 }
@@ -734,12 +716,12 @@ async function saveIdempotent(admin: SupabaseClient, userId: string, action: str
   await admin.from('idempotency_keys').upsert({ user_id: userId, operation_id: operationId, action, response }, { onConflict: 'user_id,operation_id' })
 }
 
-async function getIdempotent(admin: SupabaseClient, userId: string, operationId: string) {
-  const { data } = await admin.from('idempotency_keys').select('response').eq('user_id', userId).eq('operation_id', operationId).maybeSingle()
+async function getIdempotent(admin: SupabaseClient, userId: string, operationId: string, action: string) {
+  const { data } = await admin.from('idempotency_keys').select('response').eq('user_id', userId).eq('operation_id', operationId).eq('action', action).maybeSingle()
   return data?.response ?? null
 }
 
-async function findCycle(admin: SupabaseClient, materia: string) {
+async function findCycle(admin: SupabaseClient, materia: string, userId: string) {
   const { data, error } = await admin.from('solicitudes')
     .select('id,user_id,materia,tengo,busco,status,created_at,operation_id')
     .eq('status', 'activa')
@@ -747,15 +729,21 @@ async function findCycle(admin: SupabaseClient, materia: string) {
     .order('created_at', { ascending: true })
     .limit(5000)
   if (error) throw error
+  // Primero las solicitudes de quien acaba de guardar: un ciclo nuevo casi siempre lo incluye.
   const base = (data || []).map(r => ({ ...r, email: String(r.user_id) }))
+    .sort((a, b) => Number(String(b.user_id) === userId) - Number(String(a.user_id) === userId))
   const byTengo = new Map<number, any[]>()
   for (const o of base) {
     if (!byTengo.has(Number(o.tengo))) byTengo.set(Number(o.tengo), [])
     byTengo.get(Number(o.tengo))!.push(o)
   }
   let best: any[] | null = null
+  // Tope de pasos de la búsqueda (DFS sin memoria = exponencial en el peor caso): con solicitudes armadas a propósito
+  // en capas, cada guardado podía agotar la CPU de la función y bloquear los emparejamientos de toda la materia.
+  let pasos = 0
 
   function dfs(start: any, current: any, seen: Set<string>, path: any[]) {
+    if (++pasos > MAX_PASOS_CICLO) return
     if (path.length > MAX_CYCLE || best && path.length >= best.length) return
     const candidates = byTengo.get(Number(current.busco)) || []
     for (const next of candidates) {
@@ -771,6 +759,10 @@ async function findCycle(admin: SupabaseClient, materia: string) {
   }
 
   for (const start of base) {
+    if (pasos > MAX_PASOS_CICLO) {
+      console.warn('find_cycle_tope', materia, base.length)
+      break
+    }
     dfs(start, start, new Set([start.user_id]), [start])
   }
   return best
@@ -778,7 +770,7 @@ async function findCycle(admin: SupabaseClient, materia: string) {
 
 async function maybeMatch(admin: SupabaseClient, userId: string, materia: string) {
   for (let attempt = 0; attempt < 2; attempt++) {
-    const cycle = await findCycle(admin, materia)
+    const cycle = await findCycle(admin, materia, userId)
     if (!cycle) return { matched: false }
     const ids = cycle.map(x => x.id)
     const { data, error } = await admin.rpc('finalize_exchange', { p_request_ids: ids, p_materia: materia })
@@ -795,7 +787,7 @@ async function bootstrap(user: User, client: SupabaseClient, admin: SupabaseClie
   if (rl) return rl
 
   const [{ data: profile, error: profileError }, { data: solicitudes, error: reqError }, { data: exchanges, error: exError }] = await Promise.all([
-    client.from('profiles').select('id,pseudonimo,foto_url,is_moderator,is_admin,profile_completed').eq('id', user.id).single(),
+    admin.from('profiles').select('id,pseudonimo,foto_url,is_moderator,is_admin,profile_completed').eq('id', user.id).single(),
     client.from('solicitudes').select('id,materia,tengo,busco,status,created_at,updated_at,completed_at,exchange_id').eq('user_id', user.id).eq('status', 'activa').order('created_at', { ascending: false }),
     client.from('intercambio_participantes').select('intercambio_id,solicitud_id,user_id,tengo,busco,intercambios!inner(id,materia,created_at,completed_at)').eq('user_id', user.id),
   ])
@@ -1015,10 +1007,11 @@ function validarPartida(body: any) {
   const preguntas = enteroNoNegativo(body?.preguntas)
   const jefes = enteroNoNegativo(body?.jefes)
   if (segundos === null || kills === null || correctas === null || preguntas === null || jefes === null) return null
-  // Plausibilidad (topes holgados: el arnés de simulación da ~0,8 eliminaciones por segundo): no hay partidas de menos
-  // de 20 s, ni más de 6 eliminaciones por segundo, ni más preguntas que una cada ~10 s, ni más de un jefe cada ~25 s.
+  // Plausibilidad: el arnés de simulación da ~0,8 eliminaciones por segundo y el máximo real en producción fue ~1,4/s
+  // (nov 2026). Tope: 3/s + 60, el doble del máximo observado. Antes era 6/s, y dejaba inflar el ranking sin jugar.
+  // Además: no hay partidas de menos de 20 s, ni más preguntas que una cada ~10 s, ni más de un jefe cada ~25 s.
   if (segundos < PARTIDA_MIN_SEGUNDOS || segundos > PARTIDA_MAX_SEGUNDOS) return null
-  if (kills > segundos * 6 + 40) return null
+  if (kills > segundos * 3 + 60) return null
   if (preguntas > Math.floor(segundos / 10) + 5 || correctas > preguntas) return null
   if (jefes > Math.floor(segundos / 25) + 3) return null
   const puntaje = Math.floor((kills * 10 + segundos * 2 + correctas * 25) * MULT_INFECCION[dificultadInfeccion] * MULT_EVOLUCION[dificultadEvolucion])
@@ -1054,7 +1047,7 @@ async function guardarPuntaje(user: User, client: SupabaseClient, admin: Supabas
   if (!entrada) return json({ ok: false, error: 'partida_sin_inicio' })
   // Reintento de la misma partida: misma respuesta, sin volver a sumar.
   const operationId = entrada.id
-  const previa = await getIdempotent(admin, user.id, operationId)
+  const previa = await getIdempotent(admin, user.id, operationId, 'guardarPuntaje')
   if (previa) return json(previa)
   if (segundos > (Date.now() - entrada.inicio) / 1000 + PARTIDA_TOLERANCIA_S) return json({ ok: false, error: 'partida_invalida' })
   let record = false
@@ -1113,7 +1106,7 @@ async function rankingJuego(user: User, client: SupabaseClient, body: any) {
 
 async function handle(req: Request, body: any) {
   const action = String(body?.accion || '')
-  const authRequired = !['health', 'legacyLogin'].includes(action)
+  const authRequired = action !== 'health'
   const admin = adminClient()
   let user: User | null = null
   let client: SupabaseClient = admin
@@ -1130,12 +1123,11 @@ async function handle(req: Request, body: any) {
     const { error } = await admin.from('rate_limit_buckets').select('bucket_key', { head: true }).limit(1)
     return json({ ok: !error, service: 'medmar-api', version: 'supabase-v2', db: error ? 'error' : 'ok' })
   }
-  if (action === 'legacyLogin') return legacyLogin(admin, String(body?.email || ''), String(body?.password || ''))
   if (!user) return json({ ok: false, error: 'sesion_invalida' })
 
   switch (action) {
     case 'bootstrap': return bootstrap(user, client, admin)
-    case 'foroBootstrap': return foroBootstrap(user, client, admin, String(body.etiqueta || '').trim().toLowerCase())
+    case 'foroBootstrap': return foroBootstrap(user, client, admin, String(body.etiqueta || '').trim().toLowerCase().slice(0, MAX_TAG_LENGTH))
     case 'listarEtiquetas': {
       const rl = await rateLimit(admin, action, user.id); if (rl) return rl
       const { data, error } = await client.from('hilos').select('etiquetas').limit(1000)
@@ -1150,7 +1142,7 @@ async function handle(req: Request, body: any) {
     }
     case 'listarHilos': {
       const rl = await rateLimit(admin, action, user.id); if (rl) return rl
-      return json({ ok: true, ...(await getThreadPage(client, user.id, String(body.etiqueta || '').trim().toLowerCase(), Math.max(0, Number(body.desde || 0)), String(body.busqueda || ''))) })
+      return json({ ok: true, ...(await getThreadPage(client, user.id, String(body.etiqueta || '').trim().toLowerCase().slice(0, MAX_TAG_LENGTH), offsetSeguro(body.desde), String(body.busqueda || '').slice(0, 100))) })
     }
     case 'verHilo': {
       const rl = await rateLimit(admin, action, user.id); if (rl) return rl
@@ -1179,11 +1171,11 @@ async function handle(req: Request, body: any) {
       const rl = await rateLimit(admin, action, user.id); if (rl) return rl
       const titulo=String(body.titulo||'').trim(), contenido=String(body.contenido||'').trim(), operationId=String(body.operacionId||'')
       if (!validOperationId(operationId)) return json({ok:false,error:'datos_invalidos'})
-      const cached=await getIdempotent(admin,user.id,operationId); if(cached) return json(cached)
+      const cached=await getIdempotent(admin,user.id,operationId,action); if(cached) return json(cached)
       if(!titulo||titulo.length>MAX_TITLE||!contenido||contenido.length>MAX_CONTENT) return json({ok:false,error:titulo.length>MAX_TITLE?'titulo_invalido':'contenido_invalido'})
       const tags=cleanTags(body.etiquetas)
       const linksCheck=validateContentLinks(contenido)
-      if(!linksCheck.ok) return json({ok:false,error:'enlace_no_permitido',url:linksCheck.invalid})
+      if(!linksCheck.ok) return json({ok:false,error:linksCheck.demasiados?'demasiados_enlaces':'enlace_no_permitido',url:linksCheck.invalid})
       const isSensitive=body.isSensitive===true || body.sensible==='1'
       const {data,error}=await admin.from('hilos').insert({autor_id:user.id,es_anonimo:false,titulo,contenido,etiquetas:tags,link:null,is_sensitive:isSensitive,operation_id:operationId}).select('id').single()
       if(error){
@@ -1199,11 +1191,11 @@ async function handle(req: Request, body: any) {
       const hiloId=uuidOrEmpty(body.hiloId), contenido=String(body.contenido||'').trim(), operationId=String(body.operacionId||'')
       const parentId=String(body.parentId||'').trim()
       if(!validOperationId(operationId)) return json({ok:false,error:'datos_invalidos'})
-      const cached=await getIdempotent(admin,user.id,operationId); if(cached)return json(cached)
+      const cached=await getIdempotent(admin,user.id,operationId,action); if(cached)return json(cached)
       if(!hiloId||!contenido||contenido.length>MAX_CONTENT)return json({ok:false,error:'contenido_invalido'})
       if(parentId&&!validOperationId(parentId))return json({ok:false,error:'respuesta_invalida'})
       const linksCheck=validateContentLinks(contenido)
-      if(!linksCheck.ok) return json({ok:false,error:'enlace_no_permitido',url:linksCheck.invalid})
+      if(!linksCheck.ok) return json({ok:false,error:linksCheck.demasiados?'demasiados_enlaces':'enlace_no_permitido',url:linksCheck.invalid})
       const {data:thread}=await client.from('hilos').select('id').eq('id',hiloId).single(); if(!thread)return json({ok:false,error:'no_encontrado'})
       if(parentId){const {data:parent,error:parentError}=await client.from('respuestas').select('id').eq('id',parentId).eq('hilo_id',hiloId).maybeSingle();if(parentError)throw parentError;if(!parent)return json({ok:false,error:'respuesta_invalida'})}
       const {data,error}=await admin.from('respuestas').insert({hilo_id:hiloId,parent_id:parentId||null,autor_id:user.id,es_anonimo:false,contenido,operation_id:operationId}).select('id').single()
@@ -1213,7 +1205,7 @@ async function handle(req: Request, body: any) {
     case 'guardar': {
       const rl=await rateLimit(admin,action,user.id); if(rl)return rl
       const operationId=String(body.operacionId||''); if(!validOperationId(operationId)) return json({ok:false,error:'datos_invalidos'})
-      const cached=await getIdempotent(admin,user.id,operationId); if(cached)return json(cached)
+      const cached=await getIdempotent(admin,user.id,operationId,action); if(cached)return json(cached)
       const materia=String(body.materia||'').trim(), tengo=Number(body.tengo||0), busco=Number(body.busco||0)
       if(!validMateria(materia)||!Number.isInteger(tengo)||!Number.isInteger(busco)||tengo<1||tengo>40||busco<1||busco>40||tengo===busco)return json({ok:false,error:tengo===busco?'misma_comision':'datos_invalidos'})
       const {data:duplicate}=await client.from('solicitudes').select('id').eq('user_id',user.id).eq('status','activa').eq('materia',materia).limit(1)
@@ -1311,7 +1303,7 @@ async function handle(req: Request, body: any) {
     case 'enviarMensaje': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       const conversacionId=uuidOrEmpty(body.conversacionId),texto=String(body.texto||'').trim(),operationId=String(body.operacionId||''); if(!conversacionId||!texto||texto.length>MAX_MESSAGE||!validOperationId(operationId))return json({ok:false,error:'mensaje_invalido'})
-      const cached=await getIdempotent(admin,user.id,operationId);if(cached)return json(cached)
+      const cached=await getIdempotent(admin,user.id,operationId,action);if(cached)return json(cached)
       const {data:conv,error:convErr}=await client.from('conversaciones').select('id,cantidad_mensajes,ultima_actividad').eq('id',conversacionId).single();if(convErr||!conv)return json({ok:false,error:'chat_no_encontrado'});if(Date.now()-new Date(conv.ultima_actividad).getTime()>CHAT_DAYS*86400000)return json({ok:false,error:'chat_expirado'});if(Number(conv.cantidad_mensajes)>=MAX_CHAT_MESSAGES)return json({ok:false,error:'chat_lleno'})
       const {data,error}=await admin.from('mensajes').insert({conversacion_id:conversacionId,remitente_id:user.id,texto,operation_id:operationId}).select('id,created_at').single();if(error){if((error as any).code==='23505'){const {data:existing}=await client.from('mensajes').select('id,created_at,texto').eq('operation_id',operationId).single();if(existing)return json({ok:true,repetido:true,cantidadMensajes:Number(conv.cantidad_mensajes),mensaje:{id:String(existing.id),pseudonimo:'Vos',esVos:true,texto:existing.texto,fecha:existing.created_at,operacionId:operationId}})}throw error}
       const response={ok:true,cantidadMensajes:Number(conv.cantidad_mensajes)+1,mensaje:{id:String(data.id),pseudonimo:'Vos',esVos:true,texto,fecha:data.created_at,operacionId:operationId}};await saveIdempotent(admin,user.id,action,operationId,response);return json(response)
@@ -1322,9 +1314,9 @@ async function handle(req: Request, body: any) {
       const foto=String(body.foto||'').trim()
       if(!/^[A-Za-zÀ-ÿ0-9 _.-]{3,24}$/.test(pseudonimo)) return json({ok:false,error:'pseudonimo_invalido'})
       const presetAllowed = /^https:\/\/medmar\.com\.ar\/assets\/avatars\/[a-z0-9_-]+\.svg$/i.test(foto)
-      const existingPhoto = !foto || presetAllowed || (foto.startsWith(`${SUPABASE_URL}/storage/v1/object/public/profile-photos/`) && foto.includes(`/${user.id}/`))
+      const existingPhoto = !foto || presetAllowed || fotoPropiaValida(foto, user.id)
       if(!existingPhoto) return json({ok:false,error:'foto_invalida'})
-      const {data:duplicates,error:dupError}=await admin.from('profiles').select('id').ilike('pseudonimo',pseudonimo).neq('id',user.id).limit(1)
+      const {data:duplicates,error:dupError}=await admin.from('profiles').select('id').ilike('pseudonimo',pseudonimo.replace(/[\\%_]/g,(c)=>'\\'+c)).neq('id',user.id).limit(1)
       if(dupError) throw dupError
       if((duplicates||[]).length) return json({ok:false,error:'pseudonimo_en_uso'})
       const {data,error}=await admin.from('profiles').update({pseudonimo,foto_url:foto||null,profile_completed:true}).eq('id',user.id).select('pseudonimo,foto_url,profile_completed').single()
@@ -1701,7 +1693,12 @@ async function serve(req: Request): Promise<Response> {
   if (req.method !== 'POST') return json({ ok: false, error: 'metodo_no_permitido' }, 405)
   if (Number(req.headers.get('content-length') || 0) > MAX_BODY_BYTES) return json({ ok: false, error: 'imagen_muy_grande' }, 413)
   try {
-    const body = await req.json().catch(() => ({}))
+    const bytes = await leerBytesConTope(req as unknown as Response, MAX_BODY_BYTES + 1)
+    if (bytes.length > MAX_BODY_BYTES) return json({ ok: false, error: 'imagen_muy_grande' }, 413)
+    const texto = new TextDecoder().decode(bytes)
+    let body: any = {}
+    try { body = JSON.parse(texto) } catch { body = {} }
+    if (!body || typeof body !== 'object' || Array.isArray(body)) body = {}
     return await handle(req, body)
   } catch (err) {
     // El detalle queda solo en los logs: no se devuelven mensajes internos de Postgres al cliente.

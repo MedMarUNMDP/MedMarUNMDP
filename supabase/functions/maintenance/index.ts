@@ -20,11 +20,16 @@ const GMAIL_REFRESH_TOKEN = Deno.env.get('GMAIL_REFRESH_TOKEN') || ''
 const GMAIL_FROM_EMAIL = Deno.env.get('GMAIL_FROM_EMAIL') || 'MedMarUNMDP@gmail.com'
 const GMAIL_FROM_NAME = Deno.env.get('GMAIL_FROM_NAME') || 'MedMarUNMDP'
 
+// Lo llama solo pg_cron, nunca un navegador: sin cabeceras CORS.
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'content-type, x-medmar-cron-secret',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Content-Type': 'application/json; charset=utf-8',
+}
+
+function compararSeguro(a: string, b: string) {
+  const x = new TextEncoder().encode(a), y = new TextEncoder().encode(b)
+  let dif = x.length ^ y.length
+  for (let i = 0; i < Math.max(x.length, y.length); i++) dif |= (x[i] || 0) ^ (y[i] || 0)
+  return dif === 0
 }
 
 function json(body: unknown, status = 200) {
@@ -138,8 +143,8 @@ async function processEmails(admin: ReturnType<typeof adminClient>) {
 // el header; también se acepta `MEDMAR_CRON_SECRET` (secret de la Edge Function) por compatibilidad.
 async function autorizado(req: Request, admin: ReturnType<typeof adminClient>) {
   const token = req.headers.get('x-medmar-cron-secret') || ''
-  if (token.length < 32) return false
-  if (CRON_SECRET && token === CRON_SECRET) return true
+  if (token.length < 32 || token.length > 256) return false
+  if (CRON_SECRET && compararSeguro(token, CRON_SECRET)) return true
   const { data, error } = await admin.rpc('cron_token_valido', { p_token: token })
   if (error) {
     console.error('cron_token_check_failed', error.message)
