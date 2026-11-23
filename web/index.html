@@ -48,10 +48,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261123b">
+    <link rel="stylesheet" href="/css/styles.css?v=20261123c">
 </head>
 
 <body>
+
+    <a class="saltarContenido" href="#contenidoPrincipal">Ir al contenido</a>
 
     <div class="hero">
         <div class="hero-inner">
@@ -63,7 +65,7 @@
         </div>
     </div>
 
-    <div class="pagina">
+    <div class="pagina" id="contenidoPrincipal" role="main" tabindex="-1">
     <div class="contenido">
 
         <!-- ==================== LOGIN ==================== -->
@@ -80,12 +82,12 @@
             </div>
 
             <form id="formLogin">
-                <label>Email</label>
+                <label for="loginEmail">Email</label>
                 <input type="email" id="loginEmail" required autocomplete="username">
-                <label>Contraseña</label>
+                <label for="loginPassword">Contraseña</label>
                 <div class="campoPassword">
                     <input type="password" id="loginPassword" required autocomplete="current-password">
-                    <button type="button" class="btnMostrarPassword" data-target="loginPassword" aria-label="Mostrar contraseña">👁</button>
+                    <button type="button" class="btnMostrarPassword" data-target="loginPassword" aria-label="Mostrar contraseña"><svg class="iconoOjo" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
                 </div>
                 <button type="submit" class="btn-primario">Iniciar sesión</button>
                 <button type="button" id="btnOlvidePassword" class="linkAuth">¿Olvidaste tu contraseña?</button>
@@ -95,15 +97,15 @@
                 <h3>Recuperar contraseña</h3>
                 <p class="ayudaPerfil">Te enviaremos un enlace seguro para elegir una nueva contraseña. No enviamos contraseñas por correo.</p>
                 <form id="formRecuperarPassword">
-                    <label>Email de tu cuenta</label>
+                    <label for="resetEmail">Email de tu cuenta</label>
                     <input type="email" id="resetEmail" required autocomplete="email">
                     <button type="submit" class="btn-secundario">Enviar enlace</button>
                 </form>
                 <div id="pasoCodigoReset" style="display:none">
-                    <label>Nueva contraseña</label>
+                    <label for="resetNuevaPassword">Nueva contraseña</label>
                     <div class="campoPassword">
                         <input type="password" id="resetNuevaPassword" minlength="8" autocomplete="new-password">
-                        <button type="button" class="btnMostrarPassword" data-target="resetNuevaPassword" aria-label="Mostrar nueva contraseña">👁</button>
+                        <button type="button" class="btnMostrarPassword" data-target="resetNuevaPassword" aria-label="Mostrar nueva contraseña"><svg class="iconoOjo" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
                     </div>
                     <button type="button" id="btnRestablecerPassword" class="btn-primario">Guardar nueva contraseña</button>
                 </div>
@@ -112,19 +114,19 @@
             </div>
 
             <form id="formRegistro" style="display:none">
-                <label>Email</label>
+                <label for="regEmail">Email</label>
                 <input type="email" id="regEmail" required autocomplete="email">
 
-                <label>Contraseña (mínimo 8 caracteres)</label>
+                <label for="regPassword">Contraseña (mínimo 8 caracteres)</label>
                 <div class="campoPassword">
                     <input type="password" id="regPassword" required minlength="8" autocomplete="new-password">
-                    <button type="button" class="btnMostrarPassword" data-target="regPassword" aria-label="Mostrar contraseña">👁</button>
+                    <button type="button" class="btnMostrarPassword" data-target="regPassword" aria-label="Mostrar contraseña"><svg class="iconoOjo" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
                 </div>
 
-                <label>Repetí la contraseña</label>
+                <label for="regPasswordConfirm">Repetí la contraseña</label>
                 <div class="campoPassword">
                     <input type="password" id="regPasswordConfirm" required minlength="8" autocomplete="new-password">
-                    <button type="button" class="btnMostrarPassword" data-target="regPasswordConfirm" aria-label="Mostrar contraseña">👁</button>
+                    <button type="button" class="btnMostrarPassword" data-target="regPasswordConfirm" aria-label="Mostrar contraseña"><svg class="iconoOjo" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
                 </div>
 
                 <button type="submit" class="btn-primario">Crear cuenta</button>
@@ -259,9 +261,9 @@
                  mostrar su globo de error; la validación se hace en app.js. -->
             <form id="form" novalidate>
 
-                <label>Materia</label>
+                <label for="selectMateria">Materia</label>
 
-                <select name="materia" required>
+                <select id="selectMateria" name="materia" required>
 
                     <option value="">Seleccionar materia</option>
 
@@ -336,10 +338,10 @@
 
                 </select>
 
-                <label>Comisión que tenés</label>
+                <label for="tengo">Comisión que tenés</label>
                 <select id="tengo" name="tengo" required></select>
 
-                <label>Comisión que buscás</label>
+                <label for="busco">Comisión que buscás</label>
                 <select id="busco" name="busco" required></select>
 
                 <button type="submit" id="submitBtn" class="btn-primario">Publicar solicitud</button>
@@ -484,7 +486,7 @@
                         <span class="juegoEtiqueta">Microbiología e inmunología</span>
                         <h3>Inmune Survivors</h3>
                         <p>Defendé el tejido de los agentes de ADN. Jugá en <b>Sandbox infinito</b>, con todos los núcleos mezclados, o en <b>Foco por núcleo</b>, solo con los agentes del núcleo que estés estudiando. Para evolucionar, tenés que responder preguntas.</p>
-                        <a class="btn-primario juegoJugar" id="btnJugarInmune" href="/juegos/inmune-survivors/">Jugar ↗</a>
+                        <a class="btn-primario btn-distincion juegoJugar" id="btnJugarInmune" href="/juegos/inmune-survivors/">Jugar ↗</a>
                         <p class="juegoNota">Funciona en el celular y en la PC (con pantalla completa). Tus puntajes entran al ranking con tu pseudónimo.</p>
                     </div>
                 </article>
@@ -608,13 +610,13 @@
                             <label for="passwordActualPerfil">Contraseña actual</label>
                             <div class="campoPassword">
                                 <input type="password" id="passwordActualPerfil" autocomplete="current-password">
-                                <button type="button" class="btnMostrarPassword" data-target="passwordActualPerfil" aria-label="Mostrar contraseña">👁</button>
+                                <button type="button" class="btnMostrarPassword" data-target="passwordActualPerfil" aria-label="Mostrar contraseña"><svg class="iconoOjo" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
                             </div>
                         </div>
-                        <label>Nueva contraseña</label>
+                        <label for="nuevaPasswordPerfil">Nueva contraseña</label>
                         <div class="campoPassword">
                             <input type="password" id="nuevaPasswordPerfil" minlength="8" autocomplete="new-password">
-                            <button type="button" class="btnMostrarPassword" data-target="nuevaPasswordPerfil" aria-label="Mostrar nueva contraseña">👁</button>
+                            <button type="button" class="btnMostrarPassword" data-target="nuevaPasswordPerfil" aria-label="Mostrar nueva contraseña"><svg class="iconoOjo" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
                         </div>
                         <button type="submit" class="btn-secundario">Cambiar contraseña</button>
                     </form>
@@ -742,13 +744,15 @@
         </div>
     </div>
 
+    <div id="zonaAvisos" class="avisoBreve" role="status" aria-live="polite"></div>
+
     <!-- Versión fija + Subresource Integrity: si el CDN sirve otro archivo, el navegador no lo ejecuta.
          Para actualizar: cambiar la versión y recalcular el hash (ver web/CLAUDE.md). -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261123b"></script>
+    <script src="/js/app.js?v=20261123c"></script>
 
 
 </body>

@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-navegacion"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-componentes"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -280,6 +280,19 @@ const hilosPendientesConfirmacion = new Map()
             trigger.type = "button"
             trigger.className = "selectorTrigger"
             trigger.setAttribute("aria-haspopup", "listbox")
+
+            // El <select> real queda oculto: su etiqueta nombra al botón y, al tocarla, lo enfoca.
+            const etiqueta = select.id ? document.querySelector("label[for='" + select.id + "']") : null
+            if (etiqueta) {
+                // Se lee «Materia, Seleccionar materia»: nombre del campo + valor elegido.
+                if (!etiqueta.id) etiqueta.id = select.id + "Etiqueta"
+                trigger.id = select.id + "Selector"
+                trigger.setAttribute("aria-labelledby", etiqueta.id + " " + trigger.id)
+                etiqueta.addEventListener("click", function (e) {
+                    e.preventDefault()
+                    trigger.focus()
+                })
+            }
 
             const panel = document.createElement("div")
             panel.className = "selectorPanel"
@@ -844,6 +857,8 @@ async function cargarBootstrap() {
                 }
             }
 
+            if (!cached) listaHilos.innerHTML = esqueletoTarjetas(3)
+
             const r = busquedaForoActual
                 ? await llamar('listarHilos', { etiqueta: etiquetaFiltroActual, busqueda: busquedaForoActual, desde: 0 })
                 : await llamar('foroBootstrap', { etiqueta: etiquetaFiltroActual })
@@ -889,6 +904,37 @@ async function cargarBootstrap() {
 
         // ==================== CONTRASEÑAS / AUTENTICACIÓN SUPABASE ====================
 
+        // ==================== AVISOS BREVES Y CARGA ====================
+
+        // Aviso breve (toast) para confirmar acciones que salieron bien. #zonaAvisos es role="status",
+        // así que los lectores de pantalla lo anuncian. Los errores siguen junto al formulario.
+        let temporizadorAviso = null
+
+        function mostrarAviso(texto) {
+            const zona = document.getElementById("zonaAvisos")
+            if (!zona) return
+            zona.textContent = texto
+            zona.classList.add("visible")
+            clearTimeout(temporizadorAviso)
+            temporizadorAviso = setTimeout(function () { zona.classList.remove("visible") }, 4500)
+        }
+
+        // Tarjetas grises que ocupan el lugar del contenido mientras carga.
+        function esqueletoTarjetas(cantidad) {
+            let html = "<div class='esqueletoLista' role='status'><span class='sr-only'>Cargando…</span>"
+            for (let i = 0; i < cantidad; i++) {
+                html += "<div class='esqueletoTarjeta' aria-hidden='true'>" +
+                    "<span class='esqueletoLinea' style='width:35%'></span>" +
+                    "<span class='esqueletoLinea esqueletoTitulo' style='width:80%'></span>" +
+                    "<span class='esqueletoLinea' style='width:95%'></span>" +
+                    "<span class='esqueletoLinea' style='width:60%'></span></div>"
+            }
+            return html + "</div>"
+        }
+
+        const ICONO_MOSTRAR_PASSWORD = '<svg class="iconoOjo" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>'
+        const ICONO_OCULTAR_PASSWORD = '<svg class="iconoOjo" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg>'
+
         document.querySelectorAll('.btnMostrarPassword').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 const input = document.getElementById(btn.dataset.target)
@@ -896,7 +942,7 @@ async function cargarBootstrap() {
                 const mostrar = input.type === 'password'
                 input.type = mostrar ? 'text' : 'password'
                 btn.setAttribute('aria-label', mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña')
-                btn.textContent = mostrar ? '🙈' : '👁'
+                btn.innerHTML = mostrar ? ICONO_OCULTAR_PASSWORD : ICONO_MOSTRAR_PASSWORD
             })
         })
 
@@ -2107,7 +2153,7 @@ async function cargarBootstrap() {
                     return
                 }
             } else {
-                detalleHiloContenido.innerHTML = "<p class='vacio'>Cargando...</p>"
+                detalleHiloContenido.innerHTML = esqueletoTarjetas(1)
                 listaRespuestas.innerHTML = ""
             }
 
@@ -3041,7 +3087,8 @@ async function cargarBootstrap() {
             const r = await llamar("actualizarPseudonimo", { pseudonimo: nuevo })
             if (r.ok) {
                 inputPseudonimo.value = r.pseudonimo
-                msgPerfil.innerText = "Pseudónimo actualizado."
+                msgPerfil.innerText = ""
+                mostrarAviso("Pseudónimo actualizado.")
                 try {
                     const key = 'medmar:perfil:' + sesion.email.toLowerCase()
                     const cached = JSON.parse(localStorage.getItem(key) || 'null') || { data: {} }
@@ -3089,7 +3136,8 @@ async function cargarBootstrap() {
                 if (r.ok) {
                     fotoActual = r.foto
                     actualizarAvataresEnPantalla(inputPseudonimo.value)
-                    msgFoto.innerText = "Foto actualizada."
+                    msgFoto.innerText = ""
+                    mostrarAviso("Foto actualizada.")
                 } else {
                     msgFoto.innerText = ""
                     alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : "") )
@@ -3676,7 +3724,8 @@ async function cargarBootstrap() {
 
                     const r = await llamar(accion, datos)
                     if (r.ok) {
-                        msg.innerText = r.emparejado ? "¡Encontramos un intercambio para vos! Revisá 'Intercambios completados' y abrí el chat privado." : "Solicitud actualizada correctamente."
+                        msg.innerText = r.emparejado ? "¡Encontramos un intercambio para vos! Revisá 'Intercambios completados' y abrí el chat privado." : ""
+                        if (!r.emparejado) mostrarAviso("Solicitud actualizada. Te avisamos por mail si aparece un cruce.")
                         salirModoEdicion()
                         ultimaActualizacionUsuario = 0
                         refrescarDatosUsuario(true)
@@ -3695,7 +3744,8 @@ async function cargarBootstrap() {
 
                 const r = await llamar("guardar", datos)
                 if (r.ok) {
-                    msg.innerText = r.emparejado ? "¡Encontramos un intercambio para vos! Revisá 'Intercambios completados' y abrí el chat privado." : "Solicitud publicada correctamente."
+                    msg.innerText = r.emparejado ? "¡Encontramos un intercambio para vos! Revisá 'Intercambios completados' y abrí el chat privado." : ""
+                    if (!r.emparejado) mostrarAviso("Solicitud publicada. Te avisamos por mail si aparece un cruce.")
                     salirModoEdicion()
                     ultimaActualizacionUsuario = 0
                     refrescarDatosUsuario(true)
@@ -3795,7 +3845,8 @@ async function cargarBootstrap() {
                 registro.ultimo = Date.now()
                 try { localStorage.setItem("medmar:reportes", JSON.stringify(registro)) } catch (_) {}
                 formReporte.reset()
-                msgReporte.innerText = "¡Gracias! Lo recibimos. Lo vamos a leer para mejorar MedMar."
+                msgReporte.innerText = ""
+                mostrarAviso("¡Gracias! Lo recibimos. Lo vamos a leer para mejorar MedMar.")
             } catch (err) {
                 msgReporte.innerText = mensajeError("conexion")
             } finally {

@@ -2246,3 +2246,137 @@
         @media (prefers-reduced-motion: reduce) {
             .navItem svg { transition: none; }
         }
+
+        /* ---------- COMPONENTES Y ACCESIBILIDAD (rediseño, fase 2) ----------
+           Jerarquía de botones: verde (--brand) = acción principal; dorado (.btn-distincion) = juego y logros;
+           borde = secundaria. Foco visible de 3 px en todos los controles. */
+
+        :focus-visible {
+            outline: 3px solid var(--brand);
+            outline-offset: 2px;
+        }
+
+        .btn-primario,
+        .btnPublicarCompose,
+        body.temaOscuro .btn-primario {
+            background: var(--brand);
+            color: var(--on-brand);
+        }
+
+        .btn-primario:hover,
+        .btnPublicarCompose:hover {
+            background: var(--brand-hover);
+        }
+
+        .btn-primario.btn-distincion,
+        body.temaOscuro .btn-primario.btn-distincion {
+            background: var(--gold-500);
+            color: var(--on-gold);
+        }
+
+        .btn-primario.btn-distincion:hover {
+            background: var(--gold-600);
+        }
+
+        .btn-primario, .btn-secundario { min-height: 44px; }
+
+        /* Ícono de mostrar contraseña (SVG en lugar del emoji) */
+        .btnMostrarPassword {
+            display: grid;
+            place-items: center;
+        }
+
+        .iconoOjo {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Objetivos táctiles chicos */
+        #vistaForo .btnLimpiarBusqueda { width: 40px; height: 40px; }
+        #btnCancelarRespuesta { width: 36px; min-height: 36px; }
+
+        /* Salto al contenido: invisible hasta que se enfoca con el teclado */
+        .saltarContenido {
+            position: absolute;
+            left: 12px;
+            top: -60px;
+            z-index: 200;
+            padding: 10px 16px;
+            border-radius: var(--r-sm);
+            background: var(--brand);
+            color: var(--on-brand);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .saltarContenido:focus { top: calc(12px + env(safe-area-inset-top, 0px)); }
+        #contenidoPrincipal:focus { outline: none; }
+
+        /* Avisos breves (toasts) */
+        .avisoBreve {
+            position: fixed;
+            left: 50%;
+            bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+            z-index: 120;
+            width: max-content;
+            max-width: min(480px, calc(100vw - 32px));
+            padding: 12px 18px;
+            border-radius: var(--r-md);
+            background: var(--ink);
+            color: var(--bg);
+            font-size: .92rem;
+            line-height: 1.4;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .18);
+            opacity: 0;
+            pointer-events: none;
+            transform: translate(-50%, 12px);
+            transition: opacity .2s ease, transform .2s ease;
+        }
+
+        .avisoBreve:empty { display: none; }
+
+        .avisoBreve.visible {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
+        body.enApp .avisoBreve { bottom: calc(var(--alto-nav-app) + 16px + env(safe-area-inset-bottom, 0px)); }
+
+        @media (min-width: 900px) {
+            body.enApp .avisoBreve { bottom: 24px; left: calc(50% + var(--ancho-riel) / 2); }
+        }
+
+        /* Esqueletos de carga */
+        .esqueletoLista { display: grid; gap: 10px; margin: 10px 0; }
+
+        .esqueletoTarjeta {
+            display: grid;
+            gap: 10px;
+            padding: 16px;
+            border: 1px solid var(--line-soft);
+            border-radius: var(--r-md);
+            background: var(--surface);
+        }
+
+        .esqueletoLinea {
+            display: block;
+            height: 11px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, var(--surface-2) 0%, var(--line-soft) 50%, var(--surface-2) 100%);
+            background-size: 200% 100%;
+            animation: esqueletoBrillo 1.4s linear infinite;
+        }
+
+        .esqueletoTitulo { height: 16px; }
+
+        @keyframes esqueletoBrillo { to { background-position: -200% 0; } }
+
+        @media (prefers-reduced-motion: reduce) {
+            .esqueletoLinea { animation: none; }
+            .avisoBreve { transition: none; }
+        }
