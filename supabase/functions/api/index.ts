@@ -49,6 +49,13 @@ const RATE_LIMITS: Record<string, [number, number]> = {
   notificaciones: [60, 300],
   marcarNotificacionesLeidas: [60, 300],
   publicarNoticia: [5, 3600],
+  listarMateriales: [60, 300],
+  enviarAporte: [3, 3600],
+  misAportes: [30, 300],
+  listarAportes: [30, 300],
+  resolverAporte: [60, 600],
+  agregarMaterial: [30, 600],
+  quitarMaterial: [30, 600],
 }
 
 const ALLOWED_HOSTS = [
@@ -147,6 +154,149 @@ async function publicarNoticia(admin: SupabaseClient, body: any) {
     if (error) throw error
   }
   return json({ ok: true, destinatarios: filas.length })
+}
+
+// ==================== MATERIAL DE ESTUDIO Y APORTES ====================
+// Los archivos viven en Google Drive: acá solo se guardan enlaces. Los aportes de estudiantes pasan por
+// revisión de moderadores. Ver supabase/migrations/20261123220000_material_estudio.sql.
+
+const TIPOS_MATERIAL = ['resumen', 'apunte', 'guia', 'examen', 'libro', 'otro']
+const MAX_APORTES_DIA = 5            // por persona, en 24 h
+const MAX_APORTES_PENDIENTES = 5     // por persona, esperando revisión
+const MAX_APORTES_PENDIENTES_TOTAL = 300
+const MIN_MS_FORMULARIO = 3000       // menos que esto no lo llena una persona
+
+// Solo enlaces https de Drive o Docs, sin credenciales ni puertos raros. '' = vacío, null = inválido.
+function linkDriveValido(valor: unknown) {
+  const texto = String(valor || '').trim()
+  if (!texto) return ''
+  if (texto.length > 300) return null
+  try {
+    const u = new URL(texto)
+    if (u.protocol !== 'https:' || u.username || u.password || u.port) return null
+    if (u.hostname !== 'drive.google.com' && u.hostname !== 'docs.google.com') return null
+    return u.toString()
+  } catch { return null }
+}
+
+function textoLimpio(valor: unknown, max: number) {
+  return String(valor || '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').trim().slice(0, max)
+}
+
+function datosMaterial(body: any) {
+  const titulo = textoLimpio(body.titulo, 120)
+  const descripcion = textoLimpio(body.descripcion, 400)
+  const materia = textoLimpio(body.materia, 120)
+  const tipo = String(body.tipo || '')
+  const link = linkDriveValido(body.link)
+  const credito = textoLimpio(body.credito, 60)
+  if (titulo.length < 3 || materia.length < 2 || !TIPOS_MATERIAL.includes(tipo) || !link) return null
+  return { titulo, descripcion: descripcion || null, materia, tipo, link, credito: credito || null }
+}
+
+async function listarMateriales(client: SupabaseClient) {
+  const { data, error } = await client.from('materiales')
+    .select('id,titulo,descripcion,materia,tipo,link,credito,created_at')
+    .order('created_at', { ascending: false }).limit(500)
+  if (error) throw error
+  return json({ ok: true, materiales: data || [] })
+}
+
+async function enviarAporte(user: User, admin: SupabaseClient, body: any) {
+  // Trampas para bots: campo oculto con texto o formulario llenado en menos de 3 s. Se responde ok para no darles pistas.
+  if (String(body.website || '').trim() || Number(body.ms) < MIN_MS_FORMULARIO) return json({ ok: true })
+
+  const clase = body.clase === 'sugerencia' ? 'sugerencia' : 'archivo'
+  const titulo = textoLimpio(body.titulo, 120)
+  const descripcion = textoLimpio(body.descripcion, 1000)
+  const materia = textoLimpio(body.materia, 120)
+  const tipo = TIPOS_MATERIAL.includes(String(body.tipo)) ? String(body.tipo) : null
+  const link = linkDriveValido(body.link)
+  if (titulo.length < 3 || link === null) return json({ ok: false, error: 'datos_invalidos' })
+  if (clase === 'archivo' && !link) return json({ ok: false, error: 'link_requerido' })
+  if (clase === 'sugerencia' && descripcion.length < 10) return json({ ok: false, error: 'datos_invalidos' })
+
+  const hace24h = new Date(Date.now() - 86400000).toISOString()
+  const [delDia, pendientes, pendientesTotal] = await Promise.all([
+    admin.from('aportes_material').select('id', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', hace24h),
+    admin.from('aportes_material').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('estado', 'pendiente'),
+    admin.from('aportes_material').select('id', { count: 'exact', head: true }).eq('estado', 'pendiente'),
+  ])
+  for (const r of [delDia, pendientes, pendientesTotal]) if (r.error) throw r.error
+  if ((delDia.count || 0) >= MAX_APORTES_DIA) return json({ ok: false, error: 'aportes_limite_dia' })
+  if ((pendientes.count || 0) >= MAX_APORTES_PENDIENTES) return json({ ok: false, error: 'aportes_limite_pendientes' })
+  if ((pendientesTotal.count || 0) >= MAX_APORTES_PENDIENTES_TOTAL) return json({ ok: false, error: 'aportes_bandeja_llena' })
+
+  const { error } = await admin.from('aportes_material').insert({
+    user_id: user.id, clase, titulo, descripcion: descripcion || null, materia: materia || null, tipo,
+    link: link || null, mostrar_credito: body.mostrarCredito === true,
+  })
+  if (error) {
+    if (String((error as any).code) === '23505') return json({ ok: false, error: 'aporte_duplicado' })
+    throw error
+  }
+  return json({ ok: true })
+}
+
+async function listarAportes(admin: SupabaseClient) {
+  const { data, error } = await admin.from('aportes_material')
+    .select('id,user_id,clase,titulo,descripcion,materia,tipo,link,mostrar_credito,created_at')
+    .eq('estado', 'pendiente').order('created_at', { ascending: true }).limit(100)
+  if (error) throw error
+  const pmap = await profileMap(admin, (data || []).map((a: any) => String(a.user_id)))
+  const aportes = (data || []).map((a: any) => {
+    const { user_id, ...resto } = a
+    return { ...resto, autor: pmap.get(String(user_id))?.pseudonimo || 'Estudiante' }
+  })
+  return json({ ok: true, aportes })
+}
+
+async function resolverAporte(user: User, admin: SupabaseClient, body: any) {
+  const id = uuidOrEmpty(body.id)
+  const decision = String(body.decision || '')
+  if (!id || !['aprobar', 'rechazar'].includes(decision)) return json({ ok: false, error: 'datos_invalidos' })
+  const { data: aporte, error: errAporte } = await admin.from('aportes_material')
+    .select('id,user_id,clase,titulo,descripcion,materia,tipo,link,mostrar_credito,estado').eq('id', id).maybeSingle()
+  if (errAporte) throw errAporte
+  if (!aporte) return json({ ok: false, error: 'no_encontrado' })
+  if (aporte.estado !== 'pendiente') return json({ ok: false, error: 'ya_resuelto' })
+
+  const motivo = textoLimpio(body.motivo, 300) || null
+  let publicado = false
+  if (decision === 'aprobar' && aporte.clase === 'archivo') {
+    // El moderador puede corregir título, materia, tipo y descripción antes de publicar.
+    let credito: string | null = null
+    if (aporte.mostrar_credito) {
+      const pmap = await profileMap(admin, [String(aporte.user_id)])
+      credito = pmap.get(String(aporte.user_id))?.pseudonimo || null
+    }
+    const m = datosMaterial({
+      titulo: body.titulo ?? aporte.titulo, descripcion: body.descripcion ?? aporte.descripcion,
+      materia: body.materia ?? aporte.materia, tipo: body.tipo ?? aporte.tipo, link: aporte.link, credito,
+    })
+    if (!m) return json({ ok: false, error: 'datos_material_incompletos' })
+    const { error } = await admin.from('materiales').insert({ ...m, aporte_id: aporte.id, creado_por: user.id })
+    if (error) {
+      if (String((error as any).code) === '23505') return json({ ok: false, error: 'material_duplicado' })
+      throw error
+    }
+    publicado = true
+  }
+
+  const { error: errUpdate } = await admin.from('aportes_material').update({
+    estado: decision === 'aprobar' ? 'aprobado' : 'rechazado', motivo, revisado_por: user.id, revisado_at: new Date().toISOString(),
+  }).eq('id', id).eq('estado', 'pendiente')
+  if (errUpdate) throw errUpdate
+
+  // Aviso en la campana de quien lo mandó.
+  const cuerpo = decision === 'rechazar'
+    ? 'No se publicó.' + (motivo ? ' ' + motivo : '')
+    : publicado ? 'Ya está publicado en Material de estudio. ¡Gracias por compartir!' : 'Lo tuvimos en cuenta. ¡Gracias por la sugerencia!'
+  const { error: errNotif } = await admin.from('notificaciones').insert({
+    user_id: aporte.user_id, tipo: 'aporte', contexto: String(aporte.titulo).slice(0, 160), cuerpo: cuerpo.slice(0, 400), ref_id: aporte.id,
+  })
+  if (errNotif) console.warn('resolverAporte: no se pudo notificar', errNotif.message)
+  return json({ ok: true, publicado })
 }
 
 function json(body: unknown, status = 200) {
@@ -1048,6 +1198,47 @@ async function handle(req: Request, body: any) {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       if(!(await isAdmin(admin,user.id)))return json({ok:false,error:'no_autorizado'})
       return publicarNoticia(admin,body)
+    }
+    case 'listarMateriales': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return listarMateriales(client)
+    }
+    case 'enviarAporte': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return enviarAporte(user,admin,body)
+    }
+    case 'misAportes': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const {data,error}=await client.from('aportes_material').select('id,clase,titulo,materia,estado,motivo,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(20)
+      if(error)throw error
+      return json({ok:true,aportes:data||[]})
+    }
+    case 'listarAportes': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      if(!(await isModerator(admin,user.id)))return json({ok:false,error:'no_autorizado'})
+      return listarAportes(admin)
+    }
+    case 'resolverAporte': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      if(!(await isModerator(admin,user.id)))return json({ok:false,error:'no_autorizado'})
+      return resolverAporte(user,admin,body)
+    }
+    case 'agregarMaterial': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      if(!(await isModerator(admin,user.id)))return json({ok:false,error:'no_autorizado'})
+      const m=datosMaterial(body)
+      if(!m)return json({ok:false,error:'datos_invalidos'})
+      const {error}=await admin.from('materiales').insert({...m,creado_por:user.id})
+      if(error){if(String((error as any).code)==='23505')return json({ok:false,error:'material_duplicado'});throw error}
+      return json({ok:true})
+    }
+    case 'quitarMaterial': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      if(!(await isModerator(admin,user.id)))return json({ok:false,error:'no_autorizado'})
+      const id=uuidOrEmpty(body.id);if(!id)return json({ok:false,error:'datos_invalidos'})
+      const {error}=await admin.from('materiales').update({activo:false}).eq('id',id)
+      if(error)throw error
+      return json({ok:true})
     }
     case 'soyModerador': { const rl=await rateLimit(admin,action,user.id);if(rl)return rl; return json({ok:true,esModerador:await isModerator(admin,user.id),esAdmin:await isAdmin(admin,user.id)}) }
     case 'listarModeradores': {

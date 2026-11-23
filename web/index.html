@@ -48,7 +48,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261123g">
+    <link rel="stylesheet" href="/css/styles.css?v=20261123h">
 </head>
 
 <body>
@@ -175,6 +175,10 @@
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-4 3V6Z"/></svg>
                     <span>Foro</span>
                 </button>
+                <button type="button" class="navItem" data-nav="material">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4Z"/><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6"/></svg>
+                    <span>Material</span>
+                </button>
                 <button type="button" class="navItem" data-nav="juegos">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9h10a4 4 0 0 1 4 4v2a2.5 2.5 0 0 1-4.5 1.5L15 15H9l-1.5 1.5A2.5 2.5 0 0 1 3 15v-2a4 4 0 0 1 4-4Z"/><path d="M8 11v2M7 12h2"/></svg>
                     <span>Juegos</span>
@@ -242,6 +246,14 @@
                         </span>
                         <span class="tituloInicio">Foro</span>
                         <span class="descInicio">Compartí, preguntá y enterate de todo</span>
+                    </button>
+
+                    <button type="button" class="tarjetaInicio" data-vista="material">
+                        <span class="iconoInicio">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4Z"/><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6"/></svg>
+                        </span>
+                        <span class="tituloInicio">Material de estudio</span>
+                        <span class="descInicio">Resúmenes, guías y apuntes para descargar</span>
                     </button>
 
                     <button type="button" class="tarjetaInicio" data-vista="juegos">
@@ -487,6 +499,37 @@
                 <h2 class="seccion-titulo">Denuncias pendientes</h2>
                 <div id="listaDenuncias"></div>
 
+                <h2 class="seccion-titulo">Aportes de material</h2>
+                <p class="ayudaPerfil">Revisá el enlace antes de aprobar: que abra, que sea material de estudio y que no tenga datos de pacientes. Podés corregir el título, la materia y el tipo.</p>
+                <div id="listaAportes"></div>
+
+                <details class="agregarMaterial">
+                    <summary>Agregar material directamente</summary>
+                    <form id="formMaterialDirecto" novalidate>
+                        <label for="materialTitulo">Título</label>
+                        <input type="text" id="materialTitulo" maxlength="120" required>
+                        <label for="materialLink">Enlace de Google Drive</label>
+                        <input type="url" id="materialLink" maxlength="300" placeholder="https://drive.google.com/file/d/…" required>
+                        <label for="materialMateria">Materia</label>
+                        <select id="materialMateria" class="selectMaterias"></select>
+                        <label for="materialTipo">Tipo</label>
+                        <select id="materialTipo">
+                            <option value="resumen">Resumen</option>
+                            <option value="apunte">Apunte de clase</option>
+                            <option value="guia">Guía o cuadernillo</option>
+                            <option value="examen">Parcial o examen</option>
+                            <option value="libro">Libro o capítulo</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                        <label for="materialDescripcion">Descripción (opcional)</label>
+                        <textarea id="materialDescripcion" maxlength="400" rows="2"></textarea>
+                        <label for="materialCredito">Crédito (opcional)</label>
+                        <input type="text" id="materialCredito" maxlength="60" placeholder="Cátedra, autor o quien lo compartió">
+                        <button type="submit" class="btn-secundario">Publicar material</button>
+                    </form>
+                    <p id="msgMaterialDirecto" aria-live="polite"></p>
+                </details>
+
                 <div id="seccionModeradores" style="display:none">
 
                     <h2 class="seccion-titulo">Moderadores</h2>
@@ -518,6 +561,83 @@
             </div>
 
             <!-- ==================== JUEGOS ==================== -->
+
+            <!-- ==================== MATERIAL DE ESTUDIO ====================
+                 Catálogo de enlaces a Google Drive (los archivos no se suben a MedMar). Los aportes pasan por
+                 revisión de moderadores. Lógica en app.js, sección MATERIAL DE ESTUDIO. -->
+            <div id="vistaMaterial" style="display:none">
+
+                <div class="materialCabecera">
+                    <div>
+                        <h2 class="seccion-titulo" style="margin-top:0">Material de estudio</h2>
+                        <p class="ayudaPerfil">Resúmenes, apuntes y guías compartidos por estudiantes y revisados por moderadores. Se abren y se descargan desde Google Drive.</p>
+                    </div>
+                    <button type="button" id="btnAportarMaterial" class="btn-secundario btnAportar" aria-expanded="false" aria-controls="panelAporte">+ Aportar material</button>
+                </div>
+
+                <section id="panelAporte" class="panelAporte" aria-labelledby="tituloAporte" hidden>
+                    <h3 id="tituloAporte">Aportar material</h3>
+                    <p class="ayudaPerfil">Un moderador lo revisa antes de publicarlo. Los archivos se comparten por <b>Google Drive</b>: subilo a tu Drive, tocá «Compartir», elegí «Cualquier persona con el enlace» y pegá el enlace acá.</p>
+                    <fieldset class="claseAporte">
+                        <legend class="sr-only">Qué querés aportar</legend>
+                        <label><input type="radio" name="claseAporte" value="archivo" checked> Compartir un archivo</label>
+                        <label><input type="radio" name="claseAporte" value="sugerencia"> Sugerir contenido</label>
+                    </fieldset>
+                    <form id="formAporte" novalidate>
+                        <label for="aporteTitulo">Título</label>
+                        <input type="text" id="aporteTitulo" maxlength="120" placeholder="Resumen del núcleo 7: agentes respiratorios" required>
+                        <div id="campoAporteLink">
+                            <label for="aporteLink">Enlace de Google Drive</label>
+                            <input type="url" id="aporteLink" maxlength="300" placeholder="https://drive.google.com/file/d/…" inputmode="url">
+                        </div>
+                        <label for="aporteMateria">Materia</label>
+                        <select id="aporteMateria" class="selectMaterias"></select>
+                        <label for="aporteTipo">Tipo</label>
+                        <select id="aporteTipo">
+                            <option value="resumen">Resumen</option>
+                            <option value="apunte">Apunte de clase</option>
+                            <option value="guia">Guía o cuadernillo</option>
+                            <option value="examen">Parcial o examen</option>
+                            <option value="libro">Libro o capítulo</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                        <label for="aporteDescripcion" id="etiquetaAporteDescripcion">Descripción (opcional)</label>
+                        <textarea id="aporteDescripcion" maxlength="1000" rows="3" placeholder="¿Qué tiene y para qué sirve? ¿De qué año o cátedra es?"></textarea>
+                        <label class="labelCheckbox"><input type="checkbox" id="aporteCredito"> Mostrar mi pseudónimo como autor del aporte</label>
+                        <!-- Campo trampa para bots: las personas no lo ven -->
+                        <input type="text" id="aporteWebsite" name="website" tabindex="-1" autocomplete="off" class="campoTrampa" aria-hidden="true">
+                        <button type="submit" class="btn-primario">Enviar para revisión</button>
+                        <button type="button" id="btnCancelarAporte" class="btn-secundario">Cancelar</button>
+                    </form>
+                    <p id="msgAporte" aria-live="polite"></p>
+                </section>
+
+                <div class="filtrosMaterial">
+                    <div class="busquedaMaterial">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+                        <input type="search" id="buscarMaterial" placeholder="Buscar por título, materia o tema" aria-label="Buscar material" autocomplete="off">
+                    </div>
+                    <label for="filtroMateria" class="sr-only">Filtrar por materia</label>
+                    <select id="filtroMateria" class="selectMaterias"></select>
+                    <div class="chipsTipo" role="group" aria-label="Filtrar por tipo">
+                        <button type="button" class="chipTipoFiltro" data-tipo="" aria-pressed="true">Todo</button>
+                        <button type="button" class="chipTipoFiltro" data-tipo="resumen" aria-pressed="false">Resúmenes</button>
+                        <button type="button" class="chipTipoFiltro" data-tipo="apunte" aria-pressed="false">Apuntes</button>
+                        <button type="button" class="chipTipoFiltro" data-tipo="guia" aria-pressed="false">Guías</button>
+                        <button type="button" class="chipTipoFiltro" data-tipo="examen" aria-pressed="false">Exámenes</button>
+                        <button type="button" class="chipTipoFiltro" data-tipo="libro" aria-pressed="false">Libros</button>
+                        <button type="button" class="chipTipoFiltro" data-tipo="otro" aria-pressed="false">Otros</button>
+                    </div>
+                </div>
+
+                <p id="resumenMaterial" class="resumenMaterial" aria-live="polite"></p>
+                <div id="listaMaterial" class="listaMaterial"></div>
+
+                <section id="seccionMisAportes" class="misAportes" aria-labelledby="tituloMisAportes" hidden>
+                    <h3 id="tituloMisAportes">Tus aportes</h3>
+                    <ul id="listaMisAportes"></ul>
+                </section>
+            </div>
 
             <div id="vistaJuegos" style="display:none">
 
@@ -797,7 +917,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261123g"></script>
+    <script src="/js/app.js?v=20261123h"></script>
 
 
 </body>

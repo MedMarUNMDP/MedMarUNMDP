@@ -21,7 +21,9 @@ se aplica acá impacta producción.
 FK al mismo hilo), `likes_hilos`, `likes_respuestas` (foro) ·
 `denuncias` (moderación) · `notificaciones` (campana: las crean triggers en `respuestas`, `mensajes` e
 `intercambio_participantes` vía `notificar()`, agrupando avisos sin leer del mismo destino; las noticias las publica un admin
-con `publicarNoticia`; select solo propias, en Realtime) · `puntajes_juegos` (ranking: mejor puntaje por usuario/juego/modo, RPC `ranking_juego`) ·
+con `publicarNoticia`; select solo propias, en Realtime) · `materiales` (catálogo de enlaces a Google Drive: no se suben archivos) y
+`aportes_material` (aportes de estudiantes por link de Drive o sugerencia, revisados por moderadores; anti-spam en
+`enviarAporte`: rate limit, tope diario y de pendientes, solo Drive, trampa y tiempo mínimo) · `puntajes_juegos` (ranking: mejor puntaje por usuario/juego/modo, RPC `ranking_juego`) ·
 `notificacion_queue` · `idempotency_keys` · `rate_limit_buckets` · `private.legacy_password_migrations`.
 
 Funciones clave: `is_moderator`, `is_admin`, `prevent_role_escalation`, `consume_rate_limit`, `finalize_exchange`,

@@ -2813,3 +2813,251 @@
                 border-radius: var(--r-lg);
             }
         }
+
+        /* ---------- MATERIAL DE ESTUDIO ---------- */
+
+        /* La barra inferior pasa a 5 destinos (Material). */
+        body.enApp .navApp { grid-template-columns: repeat(5, 1fr); }
+        @media (max-width: 380px) {
+            .navItem { font-size: .66rem; }
+            .navItem svg { width: 48px; padding: 4px 12px; }
+        }
+
+        .materialCabecera {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .materialCabecera .ayudaPerfil { margin: 6px 0 0; max-width: 56ch; }
+
+        .btnAportar {
+            flex: none;
+            width: auto;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .filtrosMaterial {
+            display: grid;
+            gap: 10px;
+            margin: 18px 0 8px;
+        }
+
+        .busquedaMaterial {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 12px;
+            border: 1px solid var(--line);
+            border-radius: var(--r-md);
+            background: var(--surface);
+        }
+
+        .busquedaMaterial svg {
+            width: 18px;
+            height: 18px;
+            flex: none;
+            fill: none;
+            stroke: var(--ink-soft);
+            stroke-width: 1.8;
+            stroke-linecap: round;
+        }
+
+        .busquedaMaterial input {
+            margin: 0;
+            padding: 12px 0;
+            border: 0;
+            background: transparent;
+            box-shadow: none !important;
+        }
+
+        #filtroMateria { margin: 0; }
+
+        .chipsTipo {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+            scrollbar-width: none;
+        }
+
+        .chipTipoFiltro {
+            flex: none;
+            width: auto;
+            min-height: 36px;
+            margin: 0;
+            padding: 6px 14px;
+            border: 1px solid var(--line);
+            border-radius: var(--r-pill);
+            background: var(--surface);
+            color: var(--ink-soft);
+            font-size: .85rem;
+            font-weight: 600;
+        }
+
+        .chipTipoFiltro:hover { background: var(--surface-2); }
+
+        .chipTipoFiltro[aria-pressed="true"] {
+            background: var(--brand);
+            border-color: var(--brand);
+            color: var(--on-brand);
+        }
+
+        .resumenMaterial { margin: 6px 0; font-size: .82rem; color: var(--ink-soft); }
+
+        .listaMaterial { display: grid; gap: 12px; }
+
+        .tarjetaMaterial, .aporteItem {
+            display: grid;
+            gap: 6px;
+            min-width: 0;
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-radius: var(--r-md);
+            background: var(--surface);
+        }
+
+        .tarjetaMaterial h3, .aporteItem h3 {
+            font-family: "Public Sans", Arial, sans-serif;
+            font-size: 1.02rem;
+            font-weight: 700;
+            line-height: 1.35;
+            overflow-wrap: anywhere;
+        }
+
+        .tarjetaMaterialMeta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chipTipo {
+            padding: 3px 9px;
+            border-radius: var(--r-pill);
+            background: var(--brand-soft);
+            color: var(--brand);
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .02em;
+        }
+
+        .chipTipo.tipo-examen, .chipTipo.tipo-libro { background: var(--gold-soft); color: var(--gold-600); }
+
+        .materiaMaterial { font-size: .8rem; color: var(--ink-soft); margin: 0; }
+        .descMaterial { margin: 0; font-size: .9rem; color: var(--ink-soft); overflow-wrap: anywhere; }
+        .creditoMaterial { margin: 0; font-size: .8rem; color: var(--ink-soft); font-style: italic; }
+
+        .accionesMaterial {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .accionesMaterial .novedadAccion { margin-top: 0; }
+        .quitarMaterial { color: var(--red-600) !important; }
+
+        .materialVacio {
+            display: grid;
+            justify-items: center;
+            gap: 6px;
+            padding: 32px 20px;
+            border: 1px dashed var(--line-strong);
+            border-radius: var(--r-md);
+            text-align: center;
+            color: var(--ink-soft);
+            font-size: .92rem;
+        }
+
+        .materialVacio b { color: var(--ink); font-size: 1rem; }
+
+        .panelAporte {
+            margin: 16px 0;
+            padding: 18px;
+            border: 2px solid var(--brand);
+            border-radius: var(--r-lg);
+            background: var(--surface);
+        }
+
+        .panelAporte h3 { font-size: 1.2rem; }
+
+        .claseAporte {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0 0;
+            padding: 0;
+            border: 0;
+        }
+
+        .claseAporte label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+            padding: 8px 14px;
+            border: 1px solid var(--line);
+            border-radius: var(--r-pill);
+            color: var(--ink);
+            font-size: .88rem;
+            cursor: pointer;
+        }
+
+        .claseAporte label:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); }
+        .claseAporte input { width: auto; margin: 0; }
+
+        .misAportes { margin-top: 28px; }
+        .misAportes h3 { font-size: 1.1rem; margin-bottom: 8px; }
+
+        .misAportes ul {
+            display: grid;
+            gap: 8px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .misAportes li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 12px;
+            border: 1px solid var(--line-soft);
+            border-radius: var(--r-md);
+            background: var(--surface);
+        }
+
+        .estado-pendiente { background: var(--gold-soft); color: var(--gold-600); }
+        .estado-aprobado { background: var(--brand-soft); color: var(--brand); }
+        .estado-rechazado { background: var(--surface-2); color: var(--ink-soft); }
+
+        #listaAportes { display: grid; gap: 12px; }
+        .aporteItem label { margin-top: 6px; }
+        .linkAporte { font-size: .88rem; font-weight: 600; color: var(--link); overflow-wrap: anywhere; }
+
+        .agregarMaterial {
+            margin: 18px 0 8px;
+            padding: 12px 16px;
+            border: 1px solid var(--line);
+            border-radius: var(--r-md);
+            background: var(--surface);
+        }
+
+        .agregarMaterial summary { cursor: pointer; font-weight: 600; color: var(--link); }
+
+        .iconoNotif.tipo-aporte { color: var(--brand); }
+
+        @media (max-width: 520px) {
+            .materialCabecera { flex-direction: column; }
+            .btnAportar { width: 100%; }
+        }
+
+        @media (min-width: 900px) {
+            .filtrosMaterial { grid-template-columns: minmax(0, 1fr) 260px; }
+            .chipsTipo { grid-column: 1 / -1; }
+            .listaMaterial { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }

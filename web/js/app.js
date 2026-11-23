@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-notificaciones"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-material"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -123,6 +123,7 @@ const hilosPendientesConfirmacion = new Map()
         const vistaIntercambios = document.getElementById("vistaIntercambios")
         const vistaForo = document.getElementById("vistaForo")
         const vistaJuegos = document.getElementById("vistaJuegos")
+        const vistaMaterial = document.getElementById("vistaMaterial")
         const vistaConfiguracion = document.getElementById("vistaConfiguracion")
         const vistaReportes = document.getElementById("vistaReportes")
         const vistaModeracion = document.getElementById("vistaModeracion")
@@ -675,6 +676,14 @@ const hilosPendientesConfirmacion = new Map()
 
             const mensajes = {
                 email_invalido: "El email no es válido.",
+                link_requerido: "Pegá el enlace de Google Drive del archivo.",
+                aportes_limite_dia: "Ya mandaste varios aportes hoy. ¡Gracias! Probá de nuevo mañana.",
+                aportes_limite_pendientes: "Tenés varios aportes esperando revisión. Cuando los revisemos vas a poder mandar más.",
+                aportes_bandeja_llena: "Hay muchos aportes esperando revisión. Probá de nuevo en unos días.",
+                aporte_duplicado: "Ese enlace ya fue enviado o ya está publicado.",
+                material_duplicado: "Ese enlace ya está publicado en Material.",
+                datos_material_incompletos: "Para publicarlo falta la materia o el tipo de material.",
+                ya_resuelto: "Ese aporte ya fue revisado.",
                 password_corta: "La contraseña debe tener al menos 8 caracteres.",
                 password_no_coincide: "Las contraseñas no coinciden.",
                 email_ya_registrado: "Ese email ya tiene una cuenta creada.",
@@ -2675,6 +2684,7 @@ async function cargarBootstrap() {
             vistaIntercambios.style.display = nombre === "intercambios" ? "block" : "none"
             vistaForo.style.display = nombre === "foro" ? "block" : "none"
             vistaJuegos.style.display = nombre === "juegos" ? "block" : "none"
+            vistaMaterial.style.display = nombre === "material" ? "block" : "none"
             vistaConfiguracion.style.display = nombre === "configuracion" ? "block" : "none"
             vistaReportes.style.display = nombre === "reportes" ? "block" : "none"
             vistaModeracion.style.display = nombre === "moderacion" ? "block" : "none"
@@ -2692,9 +2702,11 @@ async function cargarBootstrap() {
             }
 
             if (nombre === "juegos") cargarRankingJuego(false)
+            if (nombre === "material") entrarAMaterial()
 
             if (nombre === "moderacion") {
                 cargarDenuncias()
+                cargarAportes()
                 if (esAdminActual) {
                     seccionModeradores.style.display = "block"
                     cargarModeradores()
@@ -2710,6 +2722,7 @@ async function cargarBootstrap() {
                 const destino = nombre === "foro" ? vistaForo :
                     nombre === "intercambios" ? vistaIntercambios :
                     nombre === "juegos" ? vistaJuegos :
+                    nombre === "material" ? vistaMaterial :
                     nombre === "configuracion" ? vistaConfiguracion :
                     nombre === "reportes" ? vistaReportes :
                     vistaModeracion
@@ -4153,6 +4166,7 @@ async function cargarBootstrap() {
             respuesta_a_respuesta: '<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v5"/>',
             mensaje: '<path d="M4 6h16v10H8l-4 4V6Z"/><path d="M8 10h8M8 13h5"/>',
             intercambio: '<path d="M4 8h13m-4-4 4 4-4 4M20 16H7m4-4-4 4 4 4"/>',
+            aporte: '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4Z"/><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6"/>',
             noticia: '<path d="M4 6h13v12H6a2 2 0 0 1-2-2V6Z"/><path d="M17 9h3v7a2 2 0 0 1-2 2M7 9h7M7 12h7M7 15h4"/>'
         }
 
@@ -4180,6 +4194,9 @@ async function cargarBootstrap() {
                         : actor + " te escribió · " + escapeHtml(n.contexto || "chat")
                 case "intercambio":
                     return "<b>¡Encontramos un intercambio!</b> " + escapeHtml(n.contexto || "")
+                case "aporte":
+                    return "<b>Tu aporte «" + escapeHtml(n.contexto || "") + "»</b>" +
+                        (n.cuerpo ? "<span class='notifCuerpo'>" + escapeHtml(n.cuerpo) + "</span>" : "")
                 case "noticia":
                     return "<b>" + escapeHtml(n.contexto || "Novedad de MedMar") + "</b>" +
                         (n.cuerpo ? "<span class='notifCuerpo'>" + escapeHtml(n.cuerpo) + "</span>" : "")
@@ -4312,6 +4329,8 @@ async function cargarBootstrap() {
                 if (n.ref_id) abrirChat(n.ref_id)
             } else if (n.tipo === "intercambio") {
                 mostrarSeccion("intercambios", "down")
+            } else if (n.tipo === "aporte") {
+                mostrarSeccion("material", "up")
             } else if (n.tipo === "noticia" && n.link) {
                 if (n.link.charAt(0) === "/") location.href = n.link
                 else window.open(n.link, "_blank", "noopener")
@@ -4373,6 +4392,337 @@ async function cargarBootstrap() {
                 formNoticia.reset()
                 mostrarAviso("Noticia publicada para " + r.destinatarios + " cuentas.")
                 cargarNotificaciones(true)
+            })
+        }
+
+        // ==================== MATERIAL DE ESTUDIO ====================
+        // Catálogo de enlaces a Google Drive. Se pide al entrar (máx. 1 vez cada 5 min) y se filtra en el
+        // cliente. Los aportes van por link de Drive (no se suben archivos) y los revisan moderadores.
+
+        const TIPOS_MATERIAL = {
+            resumen: "Resumen", apunte: "Apunte", guia: "Guía", examen: "Examen", libro: "Libro", otro: "Otro"
+        }
+        const MATERIAL_FRESCURA_MS = 5 * 60 * 1000
+        const RE_LINK_DRIVE = /^https:\/\/(drive|docs)\.google\.com\/\S+$/i
+
+        let materialesUI = []
+        let materialesCargadosEn = 0
+        let filtroTipoMaterial = ""
+        let aporteAbiertoEn = 0
+        let misAportesCargados = false
+
+        const listaMaterial = document.getElementById("listaMaterial")
+        const buscarMaterial = document.getElementById("buscarMaterial")
+        const filtroMateria = document.getElementById("filtroMateria")
+        const panelAporte = document.getElementById("panelAporte")
+        const formAporte = document.getElementById("formAporte")
+        const btnAportarMaterial = document.getElementById("btnAportarMaterial")
+
+        // Las listas de materias se copian del selector de «Publicar una solicitud» (misma fuente, con años).
+        ;(function llenarSelectsMaterias() {
+            const origen = document.getElementById("selectMateria")
+            if (!origen) return
+            document.querySelectorAll(".selectMaterias").forEach(function (sel) {
+                sel.innerHTML = origen.innerHTML
+                const primera = sel.querySelector("option[value='']")
+                if (primera) primera.textContent = sel.id === "filtroMateria" ? "Todas las materias" : "Elegí la materia"
+            })
+        })()
+
+        function normalizarTexto(t) {
+            return String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
+        }
+
+        // Enlace de descarga directa de Drive/Docs. null si no se puede (por ejemplo, una carpeta).
+        function enlaceDescarga(link) {
+            let m = String(link).match(/drive\.google\.com\/file\/d\/([\w-]+)/) || String(link).match(/drive\.google\.com\/(?:open|uc)\?(?:.*&)?id=([\w-]+)/)
+            if (m) return "https://drive.google.com/uc?export=download&id=" + m[1]
+            m = String(link).match(/docs\.google\.com\/(document|presentation|spreadsheets)\/d\/([\w-]+)/)
+            if (!m) return null
+            if (m[1] === "document") return "https://docs.google.com/document/d/" + m[2] + "/export?format=pdf"
+            if (m[1] === "presentation") return "https://docs.google.com/presentation/d/" + m[2] + "/export/pdf"
+            return "https://docs.google.com/spreadsheets/d/" + m[2] + "/export?format=xlsx"
+        }
+
+        function entrarAMaterial() {
+            cargarMateriales(false)
+            if (!misAportesCargados) cargarMisAportes()
+        }
+
+        async function cargarMateriales(forzar) {
+            if (!sesion) return
+            if (!forzar && materialesCargadosEn && Date.now() - materialesCargadosEn < MATERIAL_FRESCURA_MS) { renderizarMateriales(); return }
+            if (!materialesUI.length) listaMaterial.innerHTML = esqueletoTarjetas(3)
+            const r = await llamar("listarMateriales", {})
+            if (!r.ok) {
+                if (!materialesUI.length) {
+                    listaMaterial.innerHTML = "<p class='vacio'>" + escapeHtml(r.error === "accion_invalida"
+                        ? "El material de estudio se está activando. Probá de nuevo en un rato."
+                        : mensajeError(r.error)) + "</p>"
+                }
+                return
+            }
+            materialesUI = Array.isArray(r.materiales) ? r.materiales : []
+            materialesCargadosEn = Date.now()
+            renderizarMateriales()
+        }
+
+        function renderizarMateriales() {
+            const q = normalizarTexto(buscarMaterial.value.trim())
+            const materia = filtroMateria.value
+            const lista = materialesUI.filter(function (m) {
+                if (materia && m.materia !== materia) return false
+                if (filtroTipoMaterial && m.tipo !== filtroTipoMaterial) return false
+                if (q && normalizarTexto(m.titulo + " " + m.materia + " " + (m.descripcion || "")).indexOf(q) === -1) return false
+                return true
+            })
+            const resumen = document.getElementById("resumenMaterial")
+            const hayFiltro = q || materia || filtroTipoMaterial
+            resumen.textContent = materialesUI.length
+                ? (hayFiltro ? lista.length + (lista.length === 1 ? " resultado" : " resultados") : materialesUI.length + (materialesUI.length === 1 ? " recurso" : " recursos"))
+                : ""
+
+            if (!materialesUI.length) {
+                listaMaterial.innerHTML = "<div class='materialVacio'><b>Todavía no hay material publicado</b>" +
+                    "<span>¿Tenés un resumen o una guía que te sirvió? Compartilo y ayudá a los que vienen atrás.</span>" +
+                    "<button type='button' class='novedadAccion' data-aportar>Aportar material</button></div>"
+                return
+            }
+            if (!lista.length) {
+                listaMaterial.innerHTML = "<div class='materialVacio'><b>No encontramos material con esos filtros</b>" +
+                    "<span>Probá con otra materia o con menos palabras. Si falta algo, podés sugerirlo.</span>" +
+                    "<button type='button' class='novedadAccion secundaria' data-limpiar-filtros>Ver todo</button></div>"
+                return
+            }
+            listaMaterial.innerHTML = lista.map(function (m) {
+                const descarga = enlaceDescarga(m.link)
+                return "<article class='tarjetaMaterial'>" +
+                    "<div class='tarjetaMaterialMeta'><span class='chipTipo tipo-" + escapeAttr(m.tipo) + "'>" + escapeHtml(TIPOS_MATERIAL[m.tipo] || "Material") + "</span>" +
+                    "<span class='materiaMaterial'>" + escapeHtml(m.materia) + "</span></div>" +
+                    "<h3>" + escapeHtml(m.titulo) + "</h3>" +
+                    (m.descripcion ? "<p class='descMaterial'>" + escapeHtml(m.descripcion) + "</p>" : "") +
+                    (m.credito ? "<p class='creditoMaterial'>Aportado por " + escapeHtml(m.credito) + "</p>" : "") +
+                    "<div class='accionesMaterial'>" +
+                    (descarga ? "<a class='novedadAccion' href='" + escapeAttr(descarga) + "' target='_blank' rel='noopener noreferrer'>Descargar</a>" : "") +
+                    "<a class='novedadAccion secundaria' href='" + escapeAttr(m.link) + "' target='_blank' rel='noopener noreferrer'>" + (descarga ? "Ver en Drive" : "Abrir en Drive") + "</a>" +
+                    (esModeradorActual ? "<button type='button' class='novedadAccion secundaria quitarMaterial' data-quitar='" + escapeAttr(m.id) + "'>Quitar</button>" : "") +
+                    "</div></article>"
+            }).join("")
+        }
+
+        buscarMaterial.addEventListener("input", renderizarMateriales)
+        filtroMateria.addEventListener("change", renderizarMateriales)
+        document.querySelectorAll(".chipTipoFiltro").forEach(function (chip) {
+            chip.addEventListener("click", function () {
+                filtroTipoMaterial = chip.dataset.tipo
+                document.querySelectorAll(".chipTipoFiltro").forEach(function (c) { c.setAttribute("aria-pressed", String(c === chip)) })
+                renderizarMateriales()
+            })
+        })
+
+        listaMaterial.addEventListener("click", async function (e) {
+            if (e.target.closest("[data-aportar]")) { abrirPanelAporte(); return }
+            if (e.target.closest("[data-limpiar-filtros]")) {
+                buscarMaterial.value = ""; filtroMateria.value = ""; filtroTipoMaterial = ""
+                document.querySelectorAll(".chipTipoFiltro").forEach(function (c) { c.setAttribute("aria-pressed", String(c.dataset.tipo === "")) })
+                renderizarMateriales()
+                return
+            }
+            const quitar = e.target.closest("[data-quitar]")
+            if (quitar) {
+                if (!confirm("¿Quitar este material del catálogo? Deja de verse para todos.")) return
+                const r = await llamar("quitarMaterial", { id: quitar.dataset.quitar })
+                if (!r.ok) { alert(mensajeError(r.error)); return }
+                materialesUI = materialesUI.filter(function (m) { return m.id !== quitar.dataset.quitar })
+                renderizarMateriales()
+                mostrarAviso("Material quitado del catálogo.")
+            }
+        })
+
+        // ---- Aportes ----
+
+        function claseAporteActual() {
+            const marcado = document.querySelector("input[name='claseAporte']:checked")
+            return marcado ? marcado.value : "archivo"
+        }
+
+        function actualizarFormAporte() {
+            const archivo = claseAporteActual() === "archivo"
+            document.getElementById("campoAporteLink").hidden = !archivo
+            document.getElementById("etiquetaAporteDescripcion").textContent = archivo ? "Descripción (opcional)" : "¿Qué contenido te gustaría que sumemos?"
+            document.getElementById("aporteTitulo").placeholder = archivo ? "Resumen del núcleo 7: agentes respiratorios" : "Guía de ejercicios de Bioquímica"
+        }
+
+        function abrirPanelAporte() {
+            panelAporte.hidden = false
+            btnAportarMaterial.setAttribute("aria-expanded", "true")
+            aporteAbiertoEn = Date.now()
+            document.getElementById("msgAporte").textContent = ""
+            actualizarFormAporte()
+            panelAporte.scrollIntoView({ behavior: "smooth", block: "start" })
+            setTimeout(function () { document.getElementById("aporteTitulo").focus() }, 250)
+        }
+
+        function cerrarPanelAporte() {
+            panelAporte.hidden = true
+            btnAportarMaterial.setAttribute("aria-expanded", "false")
+            btnAportarMaterial.focus()
+        }
+
+        btnAportarMaterial.addEventListener("click", function () {
+            if (panelAporte.hidden) abrirPanelAporte()
+            else cerrarPanelAporte()
+        })
+        document.getElementById("btnCancelarAporte").addEventListener("click", cerrarPanelAporte)
+        document.querySelectorAll("input[name='claseAporte']").forEach(function (r) { r.addEventListener("change", actualizarFormAporte) })
+
+        formAporte.addEventListener("submit", async function (e) {
+            e.preventDefault()
+            const msgAporte = document.getElementById("msgAporte")
+            const clase = claseAporteActual()
+            const datos = {
+                clase: clase,
+                titulo: document.getElementById("aporteTitulo").value.trim(),
+                link: clase === "archivo" ? document.getElementById("aporteLink").value.trim() : "",
+                materia: document.getElementById("aporteMateria").value,
+                tipo: document.getElementById("aporteTipo").value,
+                descripcion: document.getElementById("aporteDescripcion").value.trim(),
+                mostrarCredito: document.getElementById("aporteCredito").checked,
+                website: document.getElementById("aporteWebsite").value,
+                ms: Date.now() - aporteAbiertoEn
+            }
+            if (datos.titulo.length < 3) { msgAporte.textContent = "Poné un título de al menos 3 letras."; return }
+            if (clase === "archivo" && !RE_LINK_DRIVE.test(datos.link)) { msgAporte.textContent = "Pegá un enlace de Google Drive (empieza con https://drive.google.com o https://docs.google.com)."; return }
+            if (clase === "sugerencia" && datos.descripcion.length < 10) { msgAporte.textContent = "Contanos un poco más qué contenido te gustaría (al menos 10 letras)."; return }
+
+            msgAporte.textContent = "Enviando…"
+            const r = await llamar("enviarAporte", datos)
+            if (!r.ok) { msgAporte.textContent = mensajeError(r.error); return }
+            msgAporte.textContent = ""
+            formAporte.reset()
+            cerrarPanelAporte()
+            mostrarAviso(clase === "archivo"
+                ? "¡Gracias! Un moderador lo va a revisar y te avisamos cuando esté publicado."
+                : "¡Gracias por la sugerencia! Te avisamos cuando la revisemos.")
+            cargarMisAportes()
+        })
+
+        async function cargarMisAportes() {
+            if (!sesion) return
+            const r = await llamar("misAportes", {})
+            if (!r.ok) return
+            misAportesCargados = true
+            const aportes = Array.isArray(r.aportes) ? r.aportes : []
+            document.getElementById("seccionMisAportes").hidden = aportes.length === 0
+            const ESTADOS = { pendiente: "En revisión", aprobado: "Publicado", rechazado: "No publicado" }
+            document.getElementById("listaMisAportes").innerHTML = aportes.map(function (a) {
+                const estado = a.clase === "sugerencia" && a.estado === "aprobado" ? "Tenida en cuenta" : (ESTADOS[a.estado] || a.estado)
+                return "<li><span class='novedadFilaTexto'><b>" + escapeHtml(a.titulo) + "</b>" +
+                    "<span>" + (a.clase === "sugerencia" ? "Sugerencia" : "Archivo") + (a.materia ? " · " + escapeHtml(a.materia) : "") +
+                    (a.estado === "rechazado" && a.motivo ? " · " + escapeHtml(a.motivo) : "") + "</span></span>" +
+                    "<span class='estadoChip estado-" + escapeAttr(a.estado) + "'>" + escapeHtml(estado) + "</span></li>"
+            }).join("")
+        }
+
+        // ---- Moderación de aportes ----
+
+        const listaAportes = document.getElementById("listaAportes")
+        let aportesUI = []
+
+        async function cargarAportes() {
+            if (!esModeradorActual || !listaAportes) return
+            listaAportes.innerHTML = esqueletoTarjetas(1)
+            const r = await llamar("listarAportes", {})
+            if (!r.ok) {
+                listaAportes.innerHTML = "<p class='vacio'>" + escapeHtml(r.error === "accion_invalida" ? "Los aportes se están activando." : mensajeError(r.error)) + "</p>"
+                return
+            }
+            aportesUI = Array.isArray(r.aportes) ? r.aportes : []
+            renderizarAportes()
+        }
+
+        function renderizarAportes() {
+            if (!aportesUI.length) { listaAportes.innerHTML = "<p class='vacio'>No hay aportes esperando revisión.</p>"; return }
+            const opcionesMateria = (document.getElementById("selectMateria") || { innerHTML: "" }).innerHTML
+            listaAportes.innerHTML = aportesUI.map(function (a) {
+                const archivo = a.clase === "archivo"
+                const idc = escapeAttr(a.id)
+                return "<article class='aporteItem' data-aporte='" + idc + "'>" +
+                    "<div class='tarjetaMaterialMeta'><span class='chipTipo'>" + (archivo ? "Archivo" : "Sugerencia") + "</span>" +
+                    "<span class='materiaMaterial'>de " + escapeHtml(a.autor) + " · " + escapeHtml(tiempoRelativo(a.created_at)) + "</span></div>" +
+                    (archivo
+                        ? "<label for='apT-" + idc + "'>Título</label><input type='text' id='apT-" + idc + "' maxlength='120' value='" + escapeAttr(a.titulo) + "'>" +
+                          "<label for='apM-" + idc + "'>Materia</label><select id='apM-" + idc + "'>" + opcionesMateria + "</select>" +
+                          "<label for='apTi-" + idc + "'>Tipo</label><select id='apTi-" + idc + "'>" +
+                          Object.keys(TIPOS_MATERIAL).map(function (t) { return "<option value='" + t + "'" + (t === a.tipo ? " selected" : "") + ">" + TIPOS_MATERIAL[t] + "</option>" }).join("") + "</select>" +
+                          "<a class='linkAporte' href='" + escapeAttr(a.link) + "' target='_blank' rel='noopener noreferrer'>Abrir el enlace en Drive ↗</a>"
+                        : "<h3>" + escapeHtml(a.titulo) + "</h3>" + (a.materia ? "<p class='materiaMaterial'>" + escapeHtml(a.materia) + "</p>" : "")) +
+                    (a.descripcion ? "<p class='descMaterial'>" + escapeHtml(a.descripcion) + "</p>" : "") +
+                    "<label for='apMo-" + idc + "'>Motivo si no se publica (opcional, lo ve quien lo mandó)</label>" +
+                    "<input type='text' id='apMo-" + idc + "' maxlength='300' placeholder='Ya está publicado, el enlace no abre…'>" +
+                    "<div class='accionesMaterial'>" +
+                    "<button type='button' class='novedadAccion' data-decision='aprobar'>" + (archivo ? "Aprobar y publicar" : "Marcar como tenida en cuenta") + "</button>" +
+                    "<button type='button' class='novedadAccion secundaria' data-decision='rechazar'>" + (archivo ? "Rechazar" : "Descartar") + "</button>" +
+                    "</div></article>"
+            }).join("")
+            aportesUI.forEach(function (a) {
+                const sel = document.getElementById("apM-" + a.id)
+                if (sel) sel.value = a.materia || ""
+            })
+        }
+
+        if (listaAportes) {
+            listaAportes.addEventListener("click", async function (e) {
+                const btn = e.target.closest("[data-decision]")
+                if (!btn) return
+                const item = btn.closest("[data-aporte]")
+                const id = item.dataset.aporte
+                const datos = { id: id, decision: btn.dataset.decision, motivo: (document.getElementById("apMo-" + id) || {}).value || "" }
+                const titulo = document.getElementById("apT-" + id)
+                if (titulo) {
+                    datos.titulo = titulo.value.trim()
+                    datos.materia = document.getElementById("apM-" + id).value
+                    datos.tipo = document.getElementById("apTi-" + id).value
+                    if (datos.decision === "aprobar" && !datos.materia) { alert("Elegí la materia antes de publicarlo."); return }
+                }
+                item.querySelectorAll("button").forEach(function (b) { b.disabled = true })
+                const r = await llamar("resolverAporte", datos)
+                if (!r.ok) {
+                    item.querySelectorAll("button").forEach(function (b) { b.disabled = false })
+                    alert(mensajeError(r.error))
+                    return
+                }
+                aportesUI = aportesUI.filter(function (a) { return a.id !== id })
+                renderizarAportes()
+                mostrarAviso(r.publicado ? "Aporte publicado en Material." : datos.decision === "aprobar" ? "Sugerencia marcada como tenida en cuenta." : "Aporte rechazado. Le avisamos a quien lo mandó.")
+                if (r.publicado) materialesCargadosEn = 0
+            })
+        }
+
+        const formMaterialDirecto = document.getElementById("formMaterialDirecto")
+        if (formMaterialDirecto) {
+            formMaterialDirecto.addEventListener("submit", async function (e) {
+                e.preventDefault()
+                const msg = document.getElementById("msgMaterialDirecto")
+                const datos = {
+                    titulo: document.getElementById("materialTitulo").value.trim(),
+                    link: document.getElementById("materialLink").value.trim(),
+                    materia: document.getElementById("materialMateria").value,
+                    tipo: document.getElementById("materialTipo").value,
+                    descripcion: document.getElementById("materialDescripcion").value.trim(),
+                    credito: document.getElementById("materialCredito").value.trim()
+                }
+                if (datos.titulo.length < 3 || !datos.materia || !RE_LINK_DRIVE.test(datos.link)) {
+                    msg.textContent = "Completá título, materia y un enlace de Google Drive."
+                    return
+                }
+                msg.textContent = "Publicando…"
+                const r = await llamar("agregarMaterial", datos)
+                if (!r.ok) { msg.textContent = mensajeError(r.error); return }
+                msg.textContent = ""
+                formMaterialDirecto.reset()
+                materialesCargadosEn = 0
+                mostrarAviso("Material publicado.")
             })
         }
 
