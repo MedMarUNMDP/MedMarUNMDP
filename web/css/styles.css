@@ -2594,3 +2594,22 @@
             color: var(--on-brand);
             box-shadow: 0 0 0 2px var(--on-hero), 0 6px 18px rgba(0, 0, 0, .25);
         }
+
+        /* Tarjeta de Foro en Inicio: respuestas nuevas (borde de marca) o últimos hilos (filas tocables). */
+        .novedadForoNuevas { border: 2px solid var(--brand); }
+        .novedadHilo {
+            display: grid;
+            gap: 2px;
+            width: 100%;
+            margin: 0;
+            padding: 4px 6px;
+            margin-left: -6px;
+            border-radius: var(--r-sm);
+            background: transparent;
+            color: var(--ink);
+            font-weight: 400;
+            text-align: left;
+        }
+        .novedadHilo:hover { background: var(--surface-2); }
+        .novedadHilo b { font-size: .92rem; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .novedadHilo span { font-size: .8rem; color: var(--ink-soft); }

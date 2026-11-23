@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-accesibilidad"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-foro-inicio"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -890,6 +890,7 @@ async function cargarBootstrap() {
             const data = busquedaForoActual ? r : (r.data || {})
             const item = { etiquetas: data.etiquetas || [], hilos: data.hilos || [], hayMas: !!data.hayMas, actualizadoEn: Date.now() }
             foroCacheCliente.set(key, item)
+            if (key === claveForo("", "")) guardarResumenForo(item.hilos)
             renderizarEtiquetasCliente(item.etiquetas)
             renderizarHilos(item.hilos, true)
             paginaHilosActual = item.hilos.length
@@ -2159,6 +2160,7 @@ async function cargarBootstrap() {
             if (cache && cache.data) {
                 hiloActualUI = Object.assign({}, cache.data.hilo)
                 renderizarDetalleHilo(hiloActualUI)
+                marcarHiloVisto(cache.data.hilo)
                 respuestasUI = combinarRespuestasConPendientes(cache.data.respuestas || [])
                 renderizarRespuestas(respuestasUI)
                 if (cacheFresco) {
@@ -2191,6 +2193,7 @@ async function cargarBootstrap() {
             hiloActualUI = Object.assign({}, r.hilo)
             renderizarDetalleHilo(hiloActualUI)
             renderizarRespuestas(r.respuestas)
+            marcarHiloVisto(r.hilo)
             hiloCacheCliente.set(String(id), { data: { hilo: r.hilo, respuestas: r.respuestas }, actualizadoEn: Date.now() })
 
         }
@@ -3917,8 +3920,6 @@ async function cargarBootstrap() {
 
         function renderizarRanking(r) {
             const modo = r.modo
-            // Solo el ranking sin búsqueda tiene el puesto propio confiable para Inicio.
-            if (r.propio && !Array.isArray(r.busqueda)) { guardarRankingPropio(r); renderizarNovedades() }
             const enlaceJugar = "/juegos/inmune-survivors/"
             if (r.propio) {
                 rankingPropio.innerHTML = "Estás <strong>#" + escapeHtml(r.propio.posicion) + "</strong> de " + escapeHtml(r.total) +
@@ -3946,29 +3947,99 @@ async function cargarBootstrap() {
         }
 
         // ==================== NOVEDADES (INICIO Y COLUMNA DEL FORO) ====================
-        // Se arma solo con lo que ya está en memoria (solicitudesUI, intercambiosUI) y con el último
-        // puesto del ranking que vio esta persona (localStorage): no hace pedidos a la API.
+        // Se arma solo con lo que ya está en memoria (solicitudesUI, intercambiosUI) y con un resumen
+        // del foro guardado en localStorage la última vez que se cargó: no hace pedidos a la API.
 
         const DIAS_VIGENCIA_SOLICITUD = 14
 
-        function claveRankingPropio() {
-            return sesion && sesion.email ? "medmar:rankingPropio:" + sesion.email.toLowerCase() : null
+        function claveLocalUsuario(nombre) {
+            return sesion && sesion.email ? "medmar:" + nombre + ":" + sesion.email.toLowerCase() : null
         }
 
-        function guardarRankingPropio(r) {
-            const clave = claveRankingPropio()
-            if (!clave || !r || !r.propio) return
-            try {
-                localStorage.setItem(clave, JSON.stringify({
-                    modo: r.modo, posicion: r.propio.posicion, total: r.total, puntaje: r.propio.puntaje
-                }))
-            } catch (_) {}
-        }
-
-        function leerRankingPropio() {
-            const clave = claveRankingPropio()
+        function leerLocal(nombre) {
+            const clave = claveLocalUsuario(nombre)
             if (!clave) return null
             try { return JSON.parse(localStorage.getItem(clave) || "null") } catch (_) { return null }
+        }
+
+        function guardarLocal(nombre, valor) {
+            const clave = claveLocalUsuario(nombre)
+            if (!clave) return
+            try { localStorage.setItem(clave, JSON.stringify(valor)) } catch (_) {}
+        }
+
+        // Resumen del foro para Inicio: los hilos más recientes (sin filtro ni búsqueda) y, para los
+        // propios, cuántas respuestas tenían la última vez que se vieron (para detectar respuestas nuevas).
+        function guardarResumenForo(hilos) {
+            if (!Array.isArray(hilos)) return
+            const vistos = leerLocal("foroVistos") || {}
+            const resumen = hilos.slice(0, 20).map(function (h) {
+                const id = String(h.id)
+                // Primera vez que se ve un hilo propio: su cuenta actual es la base (no son "nuevas").
+                if (h.esPropio && vistos[id] === undefined) vistos[id] = Number(h.respuestas || 0)
+                return { id: id, titulo: h.titulo, etiquetas: (h.etiquetas || []).slice(0, 2), respuestas: Number(h.respuestas || 0), esPropio: !!h.esPropio }
+            })
+            guardarLocal("foroResumen", resumen)
+            guardarLocal("foroVistos", vistos)
+            renderizarNovedades()
+        }
+
+        function marcarHiloVisto(hilo) {
+            if (!hilo || !hilo.esPropio) return
+            const vistos = leerLocal("foroVistos") || {}
+            vistos[String(hilo.id)] = Number(hilo.respuestas || 0)
+            guardarLocal("foroVistos", vistos)
+            const resumen = leerLocal("foroResumen")
+            if (resumen) {
+                resumen.forEach(function (h) { if (h.id === String(hilo.id)) h.respuestas = Number(hilo.respuestas || 0) })
+                guardarLocal("foroResumen", resumen)
+            }
+            renderizarNovedades()
+        }
+
+        function bloqueForoInicio() {
+            const resumen = leerLocal("foroResumen")
+
+            // C) Sin datos todavía: invitación a preguntar.
+            if (!resumen || !resumen.length) {
+                return "<article class='novedad'>" +
+                    "<span class='novedadEtiqueta'>Foro</span>" +
+                    "<b class='novedadTitulo'>¿Te trabaste con algún tema?</b>" +
+                    "<span class='novedadDato'>Preguntá en el foro: otros estudiantes de la carrera te pueden dar una mano.</span>" +
+                    "<button type='button' class='novedadAccion' data-compose>Crear publicación</button>" +
+                    "</article>"
+            }
+
+            // A) Respuestas nuevas en hilos propios: lo más útil, va primero.
+            const vistos = leerLocal("foroVistos") || {}
+            const conNuevas = resumen.filter(function (h) {
+                return h.esPropio && vistos[h.id] !== undefined && h.respuestas > vistos[h.id]
+            })
+            if (conNuevas.length) {
+                const total = conNuevas.reduce(function (n, h) { return n + (h.respuestas - vistos[h.id]) }, 0)
+                const hilo = conNuevas[0]
+                return "<article class='novedad novedadForoNuevas'>" +
+                    "<span class='novedadEtiqueta'>Foro</span>" +
+                    "<b class='novedadTitulo'>" + total + (total === 1 ? " respuesta nueva" : " respuestas nuevas") + "</b>" +
+                    "<span class='novedadDato'>" + (conNuevas.length === 1
+                        ? "en «" + escapeHtml(hilo.titulo) + "»"
+                        : "en " + conNuevas.length + " de tus publicaciones") + "</span>" +
+                    "<button type='button' class='novedadAccion' data-hilo='" + escapeAttr(hilo.id) + "'>Ver respuestas</button>" +
+                    "</article>"
+            }
+
+            // B) Lo último del foro: cada hilo se puede abrir.
+            const filas = resumen.slice(0, 2).map(function (h) {
+                const etiqueta = h.etiquetas && h.etiquetas[0] ? escapeHtml(h.etiquetas[0]) + " · " : ""
+                const respuestas = h.respuestas ? h.respuestas + (h.respuestas === 1 ? " respuesta" : " respuestas") : "sin respuestas"
+                return "<li><button type='button' class='novedadHilo' data-hilo='" + escapeAttr(h.id) + "'>" +
+                    "<b>" + escapeHtml(h.titulo) + "</b><span>" + etiqueta + respuestas + "</span></button></li>"
+            }).join("")
+            return "<article class='novedad'>" +
+                "<span class='novedadEtiqueta'>Lo último en el foro</span>" +
+                "<ul class='novedadLista'>" + filas + "</ul>" +
+                "<button type='button' class='novedadAccion secundaria' data-ir='foro'>Ir al foro</button>" +
+                "</article>"
         }
 
         function diasParaVencer(fecha) {
@@ -4026,22 +4097,10 @@ async function cargarBootstrap() {
                     "</article>")
             }
 
-            // 3) Juego: último puesto visto en el ranking, o invitación a jugar.
-            const puesto = leerRankingPropio()
-            bloques.push(
-                "<article class='novedad novedadJuego'>" +
-                "<span class='novedadEtiqueta'>Inmune Survivors</span>" +
-                (puesto
-                    ? "<b class='novedadTitulo'>Estás #" + escapeHtml(String(puesto.posicion)) + " de " + escapeHtml(String(puesto.total)) + "</b>" +
-                      "<span class='novedadDato'>" + escapeHtml(etiquetaModoRanking(puesto.modo)) + " · " + escapeHtml(Number(puesto.puntaje).toLocaleString("es-AR")) + " puntos</span>" +
-                      "<button type='button' class='novedadAccion secundaria' data-ir='juegos'>Ver ranking</button>"
-                    : "<b class='novedadTitulo'>Estudiá ADN jugando</b>" +
-                      "<span class='novedadDato'>Respondé preguntas de tu núcleo para evolucionar y subí al ranking.</span>" +
-                      "<a class='novedadAccion distincion' href='/juegos/inmune-survivors/'>Jugar</a>") +
-                "</article>")
-
+            // 3) Foro (solo en Inicio: dentro del foro la columna de contexto no lo repite).
             const html = bloques.join("")
-            contenedores.forEach(function (c) { if (c) c.innerHTML = html })
+            if (contenedores[0]) contenedores[0].innerHTML = html + bloqueForoInicio()
+            if (contenedores[1]) contenedores[1].innerHTML = html
         }
 
         ;["novedadesInicio", "contextoForo"].forEach(function (id) {
@@ -4052,6 +4111,17 @@ async function cargarBootstrap() {
                 if (chat) {
                     mostrarSeccion("intercambios", "down")
                     abrirChat(chat.dataset.chat)
+                    return
+                }
+                const hilo = e.target.closest("[data-hilo]")
+                if (hilo) {
+                    mostrarSeccion("foro", "up")
+                    abrirHilo(hilo.dataset.hilo)
+                    return
+                }
+                if (e.target.closest("[data-compose]")) {
+                    mostrarSeccion("foro", "up")
+                    btnAbrirCompose.click()
                     return
                 }
                 const ir = e.target.closest("[data-ir]")
