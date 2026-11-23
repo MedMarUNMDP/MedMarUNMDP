@@ -20,7 +20,11 @@ Cambio pedido: $ARGUMENTS
      `auth.uid()` y helpers existentes (`is_moderator`, `is_admin`, `is_conversation_participant`, …).
    - Índices para los filtros y órdenes que vaya a usar la Edge Function.
    - `updated_at` con trigger `set_updated_at` si corresponde.
-   - Funciones `security definer` → `set search_path = public` y validar permisos adentro.
+   - **Grants explícitos**: desde la migración `20261125120000_seguridad_privilegios.sql` las tablas nuevas nacen
+     sin permisos para `anon`/`authenticated`. Si el navegador tiene que leerla (por RLS o Realtime), agregá
+     `grant select on public.<tabla> to authenticated;` (o por columnas). Nunca grants de escritura: escribe la API.
+   - Funciones `security definer` → `set search_path = ''`, nombres calificados (`public.tabla`), validar permisos
+     adentro y `revoke execute … from public, anon, authenticated` + `grant execute … to service_role` si solo la usa la API.
    - Datos con vencimiento → sumarlos a `cleanup_expired_data()` (plan Free: ~500 MB).
 5. Encabezado del archivo: qué hace, si es destructiva, y "Ejecutar en Supabase Dashboard > SQL Editor".
 6. Si hay que actualizar `supabase/CLAUDE.md` (modelo de datos), hacelo.
