@@ -30,6 +30,11 @@ Para ubicarte: `Grep "// ====" web/js/app.js` y leé solo el rango que necesitá
 - Realtime de Supabase solo para chat y `solicitudes` (matches); el resto es por request.
 - Textos de usuario: siempre pasar por `escapeHtml()` / `escapeAttr()` antes de insertarlos con `innerHTML`.
 - `index.html` tiene una **Content Security Policy** en `<meta>`: un CDN, embed o dominio nuevo hay que sumarlo ahí o no carga.
+- **Cloudflare** está delante de GitHub Pages (proxy): agrega HSTS, `X-Frame-Options`, `frame-ancestors`, `nosniff` y
+  `Permissions-Policy` con una regla de Transform (Rules → Response Header). RUM/Web Analytics desactivado a propósito.
+- **CAPTCHA**: login, registro, recuperación y cambio de contraseña usan Cloudflare Turnstile (`TURNSTILE_SITE_KEY`,
+  sección CAPTCHA de `app.js`). Una llamada nueva a `signInWithPassword`/`signUp`/`resetPasswordForEmail` necesita `captchaToken`.
+- **Ranking**: moderadores pueden quitar puntajes sospechosos (`quitarPuntaje`, con llave y auditoría).
 - supabase-js va con versión fija + `integrity` (SRI). Para actualizarlo: cambiar la versión en la URL y recalcular con
   `curl -s <url> | openssl dgst -sha384 -binary | openssl base64 -A`.
 - Las escrituras a la base van siempre por la API: las políticas RLS no permiten escribir desde el navegador.
