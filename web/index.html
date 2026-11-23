@@ -49,7 +49,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261126c">
+    <link rel="stylesheet" href="/css/styles.css?v=20261126d">
 </head>
 
 <body>
@@ -557,12 +557,12 @@
 
                 <section class="modPanel" role="tabpanel" data-panel="material" aria-label="Agregar material" hidden>
                     <h3>Agregar material directamente</h3>
-                    <p class="ayudaPerfil">Publicá un archivo de tu Drive sin pasar por la revisión. Compartilo como «Cualquier persona con el enlace».</p>
+                    <p class="ayudaPerfil">Publicá material sin pasar por la revisión. Tiene que ser de un sitio admitido (Drive, Canva, Notion, YouTube, revistas y más) y estar compartido como público.</p>
                     <form id="formMaterialDirecto" novalidate>
                         <label for="materialTitulo">Título</label>
                         <input type="text" id="materialTitulo" maxlength="120" required>
-                        <label for="materialLink">Enlace de Google Drive</label>
-                        <input type="url" id="materialLink" maxlength="300" placeholder="https://drive.google.com/file/d/…" required>
+                        <label for="materialLink">Enlace</label>
+                        <input type="url" id="materialLink" maxlength="600" placeholder="https://…" required>
                         <label for="materialMateria">Materia</label>
                         <select id="materialMateria" class="selectMaterias"></select>
                         <label for="materialTipo">Tipo</label>
@@ -570,8 +570,13 @@
                             <option value="resumen">Resumen</option>
                             <option value="apunte">Apunte de clase</option>
                             <option value="guia">Guía o cuadernillo</option>
-                            <option value="examen">Parcial o examen</option>
-                            <option value="libro">Libro o capítulo</option>
+                            <option value="presentacion">Presentación</option>
+                            <option value="video">Video o podcast</option>
+                            <option value="flashcards">Tarjetas o cuestionario</option>
+                            <option value="mapa">Mapa conceptual o esquema</option>
+                            <option value="web">Sitio web o curso</option>
+                            <option value="examen">Parcial o examen (con permiso)</option>
+                            <option value="libro">Libro o capítulo de acceso libre</option>
                             <option value="otro">Otro</option>
                         </select>
                         <label for="materialDescripcion">Descripción (opcional)</label>
@@ -663,21 +668,25 @@
             <!-- ==================== JUEGOS ==================== -->
 
             <!-- ==================== MATERIAL DE ESTUDIO ====================
-                 Catálogo de enlaces a Google Drive (los archivos no se suben a MedMar). Los aportes pasan por
+                 Catálogo de enlaces a sitios admitidos (los archivos no se suben a MedMar). Los aportes pasan por
                  revisión de moderadores. Lógica en app.js, sección MATERIAL DE ESTUDIO. -->
             <div id="vistaMaterial" style="display:none">
 
                 <div class="materialCabecera">
                     <div>
                         <h2 class="seccion-titulo" style="margin-top:0">Material de estudio</h2>
-                        <p class="ayudaPerfil">Resúmenes, apuntes y guías compartidos por estudiantes y revisados por moderadores. Se abren y se descargan desde Google Drive.</p>
+                        <p class="ayudaPerfil">Resúmenes, apuntes, presentaciones, videos y más, compartidos por estudiantes y revisados por moderadores.</p>
                     </div>
                     <button type="button" id="btnAportarMaterial" class="btn-secundario btnAportar" aria-expanded="false" aria-controls="panelAporte">+ Aportar material</button>
                 </div>
 
                 <section id="panelAporte" class="panelAporte" aria-labelledby="tituloAporte" hidden>
                     <h3 id="tituloAporte">Aportar material</h3>
-                    <p class="ayudaPerfil">Un moderador lo revisa antes de publicarlo. Los archivos se comparten por <b>Google Drive</b>: subilo a tu Drive, tocá «Compartir», elegí «Cualquier persona con el enlace» y pegá el enlace acá.</p>
+                    <p class="ayudaPerfil">Un moderador lo revisa antes de publicarlo. Podés compartir un enlace de <b>Google Drive, OneDrive, Canva, Notion, Genially, Quizlet, YouTube</b>, revistas científicas y muchos sitios más. Asegurate de que esté compartido como <b>público</b> («Cualquier persona con el enlace»).</p>
+                    <details class="sitiosAdmitidos">
+                        <summary>Ver todos los sitios admitidos</summary>
+                        <div id="listaSitiosAdmitidos"><p class="ayudaPerfil">Se cargan al abrir Material.</p></div>
+                    </details>
                     <fieldset class="claseAporte">
                         <legend class="sr-only">Qué querés aportar</legend>
                         <label><input type="radio" name="claseAporte" value="archivo" checked> Compartir un archivo</label>
@@ -687,8 +696,9 @@
                         <label for="aporteTitulo">Título</label>
                         <input type="text" id="aporteTitulo" maxlength="120" placeholder="Resumen del núcleo 7: agentes respiratorios" required>
                         <div id="campoAporteLink">
-                            <label for="aporteLink">Enlace de Google Drive</label>
-                            <input type="url" id="aporteLink" maxlength="300" placeholder="https://drive.google.com/file/d/…" inputmode="url">
+                            <label for="aporteLink">Enlace</label>
+                            <input type="url" id="aporteLink" maxlength="600" placeholder="https://drive.google.com/… · https://www.canva.com/… · https://…" inputmode="url">
+                            <p id="aporteSitio" class="aporteSitio" aria-live="polite"></p>
                         </div>
                         <label for="aporteMateria">Materia</label>
                         <select id="aporteMateria" class="selectMaterias"></select>
@@ -697,13 +707,19 @@
                             <option value="resumen">Resumen</option>
                             <option value="apunte">Apunte de clase</option>
                             <option value="guia">Guía o cuadernillo</option>
-                            <option value="examen">Parcial o examen</option>
-                            <option value="libro">Libro o capítulo</option>
+                            <option value="presentacion">Presentación</option>
+                            <option value="video">Video o podcast</option>
+                            <option value="flashcards">Tarjetas o cuestionario</option>
+                            <option value="mapa">Mapa conceptual o esquema</option>
+                            <option value="web">Sitio web o curso</option>
+                            <option value="examen">Parcial o examen (con permiso)</option>
+                            <option value="libro">Libro o capítulo de acceso libre</option>
                             <option value="otro">Otro</option>
                         </select>
                         <label for="aporteDescripcion" id="etiquetaAporteDescripcion">Descripción (opcional)</label>
                         <textarea id="aporteDescripcion" maxlength="1000" rows="3" placeholder="¿Qué tiene y para qué sirve? ¿De qué año o cátedra es?"></textarea>
                         <label class="labelCheckbox"><input type="checkbox" id="aporteCredito"> Mostrar mi pseudónimo como autor del aporte</label>
+                        <label class="labelCheckbox" id="campoAporteDeclaracion"><input type="checkbox" id="aporteDeclaracion"> Puedo compartir esto: es mío o es de acceso libre, no es un libro o examen con derechos reservados y no tiene datos de pacientes.</label>
                         <!-- Campo trampa para bots: las personas no lo ven -->
                         <input type="text" id="aporteWebsite" name="website" tabindex="-1" autocomplete="off" class="campoTrampa" aria-hidden="true">
                         <button type="submit" class="btn-primario">Enviar para revisión</button>
@@ -724,6 +740,11 @@
                         <button type="button" class="chipTipoFiltro" data-tipo="resumen" aria-pressed="false">Resúmenes</button>
                         <button type="button" class="chipTipoFiltro" data-tipo="apunte" aria-pressed="false">Apuntes</button>
                         <button type="button" class="chipTipoFiltro" data-tipo="guia" aria-pressed="false">Guías</button>
+                        <button type="button" class="chipTipoFiltro" data-tipo="presentacion" aria-pressed="false">Presentaciones</button>
+                        <button type="button" class="chipTipoFiltro" data-tipo="video" aria-pressed="false">Videos</button>
+                        <button type="button" class="chipTipoFiltro" data-tipo="flashcards" aria-pressed="false">Tarjetas</button>
+                        <button type="button" class="chipTipoFiltro" data-tipo="mapa" aria-pressed="false">Mapas</button>
+                        <button type="button" class="chipTipoFiltro" data-tipo="web" aria-pressed="false">Sitios web</button>
                         <button type="button" class="chipTipoFiltro" data-tipo="examen" aria-pressed="false">Exámenes</button>
                         <button type="button" class="chipTipoFiltro" data-tipo="libro" aria-pressed="false">Libros</button>
                         <button type="button" class="chipTipoFiltro" data-tipo="otro" aria-pressed="false">Otros</button>
@@ -1077,7 +1098,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261126c"></script>
+    <script src="/js/app.js?v=20261126d"></script>
 
     <!-- CAPTCHA anti-bots (Cloudflare Turnstile) para login, registro y recuperación. Sin SRI: Cloudflare lo actualiza
          solo y su documentación pide no fijarlo. Se renderiza recién cuando el formulario se usa. -->

@@ -171,27 +171,242 @@ async function publicarNoticia(admin: SupabaseClient, body: any) {
 }
 
 // ==================== MATERIAL DE ESTUDIO Y APORTES ====================
-// Los archivos viven en Google Drive: acá solo se guardan enlaces. Los aportes de estudiantes pasan por
-// revisión de moderadores. Ver supabase/migrations/20261123220000_material_estudio.sql.
+// Los archivos viven en otros sitios: acá solo se guardan enlaces. Los aportes de estudiantes pasan por
+// revisión de moderadores. Ver supabase/migrations/20261123220000_material_estudio.sql y 20261126150000.
 
-const TIPOS_MATERIAL = ['resumen', 'apunte', 'guia', 'examen', 'libro', 'otro']
+const TIPOS_MATERIAL = ['resumen', 'apunte', 'guia', 'presentacion', 'video', 'flashcards', 'mapa', 'web', 'examen', 'libro', 'otro']
+
+// Sitios admitidos para material (lista cerrada, decisión 2026-11): plataformas legales donde estudiantes y docentes
+// publican su propio contenido, más bibliografía y fuentes oficiales. Un dominio admite también sus subdominios
+// (canva.site → miresumen.my.canva.site). Esta lista es la única fuente: la web la recibe con listarMateriales.
+// Quedan afuera a propósito: Mega, MediaFire, 4shared, Scribd, Studocu, Z-Library/LibGen, Internet Archive
+// (concentran copias de libros y apuntes con copyright) y los acortadores (bit.ly, tinyurl…: esconden el destino).
+const SITIOS_MATERIAL: [string, string, string][] = [
+  // [dominio, nombre visible, categoría]
+  ['drive.google.com', 'Google Drive', 'Archivos y documentos'],
+  ['docs.google.com', 'Google Docs', 'Archivos y documentos'],
+  ['onedrive.live.com', 'OneDrive', 'Archivos y documentos'],
+  ['1drv.ms', 'OneDrive', 'Archivos y documentos'],
+  ['dropbox.com', 'Dropbox', 'Archivos y documentos'],
+  ['box.com', 'Box', 'Archivos y documentos'],
+  ['icloud.com', 'iCloud', 'Archivos y documentos'],
+  ['github.com', 'GitHub', 'Archivos y documentos'],
+
+  ['canva.com', 'Canva', 'Presentaciones y diseño'],
+  ['canva.site', 'Canva', 'Presentaciones y diseño'],
+  ['genially.com', 'Genially', 'Presentaciones y diseño'],
+  ['genial.ly', 'Genially', 'Presentaciones y diseño'],
+  ['prezi.com', 'Prezi', 'Presentaciones y diseño'],
+  ['slides.com', 'Slides', 'Presentaciones y diseño'],
+  ['pitch.com', 'Pitch', 'Presentaciones y diseño'],
+  ['gamma.app', 'Gamma', 'Presentaciones y diseño'],
+  ['sway.cloud.microsoft', 'Sway', 'Presentaciones y diseño'],
+  ['sway.office.com', 'Sway', 'Presentaciones y diseño'],
+  ['slideshare.net', 'SlideShare', 'Presentaciones y diseño'],
+  ['figma.com', 'Figma', 'Presentaciones y diseño'],
+
+  ['notion.site', 'Notion', 'Notas y páginas web'],
+  ['notion.so', 'Notion', 'Notas y páginas web'],
+  ['sites.google.com', 'Google Sites', 'Notas y páginas web'],
+  ['gitbook.io', 'GitBook', 'Notas y páginas web'],
+  ['coda.io', 'Coda', 'Notas y páginas web'],
+  ['publish.obsidian.md', 'Obsidian Publish', 'Notas y páginas web'],
+  ['craft.me', 'Craft', 'Notas y páginas web'],
+  ['craft.do', 'Craft', 'Notas y páginas web'],
+  ['evernote.com', 'Evernote', 'Notas y páginas web'],
+  ['wixsite.com', 'Wix', 'Notas y páginas web'],
+  ['weebly.com', 'Weebly', 'Notas y páginas web'],
+  ['blogspot.com', 'Blogger', 'Notas y páginas web'],
+  ['wordpress.com', 'WordPress', 'Notas y páginas web'],
+  ['medium.com', 'Medium', 'Notas y páginas web'],
+  ['substack.com', 'Substack', 'Notas y páginas web'],
+  ['github.io', 'GitHub Pages', 'Notas y páginas web'],
+  ['netlify.app', 'Netlify', 'Notas y páginas web'],
+  ['vercel.app', 'Vercel', 'Notas y páginas web'],
+  ['pages.dev', 'Cloudflare Pages', 'Notas y páginas web'],
+  ['carrd.co', 'Carrd', 'Notas y páginas web'],
+  ['jimdosite.com', 'Jimdo', 'Notas y páginas web'],
+  ['webnode.page', 'Webnode', 'Notas y páginas web'],
+
+  ['quizlet.com', 'Quizlet', 'Tarjetas y cuestionarios'],
+  ['ankiweb.net', 'AnkiWeb', 'Tarjetas y cuestionarios'],
+  ['brainscape.com', 'Brainscape', 'Tarjetas y cuestionarios'],
+  ['goconqr.com', 'GoConqr', 'Tarjetas y cuestionarios'],
+  ['wordwall.net', 'Wordwall', 'Tarjetas y cuestionarios'],
+  ['educaplay.com', 'Educaplay', 'Tarjetas y cuestionarios'],
+  ['kahoot.it', 'Kahoot!', 'Tarjetas y cuestionarios'],
+  ['kahoot.com', 'Kahoot!', 'Tarjetas y cuestionarios'],
+  ['quizizz.com', 'Quizizz', 'Tarjetas y cuestionarios'],
+  ['wayground.com', 'Wayground (Quizizz)', 'Tarjetas y cuestionarios'],
+  ['liveworksheets.com', 'Liveworksheets', 'Tarjetas y cuestionarios'],
+  ['h5p.com', 'H5P', 'Tarjetas y cuestionarios'],
+  ['cerebriti.com', 'Cerebriti', 'Tarjetas y cuestionarios'],
+  ['forms.office.com', 'Microsoft Forms', 'Tarjetas y cuestionarios'],
+
+  ['padlet.com', 'Padlet', 'Mapas y pizarras'],
+  ['miro.com', 'Miro', 'Mapas y pizarras'],
+  ['mindmeister.com', 'MindMeister', 'Mapas y pizarras'],
+  ['coggle.it', 'Coggle', 'Mapas y pizarras'],
+  ['lucid.app', 'Lucidchart', 'Mapas y pizarras'],
+  ['lucidchart.com', 'Lucidchart', 'Mapas y pizarras'],
+  ['whimsical.com', 'Whimsical', 'Mapas y pizarras'],
+  ['xmind.ai', 'Xmind', 'Mapas y pizarras'],
+  ['xmind.works', 'Xmind', 'Mapas y pizarras'],
+  ['diagrams.net', 'diagrams.net', 'Mapas y pizarras'],
+  ['excalidraw.com', 'Excalidraw', 'Mapas y pizarras'],
+  ['mural.co', 'Mural', 'Mapas y pizarras'],
+  ['creately.com', 'Creately', 'Mapas y pizarras'],
+  ['mindomo.com', 'Mindomo', 'Mapas y pizarras'],
+
+  ['youtube.com', 'YouTube', 'Videos y podcasts'],
+  ['youtu.be', 'YouTube', 'Videos y podcasts'],
+  ['vimeo.com', 'Vimeo', 'Videos y podcasts'],
+  ['loom.com', 'Loom', 'Videos y podcasts'],
+  ['ted.com', 'TED', 'Videos y podcasts'],
+  ['open.spotify.com', 'Spotify', 'Videos y podcasts'],
+  ['podcasts.apple.com', 'Apple Podcasts', 'Videos y podcasts'],
+  ['ivoox.com', 'iVoox', 'Videos y podcasts'],
+  ['soundcloud.com', 'SoundCloud', 'Videos y podcasts'],
+
+  ['edu.ar', 'Universidad argentina (.edu.ar)', 'Bibliografía y fuentes oficiales'],
+  ['gob.ar', 'Organismo público argentino (.gob.ar)', 'Bibliografía y fuentes oficiales'],
+  ['who.int', 'OMS', 'Bibliografía y fuentes oficiales'],
+  ['paho.org', 'OPS', 'Bibliografía y fuentes oficiales'],
+  ['cdc.gov', 'CDC', 'Bibliografía y fuentes oficiales'],
+  ['nih.gov', 'NIH / PubMed', 'Bibliografía y fuentes oficiales'],
+  ['medlineplus.gov', 'MedlinePlus', 'Bibliografía y fuentes oficiales'],
+  ['ecdc.europa.eu', 'ECDC', 'Bibliografía y fuentes oficiales'],
+  ['scielo.org', 'SciELO', 'Bibliografía y fuentes oficiales'],
+  ['scielo.org.ar', 'SciELO Argentina', 'Bibliografía y fuentes oficiales'],
+  ['scielo.br', 'SciELO Brasil', 'Bibliografía y fuentes oficiales'],
+  ['redalyc.org', 'Redalyc', 'Bibliografía y fuentes oficiales'],
+  ['dialnet.unirioja.es', 'Dialnet', 'Bibliografía y fuentes oficiales'],
+  ['doi.org', 'DOI', 'Bibliografía y fuentes oficiales'],
+  ['scholar.google.com', 'Google Académico', 'Bibliografía y fuentes oficiales'],
+  ['sciencedirect.com', 'ScienceDirect', 'Bibliografía y fuentes oficiales'],
+  ['elsevier.es', 'Elsevier', 'Bibliografía y fuentes oficiales'],
+  ['springer.com', 'Springer', 'Bibliografía y fuentes oficiales'],
+  ['nature.com', 'Nature', 'Bibliografía y fuentes oficiales'],
+  ['nejm.org', 'NEJM', 'Bibliografía y fuentes oficiales'],
+  ['bmj.com', 'BMJ', 'Bibliografía y fuentes oficiales'],
+  ['thelancet.com', 'The Lancet', 'Bibliografía y fuentes oficiales'],
+  ['jamanetwork.com', 'JAMA', 'Bibliografía y fuentes oficiales'],
+  ['plos.org', 'PLOS', 'Bibliografía y fuentes oficiales'],
+  ['frontiersin.org', 'Frontiers', 'Bibliografía y fuentes oficiales'],
+  ['cochranelibrary.com', 'Cochrane', 'Bibliografía y fuentes oficiales'],
+  ['biorxiv.org', 'bioRxiv', 'Bibliografía y fuentes oficiales'],
+  ['medrxiv.org', 'medRxiv', 'Bibliografía y fuentes oficiales'],
+  ['zenodo.org', 'Zenodo', 'Bibliografía y fuentes oficiales'],
+  ['researchgate.net', 'ResearchGate', 'Bibliografía y fuentes oficiales'],
+  ['msdmanuals.com', 'Manual MSD', 'Bibliografía y fuentes oficiales'],
+  ['merckmanuals.com', 'Manual Merck', 'Bibliografía y fuentes oficiales'],
+  ['radiopaedia.org', 'Radiopaedia', 'Bibliografía y fuentes oficiales'],
+  ['kenhub.com', 'Kenhub', 'Bibliografía y fuentes oficiales'],
+  ['teachmeanatomy.info', 'TeachMeAnatomy', 'Bibliografía y fuentes oficiales'],
+  ['teachmephysiology.com', 'TeachMePhysiology', 'Bibliografía y fuentes oficiales'],
+  ['geekymedics.com', 'Geeky Medics', 'Bibliografía y fuentes oficiales'],
+  ['osmosis.org', 'Osmosis', 'Bibliografía y fuentes oficiales'],
+  ['khanacademy.org', 'Khan Academy', 'Bibliografía y fuentes oficiales'],
+  ['wikipedia.org', 'Wikipedia', 'Bibliografía y fuentes oficiales'],
+  ['libretexts.org', 'LibreTexts', 'Bibliografía y fuentes oficiales'],
+  ['openstax.org', 'OpenStax', 'Bibliografía y fuentes oficiales'],
+]
+
+// Sitios donde cualquiera crea una página gratis y la puede cambiar después de aprobada: se admiten (muchos alumnos
+// publican ahí sus resúmenes), pero la web los marca como «página externa» y el moderador lo ve al revisar.
+const SITIOS_ALOJAMIENTO_LIBRE = new Set([
+  'github.io', 'netlify.app', 'vercel.app', 'pages.dev', 'wixsite.com', 'weebly.com', 'blogspot.com', 'wordpress.com',
+  'carrd.co', 'jimdosite.com', 'webnode.page', 'notion.site', 'canva.site', 'gitbook.io', 'medium.com', 'substack.com',
+  'craft.me', 'publish.obsidian.md', 'github.com', 'sites.google.com',
+])
+
+function sitioMaterial(host: string) {
+  const h = host.toLowerCase().replace(/\.$/, '')
+  // El dominio más largo que coincide gana (scielo.org.ar antes que un sufijo más corto).
+  let mejor: [string, string, string] | null = null
+  for (const s of SITIOS_MATERIAL) if ((h === s[0] || h.endsWith('.' + s[0])) && (!mejor || s[0].length > mejor[0].length)) mejor = s
+  return mejor
+}
+
+// Forma canónica: mismo archivo de Drive/Docs o mismo video de YouTube = mismo enlace (para detectar duplicados).
+// Sin fragmento ni parámetros de rastreo.
+function canonizarLinkMaterial(u: URL) {
+  u.hash = ''
+  for (const k of [...u.searchParams.keys()]) if (/^(utm_|fbclid$|gclid$|igshid$|si$|usp$|ref$|ref_src$)/i.test(k)) u.searchParams.delete(k)
+  const host = u.hostname.toLowerCase()
+  let m: RegExpMatchArray | null
+  if (host === 'drive.google.com') {
+    const idArchivo = u.pathname.match(/\/file\/d\/([\w-]{10,})/)?.[1] || (/^\/(open|uc)$/.test(u.pathname) ? u.searchParams.get('id') : null)
+    if (idArchivo && /^[\w-]{10,}$/.test(idArchivo)) return 'https://drive.google.com/file/d/' + idArchivo + '/view'
+    if ((m = u.pathname.match(/\/folders\/([\w-]{10,})/))) return 'https://drive.google.com/drive/folders/' + m[1]
+  }
+  if (host === 'docs.google.com' && (m = u.pathname.match(/^\/(document|presentation|spreadsheets|forms)\/d\/([\w-]{10,})(\/|$)/)) && m[2] !== 'e')
+    return 'https://docs.google.com/' + m[1] + '/d/' + m[2] + '/edit'
+  if (host === 'youtu.be' && (m = u.pathname.match(/^\/([\w-]{6,})/))) return 'https://www.youtube.com/watch?v=' + m[1]
+  if ((host === 'youtube.com' || host.endsWith('.youtube.com'))) {
+    const v = u.searchParams.get('v')
+    if (u.pathname === '/watch' && v && /^[\w-]{6,}$/.test(v)) return 'https://www.youtube.com/watch?v=' + v
+    if ((m = u.pathname.match(/^\/(shorts|embed|live)\/([\w-]{6,})/))) return 'https://www.youtube.com/watch?v=' + m[2]
+  }
+  return u.toString()
+}
+
+// Enlace de material: https, sin usuario/contraseña ni puerto, de un sitio admitido. Devuelve '' si vino vacío,
+// { error } si no se acepta, o { link, sitio } con el enlace canónico.
+function linkMaterialValido(valor: unknown): '' | { error: string, dominio?: string } | { link: string, sitio: string } {
+  const texto = String(valor || '').trim()
+  if (!texto) return ''
+  if (texto.length > 600) return { error: 'link_invalido' }
+  let u: URL
+  try { u = new URL(texto) } catch { return { error: 'link_invalido' } }
+  if (u.protocol !== 'https:' || u.username || u.password || u.port) return { error: 'link_invalido' }
+  u.hostname = u.hostname.replace(/\.$/, '')
+  if (/^[\d.]+$/.test(u.hostname) || u.hostname.includes(':')) return { error: 'link_invalido' }
+  const sitio = sitioMaterial(u.hostname)
+  if (!sitio) return { error: 'sitio_no_permitido', dominio: u.hostname.toLowerCase().slice(0, 80) }
+  let ruta = u.pathname
+  try { ruta = decodeURIComponent(u.pathname) } catch { return { error: 'link_invalido' } }
+  // Descargas directas de programas o comprimidos: nunca son material de estudio (y esconden malware).
+  if (/\.(exe|msi|msix|appx|apk|bat|cmd|com|scr|dmg|pkg|jar|ps1|vbs|js|hta|lnk|reg|iso|img|zip|rar|7z|tar|gz)$/i.test(ruta.replace(/\/+$/, ''))) return { error: 'link_invalido' }
+  // Redirecciones de sitios admitidos (medium.com/r/?url=…, docs.google.com/url?q=…): llevarían a cualquier lado.
+  if (/^\/(r|url|redirect|scholar_url|out|outbound|l|link|away|exit)(\/|$)/i.test(ruta)) return { error: 'link_invalido' }
+  for (const v of u.searchParams.values()) if (/^\s*(https?:|\/\/)|%3A%2F%2F/i.test(v)) return { error: 'link_invalido' }
+  const link = canonizarLinkMaterial(u)
+  if (link.length > 300) return { error: 'link_largo' }
+  return { link, sitio: sitio[1] }
+}
+
+function sitiosMaterialPublicos() {
+  return SITIOS_MATERIAL.map(([dominio, nombre, categoria]) => ({ dominio, nombre, categoria, libre: SITIOS_ALOJAMIENTO_LIBRE.has(dominio) }))
+}
+
+// Aviso agrupado a moderadores: una sola notificación sin leer por moderador, con la cantidad acumulada.
+const REF_AVISO_APORTES = '00000000-0000-4000-8000-00000a9047e5'
+async function avisarModeradoresAporte(admin: SupabaseClient, titulo: string) {
+  const { data: mods, error } = await admin.from('profiles').select('id').or('is_moderator.eq.true,is_admin.eq.true').limit(200)
+  if (error) { console.warn('aviso_aportes', error.message); return }
+  for (const m of mods || []) {
+    // Dos intentos: si otro aporte creó la notificación entre la lectura y el insert (23505), se vuelve a leer y se suma.
+    for (let intento = 0; intento < 2; intento++) {
+      const { data: previa } = await admin.from('notificaciones').select('id,cantidad')
+        .eq('user_id', m.id).eq('tipo', 'aporte').eq('ref_id', REF_AVISO_APORTES).eq('leida', false).maybeSingle()
+      const cantidad = Number(previa?.cantidad || 0) + 1
+      const fila = {
+        contexto: cantidad === 1 ? 'Hay un aporte de material para revisar' : 'Hay ' + cantidad + ' aportes de material para revisar',
+        cuerpo: ('Último: ' + titulo).slice(0, 400), cantidad, updated_at: new Date().toISOString(),
+      }
+      const res = previa
+        ? await admin.from('notificaciones').update(fila).eq('id', previa.id)
+        : await admin.from('notificaciones').insert({ user_id: m.id, tipo: 'aporte', ref_id: REF_AVISO_APORTES, ...fila })
+      if (!res.error) break
+      if (pgCode(res.error) !== '23505' || intento) { console.warn('aviso_aportes', res.error.message); break }
+    }
+  }
+}
 const MAX_APORTES_DIA = 5            // por persona, en 24 h
 const MAX_APORTES_PENDIENTES = 5     // por persona, esperando revisión
 const MAX_APORTES_PENDIENTES_TOTAL = 300
 const MIN_MS_FORMULARIO = 3000       // menos que esto no lo llena una persona
-
-// Solo enlaces https de Drive o Docs, sin credenciales ni puertos raros. '' = vacío, null = inválido.
-function linkDriveValido(valor: unknown) {
-  const texto = String(valor || '').trim()
-  if (!texto) return ''
-  if (texto.length > 300) return null
-  try {
-    const u = new URL(texto)
-    if (u.protocol !== 'https:' || u.username || u.password || u.port) return null
-    if (u.hostname !== 'drive.google.com' && u.hostname !== 'docs.google.com') return null
-    return u.toString()
-  } catch { return null }
-}
 
 function textoLimpio(valor: unknown, max: number) {
   return String(valor || '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').trim().slice(0, max)
@@ -202,10 +417,10 @@ function datosMaterial(body: any) {
   const descripcion = textoLimpio(body.descripcion, 400)
   const materia = textoLimpio(body.materia, 120)
   const tipo = String(body.tipo || '')
-  const link = linkDriveValido(body.link)
+  const l = linkMaterialValido(body.link)
   const credito = textoLimpio(body.credito, 60)
-  if (titulo.length < 3 || materia.length < 2 || !TIPOS_MATERIAL.includes(tipo) || !link) return null
-  return { titulo, descripcion: descripcion || null, materia, tipo, link, credito: credito || null }
+  if (titulo.length < 3 || materia.length < 2 || !TIPOS_MATERIAL.includes(tipo) || !l || 'error' in l) return null
+  return { titulo, descripcion: descripcion || null, materia, tipo, link: l.link, credito: credito || null }
 }
 
 async function listarMateriales(client: SupabaseClient) {
@@ -213,7 +428,7 @@ async function listarMateriales(client: SupabaseClient) {
     .select('id,titulo,descripcion,materia,tipo,link,credito,created_at')
     .order('created_at', { ascending: false }).limit(500)
   if (error) throw error
-  return json({ ok: true, materiales: data || [] })
+  return json({ ok: true, materiales: data || [], sitios: sitiosMaterialPublicos() })
 }
 
 async function enviarAporte(user: User, admin: SupabaseClient, body: any) {
@@ -225,9 +440,13 @@ async function enviarAporte(user: User, admin: SupabaseClient, body: any) {
   const descripcion = textoLimpio(body.descripcion, 1000)
   const materia = textoLimpio(body.materia, 120)
   const tipo = TIPOS_MATERIAL.includes(String(body.tipo)) ? String(body.tipo) : null
-  const link = linkDriveValido(body.link)
-  if (titulo.length < 3 || link === null) return json({ ok: false, error: 'datos_invalidos' })
+  const l = linkMaterialValido(body.link)
+  if (l && 'error' in l) return json({ ok: false, error: l.error, dominio: l.dominio })
+  const link = l ? l.link : ''
+  if (titulo.length < 3) return json({ ok: false, error: 'datos_invalidos' })
   if (clase === 'archivo' && !link) return json({ ok: false, error: 'link_requerido' })
+  // Material compartido: la persona declara que puede compartirlo (propio o de acceso libre, sin datos de pacientes).
+  if (clase === 'archivo' && body.declaracion !== true) return json({ ok: false, error: 'declaracion_requerida' })
   if (clase === 'sugerencia' && descripcion.length < 10) return json({ ok: false, error: 'datos_invalidos' })
 
   const hace24h = new Date(Date.now() - 86400000).toISOString()
@@ -249,6 +468,7 @@ async function enviarAporte(user: User, admin: SupabaseClient, body: any) {
     if (String((error as any).code) === '23505') return json({ ok: false, error: 'aporte_duplicado' })
     throw error
   }
+  await avisarModeradoresAporte(admin, titulo)
   return json({ ok: true })
 }
 
@@ -260,7 +480,10 @@ async function listarAportes(admin: SupabaseClient) {
   const pmap = await profileMap(admin, (data || []).map((a: any) => String(a.user_id)))
   const aportes = (data || []).map((a: any) => {
     const { user_id, ...resto } = a
-    return { ...resto, autor: pmap.get(String(user_id))?.pseudonimo || 'Estudiante' }
+    let dominio = '', sitio = ''
+    let libre = false
+    try { const h = new URL(String(a.link || '')).hostname; dominio = h; const s = sitioMaterial(h); sitio = s?.[1] || ''; libre = !!s && SITIOS_ALOJAMIENTO_LIBRE.has(s[0]) } catch { /* sugerencia sin enlace */ }
+    return { ...resto, dominio, sitio, libre, autor: pmap.get(String(user_id))?.pseudonimo || 'Estudiante' }
   })
   return json({ ok: true, aportes })
 }
@@ -1593,8 +1816,11 @@ async function handle(req: Request, body: any) {
     case 'denunciar': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       const tipo=String(body.tipo||''),id=uuidOrEmpty(body.id),motivo=String(body.motivo||'').trim().slice(0,300)
-      if(!['hilo','respuesta'].includes(tipo)||!id)return json({ok:false,error:'datos_invalidos'})
-      const {data:pub,error:pubError}=await admin.from(tipo==='hilo'?'hilos':'respuestas').select('id').eq('id',id).maybeSingle()
+      if(!['hilo','respuesta','material'].includes(tipo)||!id)return json({ok:false,error:'datos_invalidos'})
+      const tabla=tipo==='hilo'?'hilos':tipo==='respuesta'?'respuestas':'materiales'
+      let consultaPub=admin.from(tabla).select('id').eq('id',id)
+      if(tipo==='material')consultaPub=consultaPub.eq('activo',true)
+      const {data:pub,error:pubError}=await consultaPub.maybeSingle()
       if(pubError)throw pubError
       if(!pub)return json({ok:false,error:'no_encontrado'})
       // Una sola denuncia pendiente por persona y publicación: evita inflar la cola de moderación.
@@ -1661,6 +1887,8 @@ async function handle(req: Request, body: any) {
     case 'agregarMaterial': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      const lm=linkMaterialValido(body.link)
+      if(lm&&'error' in lm)return json({ok:false,error:lm.error,dominio:lm.dominio})
       const m=datosMaterial(body)
       if(!m)return json({ok:false,error:'datos_invalidos'})
       const {error}=await admin.from('materiales').insert({...m,creado_por:user.id})
@@ -1863,7 +2091,8 @@ async function handle(req: Request, body: any) {
         // Se marcan como resueltas todas las denuncias pendientes de esa publicación y después se la borra.
         const {error:upError}=await admin.from('denuncias').update({estado:'eliminada',...resolucion}).eq('id_publicacion',rep.id_publicacion).eq('estado','pendiente')
         if(upError)throw upError
-        await borrarPublicacion(admin,rep.tipo==='hilo'?'hilo':'respuesta',String(rep.id_publicacion),false)
+        if(rep.tipo==='material'){const {error:errMat}=await admin.from('materiales').update({activo:false}).eq('id',rep.id_publicacion);if(errMat)throw errMat}
+        else await borrarPublicacion(admin,rep.tipo==='hilo'?'hilo':'respuesta',String(rep.id_publicacion),false)
       } else {
         const {error}=await admin.from('denuncias').update({estado:'descartada',...resolucion}).eq('id',id);if(error)throw error
       }
@@ -1929,15 +2158,27 @@ async function borrarFotosAnteriores(admin: SupabaseClient, userId: string, cons
 async function enriquecerDenuncias(admin: SupabaseClient, denuncias: any[]) {
   const idsHilos = denuncias.filter(d => d.tipo === 'hilo').map(d => String(d.id_publicacion))
   const idsResp = denuncias.filter(d => d.tipo === 'respuesta').map(d => String(d.id_publicacion))
-  const [hilos, resps] = await Promise.all([
+  const idsMat = denuncias.filter(d => d.tipo === 'material').map(d => String(d.id_publicacion))
+  const [hilos, resps, mats] = await Promise.all([
     idsHilos.length ? admin.from('hilos').select('id,titulo,contenido,autor_id').in('id', idsHilos) : Promise.resolve({ data: [], error: null }),
     idsResp.length ? admin.from('respuestas').select('id,contenido,autor_id').in('id', idsResp) : Promise.resolve({ data: [], error: null }),
+    idsMat.length ? admin.from('materiales').select('id,titulo,materia,link,creado_por,aporte_id,activo').in('id', idsMat) : Promise.resolve({ data: [], error: null }),
   ])
   if (hilos.error) throw hilos.error
   if (resps.error) throw resps.error
+  if (mats.error) throw mats.error
   const pubs = new Map<string, any>()
   for (const h of hilos.data || []) pubs.set(String(h.id), h)
   for (const r of resps.data || []) pubs.set(String(r.id), r)
+  // Material: el autor real es quien mandó el aporte (creado_por es el moderador que lo aprobó o lo cargó).
+  const idsAportes = (mats.data || []).map((m: any) => m.aporte_id).filter(Boolean)
+  const aportesAutor = new Map<string, string>()
+  if (idsAportes.length) {
+    const { data: aps, error: errAps } = await admin.from('aportes_material').select('id,user_id').in('id', idsAportes)
+    if (errAps) throw errAps
+    for (const a of aps || []) aportesAutor.set(String(a.id), String(a.user_id))
+  }
+  for (const m of mats.data || []) if (m.activo) pubs.set(String(m.id), { titulo: m.titulo, contenido: m.materia + ' · ' + m.link, autor_id: (m.aporte_id && aportesAutor.get(String(m.aporte_id))) || m.creado_por })
   const autores = await profileMap(admin, [...pubs.values()].map(p => String(p.autor_id)))
   return denuncias.map(d => {
     const p = pubs.get(String(d.id_publicacion))

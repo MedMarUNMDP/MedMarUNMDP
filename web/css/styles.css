@@ -3322,6 +3322,19 @@
         }
 
         .rankingQuitar:hover { border-color: var(--brand); color: var(--brand); }
+        /* Material: sitio de cada enlace, reportar y ayuda del formulario de aportes. */
+        .chipSitio { padding: 2px 8px; border-radius: var(--r-pill); border: 1px solid var(--line); color: var(--ink-soft); font-size: .74rem; font-weight: 700; }
+        .denunciarMaterial { width: auto; margin: 0 0 0 auto; padding: 4px 6px; border: 0; background: none; color: var(--ink-3); font-size: .8rem; text-decoration: underline; cursor: pointer; }
+        .denunciarMaterial:hover, .denunciarMaterial:focus-visible { color: var(--red-600); }
+        .sitiosAdmitidos { margin: 4px 0 12px; font-size: .88rem; }
+        .sitiosAdmitidos summary { cursor: pointer; color: var(--link); font-weight: 700; }
+        .sitiosAdmitidos .sitiosGrupo { margin: 6px 0; line-height: 1.45; }
+        .aporteSitio { margin: 4px 0 0; font-size: .84rem; min-height: 1.2em; }
+        .aporteSitio.bien { color: var(--brand); }
+        .aporteSitio.mal { color: var(--red-600); }
+        .avisoExterno { margin: 4px 0 0; font-size: .8rem; color: var(--gold-600); }
+        .dominioAporte.avisoExterno { color: var(--gold-600); }
+        .dominioAporte { margin: 4px 0 0; font-size: .84rem; color: var(--ink-soft); overflow-wrap: anywhere; }
         .rankingQuitar.peligro:hover { border-color: var(--red-600); color: var(--red-600); }
         .rankingMod { display: inline-flex; gap: 6px; margin-left: 8px; }
         .rankingMod .rankingQuitar { margin: 0; }

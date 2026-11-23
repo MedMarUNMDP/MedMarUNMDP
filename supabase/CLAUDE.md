@@ -21,8 +21,8 @@ se aplica acá impacta producción.
 FK al mismo hilo), `likes_hilos`, `likes_respuestas` (foro) ·
 `denuncias` (moderación) · `notificaciones` (campana: las crean triggers en `respuestas`, `mensajes` e
 `intercambio_participantes` vía `notificar()`, agrupando avisos sin leer del mismo destino; las noticias las publica un admin
-con `publicarNoticia`; select solo propias, en Realtime) · `materiales` (catálogo de enlaces a Google Drive: no se suben archivos) y
-`aportes_material` (aportes de estudiantes por link de Drive o sugerencia, revisados por moderadores; anti-spam en
+con `publicarNoticia`; select solo propias, en Realtime) · `materiales` (catálogo de enlaces a sitios admitidos: lista cerrada `SITIOS_MATERIAL` en la API, ~120 dominios legales; no se suben archivos) y
+`aportes_material` (aportes de estudiantes por enlace de un sitio admitido o sugerencia, con declaración de derechos; avisan a moderadores en la campana; revisados por moderadores; anti-spam en
 `enviarAporte`: rate limit, tope diario y de pendientes, solo Drive, trampa y tiempo mínimo) · `llaves_moderacion` (llaves públicas ECDSA P-256 de moderadores/admins; segundo factor:
 toda acción de moderación pasa por `autorizarModeracion` y exige rol + llave activa + token de 30 min; llaves de admin solo
 por SQL; ADR `docs/decisiones/0004`) · `registro_moderacion` (auditoría, 180 días) · `puntajes_juegos` (ranking: mejor puntaje por usuario/juego/modo, RPC `ranking_juego`; `oculto` = escondido por un moderador con `ocultarPuntaje`, no cuenta en el ranking; `quitarPuntaje` lo borra) · `partidas_juegos` (historial de partidas para estadísticas del ranking, 365 días; acción de moderación `estadisticasRanking`; sin tope de eliminaciones/s) ·

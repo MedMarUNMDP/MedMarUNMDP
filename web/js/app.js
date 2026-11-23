@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-26-formato-encuestas"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-26-material-sitios"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -680,7 +680,11 @@ const hilosPendientesConfirmacion = new Map()
                 encuesta_opciones: "La encuesta necesita entre 2 y 6 opciones.",
                 encuesta_opciones_repetidas: "Hay opciones repetidas en la encuesta.",
                 encuesta_cerrada: "Esta encuesta ya cerró.",
-                link_requerido: "Pegá el enlace de Google Drive del archivo.",
+                link_requerido: "Pegá el enlace del material.",
+                link_invalido: "Ese enlace no es válido. Tiene que empezar con https:// y no puede ser un programa para descargar.",
+                link_largo: "El enlace es demasiado largo. Probá copiarlo de nuevo con «Compartir».",
+                sitio_no_permitido: "Ese sitio no está en la lista de sitios admitidos para material.",
+                declaracion_requerida: "Confirmá que podés compartir este material.",
                 cuenta_oficial: "La cuenta oficial de MedMar no se puede modificar desde la web.",
                 no_quitarte_admin: "No podés quitarte el rol de administrador a vos mismo.",
                 ultimo_admin: "Tiene que quedar al menos un administrador.",
@@ -3045,13 +3049,13 @@ async function cargarBootstrap() {
                     : ""
 
                 div.innerHTML =
-                    "<div class='hiloMeta'>Denuncia sobre un " + escapeHtml(d.tipo) + " · " + formatearFecha(d.fecha) + "</div>" +
+                    "<div class='hiloMeta'>Denuncia sobre " + (d.tipo === "material" ? "un material" : "un " + escapeHtml(d.tipo)) + " · " + formatearFecha(d.fecha) + "</div>" +
                     (d.motivo ? "<div class='hiloMeta'>Motivo: " + escapeHtml(d.motivo) + "</div>" : "") +
                     "<div class='contenidoDenunciado'>" + contenidoTexto + "</div>" +
                     autorHtml +
                     "<div class='denunciaAcciones'>" +
                     "<button type='button' class='btnDescartar'>Descartar</button>" +
-                    (d.publicacion.existe ? "<button type='button' class='btnEliminarPublicacion'>Eliminar publicación</button>" : "") +
+                    (d.publicacion.existe ? "<button type='button' class='btnEliminarPublicacion'>" + (d.tipo === "material" ? "Quitar material" : "Eliminar publicación") + "</button>" : "") +
                     "</div>"
 
                 div.querySelector(".btnDescartar").addEventListener("click", function () {
@@ -4787,6 +4791,8 @@ async function cargarBootstrap() {
                 case "intercambio":
                     return "<b>¡Encontramos un intercambio!</b> " + escapeHtml(n.contexto || "")
                 case "aporte":
+                    if (n.ref_id === REF_AVISO_APORTES) return "<b>" + escapeHtml(n.contexto || "Hay aportes para revisar") + "</b>" +
+                        (n.cuerpo ? "<span class='notifCuerpo'>" + escapeHtml(n.cuerpo) + "</span>" : "")
                     return "<b>Tu aporte «" + escapeHtml(n.contexto || "") + "»</b>" +
                         (n.cuerpo ? "<span class='notifCuerpo'>" + escapeHtml(n.cuerpo) + "</span>" : "")
                 case "noticia":
@@ -4921,6 +4927,9 @@ async function cargarBootstrap() {
                 if (n.ref_id) abrirChat(n.ref_id)
             } else if (n.tipo === "intercambio") {
                 mostrarSeccion("intercambios", "down")
+            } else if (n.tipo === "aporte" && n.ref_id === REF_AVISO_APORTES) {
+                mostrarSeccion("moderacion", "up")
+                elegirPestaniaModeracion("aportes")
             } else if (n.tipo === "aporte") {
                 mostrarSeccion("material", "up")
             } else if (n.tipo === "noticia" && n.link) {
@@ -5416,14 +5425,49 @@ async function cargarBootstrap() {
         }
 
         // ==================== MATERIAL DE ESTUDIO ====================
-        // Catálogo de enlaces a Google Drive. Se pide al entrar (máx. 1 vez cada 5 min) y se filtra en el
-        // cliente. Los aportes van por link de Drive (no se suben archivos) y los revisan moderadores.
+        // Catálogo de enlaces a sitios admitidos (Drive, Canva, Notion, YouTube, revistas…). Se pide al entrar (máx. 1
+        // vez cada 5 min) y se filtra en el cliente. La lista de sitios la manda la API con el catálogo (única fuente:
+        // SITIOS_MATERIAL en supabase/functions/api); la web la usa para avisar antes de enviar y para los nombres.
 
         const TIPOS_MATERIAL = {
-            resumen: "Resumen", apunte: "Apunte", guia: "Guía", examen: "Examen", libro: "Libro", otro: "Otro"
+            resumen: "Resumen", apunte: "Apunte", guia: "Guía", presentacion: "Presentación", video: "Video",
+            flashcards: "Tarjetas", mapa: "Mapa conceptual", web: "Sitio web", examen: "Examen", libro: "Libro", otro: "Otro"
         }
         const MATERIAL_FRESCURA_MS = 5 * 60 * 1000
-        const RE_LINK_DRIVE = /^https:\/\/(drive|docs)\.google\.com\/\S+$/i
+        // Mismo ref_id que usa la API para el aviso agrupado de aportes a moderadores.
+        const REF_AVISO_APORTES = "00000000-0000-4000-8000-00000a9047e5"
+        let sitiosMaterial = []
+
+        // Sitio admitido de un enlace (el dominio más largo que coincide), o null.
+        function sitioDeEnlace(link) {
+            let host
+            try { const u = new URL(String(link || "")); if (u.protocol !== "https:") return null; host = u.hostname.toLowerCase() } catch (_) { return null }
+            let mejor = null
+            sitiosMaterial.forEach(function (s) {
+                if ((host === s.dominio || host.slice(-(s.dominio.length + 1)) === "." + s.dominio) && (!mejor || s.dominio.length > mejor.dominio.length)) mejor = s
+            })
+            return mejor
+        }
+
+        // Chequeo previo al envío (el servidor valida igual). "" si está bien; si no, el mensaje.
+        function problemaEnlaceMaterial(link) {
+            if (!/^https:\/\/\S+$/i.test(link)) return "Pegá un enlace que empiece con https://"
+            if (sitiosMaterial.length && !sitioDeEnlace(link)) return "Ese sitio no está en la lista de sitios admitidos. Mirá «Ver todos los sitios admitidos»."
+            return ""
+        }
+
+        function renderizarSitiosAdmitidos() {
+            const cont = document.getElementById("listaSitiosAdmitidos")
+            if (!cont || !sitiosMaterial.length) return
+            const grupos = {}
+            sitiosMaterial.forEach(function (s) {
+                grupos[s.categoria] = grupos[s.categoria] || []
+                if (grupos[s.categoria].indexOf(s.nombre) < 0) grupos[s.categoria].push(s.nombre)
+            })
+            cont.innerHTML = Object.keys(grupos).map(function (c) {
+                return "<p class='sitiosGrupo'><b>" + escapeHtml(c) + ":</b> " + grupos[c].map(escapeHtml).join(", ") + "</p>"
+            }).join("") + "<p class='ayudaPerfil'>¿Falta un sitio que usás para estudiar? Mandalo como «Sugerir contenido».</p>"
+        }
 
         let materialesUI = []
         let materialesCargadosEn = 0
@@ -5483,6 +5527,7 @@ async function cargarBootstrap() {
                 return
             }
             materialesUI = Array.isArray(r.materiales) ? r.materiales : []
+            if (Array.isArray(r.sitios) && r.sitios.length) { sitiosMaterial = r.sitios; renderizarSitiosAdmitidos() }
             materialesCargadosEn = Date.now()
             renderizarMateriales()
         }
@@ -5516,16 +5561,24 @@ async function cargarBootstrap() {
             }
             listaMaterial.innerHTML = lista.map(function (m) {
                 const descarga = enlaceDescarga(m.link)
+                const sitio = sitioDeEnlace(m.link)
+                // Para dominios genéricos (.gob.ar, .edu.ar) se muestra el sitio real: «argentina.gob.ar».
+                const nombreSitio = !sitio ? "el sitio" : (sitio.dominio === "gob.ar" || sitio.dominio === "edu.ar")
+                    ? (function () { try { return new URL(m.link).hostname.replace(/^www\./, "") } catch (_) { return sitio.dominio } })()
+                    : sitio.nombre.replace(/ \(.*\)$/, "")
                 return "<article class='tarjetaMaterial'>" +
                     "<div class='tarjetaMaterialMeta'><span class='chipTipo tipo-" + escapeAttr(m.tipo) + "'>" + escapeHtml(TIPOS_MATERIAL[m.tipo] || "Material") + "</span>" +
-                    "<span class='materiaMaterial'>" + escapeHtml(m.materia) + "</span></div>" +
+                    "<span class='materiaMaterial'>" + escapeHtml(m.materia) + "</span>" +
+                    (sitio ? "<span class='chipSitio'>" + escapeHtml(nombreSitio) + "</span>" : "") + "</div>" +
                     "<h3>" + escapeHtml(m.titulo) + "</h3>" +
                     (m.descripcion ? "<p class='descMaterial'>" + escapeHtml(m.descripcion) + "</p>" : "") +
                     (m.credito ? "<p class='creditoMaterial'>Aportado por " + escapeHtml(m.credito) + "</p>" : "") +
+                    (sitio && sitio.libre ? "<p class='avisoExterno'>Página externa: MedMar no la controla y puede cambiar. Nunca pongas tu contraseña ahí.</p>" : "") +
                     "<div class='accionesMaterial'>" +
                     (descarga ? "<a class='novedadAccion' href='" + escapeAttr(descarga) + "' target='_blank' rel='noopener noreferrer'>Descargar</a>" : "") +
-                    "<a class='novedadAccion secundaria' href='" + escapeAttr(m.link) + "' target='_blank' rel='noopener noreferrer'>" + (descarga ? "Ver en Drive" : "Abrir en Drive") + "</a>" +
+                    "<a class='novedadAccion" + (descarga ? " secundaria" : "") + "' href='" + escapeAttr(m.link) + "' target='_blank' rel='noopener noreferrer'>" + (descarga ? "Ver en " : "Abrir en ") + escapeHtml(nombreSitio) + "</a>" +
                     (esModeradorActual ? "<button type='button' class='novedadAccion secundaria quitarMaterial' data-quitar='" + escapeAttr(m.id) + "'>Quitar</button>" : "") +
+                    "<button type='button' class='denunciarMaterial' data-denunciar-material='" + escapeAttr(m.id) + "'>Reportar</button>" +
                     "</div></article>"
             }).join("")
         }
@@ -5546,6 +5599,14 @@ async function cargarBootstrap() {
                 buscarMaterial.value = ""; filtroMateria.value = ""; filtroTipoMaterial = ""
                 document.querySelectorAll(".chipTipoFiltro").forEach(function (c) { c.setAttribute("aria-pressed", String(c.dataset.tipo === "")) })
                 renderizarMateriales()
+                return
+            }
+            const reportar = e.target.closest("[data-denunciar-material]")
+            if (reportar) {
+                const motivo = prompt("¿Qué pasa con este material? (por ejemplo: el enlace no abre, no es de esa materia, tiene derechos de autor o datos de pacientes)")
+                if (motivo === null) return
+                const r = await llamar("denunciar", { tipo: "material", id: reportar.dataset.denunciarMaterial, motivo: motivo })
+                mostrarAviso(r.ok ? "Gracias, un moderador lo va a revisar." : mensajeError(r.error))
                 return
             }
             const quitar = e.target.closest("[data-quitar]")
@@ -5569,6 +5630,7 @@ async function cargarBootstrap() {
         function actualizarFormAporte() {
             const archivo = claseAporteActual() === "archivo"
             document.getElementById("campoAporteLink").hidden = !archivo
+            document.getElementById("campoAporteDeclaracion").hidden = !archivo
             document.getElementById("etiquetaAporteDescripcion").textContent = archivo ? "Descripción (opcional)" : "¿Qué contenido te gustaría que sumemos?"
             document.getElementById("aporteTitulo").placeholder = archivo ? "Resumen del núcleo 7: agentes respiratorios" : "Guía de ejercicios de Bioquímica"
         }
@@ -5595,6 +5657,13 @@ async function cargarBootstrap() {
         })
         document.getElementById("btnCancelarAporte").addEventListener("click", cerrarPanelAporte)
         document.querySelectorAll("input[name='claseAporte']").forEach(function (r) { r.addEventListener("change", actualizarFormAporte) })
+        document.getElementById("aporteLink").addEventListener("input", function () {
+            const v = this.value.trim(), out = document.getElementById("aporteSitio")
+            if (!v) { out.textContent = ""; out.className = "aporteSitio"; return }
+            const sitio = sitioDeEnlace(v), problema = problemaEnlaceMaterial(v)
+            out.className = "aporteSitio" + (problema ? " mal" : " bien")
+            out.textContent = problema || ("✓ " + (sitio ? sitio.nombre : "Enlace") + ". Revisá que esté compartido como público.")
+        })
 
         formAporte.addEventListener("submit", async function (e) {
             e.preventDefault()
@@ -5609,15 +5678,20 @@ async function cargarBootstrap() {
                 descripcion: document.getElementById("aporteDescripcion").value.trim(),
                 mostrarCredito: document.getElementById("aporteCredito").checked,
                 website: document.getElementById("aporteWebsite").value,
-                ms: Date.now() - aporteAbiertoEn
+                ms: Date.now() - aporteAbiertoEn,
+                declaracion: document.getElementById("aporteDeclaracion").checked
             }
             if (datos.titulo.length < 3) { msgAporte.textContent = "Poné un título de al menos 3 letras."; return }
-            if (clase === "archivo" && !RE_LINK_DRIVE.test(datos.link)) { msgAporte.textContent = "Pegá un enlace de Google Drive (empieza con https://drive.google.com o https://docs.google.com)."; return }
+            if (clase === "archivo") {
+                const problema = problemaEnlaceMaterial(datos.link)
+                if (problema) { msgAporte.textContent = problema; return }
+                if (!datos.declaracion) { msgAporte.textContent = mensajeError("declaracion_requerida"); return }
+            }
             if (clase === "sugerencia" && datos.descripcion.length < 10) { msgAporte.textContent = "Contanos un poco más qué contenido te gustaría (al menos 10 letras)."; return }
 
             msgAporte.textContent = "Enviando…"
             const r = await llamar("enviarAporte", datos)
-            if (!r.ok) { msgAporte.textContent = mensajeError(r.error); return }
+            if (!r.ok) { msgAporte.textContent = mensajeError(r.error) + (r.error === "sitio_no_permitido" && r.dominio ? " (" + r.dominio + ")" : ""); return }
             msgAporte.textContent = ""
             formAporte.reset()
             cerrarPanelAporte()
@@ -5675,7 +5749,9 @@ async function cargarBootstrap() {
                           "<label for='apM-" + idc + "'>Materia</label><select id='apM-" + idc + "'>" + opcionesMateria + "</select>" +
                           "<label for='apTi-" + idc + "'>Tipo</label><select id='apTi-" + idc + "'>" +
                           Object.keys(TIPOS_MATERIAL).map(function (t) { return "<option value='" + t + "'" + (t === a.tipo ? " selected" : "") + ">" + TIPOS_MATERIAL[t] + "</option>" }).join("") + "</select>" +
-                          "<a class='linkAporte' href='" + escapeAttr(a.link) + "' target='_blank' rel='noopener noreferrer'>Abrir el enlace en Drive ↗</a>"
+                          "<a class='linkAporte' href='" + escapeAttr(a.link) + "' target='_blank' rel='noopener noreferrer'>Abrir en " + escapeHtml(a.sitio || "el sitio") + " ↗</a>" +
+                          "<p class='dominioAporte'>Dominio: <b>" + escapeHtml(a.dominio || "") + "</b>. Revisá que abra, que sea público y que sea material de estudio legal.</p>" +
+                          (a.libre ? "<p class='dominioAporte avisoExterno'>Es una página que cualquiera puede crear y cambiar después de aprobada: aprobala solo si confiás en el contenido y en quien la manda.</p>" : "")
                         : "<h3>" + escapeHtml(a.titulo) + "</h3>" + (a.materia ? "<p class='materiaMaterial'>" + escapeHtml(a.materia) + "</p>" : "")) +
                     (a.descripcion ? "<p class='descMaterial'>" + escapeHtml(a.descripcion) + "</p>" : "") +
                     "<label for='apMo-" + idc + "'>Motivo si no se publica (opcional, lo ve quien lo mandó)</label>" +
@@ -5732,8 +5808,9 @@ async function cargarBootstrap() {
                     descripcion: document.getElementById("materialDescripcion").value.trim(),
                     credito: document.getElementById("materialCredito").value.trim()
                 }
-                if (datos.titulo.length < 3 || !datos.materia || !RE_LINK_DRIVE.test(datos.link)) {
-                    msg.textContent = "Completá título, materia y un enlace de Google Drive."
+                const problemaLink = problemaEnlaceMaterial(datos.link)
+                if (datos.titulo.length < 3 || !datos.materia || problemaLink) {
+                    msg.textContent = problemaLink || "Completá título y materia."
                     return
                 }
                 msg.textContent = "Publicando…"
