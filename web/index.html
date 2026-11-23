@@ -48,7 +48,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261123c">
+    <link rel="stylesheet" href="/css/styles.css?v=20261123d">
 </head>
 
 <body>
@@ -194,8 +194,17 @@
 
                 <div id="saludoInicio">
                     <span id="avatarUserBar"></span>
-                    <p>Conectado como <b id="userEmail"></b></p>
+                    <div class="saludoTexto">
+                        <h2 id="tituloSaludo" class="tituloSaludo">Hola</h2>
+                        <p>Conectado como <b id="userEmail"></b></p>
+                    </div>
                 </div>
+
+                <!-- Novedades: se arman en app.js (renderizarNovedades) con datos que ya están cargados,
+                     sin pedidos extra a la API. -->
+                <section id="novedadesInicio" class="novedades" aria-label="Novedades"></section>
+
+                <h3 class="etiquetaSeccion">Accesos</h3>
 
                 <div class="menuInicio">
 
@@ -384,6 +393,9 @@
             <!-- ==================== FORO ==================== -->
 
             <div id="vistaForo" style="display:none">
+
+                <!-- Columna de contexto: solo en pantallas anchas (≥ 1280 px). Misma info que las novedades de Inicio. -->
+                <aside id="contextoForo" class="contextoForo novedades novedadesCompactas" aria-label="Tu actividad"></aside>
 
                 <div id="foroLista">
 
@@ -752,7 +764,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261123c"></script>
+    <script src="/js/app.js?v=20261123d"></script>
 
 
 </body>

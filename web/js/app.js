@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-componentes"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-inicio"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -182,6 +182,7 @@ const hilosPendientesConfirmacion = new Map()
         const emailConfig = document.getElementById("emailConfig")
         const avatarUserBar = document.getElementById("avatarUserBar")
         const avatarBarraApp = document.getElementById("avatarBarraApp")
+        const tituloSaludo = document.getElementById("tituloSaludo")
         const avatarConfigPreview = document.getElementById("avatarConfigPreview")
         const btnCambiarFoto = document.getElementById("btnCambiarFoto")
         const inputArchivoFoto = document.getElementById("inputArchivoFoto")
@@ -2876,7 +2877,8 @@ async function cargarBootstrap() {
             paginaHilosActual = 0
 
             ;[listaHilos, listaRespuestas, detalleHiloContenido, listaSolicitudes, listaIntercambios,
-                listaDenuncias, listaModeradores, avatarUserBar, avatarBarraApp, avatarConfigPreview].forEach(function (el) {
+                listaDenuncias, listaModeradores, avatarUserBar, avatarBarraApp, avatarConfigPreview,
+                document.getElementById("novedadesInicio"), document.getElementById("contextoForo")].forEach(function (el) {
                 if (el) el.innerHTML = ""
             })
             ;[userEmail, emailConfig, msg, msgPerfil, msgFoto, msgPasswordPerfil, msgRespuesta, msgHilo].forEach(function (el) {
@@ -3052,6 +3054,7 @@ async function cargarBootstrap() {
         function actualizarAvataresEnPantalla(nombre) {
 
             avatarUserBar.innerHTML = avatarHtml(nombre, fotoActual, "avatarMediano")
+            if (tituloSaludo) tituloSaludo.textContent = nombre && nombre !== "Vos" ? "Hola, " + nombre : "Hola"
             if (avatarBarraApp) avatarBarraApp.innerHTML = avatarHtml(nombre, fotoActual, "")
             avatarConfigPreview.innerHTML = avatarHtml(nombre, fotoActual, "avatarGrande")
 
@@ -3223,6 +3226,7 @@ async function cargarBootstrap() {
             listaSolicitudes.innerHTML = ""
             if (solicitudesUI.length === 0) {
                 listaSolicitudes.innerHTML = "<p class='vacio'>Todavía no publicaste ninguna solicitud.</p>"
+                renderizarNovedades()
                 return
             }
             solicitudesUI.forEach(function (s) {
@@ -3241,6 +3245,7 @@ async function cargarBootstrap() {
                 }
                 listaSolicitudes.appendChild(div)
             })
+            renderizarNovedades()
         }
 
         // ==================== INTERCAMBIOS COMPLETADOS ====================
@@ -3259,6 +3264,7 @@ async function cargarBootstrap() {
             if (lista.length === 0) {
                 listaIntercambios.innerHTML = "<p class='vacio'>Todavía no se completó ningún intercambio para tu cuenta.</p>"
                 if (chatAbiertoId) cerrarChat()
+                renderizarNovedades()
                 return
             }
 
@@ -3295,6 +3301,8 @@ async function cargarBootstrap() {
                 listaIntercambios.appendChild(div)
 
             })
+
+            renderizarNovedades()
 
         }
 
@@ -3895,6 +3903,8 @@ async function cargarBootstrap() {
 
         function renderizarRanking(r) {
             const modo = r.modo
+            // Solo el ranking sin búsqueda tiene el puesto propio confiable para Inicio.
+            if (r.propio && !Array.isArray(r.busqueda)) { guardarRankingPropio(r); renderizarNovedades() }
             const enlaceJugar = "/juegos/inmune-survivors/"
             if (r.propio) {
                 rankingPropio.innerHTML = "Estás <strong>#" + escapeHtml(r.propio.posicion) + "</strong> de " + escapeHtml(r.total) +
@@ -3920,6 +3930,120 @@ async function cargarBootstrap() {
                 rankingResultados.innerHTML = ""
             }
         }
+
+        // ==================== NOVEDADES (INICIO Y COLUMNA DEL FORO) ====================
+        // Se arma solo con lo que ya está en memoria (solicitudesUI, intercambiosUI) y con el último
+        // puesto del ranking que vio esta persona (localStorage): no hace pedidos a la API.
+
+        const DIAS_VIGENCIA_SOLICITUD = 14
+
+        function claveRankingPropio() {
+            return sesion && sesion.email ? "medmar:rankingPropio:" + sesion.email.toLowerCase() : null
+        }
+
+        function guardarRankingPropio(r) {
+            const clave = claveRankingPropio()
+            if (!clave || !r || !r.propio) return
+            try {
+                localStorage.setItem(clave, JSON.stringify({
+                    modo: r.modo, posicion: r.propio.posicion, total: r.total, puntaje: r.propio.puntaje
+                }))
+            } catch (_) {}
+        }
+
+        function leerRankingPropio() {
+            const clave = claveRankingPropio()
+            if (!clave) return null
+            try { return JSON.parse(localStorage.getItem(clave) || "null") } catch (_) { return null }
+        }
+
+        function diasParaVencer(fecha) {
+            const t = new Date(fecha).getTime()
+            if (!isFinite(t)) return null
+            return Math.max(0, DIAS_VIGENCIA_SOLICITUD - Math.floor((Date.now() - t) / 86400000))
+        }
+
+        function renderizarNovedades() {
+            const contenedores = [document.getElementById("novedadesInicio"), document.getElementById("contextoForo")]
+            if (!contenedores[0] && !contenedores[1]) return
+
+            const bloques = []
+
+            // 1) Intercambio confirmado más reciente: lo más importante, va destacado.
+            const intercambio = intercambiosUI && intercambiosUI[0]
+            if (intercambio) {
+                const yo = (intercambio.participantes || []).find(function (p) { return p.esVos }) || {}
+                bloques.push(
+                    "<article class='novedad novedadDestacada'>" +
+                    "<span class='novedadEtiqueta'>Intercambio confirmado</span>" +
+                    "<b class='novedadTitulo'>" + escapeHtml(intercambio.materia || "") + "</b>" +
+                    (yo.tengo ? "<span class='novedadDato'>Comisión " + escapeHtml(String(yo.tengo)) + " ⇄ " + escapeHtml(String(yo.busco || "")) + "</span>" : "") +
+                    (intercambio.conversacionId
+                        ? "<button type='button' class='novedadAccion' data-chat='" + escapeAttr(intercambio.conversacionId) + "'>Abrir chat privado</button>"
+                        : "<button type='button' class='novedadAccion' data-ir='intercambios'>Ver intercambio</button>") +
+                    "</article>")
+            }
+
+            // 2) Solicitudes activas, con aviso cuando están por vencer.
+            const activas = (solicitudesUI || []).filter(function (s) { return !s._optimista })
+            if (activas.length) {
+                const filas = activas.slice(0, 3).map(function (s) {
+                    const dias = diasParaVencer(s.created_at || s.fecha)
+                    const estado = dias !== null && dias <= 3
+                        ? "<span class='estadoChip estadoAviso'>" + (dias === 0 ? "Vence hoy" : "Vence en " + dias + (dias === 1 ? " día" : " días")) + "</span>"
+                        : ""
+                    return "<li><span class='novedadFilaTexto'><b>" + escapeHtml(s.materia) + "</b>" +
+                        "<span>Comisión " + escapeHtml(String(s.tengo)) + " → " + escapeHtml(String(s.busco)) + "</span></span>" + estado + "</li>"
+                }).join("")
+                bloques.push(
+                    "<article class='novedad'>" +
+                    "<span class='novedadEtiqueta'>" + (activas.length === 1 ? "Tu solicitud activa" : "Tus " + activas.length + " solicitudes activas") + "</span>" +
+                    "<ul class='novedadLista'>" + filas + "</ul>" +
+                    (activas.length > 3 ? "<span class='novedadDato'>y " + (activas.length - 3) + " más</span>" : "") +
+                    "<button type='button' class='novedadAccion secundaria' data-ir='intercambios'>Ver o editar</button>" +
+                    "</article>")
+            } else if (!intercambio) {
+                bloques.push(
+                    "<article class='novedad'>" +
+                    "<span class='novedadEtiqueta'>Intercambio de comisiones</span>" +
+                    "<b class='novedadTitulo'>¿Querés cambiar de comisión?</b>" +
+                    "<span class='novedadDato'>Publicá una solicitud y te avisamos por mail si aparece un cruce.</span>" +
+                    "<button type='button' class='novedadAccion' data-ir='intercambios'>Publicar solicitud</button>" +
+                    "</article>")
+            }
+
+            // 3) Juego: último puesto visto en el ranking, o invitación a jugar.
+            const puesto = leerRankingPropio()
+            bloques.push(
+                "<article class='novedad novedadJuego'>" +
+                "<span class='novedadEtiqueta'>Inmune Survivors</span>" +
+                (puesto
+                    ? "<b class='novedadTitulo'>Estás #" + escapeHtml(String(puesto.posicion)) + " de " + escapeHtml(String(puesto.total)) + "</b>" +
+                      "<span class='novedadDato'>" + escapeHtml(etiquetaModoRanking(puesto.modo)) + " · " + escapeHtml(Number(puesto.puntaje).toLocaleString("es-AR")) + " puntos</span>" +
+                      "<button type='button' class='novedadAccion secundaria' data-ir='juegos'>Ver ranking</button>"
+                    : "<b class='novedadTitulo'>Estudiá ADN jugando</b>" +
+                      "<span class='novedadDato'>Respondé preguntas de tu núcleo para evolucionar y subí al ranking.</span>" +
+                      "<a class='novedadAccion distincion' href='/juegos/inmune-survivors/'>Jugar</a>") +
+                "</article>")
+
+            const html = bloques.join("")
+            contenedores.forEach(function (c) { if (c) c.innerHTML = html })
+        }
+
+        ;["novedadesInicio", "contextoForo"].forEach(function (id) {
+            const cont = document.getElementById(id)
+            if (!cont) return
+            cont.addEventListener("click", function (e) {
+                const chat = e.target.closest("[data-chat]")
+                if (chat) {
+                    mostrarSeccion("intercambios", "down")
+                    abrirChat(chat.dataset.chat)
+                    return
+                }
+                const ir = e.target.closest("[data-ir]")
+                if (ir) mostrarSeccion(ir.dataset.ir, "up")
+            })
+        })
 
         async function cargarRankingJuego(forzar) {
             if (!rankingModo || !sesion) return
