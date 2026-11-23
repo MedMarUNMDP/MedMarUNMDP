@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-material"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-24-llaves"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -677,6 +677,11 @@ const hilosPendientesConfirmacion = new Map()
             const mensajes = {
                 email_invalido: "El email no es válido.",
                 link_requerido: "Pegá el enlace de Google Drive del archivo.",
+                huella_no_coincide: "La huella no coincide. No apruebes la llave y hablá con esa persona.",
+                llave_requerida: "Necesitás desbloquear la moderación con tu llave.",
+                moderacion_bloqueada: "La moderación está bloqueada.",
+                no_es_moderador: "Esa persona ya no tiene rol de moderador.",
+                llave_duplicada: "Esa llave ya está registrada.",
                 aportes_limite_dia: "Ya mandaste varios aportes hoy. ¡Gracias! Probá de nuevo mañana.",
                 aportes_limite_pendientes: "Tenés varios aportes esperando revisión. Cuando los revisemos vas a poder mandar más.",
                 aportes_bandeja_llena: "Hay muchos aportes esperando revisión. Probá de nuevo en unos días.",
@@ -858,7 +863,7 @@ async function cargarBootstrap() {
                 : 'Tu cuenta entra con Google. Si querés, podés definir una contraseña para entrar también con email.'
             campoPasswordActual.style.display = conPassword ? 'block' : 'none'
             formCambiarPassword.style.display = 'block'
-            btnIrModeracion.style.display = esModeradorActual ? 'inline-block' : 'none'
+            btnIrModeracion.style.display = esModeradorActual ? 'inline-block' : 'none'; actualizarAccesosModeracion()
         }
 
         async function cargarForoBootstrap() {
@@ -895,7 +900,7 @@ async function cargarBootstrap() {
                 return
             }
             esModeradorActual = !!r.esModerador
-            btnIrModeracion.style.display = esModeradorActual ? 'inline-block' : 'none'
+            btnIrModeracion.style.display = esModeradorActual ? 'inline-block' : 'none'; actualizarAccesosModeracion()
             const data = busquedaForoActual ? r : (r.data || {})
             const item = { etiquetas: data.etiquetas || [], hilos: data.hilos || [], hayMas: !!data.hayMas, actualizadoEn: Date.now() }
             foroCacheCliente.set(key, item)
@@ -1333,7 +1338,10 @@ async function cargarBootstrap() {
             if (!confirm("¿Seguro que querés borrar esto?")) return
 
             const accion = tipo === "hilo" ? "borrarHilo" : "borrarRespuesta"
-            const r = await llamar(accion, { id })
+            let r = await llamar(accion, { id })
+            // Contenido de otra persona: el servidor pide la llave de moderación.
+            if (!r.ok && r.error === "llave_requerida") r = await llamarModeracion(accion, { id })
+            if (!r.ok && r.error === "moderacion_bloqueada") return
 
             if (r.ok) {
                 if (tipo === "hilo") {
@@ -2619,7 +2627,7 @@ async function cargarBootstrap() {
             esModeradorActual = r.esModerador
             esAdminActual = r.esAdmin
 
-            btnIrModeracion.style.display = esModeradorActual ? "inline-block" : "none"
+            btnIrModeracion.style.display = esModeradorActual ? "inline-block" : "none"; actualizarAccesosModeracion()
 
         }
 
@@ -2704,14 +2712,7 @@ async function cargarBootstrap() {
             if (nombre === "juegos") cargarRankingJuego(false)
             if (nombre === "material") entrarAMaterial()
 
-            if (nombre === "moderacion") {
-                cargarDenuncias()
-                cargarAportes()
-                if (esAdminActual) {
-                    seccionModeradores.style.display = "block"
-                    cargarModeradores()
-                }
-            }
+            if (nombre === "moderacion") entrarAModeracion()
 
             requestAnimationFrame(function () {
                 if (modoNavegacion === "up" || nombre === "inicio") {
@@ -2734,7 +2735,7 @@ async function cargarBootstrap() {
 
         async function cargarDenuncias() {
 
-            const r = await llamar("listarDenuncias", {})
+            const r = await llamarModeracion("listarDenuncias", {})
 
             if (!r.ok) {
                 listaDenuncias.innerHTML = "<p class='vacio'>" + mensajeError(r.error) + "</p>"
@@ -2800,7 +2801,7 @@ async function cargarBootstrap() {
 
             if (accion === "eliminar" && !confirm("¿Seguro que querés eliminar esta publicación?")) return
 
-            const r = await llamar("resolverDenuncia", { id, accion })
+            const r = await llamarModeracion("resolverDenuncia", { id, decision: accion })
 
             if (r.ok) {
                 cargarDenuncias()
@@ -2812,7 +2813,7 @@ async function cargarBootstrap() {
 
         async function cargarModeradores() {
 
-            const r = await llamar("listarModeradores", {})
+            const r = await llamarModeracion("listarModeradores", {})
 
             if (!r.ok) return
 
@@ -2842,7 +2843,7 @@ async function cargarBootstrap() {
 
                     if (!confirm("¿Sacar a " + m.email + " como moderador?")) return
 
-                    const r = await llamar("quitarModerador", { email: m.email })
+                    const r = await llamarModeracion("quitarModerador", { email: m.email })
 
                     if (r.ok) {
                         cargarModeradores()
@@ -2863,7 +2864,7 @@ async function cargarBootstrap() {
             e.preventDefault()
             msgModerador.innerText = "Agregando..."
 
-            const r = await llamar("asignarModerador", { email: inputNuevoModerador.value.trim() })
+            const r = await llamarModeracion("asignarModerador", { email: inputNuevoModerador.value.trim() })
 
             if (r.ok) {
                 msgModerador.innerText = "Moderador agregado."
@@ -2988,6 +2989,7 @@ async function cargarBootstrap() {
             loginScreen.style.display = "block"
             document.body.classList.remove("enApp")
             try { detenerNotificaciones() } catch (_) {}
+            try { cerrarSesionModeracion(true); actualizarAccesosModeracion() } catch (_) {}
             seccionActual = "inicio"
             resetearHistorialPorLogout()
             actualizarVisibilidadPie()
@@ -4332,7 +4334,9 @@ async function cargarBootstrap() {
             } else if (n.tipo === "aporte") {
                 mostrarSeccion("material", "up")
             } else if (n.tipo === "noticia" && n.link) {
-                if (n.link.charAt(0) === "/") location.href = n.link
+                const vistaInterna = /^\/\?vista=(juegos|material|moderacion|foro|intercambios)$/.exec(n.link)
+                if (vistaInterna) mostrarSeccion(vistaInterna[1], "up")
+                else if (n.link.charAt(0) === "/") location.href = n.link
                 else window.open(n.link, "_blank", "noopener")
             }
         }
@@ -4381,7 +4385,7 @@ async function cargarBootstrap() {
                 }
                 if (!datos.titulo) { msgNoticia.textContent = "Poné un título."; return }
                 msgNoticia.textContent = "Publicando…"
-                const r = await llamar("publicarNoticia", datos)
+                const r = await llamarModeracion("publicarNoticia", datos)
                 if (!r.ok) {
                     msgNoticia.textContent = r.error === "datos_invalidos"
                         ? "Revisá los datos: el enlace tiene que empezar con / o con https://."
@@ -4393,6 +4397,428 @@ async function cargarBootstrap() {
                 mostrarAviso("Noticia publicada para " + r.destinatarios + " cuentas.")
                 cargarNotificaciones(true)
             })
+        }
+
+        // ==================== MODERACIÓN CON LLAVE ====================
+        // Segundo factor criptográfico para moderar (ver docs/decisiones/0004-llaves-de-moderacion.md).
+        // * La llave es un par ECDSA P-256 creado en este navegador. La privada se guarda en un archivo .medmarkey
+        //   cifrado con PBKDF2 (600 000 iteraciones) + AES-GCM; nunca se manda al servidor.
+        // * Desbloquear = abrir el archivo con la contraseña, firmar un desafío de la API y recibir un token de
+        //   30 min. Mientras la pestaña siga abierta, el token se renueva solo firmando otro desafío.
+        // * «Mantener desbloqueado 2 h» guarda la llave privada como CryptoKey NO exportable en IndexedDB de este
+        //   dispositivo (nadie puede leer sus bytes, ni siquiera este código). Se borra al bloquear o al salir.
+
+        const LLAVE_FORMATO = "medmar-llave"
+        const LLAVE_ITERACIONES = 600000
+        const LLAVE_MENSAJE = "medmar-moderacion-v1|"
+        const LLAVE_RECORDAR_MS = 2 * 3600 * 1000
+
+        let modSesion = null        // { token, rol, expira }
+        let modLlave = null         // { huella, privada: CryptoKey }
+        let modPestania = "denuncias"
+        let resolverDesbloqueo = null
+
+        const textoUtf8 = new TextEncoder()
+
+        function bytesABase64url(bytes) {
+            let bin = ""
+            new Uint8Array(bytes).forEach(function (b) { bin += String.fromCharCode(b) })
+            return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")
+        }
+
+        function base64urlABytes(texto) {
+            const b64 = String(texto).replace(/-/g, "+").replace(/_/g, "/") + "===".slice((String(texto).length + 3) % 4)
+            const bin = atob(b64)
+            const bytes = new Uint8Array(bin.length)
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
+            return bytes
+        }
+
+        // Mismo cálculo que la API: primeros 8 bytes del SHA-256 de la llave pública canónica.
+        async function huellaLlave(jwk) {
+            const canonica = JSON.stringify({ crv: jwk.crv, kty: jwk.kty, x: jwk.x, y: jwk.y })
+            const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", textoUtf8.encode(canonica)))
+            return Array.from(hash.slice(0, 8)).map(function (b) { return b.toString(16).padStart(2, "0") }).join("").toUpperCase().match(/.{4}/g).join("-")
+        }
+
+        async function derivarClaveArchivo(pass, salt, iteraciones) {
+            const base = await crypto.subtle.importKey("raw", textoUtf8.encode(pass), "PBKDF2", false, ["deriveKey"])
+            return crypto.subtle.deriveKey({ name: "PBKDF2", salt: salt, iterations: iteraciones, hash: "SHA-256" },
+                base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"])
+        }
+
+        async function crearArchivoLlave(pass, nombre) {
+            const par = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"])
+            const pub = await crypto.subtle.exportKey("jwk", par.publicKey)
+            const publica = { kty: "EC", crv: "P-256", x: pub.x, y: pub.y }
+            const huella = await huellaLlave(publica)
+            const salt = crypto.getRandomValues(new Uint8Array(16))
+            const iv = crypto.getRandomValues(new Uint8Array(12))
+            const clave = await derivarClaveArchivo(pass, salt, LLAVE_ITERACIONES)
+            const privada = await crypto.subtle.exportKey("pkcs8", par.privateKey)
+            // La huella va como dato asociado: si alguien cambia la parte pública del archivo, no abre.
+            const cifrado = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv, additionalData: textoUtf8.encode(huella) }, clave, privada)
+            const archivo = {
+                formato: LLAVE_FORMATO, v: 1, huella: huella, nombre: nombre || "", publica: publica,
+                kdf: { alg: "PBKDF2-SHA256", iteraciones: LLAVE_ITERACIONES, salt: bytesABase64url(salt) },
+                cifrado: { alg: "AES-GCM", iv: bytesABase64url(iv), datos: bytesABase64url(cifrado) },
+                creada: new Date().toISOString()
+            }
+            return { archivo: archivo, publica: publica, huella: huella }
+        }
+
+        async function abrirArchivoLlave(texto, pass) {
+            let archivo
+            try { archivo = JSON.parse(texto) } catch (_) { throw new Error("Ese archivo no es una llave de MedMar.") }
+            if (!archivo || archivo.formato !== LLAVE_FORMATO || archivo.v !== 1 || !archivo.cifrado || !archivo.kdf) throw new Error("Ese archivo no es una llave de MedMar.")
+            if (await huellaLlave(archivo.publica || {}) !== archivo.huella) throw new Error("El archivo de llave está dañado o fue modificado.")
+            let pkcs8
+            try {
+                const clave = await derivarClaveArchivo(pass, base64urlABytes(archivo.kdf.salt), Number(archivo.kdf.iteraciones) || LLAVE_ITERACIONES)
+                pkcs8 = await crypto.subtle.decrypt({ name: "AES-GCM", iv: base64urlABytes(archivo.cifrado.iv), additionalData: textoUtf8.encode(archivo.huella) },
+                    clave, base64urlABytes(archivo.cifrado.datos))
+            } catch (_) { throw new Error("La contraseña no es correcta.") }
+            const privada = await crypto.subtle.importKey("pkcs8", pkcs8, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"])
+            return { huella: archivo.huella, privada: privada }
+        }
+
+        // ---- IndexedDB: llave no exportable por 12 h (opcional) ----
+        function abrirBaseLlaves() {
+            return new Promise(function (ok, mal) {
+                const pedido = indexedDB.open("medmar-llaves", 1)
+                pedido.onupgradeneeded = function () { pedido.result.createObjectStore("llaves") }
+                pedido.onsuccess = function () { ok(pedido.result) }
+                pedido.onerror = function () { mal(pedido.error) }
+            })
+        }
+
+        async function guardarLlaveDispositivo(llave) {
+            try {
+                const db = await abrirBaseLlaves()
+                await new Promise(function (ok, mal) {
+                    const tx = db.transaction("llaves", "readwrite")
+                    tx.objectStore("llaves").put({ huella: llave.huella, privada: llave.privada, expira: Date.now() + LLAVE_RECORDAR_MS }, sesion.userId)
+                    tx.oncomplete = ok; tx.onerror = function () { mal(tx.error) }
+                })
+            } catch (e) { console.warn("[MedMarUNMDP] No se pudo recordar la llave", e) }
+        }
+
+        async function leerLlaveDispositivo() {
+            try {
+                const db = await abrirBaseLlaves()
+                const dato = await new Promise(function (ok, mal) {
+                    const pedido = db.transaction("llaves", "readonly").objectStore("llaves").get(sesion.userId)
+                    pedido.onsuccess = function () { ok(pedido.result) }
+                    pedido.onerror = function () { mal(pedido.error) }
+                })
+                if (!dato || !dato.privada || Date.now() > dato.expira) { if (dato) borrarLlaveDispositivo(); return null }
+                return { huella: dato.huella, privada: dato.privada }
+            } catch (_) { return null }
+        }
+
+        async function borrarLlaveDispositivo() {
+            try {
+                const db = await abrirBaseLlaves()
+                db.transaction("llaves", "readwrite").objectStore("llaves").clear()
+            } catch (_) {}
+        }
+
+        // ---- Sesión de moderación ----
+        const ERRORES_LLAVE = {
+            desafio_vencido: "Se venció el desafío. Probá de nuevo.",
+            firma_invalida: "La llave no coincide con la registrada en tu cuenta.",
+            llave_desconocida: "Esta llave no está registrada para tu cuenta.",
+            llave_pendiente: "Tu llave todavía no fue aprobada por un administrador.",
+            llave_revocada: "Esta llave fue revocada. Creá una nueva en «Mi llave».",
+            no_autorizado: "Tu cuenta no tiene permiso de moderación."
+        }
+
+        async function firmarSesionModeracion(llave) {
+            const d = await llamar("desafioModeracion", {})
+            if (!d.ok) throw new Error(ERRORES_LLAVE[d.error] || mensajeError(d.error))
+            const firma = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, llave.privada, textoUtf8.encode(LLAVE_MENSAJE + d.desafio))
+            const r = await llamar("abrirSesionModeracion", { desafio: d.desafio, huella: llave.huella, firma: bytesABase64url(firma) })
+            if (!r.ok) throw new Error(ERRORES_LLAVE[r.error] || mensajeError(r.error))
+            modSesion = { token: r.token, rol: r.rol, expira: Number(r.expira) }
+            modLlave = llave
+            actualizarEstadoModeracion()
+        }
+
+        function sesionModeracionVigente() {
+            return !!(modSesion && Date.now() < modSesion.expira - 60000)
+        }
+
+        // Devuelve true si hay sesión de moderación (renovándola en silencio si se puede) o pide desbloquear.
+        async function asegurarSesionModeracion(sinPedir) {
+            if (sesionModeracionVigente()) return true
+            const llave = modLlave || await leerLlaveDispositivo()
+            if (llave) {
+                try { await firmarSesionModeracion(llave); return true } catch (e) { modLlave = null; borrarLlaveDispositivo() }
+            }
+            if (sinPedir) return false
+            return pedirDesbloqueo()
+        }
+
+        // Como llamar(), pero con el token de moderación. Si el servidor lo rechaza, renueva una vez y reintenta.
+        async function llamarModeracion(accion, params) {
+            if (!(await asegurarSesionModeracion())) return { ok: false, error: "moderacion_bloqueada" }
+            let r = await llamar(accion, Object.assign({}, params, { tokenModeracion: modSesion.token }))
+            if (!r.ok && r.error === "llave_requerida") {
+                modSesion = null
+                if (!(await asegurarSesionModeracion())) return { ok: false, error: "moderacion_bloqueada" }
+                r = await llamar(accion, Object.assign({}, params, { tokenModeracion: modSesion.token }))
+            }
+            return r
+        }
+
+        function pedirDesbloqueo() {
+            const modal = document.getElementById("modalLlave")
+            document.getElementById("msgDesbloqueo").textContent = ""
+            document.getElementById("passLlave").value = ""
+            abrirModal(modal)
+            return new Promise(function (resolver) { resolverDesbloqueo = resolver })
+        }
+
+        function terminarDesbloqueo(exito) {
+            cerrarModal(document.getElementById("modalLlave"))
+            document.getElementById("passLlave").value = ""
+            if (resolverDesbloqueo) { const r = resolverDesbloqueo; resolverDesbloqueo = null; r(exito) }
+        }
+
+        document.getElementById("btnCerrarModalLlave").addEventListener("click", function () { terminarDesbloqueo(false) })
+
+        document.getElementById("formDesbloqueo").addEventListener("submit", async function (e) {
+            e.preventDefault()
+            const msg = document.getElementById("msgDesbloqueo")
+            const archivo = document.getElementById("archivoLlave").files[0]
+            const pass = document.getElementById("passLlave").value
+            if (!archivo) { msg.textContent = "Elegí tu archivo de llave."; return }
+            if (archivo.size > 20000) { msg.textContent = "Ese archivo no es una llave de MedMar."; return }
+            if (!pass) { msg.textContent = "Escribí la contraseña de la llave."; return }
+            msg.textContent = "Verificando…"
+            try {
+                const llave = await abrirArchivoLlave(await archivo.text(), pass)
+                await firmarSesionModeracion(llave)
+                if (document.getElementById("recordarLlave").checked) await guardarLlaveDispositivo(llave)
+                msg.textContent = ""
+                terminarDesbloqueo(true)
+                mostrarAviso(modSesion.rol === "admin" ? "Moderación desbloqueada como administrador." : "Moderación desbloqueada.")
+                if (seccionActual === "moderacion") cargarPestaniaModeracion()
+            } catch (err) {
+                msg.textContent = err && err.message ? err.message : "No se pudo desbloquear."
+            }
+        })
+
+        function cerrarSesionModeracion(olvidarDispositivo) {
+            modSesion = null
+            modLlave = null
+            if (olvidarDispositivo) borrarLlaveDispositivo()
+            actualizarEstadoModeracion()
+        }
+
+        // ---- Panel de moderación ----
+        function actualizarAccesosModeracion() {
+            const visible = !!(esModeradorActual || esAdminActual)
+            document.querySelectorAll(".soloModeracion").forEach(function (el) { el.hidden = !visible })
+            document.querySelectorAll(".modPestania.soloAdmin").forEach(function (el) { el.hidden = !esAdminActual })
+        }
+
+        function actualizarEstadoModeracion() {
+            const estado = document.getElementById("estadoLlave")
+            if (!estado) return
+            const abierta = sesionModeracionVigente()
+            if (abierta) {
+                const hora = new Date(modSesion.expira).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })
+                estado.innerHTML = "<span class='estadoChip estado-aprobado'>Desbloqueada</span> " +
+                    (modSesion.rol === "admin" ? "como administrador" : "como moderador") + " · se renueva sola mientras uses esta pestaña (token hasta las " + escapeHtml(hora) + ")"
+            } else {
+                estado.innerHTML = "<span class='estadoChip estado-rechazado'>Bloqueada</span> Necesitás tu llave para moderar."
+            }
+            document.getElementById("btnDesbloquearMod").hidden = abierta
+            document.getElementById("btnBloquearMod").hidden = !abierta
+            const enLlave = modPestania === "llave"
+            document.getElementById("panelModBloqueado").hidden = abierta || enLlave
+            document.querySelectorAll(".modPanel").forEach(function (panel) {
+                panel.hidden = panel.dataset.panel !== modPestania || (!abierta && !enLlave)
+            })
+        }
+
+        function elegirPestaniaModeracion(nombre) {
+            modPestania = nombre
+            document.querySelectorAll(".modPestania").forEach(function (t) { t.setAttribute("aria-selected", String(t.dataset.panel === nombre)) })
+            actualizarEstadoModeracion()
+            cargarPestaniaModeracion()
+        }
+
+        function cargarPestaniaModeracion() {
+            if (modPestania === "llave") { cargarMisLlaves(); return }
+            if (!sesionModeracionVigente()) return
+            if (modPestania === "denuncias") cargarDenuncias()
+            else if (modPestania === "aportes") cargarAportes()
+            else if (modPestania === "equipo") { cargarLlaves(); cargarModeradores() }
+            else if (modPestania === "registro") cargarRegistro()
+        }
+
+        async function entrarAModeracion() {
+            actualizarAccesosModeracion()
+            if (!esAdminActual && (modPestania === "equipo" || modPestania === "registro")) modPestania = "denuncias"
+            if (seccionModeradores) seccionModeradores.style.display = esAdminActual ? "block" : "none"
+            elegirPestaniaModeracion(modPestania)
+            if (!sesionModeracionVigente() && await asegurarSesionModeracion(true)) cargarPestaniaModeracion()
+        }
+
+        document.querySelectorAll(".modPestania").forEach(function (t) {
+            t.addEventListener("click", function () { elegirPestaniaModeracion(t.dataset.panel) })
+        })
+        document.getElementById("btnDesbloquearMod").addEventListener("click", async function () {
+            if (await asegurarSesionModeracion()) cargarPestaniaModeracion()
+        })
+        document.getElementById("btnBloquearMod").addEventListener("click", function () {
+            cerrarSesionModeracion(true)
+            mostrarAviso("Moderación bloqueada en este dispositivo.")
+        })
+        document.getElementById("panelModBloqueado").addEventListener("click", async function (e) {
+            if (e.target.closest("[data-ir-llave]")) { elegirPestaniaModeracion("llave"); return }
+            if (e.target.closest("[data-desbloquear]") && await asegurarSesionModeracion()) cargarPestaniaModeracion()
+        })
+        setInterval(function () { if (seccionActual === "moderacion") actualizarEstadoModeracion() }, 30000)
+
+        // ---- Mi llave ----
+        const ESTADOS_LLAVE = { pendiente: "Esperando aprobación", activa: "Activa", revocada: "Revocada" }
+
+        async function cargarMisLlaves() {
+            const cont = document.getElementById("misLlaves")
+            const r = await llamar("misLlaves", {})
+            if (!r.ok) { cont.innerHTML = r.error === "accion_invalida" ? "<p class='vacio'>Las llaves se están activando.</p>" : ""; return }
+            const llaves = r.llaves || []
+            cont.innerHTML = llaves.length
+                ? "<h3>Tus llaves</h3><ul class='listaLlaves'>" + llaves.map(function (l) {
+                    return "<li><span class='novedadFilaTexto'><b class='huella'>" + escapeHtml(l.huella) + "</b><span>" +
+                        escapeHtml(l.nombre || "Sin nombre") + " · " + (l.rol === "admin" ? "Administrador" : "Moderador") +
+                        (l.ultimo_uso ? " · usada " + escapeHtml(tiempoRelativo(l.ultimo_uso)) : "") + "</span></span>" +
+                        "<span class='estadoChip estado-" + (l.estado === "activa" ? "aprobado" : l.estado === "pendiente" ? "pendiente" : "rechazado") + "'>" + escapeHtml(ESTADOS_LLAVE[l.estado] || l.estado) + "</span>" +
+                        "<button type='button' class='panelNotifAccion' data-revocar-propia='" + escapeAttr(l.id) + "'>Revocar</button></li>"
+                }).join("") + "</ul>"
+                : "<p class='ayudaPerfil'>Todavía no tenés ninguna llave.</p>"
+        }
+
+        document.getElementById("misLlaves").addEventListener("click", async function (e) {
+            const btn = e.target.closest("[data-revocar-propia]")
+            if (!btn) return
+            if (!confirm("¿Revocar esta llave? Ya no vas a poder moderar con ese archivo.")) return
+            const r = await llamar("revocarLlave", { id: btn.dataset.revocarPropia })
+            if (!r.ok) { alert(mensajeError(r.error)); return }
+            cerrarSesionModeracion(true)
+            cargarMisLlaves()
+            mostrarAviso("Llave revocada.")
+        })
+
+        function descargarArchivo(nombre, contenido) {
+            const url = URL.createObjectURL(new Blob([contenido], { type: "application/json" }))
+            const a = document.createElement("a")
+            a.href = url
+            a.download = nombre
+            document.body.appendChild(a)
+            a.click()
+            a.remove()
+            setTimeout(function () { URL.revokeObjectURL(url) }, 2000)
+        }
+
+        document.getElementById("formCrearLlave").addEventListener("submit", async function (e) {
+            e.preventDefault()
+            const msg = document.getElementById("msgCrearLlave")
+            const pass = document.getElementById("passNuevaLlave").value
+            const pass2 = document.getElementById("passNuevaLlave2").value
+            const nombre = document.getElementById("nombreLlave").value.trim()
+            if (pass.length < 12) { msg.textContent = "La contraseña tiene que tener al menos 12 caracteres."; return }
+            if (pass !== pass2) { msg.textContent = "Las contraseñas no coinciden."; return }
+            msg.textContent = "Creando tu llave…"
+            try {
+                const { archivo, publica, huella } = await crearArchivoLlave(pass, nombre)
+                const contenido = JSON.stringify(archivo, null, 2)
+                if (esAdminActual) {
+                    // Las llaves de administrador solo se activan por SQL desde el dashboard de Supabase.
+                    const nombreSql = (nombre || "Llave de administrador").replace(/'/g, "''")
+                    document.getElementById("sqlLlaveAdmin").value =
+                        "insert into public.llaves_moderacion (user_id, rol, nombre, public_key, huella, estado, aprobada_at)\n" +
+                        "values ('" + sesion.userId + "', 'admin', '" + nombreSql + "',\n  '" + JSON.stringify(publica) + "'::jsonb,\n  '" + huella + "', 'activa', now());"
+                    document.getElementById("altaLlaveAdmin").hidden = false
+                } else {
+                    const r = await llamar("registrarLlave", { publica: publica, nombre: nombre })
+                    if (!r.ok) { msg.textContent = r.error === "llaves_limite" ? "Ya tenés el máximo de llaves. Revocá una antes de crear otra." : (ERRORES_LLAVE[r.error] || mensajeError(r.error)); return }
+                }
+                descargarArchivo("medmar-llave-" + huella + ".medmarkey", contenido)
+                document.getElementById("formCrearLlave").reset()
+                msg.innerHTML = "Listo. Se descargó tu archivo de llave. Tu huella es <b class='huella'>" + escapeHtml(huella) + "</b>" +
+                    (esAdminActual ? ": ejecutá el SQL de abajo para activarla." : ": pasásela a un administrador por otro medio para que la apruebe.")
+                cargarMisLlaves()
+            } catch (err) {
+                msg.textContent = "No se pudo crear la llave en este navegador."
+                console.error(err)
+            }
+        })
+
+        document.getElementById("btnCopiarSqlLlave").addEventListener("click", async function () {
+            const area = document.getElementById("sqlLlaveAdmin")
+            try { await navigator.clipboard.writeText(area.value); mostrarAviso("SQL copiado.") }
+            catch (_) { area.select() }
+        })
+
+        // ---- Equipo: llaves de todos (admin) ----
+        async function cargarLlaves() {
+            const cont = document.getElementById("listaLlaves")
+            const r = await llamarModeracion("listarLlaves", {})
+            if (!r.ok) { cont.innerHTML = "<p class='vacio'>" + escapeHtml(mensajeError(r.error)) + "</p>"; return }
+            const llaves = r.llaves || []
+            cont.innerHTML = llaves.length ? "<ul class='listaLlaves'>" + llaves.map(function (l) {
+                return "<li><span class='novedadFilaTexto'><b>" + escapeHtml(l.pseudonimo) + " · <span class='huella'>" + escapeHtml(l.huella) + "</span></b><span>" +
+                    (l.rol === "admin" ? "Administrador" : "Moderador") + (l.nombre ? " · " + escapeHtml(l.nombre) : "") +
+                    (l.ultimo_uso ? " · usada " + escapeHtml(tiempoRelativo(l.ultimo_uso)) : "") + "</span></span>" +
+                    "<span class='estadoChip estado-" + (l.estado === "activa" ? "aprobado" : "pendiente") + "'>" + escapeHtml(ESTADOS_LLAVE[l.estado] || l.estado) + "</span>" +
+                    (l.estado === "pendiente" ? "<button type='button' class='novedadAccion' data-aprobar-llave='" + escapeAttr(l.id) + "' data-huella='" + escapeAttr(l.huella) + "' data-quien='" + escapeAttr(l.pseudonimo) + "'>Aprobar</button>" : "") +
+                    "<button type='button' class='panelNotifAccion' data-revocar-llave='" + escapeAttr(l.id) + "'>Revocar</button></li>"
+            }).join("") + "</ul>" : "<p class='vacio'>No hay llaves registradas.</p>"
+        }
+
+        document.getElementById("listaLlaves").addEventListener("click", async function (e) {
+            const aprobar = e.target.closest("[data-aprobar-llave]")
+            const revocar = e.target.closest("[data-revocar-llave]")
+            if (aprobar) {
+                const escrita = prompt("Para aprobar la llave de " + aprobar.dataset.quien + ", escribí la huella que esa persona te pasó por otro medio (en persona o por mensaje).\n\nNo la copies de esta pantalla: si alguien robó su cuenta, la huella de acá sería la del atacante.")
+                if (escrita === null) return
+                const r = await llamarModeracion("aprobarLlave", { id: aprobar.dataset.aprobarLlave, huellaConfirmada: escrita.trim().toUpperCase() })
+                if (!r.ok) { alert(mensajeError(r.error)); return }
+                mostrarAviso("Llave aprobada.")
+                cargarLlaves()
+            } else if (revocar) {
+                if (!confirm("¿Revocar esta llave? Esa persona no va a poder moderar con ese archivo.")) return
+                const r = await llamarModeracion("revocarLlave", { id: revocar.dataset.revocarLlave })
+                if (!r.ok) { alert(mensajeError(r.error)); return }
+                mostrarAviso("Llave revocada.")
+                cargarLlaves()
+            }
+        })
+
+        // ---- Registro de auditoría (admin) ----
+        const ACCIONES_REGISTRO = {
+            abrir_sesion: "desbloqueó la moderación", firma_invalida: "intentó desbloquear con una firma inválida",
+            registrar_llave: "registró una llave", aprobar_llave: "aprobó una llave", revocar_llave: "revocó una llave",
+            borrar_hilo: "borró una publicación", borrar_respuesta: "borró una respuesta", resolver_denuncia: "resolvió una denuncia",
+            resolver_aporte: "resolvió un aporte", agregar_material: "agregó material", quitar_material: "quitó material",
+            publicar_noticia: "publicó una noticia", asignar_moderador: "dio rol de moderador", quitar_moderador: "quitó un moderador"
+        }
+
+        async function cargarRegistro() {
+            const lista = document.getElementById("listaRegistro")
+            const r = await llamarModeracion("registroModeracion", {})
+            if (!r.ok) { lista.innerHTML = "<li class='vacio'>" + escapeHtml(mensajeError(r.error)) + "</li>"; return }
+            const filas = r.registro || []
+            lista.innerHTML = filas.length ? filas.map(function (f) {
+                const d = f.detalle || {}
+                const extra = d.titulo ? " «" + d.titulo + "»" : d.decision ? " (" + d.decision + ")" : d.accion ? " (" + d.accion + ")" : d.huella ? " " + d.huella : ""
+                return "<li><time datetime='" + escapeAttr(f.created_at) + "'>" + escapeHtml(new Date(f.created_at).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })) + "</time>" +
+                    "<span><b>" + escapeHtml(f.pseudonimo) + "</b> " + escapeHtml((ACCIONES_REGISTRO[f.accion] || f.accion) + extra) + "</span></li>"
+            }).join("") : "<li class='vacio'>Todavía no hay acciones registradas.</li>"
         }
 
         // ==================== MATERIAL DE ESTUDIO ====================
@@ -4531,7 +4957,7 @@ async function cargarBootstrap() {
             const quitar = e.target.closest("[data-quitar]")
             if (quitar) {
                 if (!confirm("¿Quitar este material del catálogo? Deja de verse para todos.")) return
-                const r = await llamar("quitarMaterial", { id: quitar.dataset.quitar })
+                const r = await llamarModeracion("quitarMaterial", { id: quitar.dataset.quitar })
                 if (!r.ok) { alert(mensajeError(r.error)); return }
                 materialesUI = materialesUI.filter(function (m) { return m.id !== quitar.dataset.quitar })
                 renderizarMateriales()
@@ -4630,9 +5056,9 @@ async function cargarBootstrap() {
         let aportesUI = []
 
         async function cargarAportes() {
-            if (!esModeradorActual || !listaAportes) return
+            if (!listaAportes) return
             listaAportes.innerHTML = esqueletoTarjetas(1)
-            const r = await llamar("listarAportes", {})
+            const r = await llamarModeracion("listarAportes", {})
             if (!r.ok) {
                 listaAportes.innerHTML = "<p class='vacio'>" + escapeHtml(r.error === "accion_invalida" ? "Los aportes se están activando." : mensajeError(r.error)) + "</p>"
                 return
@@ -4686,7 +5112,7 @@ async function cargarBootstrap() {
                     if (datos.decision === "aprobar" && !datos.materia) { alert("Elegí la materia antes de publicarlo."); return }
                 }
                 item.querySelectorAll("button").forEach(function (b) { b.disabled = true })
-                const r = await llamar("resolverAporte", datos)
+                const r = await llamarModeracion("resolverAporte", datos)
                 if (!r.ok) {
                     item.querySelectorAll("button").forEach(function (b) { b.disabled = false })
                     alert(mensajeError(r.error))
@@ -4717,7 +5143,7 @@ async function cargarBootstrap() {
                     return
                 }
                 msg.textContent = "Publicando…"
-                const r = await llamar("agregarMaterial", datos)
+                const r = await llamarModeracion("agregarMaterial", datos)
                 if (!r.ok) { msg.textContent = mensajeError(r.error); return }
                 msg.textContent = ""
                 formMaterialDirecto.reset()

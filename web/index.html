@@ -48,7 +48,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261123h">
+    <link rel="stylesheet" href="/css/styles.css?v=20261124a">
 </head>
 
 <body>
@@ -182,6 +182,10 @@
                 <button type="button" class="navItem" data-nav="juegos">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9h10a4 4 0 0 1 4 4v2a2.5 2.5 0 0 1-4.5 1.5L15 15H9l-1.5 1.5A2.5 2.5 0 0 1 3 15v-2a4 4 0 0 1 4-4Z"/><path d="M8 11v2M7 12h2"/></svg>
                     <span>Juegos</span>
+                </button>
+                <button type="button" class="navItem navSoloRiel soloModeracion" data-nav="moderacion" hidden>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 9.5 4-1.2 7-5 7-9.5V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+                    <span>Moderación</span>
                 </button>
                 <button type="button" class="navItem navSoloRiel" data-nav="configuracion">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
@@ -492,19 +496,52 @@
 
             <!-- ==================== MODERACIÓN ==================== -->
 
+            <!-- ==================== MODERACIÓN ====================
+                 Toda acción de moderación exige cuenta con el rol + llave de moderación (archivo cifrado que firma un
+                 desafío del servidor). Ver docs/decisiones/0004-llaves-de-moderacion.md y app.js, sección MODERACIÓN CON LLAVE.
+                 «Mi llave» no requiere desbloquear: ahí se crea o se revoca la propia llave. -->
             <div id="vistaModeracion" style="display:none">
 
-                <button type="button" id="btnVolverForoDesdeModeracion" class="btn-secundario">← Volver al foro</button>
+                <div class="modCabecera">
+                    <div>
+                        <h2 class="seccion-titulo" style="margin-top:0">Moderación</h2>
+                        <p id="estadoLlave" class="estadoLlave" aria-live="polite"></p>
+                    </div>
+                    <div class="modCabeceraAcciones">
+                        <button type="button" id="btnDesbloquearMod" class="btn-primario">Desbloquear</button>
+                        <button type="button" id="btnBloquearMod" class="btn-secundario" hidden>Bloquear</button>
+                    </div>
+                </div>
 
-                <h2 class="seccion-titulo">Denuncias pendientes</h2>
-                <div id="listaDenuncias"></div>
+                <div class="modPestanias" role="tablist" aria-label="Secciones de moderación">
+                    <button type="button" role="tab" class="modPestania" data-panel="denuncias" aria-selected="true">Denuncias</button>
+                    <button type="button" role="tab" class="modPestania" data-panel="aportes" aria-selected="false">Aportes</button>
+                    <button type="button" role="tab" class="modPestania" data-panel="material" aria-selected="false">Material</button>
+                    <button type="button" role="tab" class="modPestania soloAdmin" data-panel="equipo" aria-selected="false" hidden>Equipo</button>
+                    <button type="button" role="tab" class="modPestania soloAdmin" data-panel="registro" aria-selected="false" hidden>Registro</button>
+                    <button type="button" role="tab" class="modPestania" data-panel="llave" aria-selected="false">Mi llave</button>
+                </div>
 
-                <h2 class="seccion-titulo">Aportes de material</h2>
-                <p class="ayudaPerfil">Revisá el enlace antes de aprobar: que abra, que sea material de estudio y que no tenga datos de pacientes. Podés corregir el título, la materia y el tipo.</p>
-                <div id="listaAportes"></div>
+                <section id="panelModBloqueado" class="modBloqueado" hidden>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                    <b>La moderación está bloqueada</b>
+                    <span>Para ver y resolver esto necesitás tu archivo de llave y su contraseña, además de tu cuenta.</span>
+                    <button type="button" class="btn-primario" data-desbloquear>Desbloquear con mi llave</button>
+                    <button type="button" class="panelNotifAccion" data-ir-llave>¿Todavía no tenés llave? Creala</button>
+                </section>
 
-                <details class="agregarMaterial">
-                    <summary>Agregar material directamente</summary>
+                <section class="modPanel" role="tabpanel" data-panel="denuncias" aria-label="Denuncias pendientes">
+                    <div id="listaDenuncias"></div>
+                </section>
+
+                <section class="modPanel" role="tabpanel" data-panel="aportes" aria-label="Aportes de material" hidden>
+                    <p class="ayudaPerfil">Revisá el enlace antes de aprobar: que abra, que sea material de estudio y que no tenga datos de pacientes. Podés corregir el título, la materia y el tipo.</p>
+                    <div id="listaAportes"></div>
+                </section>
+
+                <section class="modPanel" role="tabpanel" data-panel="material" aria-label="Agregar material" hidden>
+                    <h3>Agregar material directamente</h3>
+                    <p class="ayudaPerfil">Publicá un archivo de tu Drive sin pasar por la revisión. Compartilo como «Cualquier persona con el enlace».</p>
                     <form id="formMaterialDirecto" novalidate>
                         <label for="materialTitulo">Título</label>
                         <input type="text" id="materialTitulo" maxlength="120" required>
@@ -528,12 +565,16 @@
                         <button type="submit" class="btn-secundario">Publicar material</button>
                     </form>
                     <p id="msgMaterialDirecto" aria-live="polite"></p>
-                </details>
+                </section>
 
-                <div id="seccionModeradores" style="display:none">
+                <section class="modPanel" role="tabpanel" data-panel="equipo" aria-label="Equipo de moderación" hidden>
+                    <div id="seccionModeradores">
+                        <h3>Llaves de moderación</h3>
+                        <p class="ayudaPerfil">Antes de aprobar una llave, pedile a esa persona su huella por otro medio (en persona o por mensaje) y compará que sea idéntica.</p>
+                        <div id="listaLlaves"></div>
 
-                    <h2 class="seccion-titulo">Moderadores</h2>
-
+                        <h3>Moderadores</h3>
+                        <p class="ayudaPerfil">Para sumar a alguien: dale el rol acá, esa persona crea su llave en «Mi llave» y vos la aprobás arriba.</p>
                     <form id="formModerador">
                         <input type="email" id="inputNuevoModerador" placeholder="email@ejemplo.com" required>
                         <button type="submit" class="btn-secundario">Agregar moderador</button>
@@ -543,7 +584,7 @@
 
                     <div id="listaModeradores"></div>
 
-                    <h2 class="seccion-titulo">Publicar una noticia</h2>
+                    <h3>Publicar una noticia</h3>
                     <p class="ayudaPerfil">Le llega a todas las cuentas como notificación. Usalo para novedades importantes de MedMar.</p>
                     <form id="formNoticia">
                         <label for="noticiaTitulo">Título</label>
@@ -555,8 +596,45 @@
                         <button type="submit" class="btn-secundario">Publicar noticia</button>
                     </form>
                     <p id="msgNoticia" aria-live="polite"></p>
+                    </div>
+                </section>
 
-                </div>
+                <section class="modPanel" role="tabpanel" data-panel="registro" aria-label="Registro de moderación" hidden>
+                    <p class="ayudaPerfil">Cada acción de moderación queda anotada con quién la hizo y con qué llave. Se guarda 180 días.</p>
+                    <ol id="listaRegistro" class="listaRegistro"></ol>
+                </section>
+
+                <section class="modPanel" role="tabpanel" data-panel="llave" aria-label="Mi llave de moderación" hidden>
+                    <div id="misLlaves"></div>
+
+                    <div class="crearLlave">
+                        <h3>Crear mi llave</h3>
+                        <p class="ayudaPerfil">Tu llave es un archivo que se genera en este dispositivo y queda cifrado con una contraseña. Guardalo en un lugar seguro (por ejemplo, un pendrive o tu gestor de contraseñas). <b>Si lo perdés o te olvidás la contraseña, no se puede recuperar</b>: hay que crear una llave nueva.</p>
+                        <form id="formCrearLlave" novalidate>
+                            <label for="nombreLlave">Nombre del dispositivo (opcional)</label>
+                            <input type="text" id="nombreLlave" maxlength="60" placeholder="Notebook de casa">
+                            <label for="passNuevaLlave">Contraseña de la llave (mínimo 12 caracteres)</label>
+                            <div class="campoPassword">
+                                <input type="password" id="passNuevaLlave" minlength="12" autocomplete="new-password">
+                                <button type="button" class="btnMostrarPassword" data-target="passNuevaLlave" aria-label="Mostrar contraseña"><svg class="iconoOjo" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                            </div>
+                            <label for="passNuevaLlave2">Repetí la contraseña</label>
+                            <input type="password" id="passNuevaLlave2" minlength="12" autocomplete="new-password">
+                            <p class="ayudaPerfil">Usá una contraseña distinta a la de tu cuenta.</p>
+                            <button type="submit" class="btn-primario">Crear y descargar mi llave</button>
+                        </form>
+                        <p id="msgCrearLlave" aria-live="polite"></p>
+                    </div>
+
+                    <div id="altaLlaveAdmin" class="altaLlaveAdmin" hidden>
+                        <h3>Último paso: dar de alta tu llave de administrador</h3>
+                        <p class="ayudaPerfil">Por seguridad, las llaves de administrador no se pueden activar desde la web: solo quien entra al proyecto de Supabase puede hacerlo. Copiá este SQL y ejecutalo en Supabase → SQL Editor. Contiene solo la parte pública de la llave.</p>
+                        <textarea id="sqlLlaveAdmin" rows="7" readonly aria-label="SQL para activar tu llave de administrador"></textarea>
+                        <button type="button" id="btnCopiarSqlLlave" class="btn-secundario">Copiar SQL</button>
+                    </div>
+                </section>
+
+                <button type="button" id="btnVolverForoDesdeModeracion" class="btn-secundario" hidden>← Volver al foro</button>
 
             </div>
 
@@ -732,6 +810,14 @@
 
                 <p class="ayudaPerfil">Conectado como <b id="emailConfig"></b></p>
 
+                <button type="button" class="tarjetaInicio tarjetaModeracion soloModeracion" data-nav="moderacion" hidden>
+                    <span class="iconoInicio">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 9.5 4-1.2 7-5 7-9.5V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+                    </span>
+                    <span class="tituloInicio">Panel de moderación</span>
+                    <span class="descInicio">Denuncias, aportes, material y tu llave</span>
+                </button>
+
                 <section class="configTema" aria-labelledby="tituloTema">
                     <div class="configTemaTexto">
                         <h3 id="tituloTema">Apariencia</h3>
@@ -865,6 +951,26 @@
 
     <!-- ==================== MODAL: PUBLICAR EN EL FORO ==================== -->
 
+    <!-- ==================== DESBLOQUEAR MODERACIÓN ==================== -->
+    <div id="modalLlave" class="modalFondo" role="dialog" aria-modal="true" aria-labelledby="tituloModalLlave">
+        <div class="modalCaja modalLlaveCaja">
+            <div class="modalEncabezado">
+                <h2 id="tituloModalLlave">Desbloquear moderación</h2>
+                <button type="button" class="modalCerrar" id="btnCerrarModalLlave" aria-label="Cerrar">×</button>
+            </div>
+            <form id="formDesbloqueo" novalidate>
+                <label for="archivoLlave">Tu archivo de llave (.medmarkey)</label>
+                <input type="file" id="archivoLlave" accept=".medmarkey,application/json">
+                <label for="passLlave">Contraseña de la llave</label>
+                <input type="password" id="passLlave" autocomplete="off">
+                <label class="labelCheckbox"><input type="checkbox" id="recordarLlave"> Mantener desbloqueado en este dispositivo por 2 horas (no lo uses en computadoras compartidas)</label>
+                <p class="ayudaPerfil">La llave no sale de tu dispositivo y la contraseña no se envía: se usan acá para firmar un desafío del servidor.</p>
+                <button type="submit" class="btn-primario">Desbloquear</button>
+            </form>
+            <p id="msgDesbloqueo" aria-live="polite"></p>
+        </div>
+    </div>
+
     <div id="modalCompose" class="modalFondo" role="dialog" aria-modal="true" aria-labelledby="tituloCompose">
         <div class="modalCaja">
 
@@ -917,7 +1023,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261123h"></script>
+    <script src="/js/app.js?v=20261124a"></script>
 
 
 </body>

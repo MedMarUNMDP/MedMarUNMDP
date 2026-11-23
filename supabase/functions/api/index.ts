@@ -56,6 +56,14 @@ const RATE_LIMITS: Record<string, [number, number]> = {
   resolverAporte: [60, 600],
   agregarMaterial: [30, 600],
   quitarMaterial: [30, 600],
+  desafioModeracion: [20, 600],
+  abrirSesionModeracion: [10, 600],
+  registrarLlave: [3, 3600],
+  misLlaves: [30, 300],
+  listarLlaves: [30, 300],
+  aprobarLlave: [20, 600],
+  revocarLlave: [20, 600],
+  registroModeracion: [30, 300],
 }
 
 const ALLOWED_HOSTS = [
@@ -297,6 +305,209 @@ async function resolverAporte(user: User, admin: SupabaseClient, body: any) {
   })
   if (errNotif) console.warn('resolverAporte: no se pudo notificar', errNotif.message)
   return json({ ok: true, publicado })
+}
+
+// ==================== LLAVES DE MODERACIÓN ====================
+// Segundo factor para moderar: además de la cuenta con el rol, hace falta una llave ECDSA P-256 cuyo par privado
+// vive solo en un archivo cifrado del moderador. Flujo: desafioModeracion → el navegador firma → abrirSesionModeracion
+// verifica la firma y entrega un token de 30 min → cada acción de moderación lo exige (autorizarModeracion).
+// Ver docs/decisiones/0004-llaves-de-moderacion.md y la migración 20261124120000_llaves_moderacion.sql.
+
+const MOD_DESAFIO_MS = 2 * 60 * 1000
+const MOD_SESION_MS = 30 * 60 * 1000
+const MOD_MENSAJE = 'medmar-moderacion-v1|'
+const MAX_LLAVES_POR_USUARIO = 2
+const RE_DESAFIO = /^([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\.(\d{13})\.([A-Za-z0-9_-]{43})$/
+const RE_TOKEN_MOD = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.(moderador|admin)\.(\d{13})\.([A-Za-z0-9_-]{43})$/
+const RE_HUELLA = /^[0-9A-F]{4}(-[0-9A-F]{4}){3}$/
+const RE_COORD = /^[A-Za-z0-9_-]{43}$/
+
+let claveFirmaModeracion: Promise<CryptoKey> | null = null
+async function hmacModeracion(datos: string) {
+  if (!claveFirmaModeracion) claveFirmaModeracion = crypto.subtle.importKey('raw', new TextEncoder().encode('medmar-moderacion-v1:' + SECRET_KEY), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+  const firma = new Uint8Array(await crypto.subtle.sign('HMAC', await claveFirmaModeracion, new TextEncoder().encode(datos)))
+  let bin = ''
+  for (const b of firma) bin += String.fromCharCode(b)
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+function compararSeguro(a: string, b: string) {
+  if (a.length !== b.length) return false
+  let diff = 0
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  return diff === 0
+}
+
+function base64urlABytes(texto: string) {
+  if (!/^[A-Za-z0-9_-]+$/.test(texto)) return null
+  const b64 = texto.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((texto.length + 3) % 4)
+  try {
+    const bin = atob(b64)
+    const bytes = new Uint8Array(bin.length)
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
+    return bytes
+  } catch { return null }
+}
+
+// Solo la parte pública: kty, crv, x, y. Cualquier otra cosa (sobre todo "d", la privada) se rechaza.
+function jwkPublicaValida(valor: any) {
+  if (!valor || typeof valor !== 'object' || Array.isArray(valor)) return null
+  if (valor.kty !== 'EC' || valor.crv !== 'P-256' || 'd' in valor) return null
+  if (!RE_COORD.test(String(valor.x || '')) || !RE_COORD.test(String(valor.y || ''))) return null
+  return { kty: 'EC', crv: 'P-256', x: String(valor.x), y: String(valor.y) }
+}
+
+// Huella = primeros 8 bytes del SHA-256 de la llave pública canónica, en hexadecimal: «A1B2-C3D4-E5F6-0718».
+// La calcula el navegador al crear la llave y la recalcula la API: sirve para verificarla por otro canal.
+async function huellaDeLlave(jwk: { crv: string, kty: string, x: string, y: string }) {
+  const canonica = JSON.stringify({ crv: jwk.crv, kty: jwk.kty, x: jwk.x, y: jwk.y })
+  const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(canonica)))
+  const hex = Array.from(hash.slice(0, 8)).map((b) => b.toString(16).padStart(2, '0')).join('').toUpperCase()
+  return hex.match(/.{4}/g)!.join('-')
+}
+
+async function crearDesafioModeracion(userId: string) {
+  const nonce = crypto.randomUUID()
+  const expira = Date.now() + MOD_DESAFIO_MS
+  return `${nonce}.${expira}.${await hmacModeracion(`desafio.${nonce}.${userId}.${expira}`)}`
+}
+
+async function desafioModeracionValido(desafio: unknown, userId: string) {
+  const m = RE_DESAFIO.exec(String(desafio || ''))
+  if (!m) return false
+  const esperada = await hmacModeracion(`desafio.${m[1]}.${userId}.${m[2]}`)
+  if (!compararSeguro(esperada, m[3])) return false
+  const expira = Number(m[2])
+  return Date.now() <= expira && expira <= Date.now() + MOD_DESAFIO_MS + 60_000
+}
+
+async function crearTokenModeracion(userId: string, llaveId: string, rol: string) {
+  const expira = Date.now() + MOD_SESION_MS
+  return { token: `${llaveId}.${rol}.${expira}.${await hmacModeracion(`token.${userId}.${llaveId}.${rol}.${expira}`)}`, expira }
+}
+
+async function leerTokenModeracion(token: unknown, userId: string) {
+  const m = RE_TOKEN_MOD.exec(String(token || ''))
+  if (!m) return null
+  const esperada = await hmacModeracion(`token.${userId}.${m[1]}.${m[2]}.${m[3]}`)
+  if (!compararSeguro(esperada, m[4])) return null
+  const expira = Number(m[3])
+  if (Date.now() > expira || expira > Date.now() + MOD_SESION_MS + 60_000) return null
+  return { llaveId: m[1], rol: m[2] }
+}
+
+async function tieneRol(admin: SupabaseClient, userId: string, rol: 'moderador' | 'admin') {
+  if (rol === 'admin') return isAdmin(admin, userId)
+  return (await isModerator(admin, userId)) || (await isAdmin(admin, userId))
+}
+
+// Exige cuenta con el rol + token de moderación vigente + llave activa del mismo usuario con ese rol.
+// Devuelve { llaveId } o la Response de error ('llave_requerida' le indica al navegador que pida desbloquear).
+async function autorizarModeracion(admin: SupabaseClient, user: User, body: any, rol: 'moderador' | 'admin') {
+  if (!(await tieneRol(admin, user.id, rol))) return json({ ok: false, error: 'no_autorizado' })
+  const t = await leerTokenModeracion(body?.tokenModeracion, user.id)
+  if (!t || (rol === 'admin' && t.rol !== 'admin')) return json({ ok: false, error: 'llave_requerida' })
+  const { data: llave, error } = await admin.from('llaves_moderacion').select('id,user_id,rol,estado').eq('id', t.llaveId).maybeSingle()
+  if (error) throw error
+  if (!llave || llave.estado !== 'activa' || String(llave.user_id) !== user.id || llave.rol !== t.rol) return json({ ok: false, error: 'llave_requerida' })
+  if (llave.rol === 'admin' && !(await isAdmin(admin, user.id))) return json({ ok: false, error: 'no_autorizado' })
+  return { llaveId: String(llave.id) }
+}
+
+async function auditar(admin: SupabaseClient, userId: string, llaveId: string | null, accion: string, detalle: Record<string, unknown> = {}) {
+  const { error } = await admin.from('registro_moderacion').insert({ user_id: userId, llave_id: llaveId, accion: accion.slice(0, 40), detalle })
+  if (error) console.warn('auditar:', error.message)
+}
+
+async function abrirSesionModeracion(user: User, admin: SupabaseClient, body: any) {
+  if (!(await tieneRol(admin, user.id, 'moderador'))) return json({ ok: false, error: 'no_autorizado' })
+  if (!(await desafioModeracionValido(body.desafio, user.id))) return json({ ok: false, error: 'desafio_vencido' })
+  const nonce = String(body.desafio).slice(0, 36)
+  const { error: errNonce } = await admin.from('idempotency_keys').insert({ user_id: user.id, operation_id: nonce, action: 'desafio_moderacion', response: {} })
+  if (errNonce) {
+    if (String((errNonce as any).code) === '23505') return json({ ok: false, error: 'desafio_vencido' })
+    throw errNonce
+  }
+  const huella = String(body.huella || '')
+  const firma = base64urlABytes(String(body.firma || ''))
+  if (!RE_HUELLA.test(huella) || !firma || firma.length !== 64) return json({ ok: false, error: 'datos_invalidos' })
+
+  const { data: llave, error } = await admin.from('llaves_moderacion')
+    .select('id,user_id,rol,estado,public_key').eq('huella', huella).maybeSingle()
+  if (error) throw error
+  if (!llave || String(llave.user_id) !== user.id) return json({ ok: false, error: 'llave_desconocida' })
+  if (llave.estado === 'pendiente') return json({ ok: false, error: 'llave_pendiente' })
+  if (llave.estado !== 'activa') return json({ ok: false, error: 'llave_revocada' })
+  if (!(await tieneRol(admin, user.id, llave.rol))) return json({ ok: false, error: 'no_autorizado' })
+
+  const jwk = jwkPublicaValida(llave.public_key)
+  if (!jwk) return json({ ok: false, error: 'llave_desconocida' })
+  const publica = await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify'])
+  const valida = await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, publica, firma, new TextEncoder().encode(MOD_MENSAJE + String(body.desafio)))
+  if (!valida) {
+    await auditar(admin, user.id, String(llave.id), 'firma_invalida')
+    return json({ ok: false, error: 'firma_invalida' })
+  }
+  await admin.from('llaves_moderacion').update({ ultimo_uso: new Date().toISOString() }).eq('id', llave.id)
+  await auditar(admin, user.id, String(llave.id), 'abrir_sesion', { rol: llave.rol })
+  const { token, expira } = await crearTokenModeracion(user.id, String(llave.id), llave.rol)
+  return json({ ok: true, token, rol: llave.rol, expira })
+}
+
+async function registrarLlave(user: User, admin: SupabaseClient, body: any) {
+  // Solo moderadores registran su llave por acá (queda pendiente hasta que un admin la apruebe).
+  // Las llaves de admin se dan de alta únicamente por SQL desde el dashboard de Supabase.
+  if (!(await isModerator(admin, user.id))) return json({ ok: false, error: 'no_autorizado' })
+  const jwk = jwkPublicaValida(body.publica)
+  if (!jwk) return json({ ok: false, error: 'datos_invalidos' })
+  const nombre = String(body.nombre || '').replace(/[\u0000-\u001F]/g, '').trim().slice(0, 60) || null
+  const { count, error: errCount } = await admin.from('llaves_moderacion').select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id).in('estado', ['pendiente', 'activa'])
+  if (errCount) throw errCount
+  if ((count || 0) >= MAX_LLAVES_POR_USUARIO) return json({ ok: false, error: 'llaves_limite' })
+  try { await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']) }
+  catch { return json({ ok: false, error: 'datos_invalidos' }) }
+  const huella = await huellaDeLlave(jwk)
+  const { data, error } = await admin.from('llaves_moderacion')
+    .insert({ user_id: user.id, rol: 'moderador', nombre, public_key: jwk, huella }).select('id').single()
+  if (error) {
+    if (String((error as any).code) === '23505') return json({ ok: false, error: 'llave_duplicada' })
+    throw error
+  }
+  await auditar(admin, user.id, String(data.id), 'registrar_llave', { huella })
+  // Aviso a los admins para que la revisen.
+  const { data: admins } = await admin.from('profiles').select('id').eq('is_admin', true)
+  const pmap = await profileMap(admin, [user.id])
+  const filas = (admins || []).map((a: any) => ({
+    user_id: a.id, tipo: 'noticia', contexto: 'Llave de moderación para aprobar',
+    cuerpo: `${pmap.get(user.id)?.pseudonimo || 'Un moderador'} registró una llave. Huella: ${huella}. Verificala con esa persona antes de aprobarla.`,
+    link: '/?vista=moderacion', ref_id: data.id,
+  }))
+  if (filas.length) await admin.from('notificaciones').insert(filas)
+  return json({ ok: true, huella })
+}
+
+async function listarLlaves(admin: SupabaseClient) {
+  const { data, error } = await admin.from('llaves_moderacion')
+    .select('id,user_id,rol,nombre,huella,estado,created_at,aprobada_at,ultimo_uso')
+    .neq('estado', 'revocada').order('created_at', { ascending: false }).limit(100)
+  if (error) throw error
+  const pmap = await profileMap(admin, (data || []).map((l: any) => String(l.user_id)))
+  return json({ ok: true, llaves: (data || []).map((l: any) => {
+    const { user_id, ...resto } = l
+    return { ...resto, pseudonimo: pmap.get(String(user_id))?.pseudonimo || 'Estudiante' }
+  }) })
+}
+
+async function registroModeracion(admin: SupabaseClient) {
+  const { data, error } = await admin.from('registro_moderacion')
+    .select('id,user_id,accion,detalle,created_at').order('created_at', { ascending: false }).limit(100)
+  if (error) throw error
+  const pmap = await profileMap(admin, (data || []).map((r: any) => String(r.user_id || '')).filter(Boolean))
+  return json({ ok: true, registro: (data || []).map((r: any) => {
+    const { user_id, ...resto } = r
+    return { ...resto, pseudonimo: pmap.get(String(user_id))?.pseudonimo || '—' }
+  }) })
 }
 
 function json(body: unknown, status = 200) {
@@ -1052,8 +1263,12 @@ async function handle(req: Request, body: any) {
       if (hiloError) throw hiloError
       if (!hilo) return json({ ok: false, error: 'no_encontrado' })
 
-      const puedeBorrar = String(hilo.autor_id) === user.id || await isModerator(admin, user.id)
-      if (!puedeBorrar) return json({ ok: false, error: 'no_autorizado' })
+      if (String(hilo.autor_id) !== user.id) {
+        const auth = await autorizarModeracion(admin, user, body, 'moderador'); if (auth instanceof Response) return auth
+        await borrarPublicacion(admin, 'hilo', id)
+        await auditar(admin, user.id, auth.llaveId, 'borrar_hilo', { id })
+        return json({ ok: true })
+      }
 
       await borrarPublicacion(admin, 'hilo', id)
       return json({ ok: true })
@@ -1071,8 +1286,12 @@ async function handle(req: Request, body: any) {
       if (respuestaError) throw respuestaError
       if (!respuesta) return json({ ok: false, error: 'no_encontrado' })
 
-      const puedeBorrar = String(respuesta.autor_id) === user.id || await isModerator(admin, user.id)
-      if (!puedeBorrar) return json({ ok: false, error: 'no_autorizado' })
+      if (String(respuesta.autor_id) !== user.id) {
+        const auth = await autorizarModeracion(admin, user, body, 'moderador'); if (auth instanceof Response) return auth
+        await borrarPublicacion(admin, 'respuesta', id)
+        await auditar(admin, user.id, auth.llaveId, 'borrar_respuesta', { id })
+        return json({ ok: true })
+      }
 
       await borrarPublicacion(admin, 'respuesta', id)
       return json({ ok: true })
@@ -1196,8 +1415,10 @@ async function handle(req: Request, body: any) {
     }
     case 'publicarNoticia': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      if(!(await isAdmin(admin,user.id)))return json({ok:false,error:'no_autorizado'})
-      return publicarNoticia(admin,body)
+      const auth=await autorizarModeracion(admin,user,body,'admin');if(auth instanceof Response)return auth
+      const res=await publicarNoticia(admin,body)
+      if((await res.clone().json()).ok)await auditar(admin,user.id,auth.llaveId,'publicar_noticia',{titulo:String(body.titulo||'').slice(0,80)})
+      return res
     }
     case 'listarMateriales': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
@@ -1215,52 +1436,124 @@ async function handle(req: Request, body: any) {
     }
     case 'listarAportes': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      if(!(await isModerator(admin,user.id)))return json({ok:false,error:'no_autorizado'})
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
       return listarAportes(admin)
     }
     case 'resolverAporte': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      if(!(await isModerator(admin,user.id)))return json({ok:false,error:'no_autorizado'})
-      return resolverAporte(user,admin,body)
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      const res=await resolverAporte(user,admin,body)
+      if((await res.clone().json()).ok)await auditar(admin,user.id,auth.llaveId,'resolver_aporte',{id:uuidOrEmpty(body.id),decision:String(body.decision||'')})
+      return res
     }
     case 'agregarMaterial': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      if(!(await isModerator(admin,user.id)))return json({ok:false,error:'no_autorizado'})
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
       const m=datosMaterial(body)
       if(!m)return json({ok:false,error:'datos_invalidos'})
       const {error}=await admin.from('materiales').insert({...m,creado_por:user.id})
       if(error){if(String((error as any).code)==='23505')return json({ok:false,error:'material_duplicado'});throw error}
+      await auditar(admin,user.id,auth.llaveId,'agregar_material',{titulo:m.titulo})
       return json({ok:true})
     }
     case 'quitarMaterial': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      if(!(await isModerator(admin,user.id)))return json({ok:false,error:'no_autorizado'})
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
       const id=uuidOrEmpty(body.id);if(!id)return json({ok:false,error:'datos_invalidos'})
       const {error}=await admin.from('materiales').update({activo:false}).eq('id',id)
       if(error)throw error
+      await auditar(admin,user.id,auth.llaveId,'quitar_material',{id})
       return json({ok:true})
+    }
+    case 'desafioModeracion': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      if(!(await tieneRol(admin,user.id,'moderador')))return json({ok:false,error:'no_autorizado'})
+      return json({ok:true,desafio:await crearDesafioModeracion(user.id)})
+    }
+    case 'abrirSesionModeracion': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return abrirSesionModeracion(user,admin,body)
+    }
+    case 'registrarLlave': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return registrarLlave(user,admin,body)
+    }
+    case 'misLlaves': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const {data,error}=await admin.from('llaves_moderacion').select('id,rol,nombre,huella,estado,created_at,ultimo_uso').eq('user_id',user.id).neq('estado','revocada').order('created_at',{ascending:false})
+      if(error)throw error
+      return json({ok:true,llaves:data||[]})
+    }
+    case 'listarLlaves': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'admin');if(auth instanceof Response)return auth
+      return listarLlaves(admin)
+    }
+    case 'aprobarLlave': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'admin');if(auth instanceof Response)return auth
+      const id=uuidOrEmpty(body.id);if(!id)return json({ok:false,error:'datos_invalidos'})
+      const {data:llave,error:errLlave}=await admin.from('llaves_moderacion').select('id,user_id,rol,estado,huella').eq('id',id).maybeSingle()
+      if(errLlave)throw errLlave
+      if(!llave||llave.estado!=='pendiente'||llave.rol!=='moderador')return json({ok:false,error:'no_encontrado'})
+      if(String(body.huellaConfirmada||'').trim().toUpperCase()!==llave.huella)return json({ok:false,error:'huella_no_coincide'})
+      if(!(await isModerator(admin,String(llave.user_id))))return json({ok:false,error:'no_es_moderador'})
+      const {error}=await admin.from('llaves_moderacion').update({estado:'activa',aprobada_por:user.id,aprobada_at:new Date().toISOString()}).eq('id',id).eq('estado','pendiente')
+      if(error)throw error
+      await auditar(admin,user.id,auth.llaveId,'aprobar_llave',{llave:id,huella:llave.huella})
+      await admin.from('notificaciones').insert({user_id:llave.user_id,tipo:'noticia',contexto:'Tu llave de moderación fue aprobada',cuerpo:'Ya podés desbloquear la moderación con tu archivo de llave.',link:'/?vista=moderacion',ref_id:id})
+      return json({ok:true})
+    }
+    case 'revocarLlave': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const id=uuidOrEmpty(body.id);if(!id)return json({ok:false,error:'datos_invalidos'})
+      const {data:llave,error:errLlave}=await admin.from('llaves_moderacion').select('id,user_id,rol,estado,huella').eq('id',id).maybeSingle()
+      if(errLlave)throw errLlave
+      if(!llave||llave.estado==='revocada')return json({ok:false,error:'no_encontrado'})
+      const propiaSinLlave=String(llave.user_id)===user.id&&llave.rol!=='admin'
+      // La propia llave se puede revocar solo con la cuenta (por si perdés el archivo); la de otro, solo un admin con su llave.
+      let llaveUsada:string|null=null
+      if(!propiaSinLlave){
+        const auth=await autorizarModeracion(admin,user,body,'admin');if(auth instanceof Response)return auth
+        llaveUsada=auth.llaveId
+      }
+      const {error}=await admin.from('llaves_moderacion').update({estado:'revocada',revocada_at:new Date().toISOString()}).eq('id',id)
+      if(error)throw error
+      await auditar(admin,user.id,llaveUsada,'revocar_llave',{llave:id,huella:llave.huella})
+      if(propiaSinLlave){
+        const {data:admins}=await admin.from('profiles').select('id').eq('is_admin',true)
+        const pmap=await profileMap(admin,[user.id])
+        const filas=(admins||[]).map((a:any)=>({user_id:a.id,tipo:'noticia',contexto:'Un moderador revocó su llave',cuerpo:`${pmap.get(user.id)?.pseudonimo||'Un moderador'} revocó la llave ${llave.huella}. Si después registra otra, confirmá con esa persona por otro medio que fue ella.`,link:'/?vista=moderacion',ref_id:id}))
+        if(filas.length)await admin.from('notificaciones').insert(filas)
+      }
+      return json({ok:true})
+    }
+    case 'registroModeracion': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'admin');if(auth instanceof Response)return auth
+      return registroModeracion(admin)
     }
     case 'soyModerador': { const rl=await rateLimit(admin,action,user.id);if(rl)return rl; return json({ok:true,esModerador:await isModerator(admin,user.id),esAdmin:await isAdmin(admin,user.id)}) }
     case 'listarModeradores': {
-      const rl=await rateLimit(admin,action,user.id);if(rl)return rl;if(!(await isAdmin(admin,user.id)))return json({ok:false,error:'no_autorizado'});const {data:mods,error}=await admin.from('profiles').select('id,pseudonimo,is_moderator').eq('is_moderator',true).order('pseudonimo');if(error)throw error;const users=[];for(const m of mods||[]){const u=await admin.auth.admin.getUserById(String(m.id));users.push({email:u.data.user?.email||'',pseudonimo:m.pseudonimo})}return json({ok:true,moderadores:users})
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl;const authL=await autorizarModeracion(admin,user,body,'admin');if(authL instanceof Response)return authL;const {data:mods,error}=await admin.from('profiles').select('id,pseudonimo,is_moderator').eq('is_moderator',true).order('pseudonimo');if(error)throw error;const users=[];for(const m of mods||[]){const u=await admin.auth.admin.getUserById(String(m.id));users.push({email:u.data.user?.email||'',pseudonimo:m.pseudonimo})}return json({ok:true,moderadores:users})
     }
     case 'asignarModerador': {
-      const rl=await rateLimit(admin,action,user.id);if(rl)return rl;if(!(await isAdmin(admin,user.id)))return json({ok:false,error:'no_autorizado'});const email=String(body.email||'').trim().toLowerCase();const u=await findUserByEmail(admin,email);if(!u)return json({ok:false,error:'no_encontrado'});const {data,error}=await admin.from('profiles').update({is_moderator:true}).eq('id',u.id).select('id').single();if(error)throw error;return json({ok:true})
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl;const authA=await autorizarModeracion(admin,user,body,'admin');if(authA instanceof Response)return authA;const email=String(body.email||'').trim().toLowerCase();const u=await findUserByEmail(admin,email);if(!u)return json({ok:false,error:'no_encontrado'});const {data,error}=await admin.from('profiles').update({is_moderator:true}).eq('id',u.id).select('id').single();if(error)throw error;await auditar(admin,user.id,authA.llaveId,'asignar_moderador',{usuario:String(u.id)});return json({ok:true})
     }
     case 'quitarModerador': {
-      const rl=await rateLimit(admin,action,user.id);if(rl)return rl;if(!(await isAdmin(admin,user.id)))return json({ok:false,error:'no_autorizado'});const email=String(body.email||'').trim().toLowerCase();const u=await findUserByEmail(admin,email);if(!u)return json({ok:false,error:'no_encontrado'});if(String(u.email).toLowerCase()==='medmarunmdp@gmail.com')return json({ok:false,error:'no_autorizado'});const {error}=await admin.from('profiles').update({is_moderator:false}).eq('id',u.id);if(error)throw error;return json({ok:true})
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl;const authQ=await autorizarModeracion(admin,user,body,'admin');if(authQ instanceof Response)return authQ;const email=String(body.email||'').trim().toLowerCase();const u=await findUserByEmail(admin,email);if(!u)return json({ok:false,error:'no_encontrado'});if(String(u.email).toLowerCase()==='medmarunmdp@gmail.com')return json({ok:false,error:'no_autorizado'});const {error}=await admin.from('profiles').update({is_moderator:false}).eq('id',u.id);if(error)throw error;await admin.from('llaves_moderacion').update({estado:'revocada',revocada_at:new Date().toISOString()}).eq('user_id',u.id).eq('rol','moderador').neq('estado','revocada');await auditar(admin,user.id,authQ.llaveId,'quitar_moderador',{usuario:String(u.id)});return json({ok:true})
     }
     case 'listarDenuncias': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      if(!(await isModerator(admin,user.id)))return json({ok:false,error:'no_autorizado'})
-      const {data,error}=await client.from('denuncias').select('id,tipo,id_publicacion,motivo,created_at').eq('estado','pendiente').order('created_at',{ascending:true}).limit(100)
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      const {data,error}=await admin.from('denuncias').select('id,tipo,id_publicacion,motivo,created_at').eq('estado','pendiente').order('created_at',{ascending:true}).limit(100)
       if(error)throw error
       return json({ok:true,denuncias:await enriquecerDenuncias(admin,data||[])})
     }
     case 'resolverDenuncia': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      if(!(await isModerator(admin,user.id)))return json({ok:false,error:'no_autorizado'})
-      const id=uuidOrEmpty(body.id),accion=String(body.accion||'')
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      const id=uuidOrEmpty(body.id),accion=String(body.decision||'')
       if(!id||!['descartar','eliminar'].includes(accion))return json({ok:false,error:'datos_invalidos'})
       const {data:rep,error:repError}=await admin.from('denuncias').select('id,tipo,id_publicacion,estado').eq('id',id).maybeSingle()
       if(repError)throw repError
@@ -1274,6 +1567,7 @@ async function handle(req: Request, body: any) {
       } else {
         const {error}=await admin.from('denuncias').update({estado:'descartada',...resolucion}).eq('id',id);if(error)throw error
       }
+      await auditar(admin,user.id,auth.llaveId,'resolver_denuncia',{id,accion})
       return json({ok:true})
     }
     default: return json({ok:false,error:'accion_invalida'})

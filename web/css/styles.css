@@ -3061,3 +3061,158 @@
             .chipsTipo { grid-column: 1 / -1; }
             .listaMaterial { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
+
+        /* ---------- MODERACIÓN CON LLAVE ---------- */
+
+        .soloModeracion[hidden], .navItem.soloModeracion[hidden], .modPestania[hidden] { display: none !important; }
+
+        .modCabecera {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .estadoLlave {
+            margin: 6px 0 0;
+            font-size: .86rem;
+            line-height: 1.5;
+            color: var(--ink-soft);
+        }
+
+        .modCabeceraAcciones { flex: none; }
+        .modCabeceraAcciones button { width: auto; margin: 0; }
+
+        .modPestanias {
+            display: flex;
+            gap: 6px;
+            margin: 18px 0 14px;
+            padding-bottom: 2px;
+            overflow-x: auto;
+            border-bottom: 1px solid var(--line);
+            scrollbar-width: none;
+        }
+
+        .modPestania {
+            flex: none;
+            width: auto;
+            min-height: 44px;
+            margin: 0 0 -1px;
+            padding: 8px 14px;
+            border-bottom: 3px solid transparent;
+            border-radius: var(--r-sm) var(--r-sm) 0 0;
+            background: transparent;
+            color: var(--ink-soft);
+            font-size: .92rem;
+        }
+
+        .modPestania:hover { background: var(--surface-2); color: var(--ink); }
+        .modPestania[aria-selected="true"] { color: var(--brand); border-bottom-color: var(--brand); }
+
+        .modPanel h3, .crearLlave h3, .altaLlaveAdmin h3, #misLlaves h3 {
+            margin: 18px 0 6px;
+            font-size: 1.08rem;
+        }
+
+        .modBloqueado {
+            display: grid;
+            justify-items: center;
+            gap: 8px;
+            padding: 36px 20px;
+            border: 1px dashed var(--line-strong);
+            border-radius: var(--r-lg);
+            background: var(--surface);
+            text-align: center;
+            color: var(--ink-soft);
+        }
+
+        .modBloqueado[hidden] { display: none; }
+        .modBloqueado b { color: var(--ink); font-size: 1.05rem; }
+        .modBloqueado .btn-primario { width: auto; margin-top: 8px; }
+
+        .modBloqueado svg {
+            width: 40px;
+            height: 40px;
+            fill: none;
+            stroke: var(--brand);
+            stroke-width: 1.6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .listaLlaves {
+            display: grid;
+            gap: 8px;
+            margin: 8px 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .listaLlaves li {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 12px;
+            padding: 12px;
+            border: 1px solid var(--line);
+            border-radius: var(--r-md);
+            background: var(--surface);
+        }
+
+        .listaLlaves .novedadFilaTexto { flex: 1 1 200px; }
+        .listaLlaves .novedadAccion, .listaLlaves .panelNotifAccion { margin: 0; }
+
+        .huella {
+            font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+            letter-spacing: .04em;
+        }
+
+        .crearLlave, .altaLlaveAdmin {
+            margin-top: 22px;
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: var(--r-lg);
+            background: var(--surface);
+        }
+
+        .crearLlave h3, .altaLlaveAdmin h3 { margin-top: 0; }
+        .altaLlaveAdmin { border: 2px solid var(--gold-500); }
+
+        #sqlLlaveAdmin {
+            font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+            font-size: .78rem;
+            line-height: 1.5;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        .listaRegistro {
+            display: grid;
+            gap: 2px;
+            margin: 10px 0 0;
+            padding: 0;
+            list-style: none;
+            font-size: .88rem;
+        }
+
+        .listaRegistro li {
+            display: grid;
+            grid-template-columns: 120px minmax(0, 1fr);
+            gap: 12px;
+            padding: 8px 4px;
+            border-bottom: 1px solid var(--line-soft);
+        }
+
+        .listaRegistro time { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+        .modalLlaveCaja { max-width: 460px; }
+        .modalLlaveCaja form { padding: 0 4px; }
+        .modalLlaveCaja input[type="file"] { padding: 10px; }
+
+        .tarjetaModeracion { margin: 0 0 18px; width: 100%; }
+
+        @media (max-width: 520px) {
+            .modCabecera { flex-direction: column; }
+            .modCabeceraAcciones, .modCabeceraAcciones button { width: 100%; }
+            .listaRegistro li { grid-template-columns: 1fr; gap: 2px; }
+        }

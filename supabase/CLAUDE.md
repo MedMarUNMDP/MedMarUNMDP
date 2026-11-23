@@ -23,7 +23,9 @@ FK al mismo hilo), `likes_hilos`, `likes_respuestas` (foro) ·
 `intercambio_participantes` vía `notificar()`, agrupando avisos sin leer del mismo destino; las noticias las publica un admin
 con `publicarNoticia`; select solo propias, en Realtime) · `materiales` (catálogo de enlaces a Google Drive: no se suben archivos) y
 `aportes_material` (aportes de estudiantes por link de Drive o sugerencia, revisados por moderadores; anti-spam en
-`enviarAporte`: rate limit, tope diario y de pendientes, solo Drive, trampa y tiempo mínimo) · `puntajes_juegos` (ranking: mejor puntaje por usuario/juego/modo, RPC `ranking_juego`) ·
+`enviarAporte`: rate limit, tope diario y de pendientes, solo Drive, trampa y tiempo mínimo) · `llaves_moderacion` (llaves públicas ECDSA P-256 de moderadores/admins; segundo factor:
+toda acción de moderación pasa por `autorizarModeracion` y exige rol + llave activa + token de 30 min; llaves de admin solo
+por SQL; ADR `docs/decisiones/0004`) · `registro_moderacion` (auditoría, 180 días) · `puntajes_juegos` (ranking: mejor puntaje por usuario/juego/modo, RPC `ranking_juego`) ·
 `notificacion_queue` · `idempotency_keys` · `rate_limit_buckets` · `private.legacy_password_migrations`.
 
 Funciones clave: `is_moderator`, `is_admin`, `prevent_role_escalation`, `consume_rate_limit`, `finalize_exchange`,
@@ -38,6 +40,8 @@ Keep-alive: `.github/workflows/keep-alive.yml` llama a `api/health` dos veces po
 
 ## Reglas al modificar
 
+1. **Acción de moderación o admin nueva** → siempre `const auth=await autorizarModeracion(admin,user,body,'moderador'|'admin')`
+   (nunca solo `isModerator`/`isAdmin`) y `auditar(...)`; en la web, llamala con `llamarModeracion`.
 1. **Nueva acción del API** → skill `/nueva-accion-api`. Siempre: `rateLimit()` (y entrada en `RATE_LIMITS`),
    validar/limitar tamaños (`MAX_*`), devolver `json({ ok: true, … })` o `json({ ok: false, error: 'codigo' })` con status 200.
 2. Usá el **cliente de usuario** (`client`, respeta RLS) por defecto. El **admin** (`admin`, secret key, saltea RLS)
