@@ -48,7 +48,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261123a">
+    <link rel="stylesheet" href="/css/styles.css?v=20261123b">
 </head>
 
 <body>
@@ -137,6 +137,47 @@
         <!-- ==================== APP PRINCIPAL ==================== -->
 
         <div id="app" style="display:none">
+
+            <!-- ==================== NAVEGACIÓN ====================
+                 Celular: barra superior (marca + avatar) y barra inferior con 4 destinos.
+                 PC (≥ 900 px): la barra inferior pasa a ser un riel lateral fijo con marca y Perfil.
+                 Cada botón [data-nav] llama a mostrarSeccion() en app.js. -->
+            <header class="barraApp" id="barraApp">
+                <button type="button" class="barraMarca" data-nav="inicio" aria-label="MedMar, ir a Inicio">
+                    <img src="/assets/brand/isotipo-medmar.png" alt="" width="32" height="32">
+                    <span>MedMar</span>
+                </button>
+                <button type="button" class="barraPerfil" data-nav="configuracion" aria-label="Tu perfil">
+                    <span id="avatarBarraApp" aria-hidden="true"></span>
+                </button>
+            </header>
+
+            <nav class="navApp" id="navApp" aria-label="Secciones de MedMar">
+                <button type="button" class="navMarca" data-nav="inicio" aria-label="MedMar, ir a Inicio">
+                    <img src="/assets/brand/isotipo-medmar.png" alt="" width="40" height="40">
+                    <span>MedMar</span>
+                </button>
+                <button type="button" class="navItem" data-nav="inicio">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 12 4l8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-8Z"/></svg>
+                    <span>Inicio</span>
+                </button>
+                <button type="button" class="navItem" data-nav="intercambios">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h13m-4-4 4 4-4 4M20 16H7m4-4-4 4 4 4"/></svg>
+                    <span>Intercambios</span>
+                </button>
+                <button type="button" class="navItem" data-nav="foro">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-4 3V6Z"/></svg>
+                    <span>Foro</span>
+                </button>
+                <button type="button" class="navItem" data-nav="juegos">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9h10a4 4 0 0 1 4 4v2a2.5 2.5 0 0 1-4.5 1.5L15 15H9l-1.5 1.5A2.5 2.5 0 0 1 3 15v-2a4 4 0 0 1 4-4Z"/><path d="M8 11v2M7 12h2"/></svg>
+                    <span>Juegos</span>
+                </button>
+                <button type="button" class="navItem navSoloRiel" data-nav="configuracion">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
+                    <span>Perfil</span>
+                </button>
+            </nav>
 
             <div id="userBar">
                 <button type="button" id="btnIrInicio" class="btnVolverInicio">
@@ -707,7 +748,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261123a"></script>
+    <script src="/js/app.js?v=20261123b"></script>
 
 
 </body>

@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-tokens"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-navegacion"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -181,6 +181,7 @@ const hilosPendientesConfirmacion = new Map()
         // --- avatares y configuración de cuenta ---
         const emailConfig = document.getElementById("emailConfig")
         const avatarUserBar = document.getElementById("avatarUserBar")
+        const avatarBarraApp = document.getElementById("avatarBarraApp")
         const avatarConfigPreview = document.getElementById("avatarConfigPreview")
         const btnCambiarFoto = document.getElementById("btnCambiarFoto")
         const inputArchivoFoto = document.getElementById("inputArchivoFoto")
@@ -2562,6 +2563,30 @@ async function cargarBootstrap() {
             mostrarSeccion("inicio", "up")
         })
 
+        // Navegación fija (barra inferior / riel lateral / barra superior): todos los [data-nav].
+        const botonesNav = document.querySelectorAll("[data-nav]")
+
+        botonesNav.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                const destino = btn.dataset.nav
+                // Tocar «Foro» estando dentro de un hilo vuelve a la lista.
+                if (destino === "foro" && seccionActual === "foro" && foroDetalle.style.display !== "none") {
+                    mostrarListaHilos(true)
+                    return
+                }
+                mostrarSeccion(destino, "up")
+            })
+        })
+
+        function marcarNavActiva(nombre) {
+            // Consulta directa (no botonesNav) por si se llama antes de que se declare la constante.
+            document.querySelectorAll("[data-nav]").forEach(function (btn) {
+                if (btn.classList.contains("navMarca") || btn.classList.contains("barraMarca")) return
+                if (btn.dataset.nav === nombre) btn.setAttribute("aria-current", "page")
+                else btn.removeAttribute("aria-current")
+            })
+        }
+
         btnIrModeracion.addEventListener("click", function () {
             mostrarSeccion("moderacion", "down")
         })
@@ -2593,6 +2618,7 @@ async function cargarBootstrap() {
             btnIrInicio.style.display = nombre === "inicio" ? "none" : "flex"
             // En Inicio la barra superior quedaba vacía y se veía como una cápsula de color.
             userBar.style.display = nombre === "inicio" ? "none" : "flex"
+            marcarNavActiva(nombre)
             if (pieInicio) pieInicio.classList.toggle("oculto", nombre !== "inicio")
 
             if (nombre !== 'intercambios' && chatAbiertoId) cerrarChat()
@@ -2804,7 +2830,7 @@ async function cargarBootstrap() {
             paginaHilosActual = 0
 
             ;[listaHilos, listaRespuestas, detalleHiloContenido, listaSolicitudes, listaIntercambios,
-                listaDenuncias, listaModeradores, avatarUserBar, avatarConfigPreview].forEach(function (el) {
+                listaDenuncias, listaModeradores, avatarUserBar, avatarBarraApp, avatarConfigPreview].forEach(function (el) {
                 if (el) el.innerHTML = ""
             })
             ;[userEmail, emailConfig, msg, msgPerfil, msgFoto, msgPasswordPerfil, msgRespuesta, msgHilo].forEach(function (el) {
@@ -2845,6 +2871,7 @@ async function cargarBootstrap() {
         async function mostrarApp() {
             loginScreen.style.display = "none"
             app.style.display = "block"
+            document.body.classList.add("enApp")
             userEmail.innerText = sesion.email
             inicializarHistorialMedmar()
 
@@ -2880,6 +2907,7 @@ async function cargarBootstrap() {
             limpiarDatosDeSesion(false)
             app.style.display = "none"
             loginScreen.style.display = "block"
+            document.body.classList.remove("enApp")
             seccionActual = "inicio"
             resetearHistorialPorLogout()
             actualizarVisibilidadPie()
@@ -2978,6 +3006,7 @@ async function cargarBootstrap() {
         function actualizarAvataresEnPantalla(nombre) {
 
             avatarUserBar.innerHTML = avatarHtml(nombre, fotoActual, "avatarMediano")
+            if (avatarBarraApp) avatarBarraApp.innerHTML = avatarHtml(nombre, fotoActual, "")
             avatarConfigPreview.innerHTML = avatarHtml(nombre, fotoActual, "avatarGrande")
 
             if (typeof actualizarComposeCabecera === "function") actualizarComposeCabecera()

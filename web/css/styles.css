@@ -827,7 +827,7 @@
             justify-content: center;
             font-size: 0.85rem;
             font-weight: 700;
-            color: var(--teal-900);
+            color: var(--brand);
         }
 
         .avatarChico {
@@ -2073,4 +2073,176 @@
             .juegoJugar { width: 100%; }
             .rankingFila { grid-template-columns: 36px 30px minmax(0, 1fr) auto; gap: 8px; }
             .rankingFila .avatar { width: 30px; height: 30px; }
+        }
+
+        /* ---------- NAVEGACIÓN DE LA APP (rediseño, fase 1) ----------
+           body.enApp lo pone mostrarApp() en app.js. Con sesión iniciada el hero desaparece y la navegación
+           queda siempre visible: barra superior + barra inferior en celular, riel lateral en PC (≥ 900 px). */
+        :root {
+            --alto-barra-app: 56px;
+            --alto-nav-app: 64px;
+            --ancho-riel: 232px;
+        }
+
+        .barraApp, .navApp { display: none; }
+
+        body.enApp .hero,
+        body.enApp #userBar { display: none !important; }
+
+        body.enApp .barraApp {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            min-height: var(--alto-barra-app);
+            margin: 0 -24px 18px;
+            padding: 8px 16px;
+            padding-top: calc(8px + env(safe-area-inset-top, 0px));
+            background: var(--surface);
+            border-bottom: 1px solid var(--line);
+        }
+
+        body.enApp .contenido { padding-top: 0; }
+
+        .barraMarca, .navMarca {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: auto;
+            margin: 0;
+            padding: 4px 6px;
+            background: transparent;
+            color: var(--ink);
+            border-radius: var(--r-sm);
+        }
+
+        .barraMarca img, .navMarca img {
+            border-radius: 50%;
+            border: 1.5px solid var(--gold-500);
+            object-fit: cover;
+            flex: none;
+        }
+
+        .barraMarca span, .navMarca span {
+            font-family: "Fraunces", Georgia, serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .barraPerfil {
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            margin: 0;
+            padding: 0;
+            border-radius: 50%;
+            background: transparent;
+        }
+
+        .barraPerfil .avatar { width: 34px; height: 34px; font-size: .9rem; }
+        .barraPerfil[aria-current="page"] .avatar { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--brand); }
+
+        body.enApp .navApp {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 50;
+            padding: 6px max(8px, env(safe-area-inset-left, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-right, 0px));
+            background: var(--surface);
+            border-top: 1px solid var(--line);
+        }
+
+        .navMarca, .navSoloRiel { display: none !important; }
+
+        .navItem {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            width: auto;
+            min-height: 52px;
+            margin: 0;
+            padding: 4px 2px;
+            background: transparent;
+            color: var(--ink-soft);
+            font-size: .72rem;
+            font-weight: 600;
+            border-radius: var(--r-md);
+        }
+
+        .navItem svg {
+            width: 56px;
+            height: 30px;
+            padding: 4px 16px;
+            border-radius: var(--r-pill);
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: background-color .15s ease;
+        }
+
+        .navItem:hover { color: var(--ink); }
+        .navItem[aria-current="page"] { color: var(--brand); }
+        .navItem[aria-current="page"] svg { background: var(--brand-soft); }
+
+        /* Espacio para que la barra inferior no tape el final de cada vista. */
+        body.enApp .pagina { padding-bottom: calc(var(--alto-nav-app) + 32px + env(safe-area-inset-bottom, 0px)); }
+        body.enApp { scroll-padding-top: calc(var(--alto-barra-app) + 12px); scroll-padding-bottom: calc(var(--alto-nav-app) + 12px); }
+
+        /* Dentro de un hilo el compositor de respuestas ocupa el borde inferior: la barra se esconde. */
+        body.enApp:has(#foroDetalle[style*="block"]) .navApp { display: none; }
+        body.enApp:has(#foroDetalle[style*="block"]) .pagina { padding-bottom: 60px; }
+
+        @media (min-width: 900px) {
+            body.enApp { padding-left: var(--ancho-riel); }
+            body.enApp .barraApp { display: none; }
+            body.enApp .contenido { padding-top: 26px; }
+            body.enApp .pagina { padding-bottom: 60px; }
+            body.enApp { scroll-padding-top: 12px; scroll-padding-bottom: 0; }
+
+            body.enApp .navApp,
+            body.enApp:has(#foroDetalle[style*="block"]) .navApp {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                top: 0;
+                right: auto;
+                width: var(--ancho-riel);
+                padding: 20px 14px;
+                border-top: 0;
+                border-right: 1px solid var(--line);
+            }
+
+            .navMarca, .navSoloRiel { display: flex !important; }
+            .navMarca { margin-bottom: 18px; padding: 6px 10px; }
+            .navMarca span { font-size: 1.35rem; }
+
+            .navItem {
+                flex-direction: row;
+                gap: 12px;
+                min-height: 46px;
+                padding: 0 12px;
+                font-size: .95rem;
+            }
+
+            .navItem svg { width: 22px; height: 22px; padding: 0; border-radius: 0; background: none !important; }
+            .navItem:hover { background: var(--surface-2); }
+            .navItem[aria-current="page"] { background: var(--brand-soft); }
+        }
+
+        @media (max-width: 480px) {
+            body.enApp .barraApp { margin: 0 -18px 16px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .navItem svg { transition: none; }
         }
