@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Content Security Policy (GitHub Pages no permite headers propios: va por <meta>).
          https://developer.mozilla.org/docs/Web/HTTP/CSP · Si agregás un CDN o un embed nuevo, sumalo acá. -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://ekfwdrsehhmrqxxlefyx.supabase.co wss://ekfwdrsehhmrqxxlefyx.supabase.co https://script.google.com https://script.googleusercontent.com; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://ekfwdrsehhmrqxxlefyx.supabase.co wss://ekfwdrsehhmrqxxlefyx.supabase.co https://script.google.com https://script.googleusercontent.com; frame-src https://challenges.cloudflare.com https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <script src="/js/marco.js?v=20261125a"></script>
 
@@ -49,7 +49,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261125b">
+    <link rel="stylesheet" href="/css/styles.css?v=20261125c">
 </head>
 
 <body>
@@ -90,6 +90,7 @@
                     <input type="password" id="loginPassword" required autocomplete="current-password">
                     <button type="button" class="btnMostrarPassword" data-target="loginPassword" aria-label="Mostrar contraseña"><svg class="iconoOjo" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
                 </div>
+                <div class="captchaAuth" id="captchaLogin" data-captcha></div>
                 <button type="submit" class="btn-primario">Iniciar sesión</button>
                 <button type="button" id="btnOlvidePassword" class="linkAuth">¿Olvidaste tu contraseña?</button>
             </form>
@@ -100,6 +101,7 @@
                 <form id="formRecuperarPassword">
                     <label for="resetEmail">Email de tu cuenta</label>
                     <input type="email" id="resetEmail" required autocomplete="email">
+                    <div class="captchaAuth" id="captchaReset" data-captcha></div>
                     <button type="submit" class="btn-secundario">Enviar enlace</button>
                 </form>
                 <div id="pasoCodigoReset" style="display:none">
@@ -130,6 +132,7 @@
                     <button type="button" class="btnMostrarPassword" data-target="regPasswordConfirm" aria-label="Mostrar contraseña"><svg class="iconoOjo" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
                 </div>
 
+                <div class="captchaAuth" id="captchaRegistro" data-captcha></div>
                 <button type="submit" class="btn-primario">Crear cuenta</button>
             </form>
 
@@ -876,6 +879,7 @@
                             <input type="password" id="nuevaPasswordPerfil" minlength="8" autocomplete="new-password">
                             <button type="button" class="btnMostrarPassword" data-target="nuevaPasswordPerfil" aria-label="Mostrar nueva contraseña"><svg class="iconoOjo" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
                         </div>
+                        <div class="captchaAuth" id="captchaPerfil" data-captcha></div>
                         <button type="submit" class="btn-secundario">Cambiar contraseña</button>
                     </form>
                     <p id="msgPasswordPerfil"></p>
@@ -1030,7 +1034,11 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261125b"></script>
+    <script src="/js/app.js?v=20261125c"></script>
+
+    <!-- CAPTCHA anti-bots (Cloudflare Turnstile) para login, registro y recuperación. Sin SRI: Cloudflare lo actualiza
+         solo y su documentación pide no fijarlo. Se renderiza recién cuando el formulario se usa. -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&amp;onload=alCargarTurnstile" async defer></script>
 
 
 </body>

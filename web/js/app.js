@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-25-ranking"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-25-captcha"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -1030,11 +1030,14 @@ async function cargarBootstrap() {
             e.preventDefault()
             const email = resetEmail.value.trim()
             msgReset.innerText = 'Enviando enlace…'
+            const captchaReset = await tokenCaptcha('captchaReset')
             const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin + window.location.pathname
+                redirectTo: window.location.origin + window.location.pathname,
+                captchaToken: captchaReset || undefined
             })
+            reiniciarCaptcha('captchaReset')
             if (error) {
-                msgReset.innerText = 'No se pudo enviar el enlace. Probá de nuevo en un momento.'
+                msgReset.innerText = esErrorCaptcha(error) ? MENSAJE_CAPTCHA : 'No se pudo enviar el enlace. Probá de nuevo en un momento.'
                 console.error(error)
                 return
             }
@@ -1096,8 +1099,65 @@ async function cargarBootstrap() {
             authMsg.innerText = ""
         })
 
-        async function iniciarSesionConSupabase(email, password) {
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password })
+        // ==================== CAPTCHA (CLOUDFLARE TURNSTILE) ====================
+        // Supabase Auth exige un token de Turnstile en login, registro y recuperación cuando el CAPTCHA está activo
+        // (Authentication → Attack Protection). Cada formulario tiene su widget; se dibuja recién cuando la persona
+        // empieza a usar el formulario y el token es de un solo uso, así que se reinicia después de cada intento.
+        // Si el script no carga, se sigue sin token: si el CAPTCHA está activo, Supabase lo rechaza con un error claro.
+
+        const TURNSTILE_SITE_KEY = "0x4AAAAAAGPE99ujGdAzKcDA"
+        const widgetsCaptcha = {}
+
+        function alCargarTurnstile() {
+            document.querySelectorAll("[data-captcha]").forEach(function (el) {
+                const form = el.closest("form")
+                if (!form) return
+                form.addEventListener("focusin", function () { dibujarCaptcha(el.id) })
+                if (form.contains(document.activeElement)) dibujarCaptcha(el.id)
+            })
+        }
+
+        function dibujarCaptcha(id) {
+            if (!window.turnstile || widgetsCaptcha[id] !== undefined) return
+            const el = document.getElementById(id)
+            if (!el) return
+            widgetsCaptcha[id] = window.turnstile.render(el, {
+                sitekey: TURNSTILE_SITE_KEY,
+                language: "es",
+                theme: document.body.classList.contains("temaOscuro") ? "dark" : "light",
+                size: "flexible",
+                action: id
+            })
+        }
+
+        // Devuelve el token (esperando hasta ~12 s a que Turnstile termine) o null si no hay CAPTCHA disponible.
+        async function tokenCaptcha(id) {
+            if (!window.turnstile) return null
+            dibujarCaptcha(id)
+            const widget = widgetsCaptcha[id]
+            if (widget === undefined) return null
+            for (let i = 0; i < 48; i++) {
+                const token = window.turnstile.getResponse(widget)
+                if (token) return token
+                await new Promise(function (r) { setTimeout(r, 250) })
+            }
+            return null
+        }
+
+        function reiniciarCaptcha(id) {
+            try { if (window.turnstile && widgetsCaptcha[id] !== undefined) window.turnstile.reset(widgetsCaptcha[id]) } catch (_) {}
+        }
+
+        function esErrorCaptcha(error) {
+            return !!error && /captcha/i.test(String(error.message || "") + " " + String(error.code || ""))
+        }
+
+        const MENSAJE_CAPTCHA = "No pudimos verificar que no seas un bot. Esperá a que aparezca el tilde de verificación o recargá la página."
+
+        async function iniciarSesionConSupabase(email, password, idCaptcha) {
+            const captchaToken = await tokenCaptcha(idCaptcha || "captchaLogin")
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password, options: captchaToken ? { captchaToken } : undefined })
+            reiniciarCaptcha(idCaptcha || "captchaLogin")
             return { data, error }
         }
 
@@ -1111,6 +1171,7 @@ async function cargarBootstrap() {
 
             if (login.error || !login.data?.session) {
                 const message = login.error?.message || ''
+                if (esErrorCaptcha(login.error)) { authMsg.innerText = MENSAJE_CAPTCHA; return }
                 authMsg.innerText = /confirm|verified/i.test(message)
                     ? 'Tenés que confirmar tu correo antes de iniciar sesión.'
                     : 'Email o contraseña incorrectos.'
@@ -1142,13 +1203,21 @@ async function cargarBootstrap() {
 
             authMsg.innerText = "Creando cuenta..."
 
+            const captchaRegistro = await tokenCaptcha('captchaRegistro')
             const { data, error } = await supabaseClient.auth.signUp({
                 email,
                 password,
                 options: {
-                    emailRedirectTo: window.location.origin + window.location.pathname
+                    emailRedirectTo: window.location.origin + window.location.pathname,
+                    captchaToken: captchaRegistro || undefined
                 }
             })
+            reiniciarCaptcha('captchaRegistro')
+
+            if (error && esErrorCaptcha(error)) {
+                authMsg.innerText = MENSAJE_CAPTCHA
+                return
+            }
 
             if (error) {
                 const message = String(error.message || '')
@@ -3853,9 +3922,9 @@ async function cargarBootstrap() {
             // en Supabase Auth, el servidor además exige reautenticación en sesiones viejas.)
             if (actual) {
                 msgPasswordPerfil.innerText = 'Verificando tu contraseña actual…'
-                const verificacion = await supabaseClient.auth.signInWithPassword({ email: sesion.email, password: actual })
+                const verificacion = await iniciarSesionConSupabase(sesion.email, actual, 'captchaPerfil')
                 if (verificacion.error) {
-                    msgPasswordPerfil.innerText = mensajeError('password_actual_incorrecta')
+                    msgPasswordPerfil.innerText = esErrorCaptcha(verificacion.error) ? MENSAJE_CAPTCHA : mensajeError('password_actual_incorrecta')
                     return
                 }
             }

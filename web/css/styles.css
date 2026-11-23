@@ -3235,3 +3235,8 @@
         .rankingQuitar:hover { border-color: var(--red-600); color: var(--red-600); }
         .rankingFila:has(.rankingQuitar) { grid-template-columns: 44px 34px minmax(0, 1fr) auto auto; }
         @media (max-width: 520px) { .rankingFila:has(.rankingQuitar) { grid-template-columns: 36px 30px minmax(0, 1fr) auto auto; } .rankingQuitar { margin-left: 0; } }
+
+
+        /* ---------- CAPTCHA (TURNSTILE) ---------- */
+
+        .captchaAuth:not(:empty) { margin: 10px 0 4px; min-height: 65px; }
