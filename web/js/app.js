@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-26-estadisticas"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-26-formato-encuestas"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -676,6 +676,10 @@ const hilosPendientesConfirmacion = new Map()
 
             const mensajes = {
                 email_invalido: "El email no es válido.",
+                encuesta_invalida: "Revisá la encuesta: la pregunta y cada opción tienen un largo máximo.",
+                encuesta_opciones: "La encuesta necesita entre 2 y 6 opciones.",
+                encuesta_opciones_repetidas: "Hay opciones repetidas en la encuesta.",
+                encuesta_cerrada: "Esta encuesta ya cerró.",
                 link_requerido: "Pegá el enlace de Google Drive del archivo.",
                 cuenta_oficial: "La cuenta oficial de MedMar no se puede modificar desde la web.",
                 no_quitarte_admin: "No podés quitarte el rol de administrador a vos mismo.",
@@ -1878,8 +1882,9 @@ async function cargarBootstrap() {
                 div.innerHTML =
                     (chips ? "<div class='etiquetas'>" + chips + "</div>" : "") +
                     "<h3 class='hiloTitulo'>" + escapeHtml(h.titulo) + "</h3>" +
+                    (h.encuesta ? "<span class='chipEncuesta'>📊 Encuesta</span>" : "") +
                     (h.isSensitive ? "<div class='avisoSensibleFeed'>⚠️ Contenido sensible · Abrí la publicación para visualizarlo</div>" :
-                        (h.resumen ? "<p class='hiloResumen'>" + escapeHtml(h.resumen) + "</p>" : "")) +
+                        (h.resumen ? "<p class='hiloResumen'>" + escapeHtml(quitarFormato(h.resumen)) + "</p>" : "")) +
                     // En un hilo sensible tampoco mostramos la miniatura del enlace en el listado.
                     (h.isSensitive ? "" : renderizarLinkPreview(h.link, true)) +
                     (h._optimista ? "<div class='estadoOptimista'>" + escapeHtml(h._estadoOptimista === "pendiente" ? "Confirmando publicación… No la vuelvas a publicar." : "Publicando…") + "</div>" : "") +
@@ -2060,6 +2065,9 @@ async function cargarBootstrap() {
             const titulo = inputTitulo.value.trim()
             const contenido = inputContenido.value.trim()
             const etiquetasTexto = inputEtiquetas.value.trim()
+            const encuesta = leerEncuestaCompose()
+            if (encuesta && encuesta.error) { msgHilo.innerText = encuesta.error; return }
+            if (!titulo || (!contenido && !encuesta)) { msgHilo.innerText = "Completá el título y el texto (o agregá una encuesta)."; return }
             const isSensitive = !!inputContenidoSensible.checked
             const tags = etiquetasTexto.split(",").map(function (x) { return x.trim() }).filter(Boolean).slice(0, 5)
             const tempId = "tmp-" + Date.now() + "-" + Math.random().toString(36).slice(2)
@@ -2070,7 +2078,8 @@ async function cargarBootstrap() {
                 autor: inputPseudonimo.value || "Vos",
                 autorFoto: fotoActual,
                 titulo: titulo,
-                resumen: contenido.length > 180 ? contenido.slice(0, 180) + "…" : contenido,
+                resumen: (contenido || (encuesta && (encuesta.pregunta || titulo)) || "").slice(0, 180),
+                encuesta: !!encuesta,
                 etiquetas: tags,
                 link: "",
                 isSensitive: isSensitive,
@@ -2095,13 +2104,15 @@ async function cargarBootstrap() {
             const tempEl = [...listaHilos.querySelectorAll("[data-temp-hilo]")].find(function (x) { return x.dataset.tempHilo === tempId })
             if (tempEl) tempEl.classList.add("hiloOptimista")
 
-            const r = await llamarMutacionResiliente("crearHilo", {
+            const paramsHilo = {
                 titulo: titulo,
                 contenido: contenido,
                 etiquetas: etiquetasTexto,
                 isSensitive: isSensitive,
-                operacionId: operacionId
-            }, 3)
+                operacionId: operacionId,
+                encuesta: encuesta || undefined
+            }
+            const r = await llamarMutacionResiliente("crearHilo", paramsHilo, 3)
 
             if (r.ok) {
                 hiloPublicacionEnCurso = false
@@ -2110,6 +2121,7 @@ async function cargarBootstrap() {
                 hilosPendientesConfirmacion.delete(tempId)
                 msgHilo.innerText = ""
                 formHilo.reset()
+                reiniciarEncuestaCompose()
                 inputContenido.style.height = ""
                 contadorContenido.textContent = "0 / 5000"
 
@@ -2159,13 +2171,7 @@ async function cargarBootstrap() {
                 msgHilo.innerText = "La publicación quedó en verificación. No la vuelvas a publicar."
                 // Reintento de fondo con la misma operación: el backend es idempotente.
                 setTimeout(async function() {
-                    const rr = await llamarMutacionResiliente("crearHilo", {
-                        titulo: titulo,
-                        contenido: contenido,
-                        etiquetas: etiquetasTexto,
-                        isSensitive: isSensitive,
-                        operacionId: operacionId
-                    }, 2)
+                    const rr = await llamarMutacionResiliente("crearHilo", paramsHilo, 2)
                     if (rr.ok) {
                         hilosPendientesConfirmacion.delete(tempId)
                         hiloPublicacionEnCurso = false
@@ -2283,17 +2289,43 @@ async function cargarBootstrap() {
             } catch (_) { return false }
         }
 
-        function renderizarContenidoForo(texto, sensible, id) {
+        // ==================== FORMATO DE PUBLICACIONES ====================
+        // Markdown liviano para el foro: títulos (# y ##), negrita, cursiva, tachado, `código`, listas con viñetas o
+        // numeradas (con un nivel de sangría), citas, cuadros destacados (> [!nota] / [!importante] / [!consejo]),
+        // tablas y separadores. Se guarda como texto plano; esto solo lo dibuja. Seguridad: el texto SIEMPRE se escapa
+        // primero y después se insertan etiquetas propias; nunca se pasa HTML del usuario (ver escapeHtml).
+
+        const CUADROS_FORMATO = {
+            nota: { icono: "ⓘ", titulo: "Nota" },
+            importante: { icono: "!", titulo: "Importante" },
+            consejo: { icono: "✓", titulo: "Consejo" }
+        }
+        const MAX_COLUMNAS_TABLA = 8
+        const MAX_FILAS_TABLA = 60
+
+        // Negrita, cursiva, tachado y código sobre texto YA escapado.
+        function formatoEnLinea(escapado) {
+            return escapado.split(/(`[^`\n]+`)/g).map(function (parte, i) {
+                if (i % 2 === 1) return "<code class='mdCodigoLinea'>" + parte.slice(1, -1) + "</code>"
+                return parte
+                    .replace(/\*\*(?=\S)([\s\S]*?\S)\*\*/g, "<strong>$1</strong>")
+                    .replace(/(^|[^*\w])\*(?=\S)([^*\n]*?\S)\*(?![*\w])/g, "$1<em>$2</em>")
+                    .replace(/~~(?=\S)([\s\S]*?\S)~~/g, "<s>$1</s>")
+            }).join("")
+        }
+
+        // Una línea de texto: enlaces seguros (con vista previa de imágenes) + formato en línea en el resto.
+        function htmlEnLineaForo(texto) {
             const raw = String(texto || '')
-            const urlRegex = /https?:\/\/[^\s<>\"']+/gi
+            const urlRegex = /https?:\/\/[^\s<>\"'|]+/gi
             let html = ''
             let last = 0
             let match
             while ((match = urlRegex.exec(raw)) !== null) {
                 const original = match[0]
-                const url = original.replace(/[),.;!?]+$/g, '')
+                const url = original.replace(/[),.;!?*~]+$/g, '')
                 const suffix = original.slice(url.length)
-                html += escapeHtml(raw.slice(last, match.index)).replace(/\n/g, '<br>')
+                html += formatoEnLinea(escapeHtml(raw.slice(last, match.index)))
                 let safe = false
                 try { safe = enlaceSeguroLocal(url) } catch (_) {}
                 if (safe) {
@@ -2308,10 +2340,146 @@ async function cargarBootstrap() {
                 } else {
                     html += escapeHtml(url)
                 }
-                html += escapeHtml(suffix)
+                html += formatoEnLinea(escapeHtml(suffix))
                 last = match.index + original.length
             }
-            html += escapeHtml(raw.slice(last)).replace(/\n/g, '<br>')
+            html += formatoEnLinea(escapeHtml(raw.slice(last)))
+            return html
+        }
+
+        // Línea separadora de una tabla (|---|:--:|). Sin regex con cuantificadores ambiguos: una línea armada a
+        // propósito colgaba la pestaña varios segundos (ReDoS).
+        function esSeparadorTabla(linea) {
+            let t = String(linea || "").trim()
+            if (!t || t.length > 600 || t.indexOf("-") < 0) return false
+            if (t.charAt(0) === "|") t = t.slice(1)
+            if (t.charAt(t.length - 1) === "|") t = t.slice(0, -1)
+            return t.split("|").every(function (c) { return /^:?-{2,}:?$/.test(c.trim()) })
+        }
+
+        function celdasTabla(linea) {
+            let s = linea.trim()
+            if (s.charAt(0) === "|") s = s.slice(1)
+            if (s.charAt(s.length - 1) === "|") s = s.slice(0, -1)
+            return s.split("|").map(function (c) { return c.trim() }).slice(0, MAX_COLUMNAS_TABLA)
+        }
+
+        function listaFormatoHtml(items) {
+            let html = ""
+            const pila = []
+            items.forEach(function (it) {
+                const nivel = Math.min(it.nivel, pila.length)
+                while (pila.length > nivel + 1) html += "</li></" + pila.pop() + ">"
+                if (pila.length === nivel + 1 && pila[nivel] !== it.tipo) html += "</li></" + pila.pop() + ">"
+                if (pila.length < nivel + 1) {
+                    html += "<" + it.tipo + " class='mdLista'>"
+                    pila.push(it.tipo)
+                    html += "<li>" + htmlEnLineaForo(it.texto)
+                } else {
+                    html += "</li><li>" + htmlEnLineaForo(it.texto)
+                }
+            })
+            while (pila.length) html += "</li></" + pila.pop() + ">"
+            return html
+        }
+
+        function renderizarFormato(texto, profundidad) {
+            profundidad = profundidad || 0
+            const lineas = String(texto || "").replace(/\r\n?/g, "\n").split("\n")
+            if (profundidad > 2) return "<p>" + lineas.map(htmlEnLineaForo).join("<br>") + "</p>"
+            let html = ""
+            let parrafo = []
+            let i = 0
+            function cerrarParrafo() {
+                if (parrafo.length) html += "<p>" + parrafo.map(htmlEnLineaForo).join("<br>") + "</p>"
+                parrafo = []
+            }
+            while (i < lineas.length) {
+                const l = lineas[i]
+                let m
+                if (/^\s*```/.test(l)) {
+                    cerrarParrafo()
+                    const codigo = []
+                    i++
+                    while (i < lineas.length && !/^\s*```/.test(lineas[i])) { codigo.push(lineas[i]); i++ }
+                    i++
+                    html += "<pre class='mdCodigo'><code>" + escapeHtml(codigo.join("\n")) + "</code></pre>"
+                    continue
+                }
+                if (!l.trim()) { cerrarParrafo(); i++; continue }
+                if ((m = /^\s*(#{1,3})\s+(.+)$/.exec(l))) {
+                    cerrarParrafo()
+                    html += m[1].length === 1
+                        ? "<h3 class='mdTitulo'>" + htmlEnLineaForo(m[2]) + "</h3>"
+                        : "<h4 class='mdSubtitulo'>" + htmlEnLineaForo(m[2]) + "</h4>"
+                    i++
+                    continue
+                }
+                if (/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(l)) { cerrarParrafo(); html += "<hr class='mdSeparador'>"; i++; continue }
+                if (/^\s*>/.test(l)) {
+                    cerrarParrafo()
+                    const bloque = []
+                    while (i < lineas.length && /^\s*>/.test(lineas[i])) { bloque.push(lineas[i].replace(/^\s*>\s?/, "")); i++ }
+                    const c = /^\[!(nota|importante|consejo)\]\s*(.*)$/i.exec(bloque[0] || "")
+                    if (c) {
+                        const tipo = c[1].toLowerCase(), info = CUADROS_FORMATO[tipo]
+                        const resto = [c[2]].concat(bloque.slice(1)).join("\n").trim()
+                        html += "<div class='mdCuadro mdCuadro-" + tipo + "' role='note'><span class='mdCuadroTitulo'><span class='mdCuadroIcono' aria-hidden='true'>" + info.icono + "</span>" + info.titulo + "</span>" +
+                            renderizarFormato(resto, profundidad + 1) + "</div>"
+                    } else {
+                        html += "<blockquote class='mdCita'>" + renderizarFormato(bloque.join("\n"), profundidad + 1) + "</blockquote>"
+                    }
+                    continue
+                }
+                if (/^\s*\|/.test(l) && i + 1 < lineas.length && esSeparadorTabla(lineas[i + 1])) {
+                    cerrarParrafo()
+                    const cabecera = celdasTabla(l)
+                    const filas = []
+                    i += 2
+                    while (i < lineas.length && /^\s*\|/.test(lineas[i]) && filas.length < MAX_FILAS_TABLA) { filas.push(celdasTabla(lineas[i])); i++ }
+                    html += "<div class='mdTablaScroll'><table class='mdTabla'><thead><tr>" +
+                        cabecera.map(function (c) { return "<th>" + htmlEnLineaForo(c) + "</th>" }).join("") + "</tr></thead><tbody>" +
+                        filas.map(function (f) {
+                            return "<tr>" + cabecera.map(function (_, j) { return "<td>" + htmlEnLineaForo(f[j] || "") + "</td>" }).join("") + "</tr>"
+                        }).join("") + "</tbody></table></div>"
+                    continue
+                }
+                if (/^\s*([-*•+]|\d{1,3}[.)])\s+\S/.test(l)) {
+                    cerrarParrafo()
+                    const items = []
+                    while (i < lineas.length && (m = /^(\s*)([-*•+]|\d{1,3}[.)])\s+(.*)$/.exec(lineas[i]))) {
+                        items.push({ nivel: Math.min(2, Math.floor(m[1].replace(/\t/g, "  ").length / 2)), tipo: /\d/.test(m[2]) ? "ol" : "ul", texto: m[3] })
+                        i++
+                    }
+                    html += listaFormatoHtml(items)
+                    continue
+                }
+                parrafo.push(l)
+                i++
+            }
+            cerrarParrafo()
+            return html
+        }
+
+        // Para resúmenes (listado, Inicio): el texto sin los símbolos de formato.
+        function quitarFormato(texto) {
+            return String(texto || "").split("\n").filter(function (l) { return !esSeparadorTabla(l) }).join("\n")
+                .replace(/^\s*```.*$/gm, "")
+                .replace(/^\s*>\s?\[!(nota|importante|consejo)\]\s*/gim, "")
+                .replace(/^\s*>\s?/gm, "")
+                .replace(/^\s*#{1,3}\s+/gm, "")
+                .replace(/^\s*([-*•+]|\d{1,3}[.)])\s+/gm, "• ")
+                .replace(/^\s*(-{3,}|\*{3,}|_{3,})\s*$/gm, "")
+                .replace(/\|/g, " ")
+                .replace(/\*\*|~~|`/g, "")
+                .replace(/(^|[^*\w])\*(?=\S)([^*\n]*?\S)\*(?![*\w])/g, "$1$2")
+                .replace(/[ \t]+/g, " ")
+                .replace(/\n{2,}/g, "\n")
+                .trim()
+        }
+
+        function renderizarContenidoForo(texto, sensible, id) {
+            const html = renderizarFormato(texto)
             const body = "<div class='contenidoForoRich'>" + html + "</div>"
             if (!sensible) return body
             return "<div class='bloqueSensible ocultoSensible' data-sensible-id='" + escapeAttr(id) + "'><button type='button' class='revelarSensible'>⚠️ Contenido sensible · Mostrar contenido</button>" + body + "</div>"
@@ -2421,7 +2589,10 @@ async function cargarBootstrap() {
                 "<span class='puntoSeparador'>·</span>" +
                 "<span class='hiloFecha'>" + formatearFecha(h.fecha) + "</span>" +
                 "</div>" +
-                renderizarContenidoForo(h.contenido, !!h.isSensitive, "hilo-" + h.id) +
+                // Con encuesta y sin texto propio, el contenido guardado es la pregunta: no se repite.
+                // En un hilo sensible, la encuesta aparece recién al revelar el contenido.
+                (h.encuesta && !h.isSensitive && String(h.contenido || "").trim() === String(h.encuesta.pregunta || "").trim() ? "" : renderizarContenidoForo(h.contenido, !!h.isSensitive, "hilo-" + h.id)) +
+                (h.encuesta && !h.isSensitive ? renderizarEncuesta(h.encuesta) : "") +
                 // Si es sensible, la vista previa (embed de YouTube/Spotify) se agrega recién al revelar.
                 (h.isSensitive ? "" : renderizarLinkPreview(h.link)) +
                 "<div class='hiloLikeBar'>" + likeButtonHtml('hilo', h.id, h.likes, h.meGusta) + "</div>" +
@@ -2431,6 +2602,12 @@ async function cargarBootstrap() {
             activarBotonLike(detalleHiloContenido)
 
             const btnRevelar = detalleHiloContenido.querySelector(".revelarSensible")
+            if (btnRevelar && h.encuesta) {
+                btnRevelar.addEventListener("click", function () {
+                    const bloque = detalleHiloContenido.querySelector(".bloqueSensible")
+                    if (bloque && !detalleHiloContenido.querySelector(".encuestaForo")) bloque.insertAdjacentHTML("afterend", renderizarEncuesta(hiloActualUI && hiloActualUI.encuesta || h.encuesta))
+                }, { once: true })
+            }
             if (btnRevelar && h.link) {
                 btnRevelar.addEventListener("click", function () {
                     const bloque = detalleHiloContenido.querySelector(".bloqueSensible")
@@ -3056,6 +3233,283 @@ async function cargarBootstrap() {
             resetearHistorialPorLogout()
             mostrarLogin()
         })
+
+        // ==================== ENCUESTAS DEL FORO ====================
+        // Una publicación puede llevar una encuesta (API: crearHilo con `encuesta`, verHilo y votarEncuesta).
+        // Anónima: solo totales. Pública: además, quién eligió cada opción.
+
+        const btnAgregarEncuesta = document.getElementById("btnAgregarEncuesta")
+        const camposEncuesta = document.getElementById("camposEncuesta")
+        const encuestaOpciones = document.getElementById("encuestaOpciones")
+        const MAX_OPCIONES_ENCUESTA = 6
+        let encuestaEnEdicion = false // en el detalle: mostrar las opciones para cambiar el voto
+
+        function agregarOpcionEncuesta(valor) {
+            if (!encuestaOpciones || encuestaOpciones.children.length >= MAX_OPCIONES_ENCUESTA) return
+            const n = encuestaOpciones.children.length + 1
+            const input = document.createElement("input")
+            input.type = "text"
+            input.maxLength = 80
+            input.className = "encuestaOpcionInput"
+            input.placeholder = "Opción " + n
+            input.setAttribute("aria-label", "Opción " + n)
+            input.value = valor || ""
+            encuestaOpciones.appendChild(input)
+            const btn = document.getElementById("btnAgregarOpcion")
+            if (btn) btn.hidden = encuestaOpciones.children.length >= MAX_OPCIONES_ENCUESTA
+        }
+
+        function mostrarCamposEncuesta(visible) {
+            if (!camposEncuesta) return
+            camposEncuesta.hidden = !visible
+            btnAgregarEncuesta.hidden = visible
+            btnAgregarEncuesta.setAttribute("aria-expanded", visible ? "true" : "false")
+            // Con encuesta, el texto de la publicación es opcional.
+            inputContenido.required = !visible
+            inputContenido.placeholder = visible ? "Texto (opcional): contexto de la encuesta" : "¿Qué querés compartir?"
+            if (visible && !encuestaOpciones.children.length) { agregarOpcionEncuesta(); agregarOpcionEncuesta() }
+            if (visible) setTimeout(function () { document.getElementById("encuestaPregunta").focus() }, 50)
+        }
+
+        function reiniciarEncuestaCompose() {
+            if (!camposEncuesta) return
+            encuestaOpciones.innerHTML = ""
+            document.getElementById("encuestaPregunta").value = ""
+            document.getElementById("encuestaAnonima").checked = true
+            document.getElementById("encuestaMultiple").checked = false
+            document.getElementById("encuestaDuracion").value = "168"
+            mostrarCamposEncuesta(false)
+        }
+
+        // null = sin encuesta; { error } = algo para corregir; si no, el objeto que espera la API.
+        function leerEncuestaCompose() {
+            if (!camposEncuesta || camposEncuesta.hidden) return null
+            const opciones = Array.from(encuestaOpciones.querySelectorAll("input")).map(function (x) { return x.value.trim() }).filter(Boolean)
+            if (opciones.length < 2) return { error: "La encuesta necesita al menos 2 opciones." }
+            const minusculas = opciones.map(function (o) { return o.toLowerCase() })
+            if (new Set(minusculas).size !== opciones.length) return { error: "Hay opciones repetidas en la encuesta." }
+            return {
+                pregunta: document.getElementById("encuestaPregunta").value.trim(),
+                opciones: opciones,
+                anonima: document.getElementById("encuestaAnonima").checked,
+                multiple: document.getElementById("encuestaMultiple").checked,
+                duracionHoras: Number(document.getElementById("encuestaDuracion").value)
+            }
+        }
+
+        if (btnAgregarEncuesta) {
+            btnAgregarEncuesta.addEventListener("click", function () { mostrarCamposEncuesta(true) })
+            document.getElementById("btnQuitarEncuesta").addEventListener("click", reiniciarEncuestaCompose)
+            document.getElementById("btnAgregarOpcion").addEventListener("click", function () {
+                agregarOpcionEncuesta()
+                const ultimo = encuestaOpciones.lastElementChild
+                if (ultimo) ultimo.focus()
+            })
+        }
+
+        function textoCierreEncuesta(e) {
+            if (e.cerrada) return "Encuesta cerrada"
+            if (!e.cierra) return "Sin fecha de cierre"
+            const ms = new Date(e.cierra).getTime() - Date.now()
+            const horas = Math.max(1, Math.round(ms / 3600000))
+            return horas < 48 ? "Cierra en " + horas + (horas === 1 ? " hora" : " horas") : "Cierra en " + Math.round(horas / 24) + " días"
+        }
+
+        // Pregunta y opciones: formato en línea, pero sin enlaces ni imágenes (no pasan la validación de enlaces del
+        // servidor y un enlace dentro del botón de voto votaría al hacerle clic).
+        function textoEncuestaHtml(t) { return formatoEnLinea(escapeHtml(String(t || ""))) }
+
+        function renderizarEncuesta(e) {
+            const yaVoto = (e.misVotos || []).length > 0
+            const votando = !e.cerrada && (!yaVoto || encuestaEnEdicion)
+            const total = Number(e.totalVotantes || 0)
+            let cuerpo = ""
+            if (votando) {
+                cuerpo = "<div class='encuestaOpcionesVoto' role='group' aria-label='Opciones de la encuesta'>" +
+                    (e.opciones || []).map(function (o, i) {
+                        const marcada = (e.misVotos || []).indexOf(i) >= 0
+                        return e.multiple
+                            ? "<label class='encuestaOpcionVoto'><input type='checkbox' data-opcion-multiple='" + i + "'" + (marcada ? " checked" : "") + "> <span>" + textoEncuestaHtml(o.texto) + "</span></label>"
+                            : "<button type='button' class='encuestaOpcionVoto' data-votar-opcion='" + i + "'>" + textoEncuestaHtml(o.texto) + "</button>"
+                    }).join("") + "</div>" +
+                    (e.multiple ? "<button type='button' class='btn-primario encuestaVotar' data-votar-multiple>Votar</button>" : "") +
+                    (yaVoto ? "<button type='button' class='encuestaLink' data-cancelar-cambio>Cancelar</button>" : "")
+            } else {
+                const max = Math.max.apply(null, (e.opciones || []).map(function (o) { return o.votos }).concat([0]))
+                cuerpo = "<ul class='encuestaResultados'>" + (e.opciones || []).map(function (o, i) {
+                    const pct = total ? Math.round(o.votos / total * 100) : 0
+                    const mio = (e.misVotos || []).indexOf(i) >= 0
+                    const quienes = !e.anonima && o.votantes && o.votantes.length
+                        ? "<details class='encuestaVotantes'><summary>Ver quiénes (" + o.votos + ")</summary><p>" + o.votantes.map(escapeHtml).join(", ") + (o.votos > o.votantes.length ? " y " + (o.votos - o.votantes.length) + " más" : "") + "</p></details>"
+                        : ""
+                    return "<li class='encuestaResultado" + (mio ? " mio" : "") + (o.votos === max && max > 0 ? " ganadora" : "") + "'>" +
+                        "<div class='encuestaBarra' style='--pct:" + pct + "%'><span class='encuestaTexto'>" + (mio ? "✓ " : "") + textoEncuestaHtml(o.texto) + "</span><span class='encuestaPct'>" + pct + "%</span></div>" +
+                        quienes + "</li>"
+                }).join("") + "</ul>"
+            }
+            const pie = total + (total === 1 ? " voto" : " votos") + " · " + (e.anonima ? "Anónima" : "Pública: se ve quién votó") +
+                (e.multiple ? " · Varias respuestas" : "") + " · " + textoCierreEncuesta(e)
+            return "<section class='encuestaForo' data-encuesta-id='" + escapeAttr(e.id) + "' aria-label='Encuesta'>" +
+                "<h4 class='encuestaPregunta'>📊 " + textoEncuestaHtml(e.pregunta) + "</h4>" + cuerpo +
+                "<p class='encuestaPie'>" + escapeHtml(pie) +
+                (yaVoto && !e.cerrada && !votando ? " · <button type='button' class='encuestaLink' data-cambiar-voto>Cambiar voto</button>" : "") +
+                (!yaVoto && !e.cerrada && !votando ? "" : "") + "</p>" +
+                "<p class='encuestaMsg' aria-live='polite'></p></section>"
+        }
+
+        function redibujarEncuesta() {
+            const actual = detalleHiloContenido.querySelector(".encuestaForo")
+            if (!actual || !hiloActualUI || !hiloActualUI.encuesta) return
+            actual.outerHTML = renderizarEncuesta(hiloActualUI.encuesta)
+        }
+
+        async function votarEncuestaUI(opciones) {
+            const e = hiloActualUI && hiloActualUI.encuesta
+            if (!e) return
+            const caja = detalleHiloContenido.querySelector(".encuestaForo")
+            if (caja) caja.querySelectorAll("button,input").forEach(function (b) { b.disabled = true })
+            const r = await llamar("votarEncuesta", { encuestaId: e.id, opciones: opciones })
+            if (!r.ok) {
+                if (caja) {
+                    caja.querySelectorAll("button,input").forEach(function (b) { b.disabled = false })
+                    const msg = caja.querySelector(".encuestaMsg")
+                    if (msg) msg.textContent = mensajeError(r.error)
+                }
+                return
+            }
+            encuestaEnEdicion = false
+            hiloActualUI.encuesta = r.encuesta
+            const cache = hiloCacheCliente.get(String(hiloActualUI.id))
+            if (cache && cache.data && cache.data.hilo) { cache.data.hilo.encuesta = r.encuesta; cache.actualizadoEn = Date.now() }
+            redibujarEncuesta()
+        }
+
+        detalleHiloContenido.addEventListener("click", function (ev) {
+            const t = ev.target
+            if (!t.closest(".encuestaForo")) return
+            const unica = t.closest("[data-votar-opcion]")
+            if (unica) { votarEncuestaUI([Number(unica.dataset.votarOpcion)]); return }
+            if (t.closest("[data-votar-multiple]")) {
+                const elegidas = Array.from(detalleHiloContenido.querySelectorAll("[data-opcion-multiple]:checked")).map(function (x) { return Number(x.dataset.opcionMultiple) })
+                if (!elegidas.length) { const msg = detalleHiloContenido.querySelector(".encuestaMsg"); if (msg) msg.textContent = "Elegí al menos una opción."; return }
+                votarEncuestaUI(elegidas)
+                return
+            }
+            if (t.closest("[data-cambiar-voto]")) { encuestaEnEdicion = true; redibujarEncuesta(); return }
+            if (t.closest("[data-cancelar-cambio]")) { encuestaEnEdicion = false; redibujarEncuesta() }
+        })
+
+        // ==================== BARRA DE FORMATO Y VISTA PREVIA ====================
+        // Botones que insertan la sintaxis (no hace falta saber Markdown) y una vista previa con el mismo renderizador.
+
+        const ACCIONES_FORMATO = [
+            { id: "negrita", etiqueta: "<b>B</b>", titulo: "Negrita", envolver: ["**", "**"], ejemplo: "texto" },
+            { id: "cursiva", etiqueta: "<i>I</i>", titulo: "Cursiva", envolver: ["*", "*"], ejemplo: "texto" },
+            { id: "titulo", etiqueta: "T", titulo: "Título", prefijo: "# ", ejemplo: "Título" },
+            { id: "subtitulo", etiqueta: "t", titulo: "Subtítulo", prefijo: "## ", ejemplo: "Subtítulo" },
+            { id: "lista", etiqueta: "•", titulo: "Lista con viñetas", prefijo: "- ", ejemplo: "Elemento" },
+            { id: "numerada", etiqueta: "1.", titulo: "Lista numerada", prefijo: "1. ", ejemplo: "Paso", numerar: true },
+            { id: "cita", etiqueta: "❝", titulo: "Cita", prefijo: "> ", ejemplo: "Cita" },
+            { id: "nota", etiqueta: "ⓘ", titulo: "Cuadro: nota", prefijo: "> [!nota] ", ejemplo: "Texto de la nota", bloque: true },
+            { id: "importante", etiqueta: "!", titulo: "Cuadro: importante", prefijo: "> [!importante] ", ejemplo: "Texto importante", bloque: true },
+            { id: "consejo", etiqueta: "✓", titulo: "Cuadro: consejo", prefijo: "> [!consejo] ", ejemplo: "Un consejo", bloque: true },
+            { id: "tabla", etiqueta: "▦", titulo: "Tabla", insertar: "| Columna 1 | Columna 2 |\n|---|---|\n| Dato | Dato |" },
+            { id: "separador", etiqueta: "―", titulo: "Separador", insertar: "---" }
+        ]
+
+        function aplicarFormato(textarea, accion) {
+            const v = textarea.value, ini = textarea.selectionStart, fin = textarea.selectionEnd
+            const sel = v.slice(ini, fin)
+            let nuevo, selIni, selFin
+            if (accion.envolver) {
+                const t = sel || accion.ejemplo
+                nuevo = v.slice(0, ini) + accion.envolver[0] + t + accion.envolver[1] + v.slice(fin)
+                selIni = ini + accion.envolver[0].length
+                selFin = selIni + t.length
+            } else {
+                // Las líneas seleccionadas (o la línea del cursor) reciben el prefijo; si ya tenían otro, se reemplaza.
+                const inicioLinea = v.lastIndexOf("\n", ini - 1) + 1
+                let finLinea = v.indexOf("\n", fin)
+                if (finLinea < 0) finLinea = v.length
+                const actual = v.slice(inicioLinea, finLinea)
+                if (accion.insertar) {
+                    // Tabla o separador: después de la línea actual, separado por una línea en blanco.
+                    const pos = actual.trim() ? finLinea : inicioLinea
+                    const antes = v.slice(0, pos)
+                    const pre = !antes.trim() ? "" : /\n\n$/.test(antes) ? "" : /\n$/.test(antes) ? "\n" : "\n\n"
+                    nuevo = antes + pre + accion.insertar + "\n" + v.slice(pos).replace(/^\n/, "")
+                    selIni = (antes + pre).length
+                    selFin = selIni + accion.insertar.length
+                } else {
+                    const limpiar = function (l) { return l.replace(/^\s*(>\s?(\[!\w+\]\s*)?|#{1,3}\s+|[-*•+]\s+|\d{1,3}[.)]\s+)/, "") }
+                    const lineas = actual.trim() ? actual.split("\n") : [""]
+                    const bloque = lineas.map(function (l, i) {
+                        return (accion.numerar ? (i + 1) + ". " : accion.prefijo) + (limpiar(l) || accion.ejemplo)
+                    }).join("\n")
+                    nuevo = v.slice(0, inicioLinea) + bloque + v.slice(finLinea)
+                    const prefijo = accion.numerar ? "1. " : accion.prefijo
+                    selIni = inicioLinea + prefijo.length
+                    selFin = lineas.length === 1 ? inicioLinea + bloque.length : selIni
+                }
+            }
+            if (nuevo.length > (textarea.maxLength > 0 ? textarea.maxLength : 5000)) return
+            textarea.value = nuevo
+            textarea.focus()
+            textarea.setSelectionRange(selIni, selFin)
+            textarea.dispatchEvent(new Event("input", { bubbles: true }))
+        }
+
+        function montarBarraFormato(textarea, antesDe) {
+            if (!textarea) return
+            const barra = document.createElement("div")
+            barra.className = "barraFormato"
+            barra.setAttribute("role", "toolbar")
+            barra.setAttribute("aria-label", "Formato del texto")
+            barra.innerHTML = ACCIONES_FORMATO.map(function (a) {
+                return "<button type='button' class='botonFormato' data-formato='" + a.id + "' title='" + escapeAttr(a.titulo) + "' aria-label='" + escapeAttr(a.titulo) + "'>" + a.etiqueta + "</button>"
+            }).join("") +
+                "<button type='button' class='botonFormato botonVistaPrevia' data-vista-previa aria-pressed='false'>Vista previa</button>"
+            ;(antesDe || textarea).insertAdjacentElement("beforebegin", barra)
+            const previa = document.createElement("div")
+            previa.className = "vistaPreviaFormato"
+            previa.hidden = true
+            textarea.insertAdjacentElement("afterend", previa)
+            // mousedown: el botón no le saca el foco (ni la selección) al textarea.
+            barra.addEventListener("mousedown", function (e) { if (e.target.closest(".botonFormato")) e.preventDefault() })
+            barra.addEventListener("click", function (e) {
+                const b = e.target.closest(".botonFormato")
+                if (!b) return
+                if (b.hasAttribute("data-vista-previa")) {
+                    const mostrando = previa.hidden
+                    previa.hidden = !mostrando
+                    textarea.hidden = mostrando
+                    b.setAttribute("aria-pressed", mostrando ? "true" : "false")
+                    b.textContent = mostrando ? "Editar" : "Vista previa"
+                    barra.classList.toggle("enVistaPrevia", mostrando)
+                    if (mostrando) {
+                        previa.innerHTML = textarea.value.trim() ? renderizarContenidoForo(textarea.value, false, "previa") : "<p class='vacio'>Escribí algo para ver cómo queda.</p>"
+                        hidratarImagenesExternas(previa)
+                    } else textarea.focus()
+                    return
+                }
+                if (!previa.hidden) return
+                const accion = ACCIONES_FORMATO.find(function (a) { return a.id === b.dataset.formato })
+                if (accion) aplicarFormato(textarea, accion)
+            })
+            // Al enviar o vaciar el formulario, vuelve al modo edición.
+            const form = textarea.closest("form")
+            if (form) form.addEventListener("reset", function () {
+                previa.hidden = true; textarea.hidden = false
+                const bp = barra.querySelector("[data-vista-previa]")
+                bp.textContent = "Vista previa"; bp.setAttribute("aria-pressed", "false"); barra.classList.remove("enVistaPrevia")
+            })
+            form && form.addEventListener("submit", function () {
+                if (!previa.hidden) barra.querySelector("[data-vista-previa]").click()
+            }, true)
+        }
+
+        montarBarraFormato(inputContenido)
+        montarBarraFormato(inputRespuesta, document.querySelector("#formRespuesta .respuestaComposerFila"))
 
         // ==================== MOSTRAR / OCULTAR PANTALLAS ====================
 

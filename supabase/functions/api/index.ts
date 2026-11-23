@@ -60,6 +60,7 @@ const RATE_LIMITS: Record<string, [number, number]> = {
   quitarPuntaje: [30, 600],
   ocultarPuntaje: [60, 600],
   estadisticasRanking: [30, 600],
+  votarEncuesta: [60, 600],
   puntajesOcultos: [60, 600],
   desafioModeracion: [20, 600],
   abrirSesionModeracion: [10, 600],
@@ -615,6 +616,104 @@ function extractUrls(text: string) {
 // Cada enlace a un host de imágenes dispara una previsualización (una invocación de resolverImagen por lector):
 // sin tope, una sola publicación podía consumir miles de invocaciones del plan.
 const MAX_ENLACES_POR_PUBLICACION = 10
+
+// ==================== ENCUESTAS DEL FORO ====================
+// Una publicación puede llevar una encuesta (tablas encuestas y votos_encuesta, solo accesibles por la API).
+// Anónima: se guarda quién votó (para un voto por persona y poder cambiarlo) pero nunca se devuelve.
+const MAX_ENCUESTA_PREGUNTA = 200
+const MAX_ENCUESTA_OPCION = 80
+const MIN_ENCUESTA_OPCIONES = 2
+const MAX_ENCUESTA_OPCIONES = 6
+const DURACIONES_ENCUESTA_HORAS = new Set([0, 24, 72, 168]) // 0 = sin cierre
+const MAX_VOTANTES_VISIBLES = 60 // por opción, en encuestas públicas
+
+function textoEncuesta(v: unknown, max: number) {
+  return String(v ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max + 1)
+}
+
+// undefined = sin encuesta; { error } = datos inválidos; si no, la encuesta lista para guardar.
+function validarEncuesta(raw: any, titulo: string): any {
+  if (raw === undefined || raw === null || raw === false) return undefined
+  if (typeof raw !== 'object') return { error: 'encuesta_invalida' }
+  const pregunta = textoEncuesta(raw.pregunta, MAX_ENCUESTA_PREGUNTA) || titulo
+  if (!pregunta || pregunta.length > MAX_ENCUESTA_PREGUNTA) return { error: 'encuesta_invalida' }
+  if (!Array.isArray(raw.opciones) || raw.opciones.length > MAX_ENCUESTA_OPCIONES * 2) return { error: 'encuesta_invalida' }
+  const opciones = raw.opciones.map((o: unknown) => textoEncuesta(o, MAX_ENCUESTA_OPCION)).filter(Boolean)
+  if (opciones.length < MIN_ENCUESTA_OPCIONES || opciones.length > MAX_ENCUESTA_OPCIONES) return { error: 'encuesta_opciones' }
+  if (opciones.some((o: string) => o.length > MAX_ENCUESTA_OPCION)) return { error: 'encuesta_invalida' }
+  if (new Set(opciones.map((o: string) => o.toLowerCase())).size !== opciones.length) return { error: 'encuesta_opciones_repetidas' }
+  const horas = Number(raw.duracionHoras ?? 0)
+  if (!DURACIONES_ENCUESTA_HORAS.has(horas)) return { error: 'encuesta_invalida' }
+  return {
+    pregunta, opciones, anonima: raw.anonima !== false, multiple: raw.multiple === true,
+    cierra_at: horas ? new Date(Date.now() + horas * 3600_000).toISOString() : null,
+  }
+}
+
+// Encuesta de un hilo con sus resultados para quien la mira. null si no tiene (o si la tabla todavía no existe).
+async function datosEncuesta(admin: SupabaseClient, hiloId: string, userId: string) {
+  const { data: e, error } = await admin.from('encuestas').select('id,pregunta,opciones,anonima,multiple,cierra_at').eq('hilo_id', hiloId).maybeSingle()
+  if (error) { if (pgCode(error) === '42P01') return null; throw error }
+  if (!e) return null
+  const { data: votos, error: errVotos } = await admin.from('votos_encuesta').select('opciones,user_id').eq('encuesta_id', e.id).limit(5000)
+  if (errVotos) throw errVotos
+  const opciones: string[] = e.opciones || []
+  const conteo = opciones.map(() => 0)
+  const porOpcion: string[][] = opciones.map(() => [])
+  const votantes = new Set<string>()
+  const mios: number[] = []
+  for (const v of votos || []) {
+    const uid = String(v.user_id)
+    votantes.add(uid)
+    for (const raw of v.opciones || []) {
+      const i = Number(raw)
+      if (!(i >= 0 && i < opciones.length)) continue
+      conteo[i]++
+      if (uid === userId) mios.push(i)
+      if (!e.anonima && porOpcion[i].length < MAX_VOTANTES_VISIBLES) porOpcion[i].push(uid)
+    }
+  }
+  const nombres = e.anonima ? new Map() : await profileMap(admin, porOpcion.flat())
+  const cerrada = !!e.cierra_at && new Date(e.cierra_at).getTime() <= Date.now()
+  return {
+    id: String(e.id), pregunta: e.pregunta, anonima: !!e.anonima, multiple: !!e.multiple, cierra: e.cierra_at, cerrada,
+    totalVotantes: votantes.size, misVotos: mios.sort((a, b) => a - b),
+    opciones: opciones.map((texto, i) => ({
+      texto, votos: conteo[i],
+      ...(e.anonima ? {} : { votantes: porOpcion[i].map((uid) => nombres.get(uid)?.pseudonimo || 'Estudiante') }),
+    })),
+  }
+}
+
+async function hilosConEncuesta(ids: string[]) {
+  if (!ids.length) return new Set<string>()
+  const { data, error } = await adminClient().from('encuestas').select('hilo_id').in('hilo_id', ids)
+  if (error) { if (pgCode(error) === '42P01') return new Set<string>(); throw error }
+  return new Set((data || []).map((r: any) => String(r.hilo_id)))
+}
+
+async function votarEncuesta(user: User, admin: SupabaseClient, body: any) {
+  const encuestaId = uuidOrEmpty(body?.encuestaId)
+  const elegidas = Array.isArray(body?.opciones) ? body.opciones : null
+  if (!encuestaId || !elegidas || elegidas.length > MAX_ENCUESTA_OPCIONES || !elegidas.every((n: unknown) => typeof n === 'number' && Number.isInteger(n) && n >= 0 && n < MAX_ENCUESTA_OPCIONES)) return json({ ok: false, error: 'datos_invalidos' })
+  const unicas = [...new Set<number>(elegidas)]
+  const { data: e, error } = await admin.from('encuestas').select('id,hilo_id,opciones,multiple,cierra_at').eq('id', encuestaId).maybeSingle()
+  if (error) throw error
+  if (!e) return json({ ok: false, error: 'no_encontrado' })
+  if (e.cierra_at && new Date(e.cierra_at).getTime() <= Date.now()) return json({ ok: false, error: 'encuesta_cerrada' })
+  if (unicas.some((n) => n >= (e.opciones || []).length) || (!e.multiple && unicas.length > 1)) return json({ ok: false, error: 'datos_invalidos' })
+  // Una fila por persona: votar o cambiar el voto es un upsert atómico (dos votos simultáneos no se suman).
+  // Una lista vacía retira el voto.
+  if (unicas.length) {
+    const { error: errVoto } = await admin.from('votos_encuesta')
+      .upsert({ encuesta_id: encuestaId, user_id: user.id, opciones: unicas.sort((a, b) => a - b), updated_at: new Date().toISOString() }, { onConflict: 'encuesta_id,user_id' })
+    if (errVoto) throw errVoto
+  } else {
+    const { error: errBorrar } = await admin.from('votos_encuesta').delete().eq('encuesta_id', encuestaId).eq('user_id', user.id)
+    if (errBorrar) throw errBorrar
+  }
+  return json({ ok: true, encuesta: await datosEncuesta(admin, String(e.hilo_id), user.id) })
+}
 function validateContentLinks(text: string) {
   const urls = extractUrls(text)
   if (urls.length > MAX_ENLACES_POR_PUBLICACION) return { ok: false, urls, invalid: '', demasiados: true }
@@ -878,10 +977,11 @@ async function getThreadPage(client: SupabaseClient, userId: string, etiqueta: s
   if (error) throw error
   const ids = (data || []).map((h: any) => String(h.id))
   const authorIds = (data || []).map((h: any) => String(h.autor_id))
-  const [pmap, likesRes, mineRes] = await Promise.all([
+  const [pmap, likesRes, mineRes, conEncuesta] = await Promise.all([
     profileMap(client, authorIds),
     ids.length ? client.from('likes_hilos').select('hilo_id,user_id').in('hilo_id', ids) : Promise.resolve({ data: [] as any[], error: null }),
     ids.length ? client.from('likes_hilos').select('hilo_id').eq('user_id', userId).in('hilo_id', ids) : Promise.resolve({ data: [] as any[], error: null }),
+    hilosConEncuesta(ids),
   ])
   if (likesRes.error) throw likesRes.error
   if (mineRes.error) throw mineRes.error
@@ -904,6 +1004,7 @@ async function getThreadPage(client: SupabaseClient, userId: string, etiqueta: s
       likes: Number(counts.get(String(h.id)) || 0),
       meGusta: mine.has(String(h.id)),
       esPropio: String(h.autor_id) === userId,
+      encuesta: conEncuesta.has(String(h.id)),
     }
   })
   return { hilos, hayMas: Number(count || 0) > offset + hilos.length }
@@ -1261,13 +1362,23 @@ async function handle(req: Request, body: any) {
       const autorProf = pmap.get(String(h.autor_id))
       const hilo = { id:String(h.id), autor:h.es_anonimo?'Anónimo':(autorProf?.pseudonimo||'Estudiante'), autorFoto:h.es_anonimo?'':(autorProf?.foto_url||''), titulo:h.titulo, contenido:h.contenido, etiquetas:h.etiquetas||[], link:h.link||'', isSensitive:!!h.is_sensitive, fecha:h.created_at, respuestas:Number(h.respuestas||0), likes:(hLikes.data||[]).length, meGusta:!!mineH.data, esPropio:String(h.autor_id)===user.id }
       const respuestas = (rs||[]).map((r:any)=>{ const p=pmap.get(String(r.autor_id)); return {id:String(r.id),parentId:r.parent_id?String(r.parent_id):null,autor:r.es_anonimo?'Anónimo':(p?.pseudonimo||'Estudiante'),autorFoto:r.es_anonimo?'':(p?.foto_url||''),contenido:r.contenido,fecha:r.created_at,likes:Number(rCounts.get(String(r.id))||0),meGusta:mineRs.has(String(r.id)),esPropio:String(r.autor_id)===user.id,operacionId:String(r.autor_id)===user.id?String(r.operation_id||''):''} })
-      return json({ok:true,hilo,respuestas})
+      const encuesta=await datosEncuesta(admin,String(h.id),user.id)
+      return json({ok:true,hilo:{...hilo,encuesta},respuestas})
+    }
+    case 'votarEncuesta': {
+      const rl=await rateLimit(admin,action,user.id); if(rl)return rl
+      return votarEncuesta(user,admin,body)
     }
     case 'crearHilo': {
       const rl = await rateLimit(admin, action, user.id); if (rl) return rl
-      const titulo=String(body.titulo||'').trim(), contenido=String(body.contenido||'').trim(), operationId=String(body.operacionId||'')
+      const titulo=String(body.titulo||'').trim(), operationId=String(body.operacionId||'')
+      let contenido=String(body.contenido||'').trim()
       if (!validOperationId(operationId)) return json({ok:false,error:'datos_invalidos'})
       const cached=await getIdempotent(admin,user.id,operationId,action); if(cached) return json(cached)
+      const encuesta=validarEncuesta(body.encuesta,titulo)
+      if(encuesta?.error) return json({ok:false,error:encuesta.error})
+      // Con encuesta, el texto es opcional: si falta, se guarda la pregunta (la web no la repite al mostrarla).
+      if(encuesta&&!contenido) contenido=encuesta.pregunta
       if(!titulo||titulo.length>MAX_TITLE||!contenido||contenido.length>MAX_CONTENT) return json({ok:false,error:titulo.length>MAX_TITLE?'titulo_invalido':'contenido_invalido'})
       const tags=cleanTags(body.etiquetas)
       const linksCheck=validateContentLinks(contenido)
@@ -1275,10 +1386,19 @@ async function handle(req: Request, body: any) {
       const isSensitive=body.isSensitive===true || body.sensible==='1'
       const {data,error}=await admin.from('hilos').insert({autor_id:user.id,es_anonimo:false,titulo,contenido,etiquetas:tags,link:null,is_sensitive:isSensitive,operation_id:operationId}).select('id').single()
       if(error){
-        if((error as any).code==='23505'){ const {data:existing}=await client.from('hilos').select('id').eq('operation_id',operationId).single(); if(existing) return json({ ok: true, id: String(existing.id), hilo: await getOrBuildThreadResponse(client,user.id,String(existing.id)) })}
+        if((error as any).code==='23505'){ const {data:existing}=await client.from('hilos').select('id').eq('operation_id',operationId).single(); if(existing){
+          // Si un intento anterior se cortó entre el hilo y la encuesta, se completa ahora.
+          if(encuesta&&!(await datosEncuesta(admin,String(existing.id),user.id))){const {error:errE}=await admin.from('encuestas').insert({hilo_id:existing.id,...encuesta});if(errE&&pgCode(errE)!=='23505')throw errE}
+          const hiloExistente=await getOrBuildThreadResponse(client,user.id,String(existing.id))
+          return json({ ok: true, id: String(existing.id), hilo: encuesta?{...hiloExistente,encuesta:await datosEncuesta(admin,String(existing.id),user.id)}:hiloExistente }) }}
         throw error
       }
-      const response={ok:true,id:String(data.id),hilo:await getOrBuildThreadResponse(client,user.id,String(data.id))}
+      if(encuesta){
+        const {error:errEncuesta}=await admin.from('encuestas').insert({hilo_id:data.id,...encuesta})
+        if(errEncuesta){await admin.from('hilos').delete().eq('id',data.id);throw errEncuesta}
+      }
+      const hiloCreado=await getOrBuildThreadResponse(client,user.id,String(data.id))
+      const response={ok:true,id:String(data.id),hilo:encuesta?{...hiloCreado,encuesta:await datosEncuesta(admin,String(data.id),user.id)}:hiloCreado}
       await saveIdempotent(admin,user.id,action,operationId,response)
       return json(response)
     }

@@ -33,6 +33,7 @@
             --link: var(--teal-700);
             --on-gold: var(--teal-950);
             --gold-soft: #f2e6c9;
+            --red-soft: #f8e9e5;
             --on-danger: #ffffff;
             --like: #c74343;
             --like-soft: #f8e8e7;
@@ -85,6 +86,7 @@
             --link: #a9d9cc;
             --on-gold: #18251d;
             --gold-soft: #3a331a;
+            --red-soft: rgba(239, 140, 124, .14);
             --on-danger: #2a0f0a;
             --like: #f08a94;
             --like-soft: rgba(240, 138, 148, .14);
@@ -3348,3 +3350,103 @@
         /* ---------- CAPTCHA (TURNSTILE) ---------- */
 
         .captchaAuth:not(:empty) { margin: 10px 0 4px; min-height: 65px; }
+
+
+        /* ---------- FORMATO DE PUBLICACIONES (markdown liviano) ---------- */
+
+        .contenidoForoRich > :first-child { margin-top: 0; }
+        .contenidoForoRich > :last-child { margin-bottom: 0; }
+        .contenidoForoRich p { margin: 0 0 .7em; }
+        .contenidoForoRich .mdTitulo { margin: 1.1em 0 .45em; font-size: 1.3rem; line-height: 1.25; }
+        .contenidoForoRich .mdSubtitulo { margin: 1em 0 .4em; font-size: 1.08rem; line-height: 1.3; color: var(--brand); }
+        .contenidoForoRich .mdLista { margin: .2em 0 .8em; padding-left: 1.4em; }
+        .contenidoForoRich .mdLista .mdLista { margin: .2em 0; }
+        .contenidoForoRich .mdLista li { margin: .2em 0; }
+        .contenidoForoRich ul.mdLista > li::marker { color: var(--brand); }
+        .contenidoForoRich ol.mdLista > li::marker { color: var(--brand); font-weight: 700; }
+        .contenidoForoRich .mdSeparador { border: 0; border-top: 1px solid var(--line); margin: 1.1em 0; }
+        .contenidoForoRich .mdCita { margin: .5em 0 .9em; padding: 2px 0 2px 14px; border-left: 3px solid var(--line-strong); color: var(--ink-soft); }
+        .contenidoForoRich .mdCodigoLinea { padding: 1px 5px; border-radius: 5px; background: var(--surface-2); font-size: .9em; }
+        .contenidoForoRich .mdCodigo { margin: .5em 0 .9em; padding: 10px 12px; border-radius: var(--r-sm); background: var(--surface-2); overflow-x: auto; font-size: .88rem; white-space: pre; }
+        .contenidoForoRich .mdCuadro { margin: .6em 0 1em; padding: 10px 14px 12px; border-radius: var(--r-md); border: 1px solid var(--line); border-left-width: 4px; }
+        .contenidoForoRich .mdCuadro p:last-child { margin-bottom: 0; }
+        .contenidoForoRich .mdCuadroTitulo { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; font-size: .78rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+        .contenidoForoRich .mdCuadroIcono { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; font-size: .78rem; color: var(--surface); }
+        .mdCuadro-nota { background: var(--brand-soft); border-left-color: var(--brand) !important; }
+        .mdCuadro-nota .mdCuadroTitulo { color: var(--brand); }
+        .mdCuadro-nota .mdCuadroIcono { background: var(--brand); }
+        .mdCuadro-importante { background: var(--red-soft); border-left-color: var(--red-600) !important; }
+        .mdCuadro-importante .mdCuadroTitulo { color: var(--red-600); }
+        .mdCuadro-importante .mdCuadroIcono { background: var(--red-600); }
+        .mdCuadro-consejo { background: var(--gold-soft); border-left-color: var(--gold-500) !important; }
+        .mdCuadro-consejo .mdCuadroTitulo { color: var(--gold-600); }
+        .mdCuadro-consejo .mdCuadroIcono { background: var(--gold-500); }
+        .contenidoForoRich .mdTablaScroll { margin: .5em 0 1em; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--line); border-radius: var(--r-sm); }
+        .contenidoForoRich .mdTabla { width: 100%; border-collapse: collapse; font-size: .92rem; }
+        .contenidoForoRich .mdTabla th, .contenidoForoRich .mdTabla td { padding: 7px 10px; border-bottom: 1px solid var(--line-soft); text-align: left; vertical-align: top; min-width: 90px; }
+        .contenidoForoRich .mdTabla th { background: var(--surface-2); font-weight: 700; }
+        .contenidoForoRich .mdTabla tr:last-child td { border-bottom: 0; }
+
+        /* Barra de formato y vista previa (crear publicación y responder). */
+        .barraFormato { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+        .botonFormato {
+            width: auto; min-width: 32px; min-height: 32px; margin: 0; padding: 3px 8px;
+            border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--ink-soft);
+            font-size: .86rem; line-height: 1; cursor: pointer;
+        }
+        .botonFormato:hover, .botonFormato:focus-visible { border-color: var(--brand); color: var(--brand); }
+        .botonVistaPrevia { margin-left: auto; font-weight: 700; padding: 3px 12px; }
+        .barraFormato.enVistaPrevia .botonFormato:not(.botonVistaPrevia) { opacity: .4; pointer-events: none; }
+        .botonVistaPrevia[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: var(--on-brand); }
+        .vistaPreviaFormato { min-height: 90px; max-height: 50vh; overflow: auto; padding: 12px; border: 1px dashed var(--line-strong); border-radius: var(--r-md); background: var(--surface); }
+        #formRespuesta .barraFormato { margin: 0 0 6px; }
+        /* En la respuesta (fija abajo en el celular) la barra aparece solo mientras escribís o en vista previa. */
+        #formRespuesta:not(:focus-within) .barraFormato:not(.enVistaPrevia) { display: none; }
+        #formRespuesta .vistaPreviaFormato { flex: 1; min-width: 0; min-height: 44px; }
+        @media (max-width: 520px) { .botonFormato { min-width: 30px; min-height: 30px; padding: 3px 6px; } }
+
+        /* ---------- ENCUESTAS DEL FORO ---------- */
+
+        .chipEncuesta { display: inline-block; margin: 2px 0 6px; padding: 2px 9px; border-radius: var(--r-pill); background: var(--brand-soft); color: var(--brand); font-size: .76rem; font-weight: 700; }
+        .encuestaCompose { margin: 10px 0 4px; }
+        .btnEncuestaToggle, .btnEncuestaChico { width: auto; margin: 0; padding: 6px 12px; border: 1px dashed var(--line-strong); border-radius: var(--r-pill); background: transparent; color: var(--brand); font-weight: 700; font-size: .86rem; cursor: pointer; }
+        .btnEncuestaChico { border-style: solid; padding: 4px 10px; font-size: .82rem; }
+        .btnEncuestaChico.peligro { color: var(--red-600); border-color: var(--line); }
+        .camposEncuesta { display: grid; gap: 8px; margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-sunken); }
+        .camposEncuesta[hidden] { display: none; }
+        .camposEncuesta legend { padding: 0 6px; font-weight: 700; font-size: .85rem; color: var(--ink-soft); }
+        .camposEncuesta input[type="text"], .camposEncuesta select { width: 100%; margin: 0; }
+        .encuestaOpcionesCompose { display: grid; gap: 6px; }
+        .encuestaDuracionLabel { display: flex; align-items: center; gap: 8px; font-size: .9rem; }
+        .encuestaDuracionLabel select { width: auto; }
+        .camposEncuesta .btnEncuestaChico { justify-self: start; }
+
+        .encuestaForo { margin: 14px 0 6px; padding: 14px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
+        .encuestaPregunta { margin: 0 0 10px; font-size: 1.02rem; line-height: 1.35; }
+        .encuestaOpcionesVoto { display: grid; gap: 8px; }
+        .encuestaOpcionVoto {
+            display: flex; align-items: center; gap: 8px; width: 100%; margin: 0; padding: 10px 12px;
+            border: 1.5px solid var(--line-strong); border-radius: var(--r-pill); background: var(--surface);
+            color: var(--ink); font-weight: 600; text-align: left; cursor: pointer;
+        }
+        .encuestaOpcionVoto:hover, .encuestaOpcionVoto:focus-visible, .encuestaOpcionVoto:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); }
+        .encuestaOpcionVoto input { width: auto; margin: 0; accent-color: var(--brand); }
+        .encuestaVotar { width: auto; margin-top: 10px; }
+        .encuestaResultados { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+        .encuestaBarra {
+            position: relative; display: flex; justify-content: space-between; gap: 10px; padding: 9px 12px;
+            border-radius: var(--r-sm); overflow: hidden; background: var(--surface-2); isolation: isolate;
+        }
+        .encuestaBarra::before { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--pct); background: var(--brand-soft); z-index: -1; transition: width .4s ease; }
+        .encuestaResultado.ganadora .encuestaBarra::before { background: color-mix(in srgb, var(--brand) 30%, var(--brand-soft)); }
+        .encuestaResultado.mio .encuestaTexto { font-weight: 700; }
+        .encuestaPct { font-weight: 700; font-variant-numeric: tabular-nums; }
+        .encuestaVotantes { margin: 4px 2px 0; font-size: .84rem; color: var(--ink-soft); }
+        .encuestaVotantes summary { cursor: pointer; color: var(--link); }
+        .encuestaVotantes p { margin: 4px 0 0; }
+        .encuestaPie { margin: 10px 0 0; font-size: .82rem; color: var(--ink-3); }
+        .encuestaLink { width: auto; margin: 0; padding: 0; border: 0; background: none; color: var(--link); font: inherit; font-weight: 700; cursor: pointer; text-decoration: underline; }
+        .encuestaForo > .encuestaLink { margin-top: 8px; margin-left: 12px; }
+        .encuestaMsg { margin: 6px 0 0; font-size: .85rem; color: var(--red-600); }
+        .encuestaMsg:empty { display: none; }
+        @media (prefers-reduced-motion: reduce) { .encuestaBarra::before { transition: none; } }

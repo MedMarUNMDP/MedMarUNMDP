@@ -29,6 +29,11 @@ Para ubicarte: `Grep "// ====" web/js/app.js` y leé solo el rango que necesitá
   Si agregás una acción de lectura frecuente, sumala ahí: ahorra invocaciones del plan Free.
 - Realtime de Supabase solo para chat y `solicitudes` (matches); el resto es por request.
 - Textos de usuario: siempre pasar por `escapeHtml()` / `escapeAttr()` antes de insertarlos con `innerHTML`.
+- **Formato del foro** (sección FORMATO DE PUBLICACIONES): markdown liviano propio (`renderizarFormato`: títulos, negrita,
+  cursiva, listas, citas, cuadros `> [!nota|importante|consejo]`, tablas, código, separadores). Escapa primero y
+  después inserta etiquetas propias: no agregues reglas que inserten texto sin escapar. Resúmenes con `quitarFormato`.
+  Barra de botones + vista previa: `montarBarraFormato(textarea)`.
+- **Encuestas del foro** (sección ENCUESTAS DEL FORO): `crearHilo` con `encuesta`, `verHilo` devuelve `hilo.encuesta`, `votarEncuesta`.
 - `index.html` tiene una **Content Security Policy** en `<meta>`: un CDN, embed o dominio nuevo hay que sumarlo ahí o no carga.
 - **Cloudflare** está delante de GitHub Pages (proxy): agrega HSTS, `X-Frame-Options`, `frame-ancestors`, `nosniff` y
   `Permissions-Policy` con una regla de Transform (Rules → Response Header). RUM/Web Analytics desactivado a propósito.

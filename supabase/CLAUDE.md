@@ -17,7 +17,7 @@ se aplica acá impacta producción.
 `profiles` (`is_moderator`/`is_admin` booleanos, pseudónimo único sin distinguir mayúsculas, `foto_url`, `profile_completed`) ·
 `solicitudes` → `intercambios` + `intercambio_participantes`
 (intercambio de comisiones, matching por ciclos en `finalize_exchange`) · `conversaciones`, `conversacion_participantes`,
-`mensajes` (chat de un intercambio, 14 días) · `hilos` (`is_sensitive`), `respuestas` (anidadas con `parent_id`,
+`mensajes` (chat de un intercambio, 14 días) · `hilos` (`is_sensitive`; opcionalmente una `encuestas` con sus `votos_encuesta`: anónima = la API nunca devuelve quién votó), `respuestas` (anidadas con `parent_id`,
 FK al mismo hilo), `likes_hilos`, `likes_respuestas` (foro) ·
 `denuncias` (moderación) · `notificaciones` (campana: las crean triggers en `respuestas`, `mensajes` e
 `intercambio_participantes` vía `notificar()`, agrupando avisos sin leer del mismo destino; las noticias las publica un admin
