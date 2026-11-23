@@ -1424,7 +1424,9 @@ async function handle(req: Request, body: any) {
     }
     case 'misAportes': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      const {data,error}=await client.from('aportes_material').select('id,clase,titulo,materia,estado,motivo,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(20)
+      // Sin .eq('user_id'): authenticated no tiene SELECT sobre esa columna (fallaba con 42501). La política RLS
+      // aportes_material_select_propios ya limita a las filas propias.
+      const {data,error}=await client.from('aportes_material').select('id,clase,titulo,materia,estado,motivo,created_at').order('created_at',{ascending:false}).limit(20)
       if(error)throw error
       return json({ok:true,aportes:data||[]})
     }
