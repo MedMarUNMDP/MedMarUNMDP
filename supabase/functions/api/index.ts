@@ -603,7 +603,9 @@ function safeLink(raw: unknown) {
 }
 
 function extractUrls(text: string) {
-  return [...new Set((String(text || '').match(/https?:\/\/[^\s<>\"']+/gi) || []).map(x => x.replace(/[),.;!?]+$/g, '')))].slice(0, 10)
+  // Sin recortar: antes se quedaba con los 10 primeros, así que el tope de enlaces nunca saltaba y del 11.º en
+  // adelante no se validaba el dominio (verificado en vivo en la auditoría 2026-11).
+  return [...new Set((String(text || '').match(/https?:\/\/[^\s<>\"']+/gi) || []).map(x => x.replace(/[),.;!?]+$/g, '')))]
 }
 
 // Cada enlace a un host de imágenes dispara una previsualización (una invocación de resolverImagen por lector):
