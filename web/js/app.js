@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-terminos"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-clasificados-baja"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -124,6 +124,7 @@ const hilosPendientesConfirmacion = new Map()
         const vistaForo = document.getElementById("vistaForo")
         const vistaJuegos = document.getElementById("vistaJuegos")
         const vistaMaterial = document.getElementById("vistaMaterial")
+        const vistaClasificados = document.getElementById("vistaClasificados")
         const vistaConfiguracion = document.getElementById("vistaConfiguracion")
         const vistaReportes = document.getElementById("vistaReportes")
         const vistaModeracion = document.getElementById("vistaModeracion")
@@ -676,6 +677,12 @@ const hilosPendientesConfirmacion = new Map()
 
             const mensajes = {
                 email_invalido: "El email no es válido.",
+                confirmacion_baja: "Escribí BORRAR para confirmar.",
+                baja_admin: "La cuenta de administración no se puede eliminar desde la web. Escribinos por mail.",
+                clasificado_titulo: "El título tiene que tener entre 3 y 100 caracteres.",
+                clasificado_descripcion: "La descripción tiene que tener entre 10 y 1500 caracteres.",
+                clasificados_maximo: "Ya tenés 5 avisos activos. Pausá o borrá alguno para publicar otro.",
+                declaracion_clasificado: "Confirmá que lo ofrecés a título personal y que cumple las reglas.",
                 encuesta_invalida: "Revisá la encuesta: la pregunta y cada opción tienen un largo máximo.",
                 encuesta_opciones: "La encuesta necesita entre 2 y 6 opciones.",
                 encuesta_opciones_repetidas: "Hay opciones repetidas en la encuesta.",
@@ -859,28 +866,81 @@ async function cargarBootstrap() {
         // La API guarda qué versión aceptó cada cuenta (aceptarTerminos) y la devuelve en bootstrap. Si no es la vigente:
         // quien acaba de registrarse marcando la casilla la acepta sola; el resto ve una ventana que no se puede cerrar.
         // Tiene que coincidir con TERMINOS_VERSION de la API (y con la fecha de versión de /terminos/ y /privacidad/).
-        const TERMINOS_VERSION = "2026-11-23"
+        const TERMINOS_VERSION = "2026-11-23.2"
         const CLAVE_TERMINOS_REGISTRO = "medmar:terminosRegistro"
         const modalTerminos = document.getElementById("modalTerminos")
         const chkAceptoTerminos = document.getElementById("chkAceptoTerminos")
         const btnAceptarTerminos = document.getElementById("btnAceptarTerminos")
         const msgTerminos = document.getElementById("msgTerminos")
 
+        // Cambia campos del perfil guardado en caché (bootstrap) para no mostrar datos viejos al volver a entrar.
+        function actualizarPerfilEnCache(cambios) {
+            if (!sesion) return
+            try {
+                const cacheKey = "medmar:perfil:" + sesion.userId
+                const local = JSON.parse(localStorage.getItem(cacheKey) || "null")
+                if (local && local.data && local.data.perfil) {
+                    Object.assign(local.data.perfil, cambios)
+                    localStorage.setItem(cacheKey, JSON.stringify(local))
+                }
+            } catch (_) {}
+        }
+
         async function enviarAceptacionTerminos() {
             const r = await llamar("aceptarTerminos", { version: TERMINOS_VERSION })
-            if (r.ok && sesion) {
-                // Actualiza el perfil en caché para no volver a preguntar con datos viejos.
-                try {
-                    const cacheKey = "medmar:perfil:" + sesion.userId
-                    const local = JSON.parse(localStorage.getItem(cacheKey) || "null")
-                    if (local && local.data && local.data.perfil) {
-                        local.data.perfil.terminosVersion = TERMINOS_VERSION
-                        localStorage.setItem(cacheKey, JSON.stringify(local))
-                    }
-                } catch (_) {}
-            }
+            if (r.ok) actualizarPerfilEnCache({ terminosVersion: TERMINOS_VERSION })
             return r
         }
+
+        // ==================== BAJA DE CUENTA (30 DÍAS PARA ARREPENTIRSE) ====================
+        // solicitarBaja programa el borrado para dentro de 30 días; mientras tanto la cuenta funciona igual y un aviso
+        // en todas las secciones ofrece cancelarlo (cancelarBaja). El borrado lo hace la función maintenance.
+        let bajaProgramadaActual = null
+        const avisoBaja = document.getElementById("avisoBaja")
+        function fechaLargaBaja(iso) {
+            return new Date(iso).toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" })
+        }
+        function renderizarEstadoBaja() {
+            const pedida = !!bajaProgramadaActual
+            document.getElementById("bajaSinPedir").hidden = pedida
+            document.getElementById("bajaPedida").hidden = !pedida
+            avisoBaja.hidden = !pedida
+            if (pedida) {
+                const fecha = fechaLargaBaja(bajaProgramadaActual)
+                document.getElementById("textoAvisoBaja").textContent = "Tu cuenta y tus datos se van a eliminar el " + fecha + "."
+                document.getElementById("textoBajaPedida").textContent = "Pediste eliminar tu cuenta. Se va a borrar el " + fecha + ". Hasta entonces podés seguir usándola y cancelar la eliminación cuando quieras."
+            }
+        }
+        document.getElementById("btnSolicitarBaja").addEventListener("click", async function () {
+            const msg = document.getElementById("msgBaja")
+            const texto = document.getElementById("confirmarBaja").value.trim().toUpperCase()
+            if (texto !== "BORRAR") { msg.textContent = "Escribí BORRAR para confirmar."; return }
+            if (!confirm("Tu cuenta se va a eliminar en 30 días. Hasta entonces podés cancelarlo. ¿Seguir?")) return
+            this.disabled = true
+            msg.textContent = "Programando..."
+            const r = await llamar("solicitarBaja", { confirmacion: texto })
+            this.disabled = false
+            if (!r.ok) { msg.textContent = mensajeError(r.error); return }
+            msg.textContent = ""
+            document.getElementById("confirmarBaja").value = ""
+            bajaProgramadaActual = r.bajaProgramada
+            actualizarPerfilEnCache({ bajaProgramada: bajaProgramadaActual })
+            renderizarEstadoBaja()
+            mostrarAviso("Listo: tu cuenta se elimina el " + fechaLargaBaja(bajaProgramadaActual) + ".")
+        })
+        document.addEventListener("click", async function (e) {
+            const btn = e.target.closest("[data-cancelar-baja]")
+            if (!btn) return
+            btn.disabled = true
+            const r = await llamar("cancelarBaja", {})
+            btn.disabled = false
+            if (!r.ok) { mostrarAviso(mensajeError(r.error)); return }
+            bajaProgramadaActual = null
+            actualizarPerfilEnCache({ bajaProgramada: null })
+            renderizarEstadoBaja()
+            document.getElementById("msgBaja").textContent = ""
+            mostrarAviso("Cancelaste la eliminación: tu cuenta sigue activa.")
+        })
 
         async function verificarTerminos(perfil) {
             // Sin terminosVigente la respuesta es de una API anterior (o de la caché vieja): no se pregunta nada.
@@ -932,6 +992,7 @@ async function cargarBootstrap() {
                 fotoActual = data.perfil.foto || ''
                 emailConfig.innerText = sesion.email
                 actualizarAvataresEnPantalla(data.perfil.pseudonimo || 'Vos')
+                if ("bajaProgramada" in data.perfil) { bajaProgramadaActual = data.perfil.bajaProgramada || null; renderizarEstadoBaja() }
             }
             solicitudesUI = Array.isArray(data.solicitudes) ? data.solicitudes.slice() : []
             intercambiosUI = Array.isArray(data.intercambios) ? data.intercambios.slice() : []
@@ -3050,6 +3111,7 @@ async function cargarBootstrap() {
             vistaForo.style.display = nombre === "foro" ? "block" : "none"
             vistaJuegos.style.display = nombre === "juegos" ? "block" : "none"
             vistaMaterial.style.display = nombre === "material" ? "block" : "none"
+            vistaClasificados.style.display = nombre === "clasificados" ? "block" : "none"
             vistaConfiguracion.style.display = nombre === "configuracion" ? "block" : "none"
             vistaReportes.style.display = nombre === "reportes" ? "block" : "none"
             vistaModeracion.style.display = nombre === "moderacion" ? "block" : "none"
@@ -3068,6 +3130,7 @@ async function cargarBootstrap() {
 
             if (nombre === "juegos") cargarRankingJuego(false)
             if (nombre === "material") entrarAMaterial()
+            if (nombre === "clasificados") cargarClasificados(false)
 
             if (nombre === "moderacion") entrarAModeracion()
 
@@ -3081,6 +3144,7 @@ async function cargarBootstrap() {
                     nombre === "intercambios" ? vistaIntercambios :
                     nombre === "juegos" ? vistaJuegos :
                     nombre === "material" ? vistaMaterial :
+                    nombre === "clasificados" ? vistaClasificados :
                     nombre === "configuracion" ? vistaConfiguracion :
                     nombre === "reportes" ? vistaReportes :
                     vistaModeracion
@@ -3127,13 +3191,13 @@ async function cargarBootstrap() {
                     : ""
 
                 div.innerHTML =
-                    "<div class='hiloMeta'>Denuncia sobre " + (d.tipo === "material" ? "un material" : "un " + escapeHtml(d.tipo)) + " · " + formatearFecha(d.fecha) + "</div>" +
+                    "<div class='hiloMeta'>Denuncia sobre " + (d.tipo === "material" ? "un material" : d.tipo === "clasificado" ? "un aviso de Clasificados" : "un " + escapeHtml(d.tipo)) + " · " + formatearFecha(d.fecha) + "</div>" +
                     (d.motivo ? "<div class='hiloMeta'>Motivo: " + escapeHtml(d.motivo) + "</div>" : "") +
                     "<div class='contenidoDenunciado'>" + contenidoTexto + "</div>" +
                     autorHtml +
                     "<div class='denunciaAcciones'>" +
                     "<button type='button' class='btnDescartar'>Descartar</button>" +
-                    (d.publicacion.existe ? "<button type='button' class='btnEliminarPublicacion'>" + (d.tipo === "material" ? "Quitar material" : "Eliminar publicación") + "</button>" : "") +
+                    (d.publicacion.existe ? "<button type='button' class='btnEliminarPublicacion'>" + (d.tipo === "material" ? "Quitar material" : d.tipo === "clasificado" ? "Borrar aviso" : "Eliminar publicación") + "</button>" : "") +
                     "</div>"
 
                 div.querySelector(".btnDescartar").addEventListener("click", function () {
@@ -6052,6 +6116,147 @@ async function cargarBootstrap() {
             if (rankingModo && modoPedido && Array.from(rankingModo.options).some(function (o) { return o.value === modoPedido })) rankingModo.value = modoPedido
             try { history.replaceState(history.state, "", location.pathname + location.hash) } catch (_) {}
         }
+
+        // ==================== CLASIFICADOS ====================
+        // Ventas y servicios entre estudiantes, aparte del foro (API: listarClasificados, publicarClasificado,
+        // gestionarClasificado; denuncias con tipo "clasificado"). Todo texto se escapa y no se convierte en enlace.
+        const CATEGORIAS_CLASIFICADOS = {
+            resumenes: "Resúmenes y apuntes", clases: "Clases particulares", equipo: "Equipo e instrumental",
+            libros: "Libros usados", servicios: "Servicios", otros: "Otros"
+        }
+        const CLASIFICADOS_FRESCURA_MS = 60 * 1000
+        let clasificadosUI = [], misClasificadosUI = [], clasificadosCargadosEn = 0, filtroCategoriaClasificado = ""
+        const listaClasificados = document.getElementById("listaClasificados")
+        const buscarClasificado = document.getElementById("buscarClasificado")
+        const panelClasificado = document.getElementById("panelClasificado")
+        const btnPublicarClasificado = document.getElementById("btnPublicarClasificado")
+        const formClasificado = document.getElementById("formClasificado")
+        const msgClasificado = document.getElementById("msgClasificado")
+        let operacionClasificado = null
+
+        async function cargarClasificados(forzar) {
+            if (!sesion) return
+            if (!forzar && clasificadosCargadosEn && Date.now() - clasificadosCargadosEn < CLASIFICADOS_FRESCURA_MS) { renderizarClasificados(); return }
+            if (!clasificadosUI.length) listaClasificados.innerHTML = esqueletoTarjetas(2)
+            const r = await llamar("listarClasificados", {})
+            if (!r.ok) {
+                if (!clasificadosUI.length) listaClasificados.innerHTML = "<p class='vacio'>" + escapeHtml(r.error === "accion_invalida" ? "Clasificados se está activando. Probá de nuevo en un rato." : mensajeError(r.error)) + "</p>"
+                return
+            }
+            clasificadosUI = Array.isArray(r.clasificados) ? r.clasificados : []
+            misClasificadosUI = Array.isArray(r.misClasificados) ? r.misClasificados : []
+            clasificadosCargadosEn = Date.now()
+            renderizarClasificados()
+        }
+
+        function textoConSaltos(texto) {
+            return escapeHtml(texto).replace(/\n/g, "<br>")
+        }
+
+        function tarjetaClasificado(c, propio) {
+            const estado = propio ? (c.vencido ? "Vencido" : (c.activo ? "Activo hasta el " + fechaLargaBaja(c.expira_at) : "Pausado")) : ""
+            return "<article class='tarjetaMaterial tarjetaClasificado'>" +
+                "<div class='tarjetaMaterialMeta'><span class='chipTipo'>" + escapeHtml(CATEGORIAS_CLASIFICADOS[c.categoria] || "Otros") + "</span>" +
+                (c.precio ? "<span class='precioClasificado'>" + escapeHtml(c.precio) + "</span>" : "") +
+                (propio ? "<span class='materiaMaterial'>" + escapeHtml(estado) + "</span>" : "") + "</div>" +
+                "<h3>" + escapeHtml(c.titulo) + "</h3>" +
+                "<p class='descMaterial'>" + textoConSaltos(c.descripcion) + "</p>" +
+                (c.contacto ? "<p class='contactoClasificado'><b>Contacto:</b> " + escapeHtml(c.contacto) + "</p>" : "") +
+                (propio ? "" : "<p class='autorClasificado'>" + avatarHtml(c.autor, c.foto, "avatarMini") + "<span>" + escapeHtml(c.autor) + " · " + formatearFecha(c.created_at) + "</span></p>") +
+                "<div class='accionesMaterial'>" +
+                (propio
+                    ? (c.activo && !c.vencido
+                        ? "<button type='button' class='novedadAccion secundaria' data-gestionar-clasificado='pausar' data-id='" + escapeAttr(c.id) + "'>Pausar o vendido</button>"
+                        : "<button type='button' class='novedadAccion secundaria' data-gestionar-clasificado='activar' data-id='" + escapeAttr(c.id) + "'>Volver a publicar</button>") +
+                      (c.activo && !c.vencido ? "<button type='button' class='novedadAccion secundaria' data-gestionar-clasificado='renovar' data-id='" + escapeAttr(c.id) + "'>Renovar 60 días</button>" : "") +
+                      "<button type='button' class='novedadAccion secundaria quitarMaterial' data-gestionar-clasificado='borrar' data-id='" + escapeAttr(c.id) + "'>Borrar</button>"
+                    : (c.esMio ? "" : "<button type='button' class='denunciarMaterial' data-denunciar-clasificado='" + escapeAttr(c.id) + "'>Denunciar</button>")) +
+                "</div></article>"
+        }
+
+        function renderizarClasificados() {
+            const q = normalizarTexto(buscarClasificado.value.trim())
+            const lista = clasificadosUI.filter(function (c) {
+                if (filtroCategoriaClasificado && c.categoria !== filtroCategoriaClasificado) return false
+                if (q && normalizarTexto(c.titulo + " " + c.descripcion + " " + (c.precio || "")).indexOf(q) === -1) return false
+                return true
+            })
+            listaClasificados.innerHTML = lista.length
+                ? lista.map(function (c) { return tarjetaClasificado(c, false) }).join("")
+                : "<div class='materialVacio'><b>" + (clasificadosUI.length ? "No hay avisos con ese filtro" : "Todavía no hay avisos") + "</b>" +
+                  "<span>¿Tenés algo para vender u ofrecer? Publicá el primero.</span></div>"
+            const seccion = document.getElementById("seccionMisClasificados")
+            seccion.hidden = !misClasificadosUI.length
+            document.getElementById("listaMisClasificados").innerHTML = misClasificadosUI.map(function (c) { return tarjetaClasificado(c, true) }).join("")
+        }
+
+        buscarClasificado.addEventListener("input", renderizarClasificados)
+
+        function abrirPanelClasificado(abrir) {
+            panelClasificado.hidden = !abrir
+            btnPublicarClasificado.setAttribute("aria-expanded", String(abrir))
+            if (abrir) { msgClasificado.textContent = ""; document.getElementById("clasificadoTitulo").focus() }
+        }
+        btnPublicarClasificado.addEventListener("click", function () { abrirPanelClasificado(panelClasificado.hidden) })
+        document.getElementById("btnCancelarClasificado").addEventListener("click", function () { abrirPanelClasificado(false) })
+
+        formClasificado.addEventListener("submit", async function (e) {
+            e.preventDefault()
+            const datos = {
+                categoria: document.getElementById("clasificadoCategoria").value,
+                titulo: document.getElementById("clasificadoTitulo").value.trim(),
+                descripcion: document.getElementById("clasificadoDescripcion").value.trim(),
+                precio: document.getElementById("clasificadoPrecio").value.trim(),
+                contacto: document.getElementById("clasificadoContacto").value.trim(),
+                declaracion: document.getElementById("clasificadoDeclaracion").checked
+            }
+            if (datos.titulo.length < 3) { msgClasificado.textContent = mensajeError("clasificado_titulo"); return }
+            if (datos.descripcion.length < 10) { msgClasificado.textContent = mensajeError("clasificado_descripcion"); return }
+            if (!datos.declaracion) { msgClasificado.textContent = mensajeError("declaracion_clasificado"); return }
+            // El mismo id de operación en los reintentos evita avisos duplicados.
+            if (!operacionClasificado) operacionClasificado = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ("op-" + Date.now() + "-" + Math.random().toString(36).slice(2))
+            datos.operationId = operacionClasificado
+            const boton = formClasificado.querySelector("button[type=submit]")
+            boton.disabled = true
+            msgClasificado.textContent = "Publicando..."
+            const r = await llamar("publicarClasificado", datos)
+            boton.disabled = false
+            if (!r.ok) { msgClasificado.textContent = mensajeError(r.error); return }
+            operacionClasificado = null
+            formClasificado.reset()
+            abrirPanelClasificado(false)
+            mostrarAviso("Aviso publicado.")
+            cargarClasificados(true)
+        })
+
+        vistaClasificados.addEventListener("click", async function (e) {
+            const chip = e.target.closest("[data-cat-clasificado]")
+            if (chip) {
+                filtroCategoriaClasificado = chip.dataset.catClasificado
+                document.querySelectorAll("[data-cat-clasificado]").forEach(function (c) { c.setAttribute("aria-pressed", String(c === chip)) })
+                renderizarClasificados()
+                return
+            }
+            const denunciar = e.target.closest("[data-denunciar-clasificado]")
+            if (denunciar) {
+                const motivo = prompt("¿Qué pasa con este aviso? (por ejemplo: es una empresa o academia, vende copias de libros o medicamentos, es una estafa)")
+                if (motivo === null) return
+                const r = await llamar("denunciar", { tipo: "clasificado", id: denunciar.dataset.denunciarClasificado, motivo: motivo })
+                mostrarAviso(r.ok ? "Gracias, un moderador lo va a revisar." : mensajeError(r.error))
+                return
+            }
+            const gestionar = e.target.closest("[data-gestionar-clasificado]")
+            if (gestionar) {
+                const accion = gestionar.dataset.gestionarClasificado
+                if (accion === "borrar" && !confirm("¿Borrar este aviso? No se puede deshacer.")) return
+                gestionar.disabled = true
+                const r = await llamar("gestionarClasificado", { id: gestionar.dataset.id, accion: accion })
+                gestionar.disabled = false
+                if (!r.ok) { mostrarAviso(mensajeError(r.error)); return }
+                mostrarAviso(accion === "borrar" ? "Aviso borrado." : accion === "pausar" ? "Aviso pausado." : accion === "renovar" ? "Aviso renovado por 60 días." : "Aviso publicado de nuevo.")
+                cargarClasificados(true)
+            }
+        })
 
         // ==================== INICIO ====================
 

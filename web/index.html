@@ -49,7 +49,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261123t">
+    <link rel="stylesheet" href="/css/styles.css?v=20261123c">
 </head>
 
 <body>
@@ -190,6 +190,10 @@
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4Z"/><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6"/></svg>
                     <span>Material</span>
                 </button>
+                <button type="button" class="navItem navSoloRiel" data-nav="clasificados">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12V5a2 2 0 0 1 2-2h7l9 9-9 9-9-9Z"/><circle cx="8" cy="8" r="1.5"/></svg>
+                    <span>Clasificados</span>
+                </button>
                 <button type="button" class="navItem" data-nav="juegos">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9h10a4 4 0 0 1 4 4v2a2.5 2.5 0 0 1-4.5 1.5L15 15H9l-1.5 1.5A2.5 2.5 0 0 1 3 15v-2a4 4 0 0 1 4-4Z"/><path d="M8 11v2M7 12h2"/></svg>
                     <span>Juegos</span>
@@ -225,6 +229,11 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5 8 12l7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     Inicio
                 </button>
+            </div>
+
+            <div id="avisoBaja" class="avisoBaja" role="status" hidden>
+                <span id="textoAvisoBaja"></span>
+                <button type="button" class="btn-primario" data-cancelar-baja>Me arrepentí: conservar mi cuenta</button>
             </div>
 
             <!-- ==================== INICIO ==================== -->
@@ -281,6 +290,14 @@
                         </span>
                         <span class="tituloInicio">Material de estudio</span>
                         <span class="descInicio">Resúmenes, guías y apuntes para descargar</span>
+                    </button>
+
+                    <button type="button" class="tarjetaInicio" data-vista="clasificados">
+                        <span class="iconoInicio dorado">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V5a2 2 0 0 1 2-2h7l9 9-9 9-9-9Z"/><circle cx="8" cy="8" r="1.5"/></svg>
+                        </span>
+                        <span class="tituloInicio">Clasificados</span>
+                        <span class="descInicio">Resúmenes, clases y equipo entre estudiantes</span>
                     </button>
 
                     <button type="button" class="tarjetaInicio" data-vista="juegos">
@@ -466,7 +483,7 @@
                         </div>
                     </div>
 
-                    <p class="notaForo">Compartí dudas, apuntes y recursos de la carrera. No publiques datos personales ni información que permita identificar pacientes.</p>
+                    <p class="notaForo">Compartí dudas, apuntes y recursos de la carrera. No publiques datos personales ni información que permita identificar pacientes. ¿Querés vender u ofrecer algo? Usá <button type="button" class="linkEnTexto" data-nav="clasificados">Clasificados</button>.</p>
 
                     <form id="busquedaForo" class="busquedaForo" role="search">
                         <span class="busquedaForoIcono" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg></span>
@@ -767,6 +784,77 @@
                 </section>
             </div>
 
+            <!-- ==================== CLASIFICADOS ==================== -->
+            <div id="vistaClasificados" style="display:none">
+
+                <div class="materialCabecera">
+                    <div>
+                        <h2 class="seccion-titulo" style="margin-top:0">Clasificados</h2>
+                        <p class="ayudaPerfil">Para que estudiantes vendan u ofrezcan, a título personal, cosas de la carrera: resúmenes propios, clases particulares, equipo o libros usados. Está aparte del foro para no llenarlo de avisos.</p>
+                    </div>
+                    <button type="button" id="btnPublicarClasificado" class="btn-secundario btnAportar" aria-expanded="false" aria-controls="panelClasificado">+ Publicar aviso</button>
+                </div>
+
+                <details class="reglasClasificados">
+                    <summary>Qué se puede publicar y qué no</summary>
+                    <p><b>Sí:</b> resúmenes y apuntes <b>hechos por vos</b>; clases particulares o de apoyo que des vos; equipo e instrumental usado (ambo, estetoscopio, tensiómetro, caja de disección, etc.); libros usados en papel; servicios personales relacionados con la carrera.</p>
+                    <p><b>No:</b> empresas, marcas, academias, institutos o negocios con empleados; reventa o venta al por mayor; medicamentos, muestras médicas o productos que requieren receta; fotocopias o PDF de libros con derechos de autor; exámenes; hacer trabajos o rendir por otra persona; cuentas o vacantes; referidos, sorteos, criptomonedas o inversiones.</p>
+                    <p>MedMar no interviene en las ventas ni cobra nada: arreglá directamente con la otra persona, preferí encontrarte en la facultad o en un lugar público y no pagues por adelantado a quien no conocés. Ver los <a href="/terminos/#clasificados" target="_blank" rel="noopener">Términos</a>.</p>
+                </details>
+
+                <section id="panelClasificado" class="panelAporte" aria-labelledby="tituloPanelClasificado" hidden>
+                    <h3 id="tituloPanelClasificado">Publicar un aviso</h3>
+                    <p class="ayudaPerfil">Se publica al instante y dura 60 días (lo podés renovar). Podés tener hasta 5 avisos activos.</p>
+                    <form id="formClasificado" novalidate>
+                        <label for="clasificadoCategoria">Categoría</label>
+                        <select id="clasificadoCategoria">
+                            <option value="resumenes">Resúmenes y apuntes propios</option>
+                            <option value="clases">Clases particulares</option>
+                            <option value="equipo">Equipo e instrumental</option>
+                            <option value="libros">Libros usados</option>
+                            <option value="servicios">Servicios</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                        <label for="clasificadoTitulo">Título</label>
+                        <input type="text" id="clasificadoTitulo" maxlength="100" placeholder="Estetoscopio Littmann Classic III, poco uso" required>
+                        <label for="clasificadoDescripcion">Descripción</label>
+                        <textarea id="clasificadoDescripcion" maxlength="1500" rows="4" placeholder="Estado, qué incluye, materias o temas, zona donde lo entregás…" required></textarea>
+                        <label for="clasificadoPrecio">Precio (opcional)</label>
+                        <input type="text" id="clasificadoPrecio" maxlength="40" placeholder="$25.000 · A convenir · Gratis">
+                        <label for="clasificadoContacto">Cómo contactarte (opcional)</label>
+                        <input type="text" id="clasificadoContacto" maxlength="120" placeholder="Instagram, mail o «hablame en la facu»">
+                        <p class="ayudaPerfil">Lo van a ver todas las personas con cuenta en MedMar. Si no ponés nada, te pueden ubicar por tu pseudónimo.</p>
+                        <label class="labelCheckbox"><input type="checkbox" id="clasificadoDeclaracion"> Lo ofrezco yo, a título personal y no como empresa o negocio; es algo permitido (no son medicamentos, copias de libros con derechos ni exámenes) y acepto las reglas de Clasificados.</label>
+                        <button type="submit" class="btn-primario">Publicar</button>
+                        <button type="button" id="btnCancelarClasificado" class="btn-secundario">Cancelar</button>
+                    </form>
+                    <p id="msgClasificado" aria-live="polite"></p>
+                </section>
+
+                <div class="filtrosMaterial">
+                    <div class="busquedaMaterial">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+                        <input type="search" id="buscarClasificado" placeholder="Buscar en clasificados" aria-label="Buscar en clasificados" autocomplete="off">
+                    </div>
+                    <div class="chipsTipo" role="group" aria-label="Filtrar por categoría" id="chipsClasificados">
+                        <button type="button" class="chipTipoFiltro" data-cat-clasificado="" aria-pressed="true">Todo</button>
+                        <button type="button" class="chipTipoFiltro" data-cat-clasificado="resumenes" aria-pressed="false">Resúmenes</button>
+                        <button type="button" class="chipTipoFiltro" data-cat-clasificado="clases" aria-pressed="false">Clases</button>
+                        <button type="button" class="chipTipoFiltro" data-cat-clasificado="equipo" aria-pressed="false">Equipo</button>
+                        <button type="button" class="chipTipoFiltro" data-cat-clasificado="libros" aria-pressed="false">Libros</button>
+                        <button type="button" class="chipTipoFiltro" data-cat-clasificado="servicios" aria-pressed="false">Servicios</button>
+                        <button type="button" class="chipTipoFiltro" data-cat-clasificado="otros" aria-pressed="false">Otros</button>
+                    </div>
+                </div>
+
+                <div id="listaClasificados" class="listaMaterial"></div>
+
+                <section id="seccionMisClasificados" class="misAportes" aria-labelledby="tituloMisClasificados" hidden>
+                    <h3 id="tituloMisClasificados">Tus avisos</h3>
+                    <div id="listaMisClasificados" class="listaMaterial"></div>
+                </section>
+            </div>
+
             <div id="vistaJuegos" style="display:none">
 
                 <h2 class="seccion-titulo" style="margin-top:0">Juegos</h2>
@@ -937,6 +1025,24 @@
                 <h3 class="seccion-titulo">Sesión</h3>
                 <button type="button" id="logoutBtn" class="btn-secundario">Cerrar sesión</button>
 
+                <div id="seccionBajaCuenta" class="seccionBajaCuenta">
+                    <h3 class="seccion-titulo">Eliminar cuenta</h3>
+                    <div id="bajaSinPedir">
+                        <p class="ayudaPerfil">Se borran tu cuenta y tus datos: perfil y foto, publicaciones y respuestas (con las respuestas que otros hicieron debajo), chats, solicitudes de intercambio, votos, puntajes y clasificados. Tenés <b>30 días para arrepentirte</b>: hasta entonces todo sigue igual y lo podés cancelar con un botón.</p>
+                        <details class="detallesBaja">
+                            <summary>Quiero eliminar mi cuenta</summary>
+                            <label for="confirmarBaja">Para confirmar, escribí <b>BORRAR</b></label>
+                            <input type="text" id="confirmarBaja" autocomplete="off" autocapitalize="characters" spellcheck="false">
+                            <button type="button" id="btnSolicitarBaja" class="btn-secundario btnPeligro">Programar la eliminación</button>
+                        </details>
+                    </div>
+                    <div id="bajaPedida" hidden>
+                        <p id="textoBajaPedida" class="ayudaPerfil"></p>
+                        <button type="button" class="btn-primario" data-cancelar-baja>Cancelar la eliminación</button>
+                    </div>
+                    <p id="msgBaja" role="status"></p>
+                </div>
+
             </div>
 
         </div>
@@ -1018,7 +1124,7 @@
             <p>Para seguir usando MedMar necesitamos que leas y aceptes los <a href="/terminos/" target="_blank" rel="noopener">Términos y Condiciones</a> y la <a href="/privacidad/" target="_blank" rel="noopener">Política de Privacidad</a>. En resumen:</p>
             <ul class="terminosResumen">
                 <li>MedMar es gratuito, independiente y sin fines de lucro: no hay publicidad ni se venden datos.</li>
-                <li>No se permite promocionar empresas, academias, cursos pagos ni vender apuntes o servicios.</li>
+                <li>No se permite promocionar empresas, academias ni negocios. Los estudiantes pueden vender u ofrecer a título personal resúmenes propios, clases o equipo usado, solo en Clasificados.</li><li>Podés eliminar tu cuenta desde tu perfil, con 30 días para arrepentirte.</li>
                 <li>Nunca publiques datos que identifiquen a un paciente. El contenido médico es para estudiar, no es consejo médico.</li>
                 <li>Lo que publicás sigue siendo tuyo; no subas material con derechos de autor ajenos.</li>
                 <li>Tus datos se guardan en servidores de Estados Unidos (Supabase). Podés pedir verlos, corregirlos o borrarlos.</li>
@@ -1131,7 +1237,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261123t"></script>
+    <script src="/js/app.js?v=20261123c"></script>
 
     <!-- CAPTCHA anti-bots (Cloudflare Turnstile) para login, registro y recuperación. Sin SRI: Cloudflare lo actualiza
          solo y su documentación pide no fijarlo. Se renderiza recién cuando el formulario se usa. -->

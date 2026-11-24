@@ -16,10 +16,102 @@ const CHAT_DAYS = 14
 
 // Versión vigente de los Términos y la Política de Privacidad (web/terminos/ y web/privacidad/). Al cambiarla, la web
 // le vuelve a pedir la aceptación a todas las cuentas. Tiene que coincidir con TERMINOS_VERSION de web/js/app.js.
-const TERMINOS_VERSION = '2026-11-23'
+const TERMINOS_VERSION = '2026-11-23.2'
+const DIAS_ARREPENTIMIENTO_BAJA = 30
+
+// ==================== CLASIFICADOS ====================
+// Sección aparte del foro para que estudiantes vendan u ofrezcan, a título personal, cosas de la carrera.
+// Nada de empresas ni negocios: eso lo dicen los Términos (sección 4) y lo hace cumplir la moderación por denuncias.
+const CATEGORIAS_CLASIFICADOS = ['resumenes', 'clases', 'equipo', 'libros', 'servicios', 'otros']
+const MAX_CLASIFICADOS_ACTIVOS = 5
+const DIAS_CLASIFICADO = 60
+
+function textoClasificado(valor: unknown, max: number) {
+  return String(valor ?? '').normalize('NFC').replace(/\r\n?/g, '\n').replace(/[\u0000-\u0008\u000B-\u001F\u007F]/g, '').trim().slice(0, max + 1)
+}
+
+async function listarClasificados(admin: SupabaseClient, user: any) {
+  const ahora = new Date().toISOString()
+  const [pub, mios] = await Promise.all([
+    admin.from('clasificados').select('id,autor_id,categoria,titulo,descripcion,precio,contacto,created_at,expira_at')
+      .eq('activo', true).gt('expira_at', ahora).order('created_at', { ascending: false }).limit(150),
+    admin.from('clasificados').select('id,categoria,titulo,descripcion,precio,contacto,activo,created_at,expira_at')
+      .eq('autor_id', user.id).order('created_at', { ascending: false }).limit(20),
+  ])
+  if (pub.error) throw pub.error
+  if (mios.error) throw mios.error
+  const autores = await profileMap(admin, (pub.data || []).map((c: any) => String(c.autor_id)))
+  const clasificados = (pub.data || []).map((c: any) => {
+    const a = autores.get(String(c.autor_id))
+    const { autor_id, ...resto } = c
+    return { ...resto, autor: a?.pseudonimo || 'Estudiante', foto: a?.foto_url || '', esMio: String(autor_id) === user.id }
+  })
+  const misClasificados = (mios.data || []).map((c: any) => ({ ...c, vencido: c.expira_at <= ahora }))
+  return json({ ok: true, clasificados, misClasificados })
+}
+
+async function publicarClasificado(admin: SupabaseClient, user: any, body: any) {
+  const categoria = String(body.categoria || '')
+  if (!CATEGORIAS_CLASIFICADOS.includes(categoria)) return json({ ok: false, error: 'datos_invalidos' })
+  if (body.declaracion !== true) return json({ ok: false, error: 'declaracion_clasificado' })
+  const titulo = textoClasificado(body.titulo, 100).replace(/\s+/g, ' ')
+  const descripcion = textoClasificado(body.descripcion, 1500)
+  const precio = textoClasificado(body.precio, 40).replace(/\s+/g, ' ') || null
+  const contacto = textoClasificado(body.contacto, 120).replace(/\s+/g, ' ') || null
+  if (titulo.length < 3 || titulo.length > 100) return json({ ok: false, error: 'clasificado_titulo' })
+  if (descripcion.length < 10 || descripcion.length > 1500) return json({ ok: false, error: 'clasificado_descripcion' })
+  if ((precio && precio.length > 40) || (contacto && contacto.length > 120)) return json({ ok: false, error: 'datos_invalidos' })
+  const operationId = uuidOrEmpty(body.operationId)
+  if (!operationId) return json({ ok: false, error: 'datos_invalidos' })
+  const { count, error: cErr } = await admin.from('clasificados').select('id', { count: 'exact', head: true })
+    .eq('autor_id', user.id).eq('activo', true).gt('expira_at', new Date().toISOString())
+  if (cErr) throw cErr
+  if (Number(count || 0) >= MAX_CLASIFICADOS_ACTIVOS) return json({ ok: false, error: 'clasificados_maximo' })
+  const { data, error } = await admin.from('clasificados').insert({
+    autor_id: user.id, categoria, titulo, descripcion, precio, contacto, operation_id: operationId,
+  }).select('id').single()
+  if (error) {
+    if (pgCode(error) === '23505') return json({ ok: true, repetido: true })
+    throw error
+  }
+  return json({ ok: true, id: String(data.id) })
+}
+
+async function gestionarClasificado(admin: SupabaseClient, user: any, body: any) {
+  const id = uuidOrEmpty(body.id), accion = String(body.accion || '')
+  if (!id || !['pausar', 'activar', 'renovar', 'borrar'].includes(accion)) return json({ ok: false, error: 'datos_invalidos' })
+  const { data: c, error } = await admin.from('clasificados').select('id,autor_id,activo,expira_at').eq('id', id).maybeSingle()
+  if (error) throw error
+  if (!c || String(c.autor_id) !== user.id) return json({ ok: false, error: 'no_encontrado' })
+  if (accion === 'borrar') {
+    const { error: e } = await admin.from('clasificados').delete().eq('id', id)
+    if (e) throw e
+    return json({ ok: true })
+  }
+  const ahora = new Date()
+  const vigente = new Date(c.expira_at) > ahora
+  if (accion === 'activar' || accion === 'renovar') {
+    const { count, error: cErr } = await admin.from('clasificados').select('id', { count: 'exact', head: true })
+      .eq('autor_id', user.id).eq('activo', true).gt('expira_at', ahora.toISOString()).neq('id', id)
+    if (cErr) throw cErr
+    if (Number(count || 0) >= MAX_CLASIFICADOS_ACTIVOS) return json({ ok: false, error: 'clasificados_maximo' })
+  }
+  const cambios: Record<string, unknown> = { updated_at: ahora.toISOString() }
+  if (accion === 'pausar') cambios.activo = false
+  if (accion === 'activar') { cambios.activo = true; if (!vigente) cambios.expira_at = new Date(ahora.getTime() + DIAS_CLASIFICADO * 86400000).toISOString() }
+  if (accion === 'renovar') { cambios.activo = true; cambios.expira_at = new Date(ahora.getTime() + DIAS_CLASIFICADO * 86400000).toISOString() }
+  const { error: upErr } = await admin.from('clasificados').update(cambios).eq('id', id)
+  if (upErr) throw upErr
+  return json({ ok: true })
+}
 
 const RATE_LIMITS: Record<string, [number, number]> = {
   aceptarTerminos: [10, 600],
+  solicitarBaja: [5, 3600],
+  cancelarBaja: [10, 3600],
+  listarClasificados: [60, 300],
+  publicarClasificado: [6, 3600],
+  gestionarClasificado: [30, 600],
   guardar: [8, 600],
   editar: [12, 600],
   borrar: [20, 600],
@@ -1120,7 +1212,7 @@ async function bootstrap(user: User, client: SupabaseClient, admin: SupabaseClie
   if (rl) return rl
 
   const [{ data: profile, error: profileError }, { data: solicitudes, error: reqError }, { data: exchanges, error: exError }] = await Promise.all([
-    admin.from('profiles').select('id,pseudonimo,foto_url,is_moderator,is_admin,profile_completed,terminos_version').eq('id', user.id).single(),
+    admin.from('profiles').select('id,pseudonimo,foto_url,is_moderator,is_admin,profile_completed,terminos_version,baja_programada_para').eq('id', user.id).single(),
     client.from('solicitudes').select('id,materia,tengo,busco,status,created_at,updated_at,completed_at,exchange_id').eq('user_id', user.id).eq('status', 'activa').order('created_at', { ascending: false }),
     client.from('intercambio_participantes').select('intercambio_id,solicitud_id,user_id,tengo,busco,intercambios!inner(id,materia,created_at,completed_at)').eq('user_id', user.id),
   ])
@@ -1168,7 +1260,7 @@ async function bootstrap(user: User, client: SupabaseClient, admin: SupabaseClie
 
   return json({ ok: true, data: {
     perfil: { pseudonimo: profile.pseudonimo, foto: profile.foto_url || '', profileCompleted: profile.profile_completed !== false,
-      terminosVersion: profile.terminos_version || '', terminosVigente: TERMINOS_VERSION },
+      terminosVersion: profile.terminos_version || '', terminosVigente: TERMINOS_VERSION, bajaProgramada: profile.baja_programada_para || null },
     solicitudes: solicitudes || [],
     intercambios: [...exchangeMap.values()],
     rol: { esModerador: !!profile.is_moderator, esAdmin: !!profile.is_admin },
@@ -1785,6 +1877,34 @@ async function handle(req: Request, body: any) {
       if(error)throw error
       return json({ok:true,version:TERMINOS_VERSION})
     }
+    case 'solicitarBaja': {
+      // Baja con arrepentimiento: la cuenta sigue funcionando y se borra sola a los 30 días (maintenance), salvo que se cancele.
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      if(String(body.confirmacion||'').trim().toUpperCase()!=='BORRAR')return json({ok:false,error:'confirmacion_baja'})
+      if(await isAdmin(admin,user.id))return json({ok:false,error:'baja_admin'})
+      const ahora=new Date(),programada=new Date(ahora.getTime()+DIAS_ARREPENTIMIENTO_BAJA*86400000).toISOString()
+      const {error}=await admin.from('profiles').update({baja_solicitada_at:ahora.toISOString(),baja_programada_para:programada}).eq('id',user.id)
+      if(error)throw error
+      return json({ok:true,bajaProgramada:programada})
+    }
+    case 'cancelarBaja': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const {error}=await admin.from('profiles').update({baja_solicitada_at:null,baja_programada_para:null}).eq('id',user.id)
+      if(error)throw error
+      return json({ok:true})
+    }
+    case 'listarClasificados': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return listarClasificados(admin,user)
+    }
+    case 'publicarClasificado': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return publicarClasificado(admin,user,body)
+    }
+    case 'gestionarClasificado': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return gestionarClasificado(admin,user,body)
+    }
     case 'miPerfil': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       const {data,error}=await client.from('profiles').select('id,pseudonimo,foto_url').eq('id',user.id).single();if(error)throw error;return json({ok:true,perfil:{pseudonimo:data.pseudonimo,foto:data.foto_url||''}})
@@ -1830,10 +1950,10 @@ async function handle(req: Request, body: any) {
     case 'denunciar': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       const tipo=String(body.tipo||''),id=uuidOrEmpty(body.id),motivo=String(body.motivo||'').trim().slice(0,300)
-      if(!['hilo','respuesta','material'].includes(tipo)||!id)return json({ok:false,error:'datos_invalidos'})
-      const tabla=tipo==='hilo'?'hilos':tipo==='respuesta'?'respuestas':'materiales'
+      if(!['hilo','respuesta','material','clasificado'].includes(tipo)||!id)return json({ok:false,error:'datos_invalidos'})
+      const tabla=tipo==='hilo'?'hilos':tipo==='respuesta'?'respuestas':tipo==='material'?'materiales':'clasificados'
       let consultaPub=admin.from(tabla).select('id').eq('id',id)
-      if(tipo==='material')consultaPub=consultaPub.eq('activo',true)
+      if(tipo==='material'||tipo==='clasificado')consultaPub=consultaPub.eq('activo',true)
       const {data:pub,error:pubError}=await consultaPub.maybeSingle()
       if(pubError)throw pubError
       if(!pub)return json({ok:false,error:'no_encontrado'})
@@ -2106,6 +2226,7 @@ async function handle(req: Request, body: any) {
         const {error:upError}=await admin.from('denuncias').update({estado:'eliminada',...resolucion}).eq('id_publicacion',rep.id_publicacion).eq('estado','pendiente')
         if(upError)throw upError
         if(rep.tipo==='material'){const {error:errMat}=await admin.from('materiales').update({activo:false}).eq('id',rep.id_publicacion);if(errMat)throw errMat}
+        else if(rep.tipo==='clasificado'){const {error:errCl}=await admin.from('clasificados').delete().eq('id',rep.id_publicacion);if(errCl)throw errCl}
         else await borrarPublicacion(admin,rep.tipo==='hilo'?'hilo':'respuesta',String(rep.id_publicacion),false)
       } else {
         const {error}=await admin.from('denuncias').update({estado:'descartada',...resolucion}).eq('id',id);if(error)throw error
@@ -2173,17 +2294,24 @@ async function enriquecerDenuncias(admin: SupabaseClient, denuncias: any[]) {
   const idsHilos = denuncias.filter(d => d.tipo === 'hilo').map(d => String(d.id_publicacion))
   const idsResp = denuncias.filter(d => d.tipo === 'respuesta').map(d => String(d.id_publicacion))
   const idsMat = denuncias.filter(d => d.tipo === 'material').map(d => String(d.id_publicacion))
-  const [hilos, resps, mats] = await Promise.all([
+  const idsClas = denuncias.filter(d => d.tipo === 'clasificado').map(d => String(d.id_publicacion))
+  const [hilos, resps, mats, clas] = await Promise.all([
     idsHilos.length ? admin.from('hilos').select('id,titulo,contenido,autor_id').in('id', idsHilos) : Promise.resolve({ data: [], error: null }),
     idsResp.length ? admin.from('respuestas').select('id,contenido,autor_id').in('id', idsResp) : Promise.resolve({ data: [], error: null }),
     idsMat.length ? admin.from('materiales').select('id,titulo,materia,link,creado_por,aporte_id,activo').in('id', idsMat) : Promise.resolve({ data: [], error: null }),
+    idsClas.length ? admin.from('clasificados').select('id,titulo,descripcion,precio,contacto,autor_id').in('id', idsClas) : Promise.resolve({ data: [], error: null }),
   ])
+  if (clas.error) throw clas.error
   if (hilos.error) throw hilos.error
   if (resps.error) throw resps.error
   if (mats.error) throw mats.error
   const pubs = new Map<string, any>()
   for (const h of hilos.data || []) pubs.set(String(h.id), h)
   for (const r of resps.data || []) pubs.set(String(r.id), r)
+  for (const c of clas.data || []) pubs.set(String(c.id), {
+    titulo: c.titulo, autor_id: c.autor_id,
+    contenido: c.descripcion + (c.precio ? '\nPrecio: ' + c.precio : '') + (c.contacto ? '\nContacto: ' + c.contacto : ''),
+  })
   // Material: el autor real es quien mandó el aporte (creado_por es el moderador que lo aprobó o lo cargó).
   const idsAportes = (mats.data || []).map((m: any) => m.aporte_id).filter(Boolean)
   const aportesAutor = new Map<string, string>()

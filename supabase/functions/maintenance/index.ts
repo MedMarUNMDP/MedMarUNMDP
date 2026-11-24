@@ -138,6 +138,28 @@ async function processEmails(admin: ReturnType<typeof adminClient>) {
   return { sent, failed, seen: (rows || []).length }
 }
 
+// Bajas de cuenta vencidas (pedidas con solicitarBaja hace 30 días o más y no canceladas). Se borra el usuario de Auth:
+// profiles, publicaciones, chats, solicitudes, votos, puntajes, clasificados, etc. caen en cascada. Antes, sus fotos.
+async function procesarBajas(admin: ReturnType<typeof adminClient>) {
+  const { data, error } = await admin.from('profiles').select('id,is_admin')
+    .lte('baja_programada_para', new Date().toISOString()).limit(20)
+  if (error) throw error
+  let borradas = 0
+  for (const p of data || []) {
+    const id = String(p.id)
+    if (p.is_admin) { console.warn('baja_admin_omitida', id); continue }
+    try {
+      const { data: fotos } = await admin.storage.from('profile-photos').list(id, { limit: 100 })
+      const rutas = (fotos || []).map((o: { name: string }) => id + '/' + o.name)
+      if (rutas.length) await admin.storage.from('profile-photos').remove(rutas)
+    } catch (err) { console.warn('baja_fotos', id, String(err)) }
+    const { error: delError } = await admin.auth.admin.deleteUser(id)
+    if (delError) { console.error('baja_fallida', id, delError.message); continue }
+    borradas++
+  }
+  return { borradas, vistas: (data || []).length }
+}
+
 // Autoriza la llamada del cron. Falla cerrada: sin token válido no se procesa nada.
 // El token vive en Supabase Vault (`medmar_cron_secret`, creado por la migración de cron) y pg_cron lo manda en
 // el header; también se acepta `MEDMAR_CRON_SECRET` (secret de la Edge Function) por compatibilidad.
@@ -157,7 +179,8 @@ async function run(req: Request) {
   const admin = adminClient()
   if (!(await autorizado(req, admin))) return json({ ok: false, error: 'no_autorizado' }, 401)
   const emails = await processEmails(admin)
-  return json({ ok: true, emails, timestamp: new Date().toISOString() })
+  const bajas = await procesarBajas(admin)
+  return json({ ok: true, emails, bajas, timestamp: new Date().toISOString() })
 }
 
 Deno.serve(async (req) => {
