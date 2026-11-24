@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-24-guia-moderacion"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-24-pedir-texto"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -651,6 +651,10 @@ const hilosPendientesConfirmacion = new Map()
         function manejarPopState(evento) {
             if (!historialMedmarInicializado) return
 
+            // Ventana de texto (pedirTexto): el «Atrás» propio se ignora y el del celular la cancela.
+            if (ignorarPopTexto) { ignorarPopTexto = false; return }
+            if (resolverTexto) { terminarTexto(null, true); return }
+
             // Si el navegador salió hacia una entrada externa, dejamos que
             // el navegador continúe su navegación normal.
             if (!esEstadoMedmar(evento.state)) return
@@ -719,14 +723,15 @@ const hilosPendientesConfirmacion = new Map()
         function cerrarModalConEscape(e) {
             if (e.key === "Escape") {
                 document.querySelectorAll(".modalFondo.abierto").forEach(function (modal) {
-                    if (modal !== modalSetupPerfil) cerrarModal(modal)
+                    if (modal === modalTexto) terminarTexto(null)
+                    else if (modal !== modalSetupPerfil) cerrarModal(modal)
                 })
             }
         }
 
         document.querySelectorAll(".modalFondo").forEach(function (fondo) {
             fondo.addEventListener("click", function (e) {
-                if (e.target !== fondo || fondo === modalSetupPerfil) return
+                if (e.target !== fondo || fondo === modalSetupPerfil || fondo.id === "modalTexto") return
                 if (fondo === modalCompose) {
                     volverHistorialOverlay("compose", function () { cerrarModal(fondo) })
                 } else {
@@ -734,6 +739,85 @@ const hilosPendientesConfirmacion = new Map()
                 }
             })
         })
+
+        // ==================== PEDIR TEXTO ====================
+        // Reemplaza a prompt(): en Android el diálogo nativo dejaba el teclado abierto y «Atrás» cambiaba de página.
+        // Devuelve una promesa con el texto (recortado) o null si se cancela. «Atrás» del celular la cancela.
+        const modalTexto = document.getElementById("modalTexto")
+        const inputModalTexto = document.getElementById("inputModalTexto")
+        let resolverTexto = null
+        let textoConHistorial = false
+        let ignorarPopTexto = false
+        let opcionesTexto = null
+
+        function pedirTexto(op) {
+            if (resolverTexto) terminarTexto(null, true)
+            opcionesTexto = op
+            document.getElementById("tituloModalTexto").textContent = op.titulo || ""
+            const desc = document.getElementById("descModalTexto")
+            desc.textContent = op.texto || ""
+            desc.hidden = !op.texto
+            document.getElementById("etiquetaModalTexto").textContent = op.etiqueta || ""
+            const ok = document.getElementById("btnModalTextoOk")
+            ok.textContent = op.boton || "Aceptar"
+            ok.classList.toggle("btnPeligroLleno", !!op.peligro)
+            inputModalTexto.value = ""
+            inputModalTexto.placeholder = op.placeholder || ""
+            inputModalTexto.maxLength = op.max || 400
+            inputModalTexto.rows = op.filas || 3
+            inputModalTexto.classList.toggle("textoMono", !!op.mono)
+            inputModalTexto.autocapitalize = op.mono ? "characters" : "sentences"
+            document.getElementById("errorModalTexto").hidden = true
+            abrirModal(modalTexto)
+            textoConHistorial = false
+            const actual = estadoActualSeguro()
+            if (historialMedmarInicializado && !aplicandoEstadoHistorial && actual) {
+                const copia = Object.assign({}, actual, { pedirTexto: true })
+                delete copia.guard
+                history.pushState(copia, "", location.href)
+                textoConHistorial = true
+            }
+            return new Promise(function (resolve) { resolverTexto = resolve })
+        }
+
+        function terminarTexto(valor, desdeHistorial) {
+            if (!resolverTexto) return
+            const resolve = resolverTexto
+            resolverTexto = null
+            // Sacar el foco del campo cierra el teclado del celular antes de esconder la ventana.
+            if (modalTexto.contains(document.activeElement)) document.activeElement.blur()
+            cerrarModal(modalTexto)
+            if (textoConHistorial && !desdeHistorial) { ignorarPopTexto = true; history.back() }
+            textoConHistorial = false
+            resolve(valor === null ? null : valor.trim())
+        }
+
+        document.getElementById("formModalTexto").addEventListener("submit", function (e) {
+            e.preventDefault()
+            const valor = inputModalTexto.value.trim()
+            if (opcionesTexto && opcionesTexto.obligatorio && !valor) {
+                const err = document.getElementById("errorModalTexto")
+                err.textContent = "Completá este campo."
+                err.hidden = false
+                return
+            }
+            terminarTexto(valor)
+        })
+        modalTexto.addEventListener("click", function (e) {
+            if (e.target === modalTexto || e.target.closest("[data-texto-cancelar]")) terminarTexto(null)
+        })
+
+        function pedirMotivoModeracion(que) {
+            return pedirTexto({
+                titulo: "Quitar contenido",
+                texto: "Vas a quitar " + que + ". Queda 7 días en la papelera y se puede restaurar.",
+                etiqueta: "Motivo para quien lo publicó (opcional, le llega como notificación)",
+                placeholder: "Ej.: tenía datos que permitían identificar a un paciente",
+                boton: "Quitar",
+                peligro: true,
+                max: 200
+            })
+        }
 
         function mensajeError(codigo) {
 
@@ -1597,7 +1681,13 @@ async function cargarBootstrap() {
 
         async function denunciarPublicacion(tipo, id) {
 
-            const motivoRaw = prompt("¿Por qué querés denunciar esto? (opcional, podés dejarlo vacío)")
+            const motivoRaw = await pedirTexto({
+                titulo: "Denunciar",
+                texto: "Un moderador lo va a revisar.",
+                etiqueta: "¿Por qué lo denunciás? (opcional)",
+                boton: "Enviar denuncia",
+                max: 300
+            })
             if (motivoRaw === null) return
 
             const r = await llamar("denunciar", { tipo, id, motivo: motivoRaw })
@@ -1611,11 +1701,6 @@ async function cargarBootstrap() {
         }
 
         // Moderación: motivo opcional que le llega a quien publicó (notificación «moderacion»). null = canceló.
-        function pedirMotivoModeracion(que) {
-            const motivo = prompt("Vas a quitar " + que + ". Escribí el motivo para la persona que lo publicó (opcional, le llega como notificación):", "")
-            return motivo === null ? null : motivo.trim().slice(0, 200)
-        }
-
         async function borrarPublicacion(tipo, id) {
 
             if (!confirm("¿Seguro que querés borrar esto?")) return
@@ -1624,7 +1709,7 @@ async function cargarBootstrap() {
             let r = await llamar(accion, { id })
             // Contenido de otra persona: el servidor pide la llave de moderación.
             if (!r.ok && r.error === "llave_requerida") {
-                const motivo = pedirMotivoModeracion(tipo === "hilo" ? "esta publicación" : "esta respuesta")
+                const motivo = await pedirMotivoModeracion(tipo === "hilo" ? "esta publicación" : "esta respuesta")
                 if (motivo === null) return
                 r = await llamarModeracion(accion, { id, motivo })
             }
@@ -3301,7 +3386,7 @@ async function cargarBootstrap() {
 
             let motivo = ""
             if (accion === "eliminar") {
-                motivo = pedirMotivoModeracion("lo denunciado")
+                motivo = await pedirMotivoModeracion("lo denunciado")
                 if (motivo === null) return
             }
 
@@ -5777,7 +5862,17 @@ async function cargarBootstrap() {
 
         document.getElementById("misLlaves").addEventListener("click", async function (e) {
             if (e.target.closest("[data-renunciar]")) {
-                const texto = prompt("Vas a dejar tu rol de " + (esAdminActual ? "administrador" : "moderador") + " ahora mismo. Para confirmar, escribí RENUNCIO:")
+                const texto = await pedirTexto({
+                    titulo: "Dejar de moderar",
+                    texto: "Vas a dejar tu rol de " + (esAdminActual ? "administrador" : "moderador") + " ahora mismo.",
+                    etiqueta: "Para confirmar, escribí RENUNCIO",
+                    boton: "Dejar el rol",
+                    peligro: true,
+                    obligatorio: true,
+                    mono: true,
+                    filas: 1,
+                    max: 20
+                })
                 if (texto === null) return
                 const r = await llamar("renunciarModeracion", { confirmacion: texto })
                 if (!r.ok) { alert(mensajeError(r.error)); return }
@@ -5874,7 +5969,16 @@ async function cargarBootstrap() {
             const aprobar = e.target.closest("[data-aprobar-llave]")
             const revocar = e.target.closest("[data-revocar-llave]")
             if (aprobar) {
-                const escrita = prompt("Para aprobar la llave de " + aprobar.dataset.quien + ", escribí la huella que esa persona te pasó por otro medio (en persona o por mensaje).\n\nNo la copies de esta pantalla: si alguien robó su cuenta, la huella de acá sería la del atacante.")
+                const escrita = await pedirTexto({
+                    titulo: "Aprobar llave",
+                    texto: "Escribí la huella que " + aprobar.dataset.quien + " te pasó por otro medio (en persona o por mensaje). No la copies de esta pantalla: si alguien robó su cuenta, la huella de acá sería la del atacante.",
+                    etiqueta: "Huella",
+                    boton: "Aprobar",
+                    obligatorio: true,
+                    mono: true,
+                    filas: 2,
+                    max: 120
+                })
                 if (escrita === null) return
                 const r = await llamarModeracion("aprobarLlave", { id: aprobar.dataset.aprobarLlave, huellaConfirmada: escrita.trim().toUpperCase() })
                 if (!r.ok) { alert(mensajeError(r.error)); return }
@@ -6220,7 +6324,13 @@ async function cargarBootstrap() {
             }
             const reportar = e.target.closest("[data-denunciar-material]")
             if (reportar) {
-                const motivo = prompt("¿Qué pasa con este material? (por ejemplo: el enlace no abre, no es de esa materia, tiene derechos de autor o datos de pacientes)")
+                const motivo = await pedirTexto({
+                    titulo: "Reportar material",
+                    etiqueta: "¿Qué pasa con este material?",
+                    placeholder: "Ej.: el enlace no abre, no es de esa materia, tiene derechos de autor o datos de pacientes",
+                    boton: "Enviar reporte",
+                    max: 300
+                })
                 if (motivo === null) return
                 const r = await llamar("denunciar", { tipo: "material", id: reportar.dataset.denunciarMaterial, motivo: motivo })
                 mostrarAviso(r.ok ? "Gracias, un moderador lo va a revisar." : mensajeError(r.error))
@@ -6228,7 +6338,7 @@ async function cargarBootstrap() {
             }
             const quitar = e.target.closest("[data-quitar]")
             if (quitar) {
-                const motivo = pedirMotivoModeracion("este material del catálogo (deja de verse para todos)")
+                const motivo = await pedirMotivoModeracion("este material del catálogo (deja de verse para todos)")
                 if (motivo === null) return
                 const r = await llamarModeracion("quitarMaterial", { id: quitar.dataset.quitar, motivo })
                 if (!r.ok) { alert(mensajeError(r.error)); return }
@@ -6737,7 +6847,7 @@ async function cargarBootstrap() {
             }
             const quitarCV = e.target.closest("[data-quitar-clasificado]")
             if (quitarCV) {
-                const motivo = pedirMotivoModeracion("este aviso de Compra venta")
+                const motivo = await pedirMotivoModeracion("este aviso de Compra venta")
                 if (motivo === null) return
                 const r = await llamarModeracion("quitarClasificado", { id: quitarCV.dataset.quitarClasificado, motivo })
                 if (!r.ok) { if (r.error !== "moderacion_bloqueada") alert(mensajeError(r.error)); return }
@@ -6749,7 +6859,13 @@ async function cargarBootstrap() {
             if (chatCV) { abrirChat(chatCV.dataset.abrirChatCv, true, "clasificados"); return }
             const denunciar = e.target.closest("[data-denunciar-clasificado]")
             if (denunciar) {
-                const motivo = prompt("¿Qué pasa con este aviso? (por ejemplo: es una empresa o academia, vende copias de libros o medicamentos, es una estafa)")
+                const motivo = await pedirTexto({
+                    titulo: "Denunciar aviso",
+                    etiqueta: "¿Qué pasa con este aviso?",
+                    placeholder: "Ej.: es una empresa o academia, vende copias de libros o medicamentos, es una estafa",
+                    boton: "Enviar denuncia",
+                    max: 300
+                })
                 if (motivo === null) return
                 const r = await llamar("denunciar", { tipo: "clasificado", id: denunciar.dataset.denunciarClasificado, motivo: motivo })
                 mostrarAviso(r.ok ? "Gracias, un moderador lo va a revisar." : mensajeError(r.error))
