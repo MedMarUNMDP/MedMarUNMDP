@@ -34,9 +34,9 @@ async function listarClasificados(admin: SupabaseClient, user: any) {
   const ahora = new Date().toISOString()
   const [pub, mios] = await Promise.all([
     admin.from('clasificados').select('id,autor_id,categoria,titulo,descripcion,precio,contacto,created_at,expira_at')
-      .eq('activo', true).gt('expira_at', ahora).order('created_at', { ascending: false }).limit(150),
+      .eq('activo', true).is('eliminado_at', null).gt('expira_at', ahora).order('created_at', { ascending: false }).limit(150),
     admin.from('clasificados').select('id,categoria,titulo,descripcion,precio,contacto,activo,created_at,expira_at')
-      .eq('autor_id', user.id).order('created_at', { ascending: false }).limit(20),
+      .eq('autor_id', user.id).is('eliminado_at', null).order('created_at', { ascending: false }).limit(20),
   ])
   if (pub.error) throw pub.error
   if (mios.error) throw mios.error
@@ -80,9 +80,9 @@ async function chatsCompraVenta(admin: SupabaseClient, user: any) {
 async function contactarClasificado(admin: SupabaseClient, user: any, body: any) {
   const id = uuidOrEmpty(body.id)
   if (!id) return json({ ok: false, error: 'datos_invalidos' })
-  const { data: aviso, error } = await admin.from('clasificados').select('id,autor_id,titulo,activo,expira_at').eq('id', id).maybeSingle()
+  const { data: aviso, error } = await admin.from('clasificados').select('id,autor_id,titulo,activo,expira_at,eliminado_at').eq('id', id).maybeSingle()
   if (error) throw error
-  if (!aviso || !aviso.activo || new Date(aviso.expira_at) <= new Date()) return json({ ok: false, error: 'no_encontrado' })
+  if (!aviso || !aviso.activo || aviso.eliminado_at || new Date(aviso.expira_at) <= new Date()) return json({ ok: false, error: 'no_encontrado' })
   if (String(aviso.autor_id) === user.id) return json({ ok: false, error: 'clasificado_propio' })
   const buscar = () => admin.from('conversaciones').select('id').eq('clasificado_id', id).eq('interesado_id', user.id).maybeSingle()
   const { data: previa, error: prevErr } = await buscar()
@@ -131,9 +131,9 @@ async function publicarClasificado(admin: SupabaseClient, user: any, body: any) 
 async function gestionarClasificado(admin: SupabaseClient, user: any, body: any) {
   const id = uuidOrEmpty(body.id), accion = String(body.accion || '')
   if (!id || !['pausar', 'activar', 'renovar', 'borrar'].includes(accion)) return json({ ok: false, error: 'datos_invalidos' })
-  const { data: c, error } = await admin.from('clasificados').select('id,autor_id,activo,expira_at').eq('id', id).maybeSingle()
+  const { data: c, error } = await admin.from('clasificados').select('id,autor_id,activo,expira_at,eliminado_at').eq('id', id).maybeSingle()
   if (error) throw error
-  if (!c || String(c.autor_id) !== user.id) return json({ ok: false, error: 'no_encontrado' })
+  if (!c || c.eliminado_at || String(c.autor_id) !== user.id) return json({ ok: false, error: 'no_encontrado' })
   if (accion === 'borrar') {
     const { error: e } = await admin.from('clasificados').delete().eq('id', id)
     if (e) throw e
@@ -159,8 +159,13 @@ async function gestionarClasificado(admin: SupabaseClient, user: any, body: any)
 const RATE_LIMITS: Record<string, [number, number]> = {
   aceptarTerminos: [10, 600],
   autorizarDispositivo: [10, 3600],
-  fijarPeriodoModeracion: [20, 3600],
-  confirmarModerador: [60, 3600],
+  guardarGrupoModeracion: [30, 3600],
+  borrarGrupoModeracion: [30, 3600],
+  asignarPeriodoModerador: [60, 3600],
+  listarPapelera: [60, 600],
+  restaurarPapelera: [60, 600],
+  crearEmparejamiento: [10, 600],
+  completarEmparejamiento: [10, 3600],
   renunciarModeracion: [5, 3600],
   solicitarBaja: [5, 3600],
   cancelarBaja: [10, 3600],
@@ -567,10 +572,18 @@ function avisarModeradoresAporte(admin: SupabaseClient, titulo: string) {
 function moderadorVigente(venceAt: string | null | undefined) {
   return !venceAt || new Date(venceAt).getTime() > Date.now()
 }
-async function fechaCorteModeracion(admin: SupabaseClient) {
-  const { data, error } = await admin.from('periodo_moderacion').select('fecha_corte,descripcion').eq('id', true).maybeSingle()
+// Fecha «AAAA-MM-DD» → fin de ese día en Argentina. null si no es válida, ya pasó o es de dentro de más de 3 años.
+function fechaCorteDesde(valor: unknown) {
+  const fecha = String(valor || '')
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return null
+  const corte = new Date(fecha + 'T23:59:59-03:00')
+  if (isNaN(corte.getTime()) || corte.getTime() <= Date.now() || corte.getTime() > Date.now() + 3 * 365 * 86400000) return null
+  return corte.toISOString()
+}
+async function grupoModeracion(admin: SupabaseClient, id: string) {
+  const { data, error } = await admin.from('grupos_moderacion').select('id,nombre,fecha_corte').eq('id', id).maybeSingle()
   if (error) throw error
-  return { fechaCorte: data?.fecha_corte || null, descripcion: data?.descripcion || '' }
+  return data
 }
 function fechaCorta(iso: string) {
   return new Date(iso).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -612,6 +625,82 @@ async function avisarAutorModeracion(admin: SupabaseClient, moderadorId: string,
   })
   if (error) console.warn('aviso_moderacion_autor', error.message)
 }
+// ---------- Papelera: lo que quita la moderación queda 7 días oculto y se puede restaurar ----------
+const TABLA_PAPELERA: Record<string, string> = { hilo: 'hilos', respuesta: 'respuestas', material: 'materiales', clasificado: 'clasificados' }
+async function moverAPapelera(admin: SupabaseClient, tipo: string, id: string, moderadorId: string, motivo: string) {
+  const tabla = TABLA_PAPELERA[tipo]
+  if (!tabla) throw new Error('tipo_papelera')
+  const marca: Record<string, unknown> = { eliminado_at: new Date().toISOString(), eliminado_por: moderadorId, motivo_eliminacion: motivo || null }
+  let ids = [id]
+  if (tipo === 'respuesta') {
+    // Las respuestas que colgaban de esta se ocultan con ella (misma marca de tiempo: se restauran juntas).
+    const { data: actual, error: e1 } = await admin.from('respuestas').select('hilo_id').eq('id', id).maybeSingle()
+    if (e1) throw e1
+    if (actual) {
+      const { data: todas, error: e2 } = await admin.from('respuestas').select('id,parent_id').eq('hilo_id', actual.hilo_id).is('eliminado_at', null)
+      if (e2) throw e2
+      const hijos = new Map<string, string[]>()
+      for (const r of todas || []) if (r.parent_id) { const p = String(r.parent_id); if (!hijos.has(p)) hijos.set(p, []); hijos.get(p)!.push(String(r.id)) }
+      for (let i = 0; i < ids.length; i++) ids.push(...(hijos.get(ids[i]) || []))
+    }
+  }
+  if (tipo === 'material') marca.activo = false
+  const { error } = await admin.from(tabla).update(marca).in('id', ids).is('eliminado_at', null)
+  if (error) throw error
+  const { error: dErr } = await admin.from('denuncias').update({ estado: 'eliminada', resuelto_por: moderadorId, fecha_resolucion: new Date().toISOString() })
+    .eq('id_publicacion', id).eq('estado', 'pendiente')
+  if (dErr) throw dErr
+}
+
+async function listarPapelera(admin: SupabaseClient) {
+  const desde = new Date(Date.now() - 8 * 86400000).toISOString()
+  const [h, r, m, c] = await Promise.all([
+    admin.from('hilos').select('id,autor_id,titulo,contenido,eliminado_at,eliminado_por,motivo_eliminacion').not('eliminado_at', 'is', null).gt('eliminado_at', desde).order('eliminado_at', { ascending: false }).limit(100),
+    admin.from('respuestas').select('id,autor_id,contenido,parent_id,hilo_id,eliminado_at,eliminado_por,motivo_eliminacion').not('eliminado_at', 'is', null).gt('eliminado_at', desde).order('eliminado_at', { ascending: false }).limit(200),
+    admin.from('materiales').select('id,titulo,materia,link,aporte_id,eliminado_at,eliminado_por,motivo_eliminacion').not('eliminado_at', 'is', null).gt('eliminado_at', desde).order('eliminado_at', { ascending: false }).limit(100),
+    admin.from('clasificados').select('id,autor_id,titulo,descripcion,eliminado_at,eliminado_por,motivo_eliminacion').not('eliminado_at', 'is', null).gt('eliminado_at', desde).order('eliminado_at', { ascending: false }).limit(100),
+  ])
+  for (const x of [h, r, m, c]) if (x.error) throw x.error
+  // De una cadena de respuestas ocultadas juntas se muestra solo la primera.
+  const respuestas = (r.data || [])
+  const raiz = respuestas.filter((x: any) => !respuestas.some((p: any) => String(p.id) === String(x.parent_id) && p.eliminado_at === x.eliminado_at))
+  const items: any[] = [
+    ...(h.data || []).map((x: any) => ({ tipo: 'hilo', id: x.id, titulo: x.titulo, detalle: x.contenido, autor: x.autor_id, ...x })),
+    ...raiz.map((x: any) => ({ tipo: 'respuesta', id: x.id, titulo: 'Respuesta', detalle: x.contenido, autor: x.autor_id, ...x })),
+    ...(m.data || []).map((x: any) => ({ tipo: 'material', id: x.id, titulo: x.titulo, detalle: x.materia + ' · ' + x.link, autor: null, ...x })),
+    ...(c.data || []).map((x: any) => ({ tipo: 'clasificado', id: x.id, titulo: x.titulo, detalle: x.descripcion, autor: x.autor_id, ...x })),
+  ]
+  const perfiles = await profileMap(admin, items.flatMap((i) => [i.autor, i.eliminado_por].filter(Boolean).map(String)))
+  return json({ ok: true, papelera: items.sort((a, b) => String(b.eliminado_at).localeCompare(String(a.eliminado_at))).map((i) => ({
+    tipo: i.tipo, id: String(i.id), titulo: String(i.titulo || '').slice(0, 140), detalle: String(i.detalle || '').slice(0, 300),
+    autor: i.autor ? (perfiles.get(String(i.autor))?.pseudonimo || 'Estudiante') : '', quitadoPor: perfiles.get(String(i.eliminado_por || ''))?.pseudonimo || '—',
+    motivo: i.motivo_eliminacion || '', quitadoAt: i.eliminado_at, borraAt: new Date(new Date(i.eliminado_at).getTime() + 7 * 86400000).toISOString(),
+  })) })
+}
+
+async function restaurarPapelera(admin: SupabaseClient, user: User, llaveId: string, body: any) {
+  const tipo = String(body.tipo || ''), id = uuidOrEmpty(body.id)
+  const tabla = TABLA_PAPELERA[tipo]
+  if (!tabla || !id) return json({ ok: false, error: 'datos_invalidos' })
+  const { data: fila, error } = await admin.from(tabla).select('id,eliminado_at' + (tipo === 'respuesta' ? ',hilo_id' : '')).eq('id', id).maybeSingle()
+  if (error) throw error
+  if (!fila || !(fila as any).eliminado_at) return json({ ok: false, error: 'no_encontrado' })
+  const limpio: Record<string, unknown> = { eliminado_at: null, eliminado_por: null, motivo_eliminacion: null }
+  if (tipo === 'material') limpio.activo = true
+  let q = admin.from(tabla).update(limpio)
+  // Respuestas: vuelven también las que se ocultaron junto con ella (misma marca de tiempo, mismo hilo).
+  q = tipo === 'respuesta' ? q.eq('hilo_id', (fila as any).hilo_id).eq('eliminado_at', (fila as any).eliminado_at) : q.eq('id', id)
+  const { error: upErr } = await q
+  if (upErr) throw upErr
+  const datos = await datosPublicacion(admin, tipo, id)
+  await auditar(admin, user.id, llaveId, 'restaurar', { tipo, id })
+  if (datos && datos.autor !== user.id) {
+    await admin.from('notificaciones').insert({ user_id: datos.autor, tipo: 'moderacion', ref_id: id, contexto: datos.titulo.slice(0, 160),
+      cuerpo: 'La moderación revisó de nuevo y restauró tu ' + (NOMBRE_TIPO_PUBLICACION[tipo] || 'publicación') + '. Ya se ve otra vez.' })
+  }
+  return json({ ok: true })
+}
+
 function motivoModeracion(body: any) {
   return String(body?.motivo || '').replace(/\s+/g, ' ').trim().slice(0, 200)
 }
@@ -856,12 +945,12 @@ async function autorizarModeracion(admin: SupabaseClient, user: User, body: any,
   if (!(await tieneRol(admin, user.id, rol))) return json({ ok: false, error: 'no_autorizado' })
   const t = await leerTokenModeracion(body?.tokenModeracion, user.id)
   if (!t || (rol === 'admin' && t.rol !== 'admin')) return json({ ok: false, error: 'llave_requerida' })
-  const { data: llave, error } = await admin.from('llaves_moderacion').select('id,user_id,rol,estado,tipo').eq('id', t.llaveId).maybeSingle()
+  const { data: llave, error } = await admin.from('llaves_moderacion').select('id,user_id,rol,estado,tipo,padre_id').eq('id', t.llaveId).maybeSingle()
   if (error) throw error
   if (!llave || llave.estado !== 'activa' || String(llave.user_id) !== user.id || llave.rol !== t.rol) return json({ ok: false, error: 'llave_requerida' })
   if (critica && llave.tipo !== 'archivo') return json({ ok: false, error: 'archivo_requerido' })
   if (llave.rol === 'admin' && !(await isAdmin(admin, user.id))) return json({ ok: false, error: 'no_autorizado' })
-  return { llaveId: String(llave.id) }
+  return { llaveId: String(llave.id), tipo: String(llave.tipo || 'archivo'), padreId: llave.padre_id ? String(llave.padre_id) : String(llave.id) }
 }
 
 async function auditar(admin: SupabaseClient, userId: string, llaveId: string | null, accion: string, detalle: Record<string, unknown> = {}) {
@@ -916,6 +1005,84 @@ async function abrirSesionModeracion(user: User, admin: SupabaseClient, body: an
   return json({ ok: true, token, rol: llave.rol, expira, tipo: llave.tipo || 'archivo' })
 }
 
+// Registra la llave pública de un dispositivo como hija de una llave de archivo (tope de dispositivos, auditoría y aviso).
+async function insertarDispositivo(admin: SupabaseClient, userId: string, padre: { id: string, rol: string },
+  jwkDisp: { kty: string, crv: string, x: string, y: string }, huellaDisp: string, nombre: string, detalle: Record<string, unknown>) {
+  // Tope de dispositivos: si se llegó, se revoca el que hace más tiempo que no se usa.
+  const { data: activos, error: errAct } = await admin.from('llaves_moderacion').select('id,ultimo_uso,created_at')
+    .eq('user_id', userId).eq('tipo', 'dispositivo').eq('estado', 'activa')
+  if (errAct) throw errAct
+  if ((activos || []).length >= MAX_DISPOSITIVOS_POR_USUARIO) {
+    const viejo = [...activos!].sort((a: any, b: any) => new Date(a.ultimo_uso || a.created_at).getTime() - new Date(b.ultimo_uso || b.created_at).getTime())[0]
+    await admin.from('llaves_moderacion').update({ estado: 'revocada', revocada_at: new Date().toISOString() }).eq('id', viejo.id)
+  }
+  const ahora = new Date().toISOString()
+  const { data: disp, error: errIns } = await admin.from('llaves_moderacion').insert({
+    user_id: userId, rol: padre.rol, tipo: 'dispositivo', padre_id: padre.id, nombre, public_key: jwkDisp, huella: huellaDisp,
+    estado: 'activa', aprobada_por: userId, aprobada_at: ahora, ultimo_uso: ahora,
+  }).select('id').single()
+  if (errIns) {
+    if (String((errIns as any).code) === '23505') return json({ ok: false, error: 'llave_duplicada' })
+    throw errIns
+  }
+  await admin.from('llaves_moderacion').update({ ultimo_uso: ahora }).eq('id', padre.id)
+  await auditar(admin, userId, String(disp.id), 'autorizar_dispositivo', { nombre, huella: huellaDisp, ...detalle })
+  // Aviso a la propia cuenta: si no fue la persona, lo ve y lo revoca.
+  await admin.from('notificaciones').insert({
+    user_id: userId, tipo: 'noticia', contexto: 'Autorizaste un dispositivo para moderar', link: '/?vista=moderacion', ref_id: disp.id,
+    cuerpo: (nombre + ' ya puede moderar sin pedir tu archivo de llave. Si no fuiste vos, revocalo en Moderación → Mi llave y cambiá tu contraseña.').slice(0, 400),
+  })
+  return { id: String(disp.id) }
+}
+
+// ---------- Emparejamiento por QR ----------
+// Un dispositivo con la moderación desbloqueada crea un código de un solo uso (3 min) que muestra como QR. El celular,
+// con la MISMA cuenta iniciada, lo abre, crea su propia llave y la registra (hija del mismo archivo).
+const EMPAREJAMIENTO_MS = 3 * 60 * 1000
+async function hashHex(texto: string) {
+  const h = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(texto)))
+  return Array.from(h).map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+async function crearEmparejamiento(admin: SupabaseClient, user: User, auth: { llaveId: string, padreId: string }) {
+  const bytes = crypto.getRandomValues(new Uint8Array(24))
+  let bin = ''
+  for (const b of bytes) bin += String.fromCharCode(b)
+  const codigo = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  // Solo un código vigente por cuenta: crear otro invalida los anteriores sin usar.
+  await admin.from('emparejamientos_moderacion').delete().eq('user_id', user.id).is('usado_at', null)
+  const expira = new Date(Date.now() + EMPAREJAMIENTO_MS).toISOString()
+  const { error } = await admin.from('emparejamientos_moderacion').insert({
+    codigo_hash: await hashHex(codigo), user_id: user.id, padre_id: auth.padreId, creado_por_llave: auth.llaveId, expira_at: expira,
+  })
+  if (error) throw error
+  await auditar(admin, user.id, auth.llaveId, 'crear_emparejamiento')
+  return json({ ok: true, codigo, expira })
+}
+async function completarEmparejamiento(admin: SupabaseClient, user: User, body: any) {
+  if (!(await tieneRol(admin, user.id, 'moderador'))) return json({ ok: false, error: 'no_autorizado' })
+  const codigo = String(body.codigo || '')
+  const jwkDisp = jwkPublicaValida(body.publicaDispositivo)
+  if (!/^[A-Za-z0-9_-]{32}$/.test(codigo) || !jwkDisp) return json({ ok: false, error: 'datos_invalidos' })
+  try { await crypto.subtle.importKey('jwk', jwkDisp, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']) }
+  catch { return json({ ok: false, error: 'datos_invalidos' }) }
+  // Se marca usado antes de seguir (un solo uso aunque lleguen dos pedidos juntos).
+  const { data: emp, error } = await admin.from('emparejamientos_moderacion').update({ usado_at: new Date().toISOString() })
+    .eq('codigo_hash', await hashHex(codigo)).eq('user_id', user.id).is('usado_at', null).gt('expira_at', new Date().toISOString())
+    .select('padre_id').maybeSingle()
+  if (error) throw error
+  if (!emp) return json({ ok: false, error: 'codigo_vencido' })
+  const { data: padre, error: errPadre } = await admin.from('llaves_moderacion').select('id,rol,estado,tipo,user_id').eq('id', emp.padre_id).maybeSingle()
+  if (errPadre) throw errPadre
+  if (!padre || padre.estado !== 'activa' || padre.tipo !== 'archivo' || String(padre.user_id) !== user.id) return json({ ok: false, error: 'llave_revocada' })
+  if (!(await tieneRol(admin, user.id, padre.rol))) return json({ ok: false, error: 'no_autorizado' })
+  const huellaDisp = await huellaDeLlave(jwkDisp)
+  const nombre = (String(body.nombre || '').replace(/[\u0000-\u001F]/g, '').trim().slice(0, 48) || 'Celular') + ' (por QR)'
+  const disp = await insertarDispositivo(admin, user.id, { id: String(padre.id), rol: padre.rol }, jwkDisp, huellaDisp, nombre, { qr: true })
+  if (disp instanceof Response) return disp
+  const { token, expira } = await crearTokenModeracion(user.id, disp.id, padre.rol)
+  return json({ ok: true, token, rol: padre.rol, expira, tipo: 'dispositivo', huellaDispositivo: huellaDisp })
+}
+
 // Autoriza un dispositivo: la llave del ARCHIVO firma «desafío + huella del dispositivo». Se guarda la parte pública
 // del dispositivo como llave hija (activa, mismo rol). Un dispositivo no puede autorizar a otro.
 async function autorizarDispositivo(user: User, admin: SupabaseClient, body: any) {
@@ -951,31 +1118,9 @@ async function autorizarDispositivo(user: User, admin: SupabaseClient, body: any
     return json({ ok: false, error: 'firma_invalida' })
   }
 
-  // Tope de dispositivos: si se llegó, se revoca el que hace más tiempo que no se usa.
-  const { data: activos, error: errAct } = await admin.from('llaves_moderacion').select('id,ultimo_uso,created_at')
-    .eq('user_id', user.id).eq('tipo', 'dispositivo').eq('estado', 'activa')
-  if (errAct) throw errAct
-  if ((activos || []).length >= MAX_DISPOSITIVOS_POR_USUARIO) {
-    const viejo = [...activos!].sort((a: any, b: any) => new Date(a.ultimo_uso || a.created_at).getTime() - new Date(b.ultimo_uso || b.created_at).getTime())[0]
-    await admin.from('llaves_moderacion').update({ estado: 'revocada', revocada_at: new Date().toISOString() }).eq('id', viejo.id)
-  }
   const nombre = String(body.nombre || '').replace(/[\u0000-\u001F]/g, '').trim().slice(0, 60) || 'Dispositivo'
-  const ahora = new Date().toISOString()
-  const { data: disp, error: errIns } = await admin.from('llaves_moderacion').insert({
-    user_id: user.id, rol: padre.rol, tipo: 'dispositivo', padre_id: padre.id, nombre, public_key: jwkDisp, huella: huellaDisp,
-    estado: 'activa', aprobada_por: user.id, aprobada_at: ahora, ultimo_uso: ahora,
-  }).select('id').single()
-  if (errIns) {
-    if (String((errIns as any).code) === '23505') return json({ ok: false, error: 'llave_duplicada' })
-    throw errIns
-  }
-  await admin.from('llaves_moderacion').update({ ultimo_uso: ahora }).eq('id', padre.id)
-  await auditar(admin, user.id, String(disp.id), 'autorizar_dispositivo', { nombre, huella: huellaDisp, archivo: huellaArchivo })
-  // Aviso a la propia cuenta: si no fue la persona, lo ve y lo revoca.
-  await admin.from('notificaciones').insert({
-    user_id: user.id, tipo: 'noticia', contexto: 'Autorizaste un dispositivo para moderar', link: '/?vista=moderacion', ref_id: disp.id,
-    cuerpo: (nombre + ' ya puede moderar sin pedir tu archivo de llave. Si no fuiste vos, revocalo en Moderación → Mi llave y cambiá tu contraseña.').slice(0, 400),
-  })
+  const disp = await insertarDispositivo(admin, user.id, { id: String(padre.id), rol: padre.rol }, jwkDisp, huellaDisp, nombre, { archivo: huellaArchivo })
+  if (disp instanceof Response) return disp
   // La sesión de esta vez se abre con la llave del archivo: sirve también para acciones críticas.
   const { token, expira } = await crearTokenModeracion(user.id, String(padre.id), padre.rol)
   return json({ ok: true, token, rol: padre.rol, expira, tipo: 'archivo', huellaDispositivo: huellaDisp })
@@ -1998,7 +2143,7 @@ async function handle(req: Request, body: any) {
       if (String(hilo.autor_id) !== user.id) {
         const auth = await autorizarModeracion(admin, user, body, 'moderador'); if (auth instanceof Response) return auth
         const datos = await datosPublicacion(admin, 'hilo', id), motivo = motivoModeracion(body)
-        await borrarPublicacion(admin, 'hilo', id)
+        await moverAPapelera(admin, 'hilo', id, user.id, motivo)
         await auditar(admin, user.id, auth.llaveId, 'borrar_hilo', { id, motivo })
         await avisarAutorModeracion(admin, user.id, 'hilo', id, datos, motivo)
         return json({ ok: true })
@@ -2023,7 +2168,7 @@ async function handle(req: Request, body: any) {
       if (String(respuesta.autor_id) !== user.id) {
         const auth = await autorizarModeracion(admin, user, body, 'moderador'); if (auth instanceof Response) return auth
         const datos = await datosPublicacion(admin, 'respuesta', id), motivo = motivoModeracion(body)
-        await borrarPublicacion(admin, 'respuesta', id)
+        await moverAPapelera(admin, 'respuesta', id, user.id, motivo)
         await auditar(admin, user.id, auth.llaveId, 'borrar_respuesta', { id, motivo })
         await avisarAutorModeracion(admin, user.id, 'respuesta', id, datos, motivo)
         return json({ ok: true })
@@ -2161,7 +2306,7 @@ async function handle(req: Request, body: any) {
       const tipo=String(body.tipo||''),id=uuidOrEmpty(body.id),motivo=String(body.motivo||'').trim().slice(0,300)
       if(!['hilo','respuesta','material','clasificado'].includes(tipo)||!id)return json({ok:false,error:'datos_invalidos'})
       const tabla=tipo==='hilo'?'hilos':tipo==='respuesta'?'respuestas':tipo==='material'?'materiales':'clasificados'
-      let consultaPub=admin.from(tabla).select('id').eq('id',id)
+      let consultaPub=admin.from(tabla).select('id').eq('id',id).is('eliminado_at',null)
       if(tipo==='material'||tipo==='clasificado')consultaPub=consultaPub.eq('activo',true)
       const {data:pub,error:pubError}=await consultaPub.maybeSingle()
       if(pubError)throw pubError
@@ -2247,8 +2392,7 @@ async function handle(req: Request, body: any) {
       const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
       const id=uuidOrEmpty(body.id);if(!id)return json({ok:false,error:'datos_invalidos'})
       const datos=await datosPublicacion(admin,'material',id),motivo=motivoModeracion(body)
-      const {error}=await admin.from('materiales').update({activo:false}).eq('id',id)
-      if(error)throw error
+      await moverAPapelera(admin,'material',id,user.id,motivo)
       await auditar(admin,user.id,auth.llaveId,'quitar_material',{id,motivo})
       await avisarAutorModeracion(admin,user.id,'material',id,datos,motivo)
       return json({ok:true})
@@ -2260,10 +2404,7 @@ async function handle(req: Request, body: any) {
       const id=uuidOrEmpty(body.id);if(!id)return json({ok:false,error:'datos_invalidos'})
       const datos=await datosPublicacion(admin,'clasificado',id),motivo=motivoModeracion(body)
       if(!datos)return json({ok:false,error:'no_encontrado'})
-      const {error:dErr}=await admin.from('denuncias').update({estado:'eliminada',resuelto_por:user.id,fecha_resolucion:new Date().toISOString()}).eq('id_publicacion',id).eq('estado','pendiente')
-      if(dErr)throw dErr
-      const {error}=await admin.from('clasificados').delete().eq('id',id)
-      if(error)throw error
+      await moverAPapelera(admin,'clasificado',id,user.id,motivo)
       await auditar(admin,user.id,auth.llaveId,'quitar_clasificado',{id,motivo,titulo:datos.titulo})
       await avisarAutorModeracion(admin,user.id,'clasificado',id,datos,motivo)
       return json({ok:true})
@@ -2395,40 +2536,83 @@ async function handle(req: Request, body: any) {
       return registroModeracion(admin)
     }
     case 'soyModerador': { const rl=await rateLimit(admin,action,user.id);if(rl)return rl; return json({ok:true,esModerador:await isModerator(admin,user.id),esAdmin:await isAdmin(admin,user.id)}) }
-    case 'fijarPeriodoModeracion': {
-      // Fecha de corte del período (por ejemplo, las elecciones del centro de estudiantes). Los moderadores sin fecha
-      // pasan a vencer ahí; los que ya tienen una la conservan (para seguir después hay que confirmarlos).
-      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      const auth=await autorizarModeracion(admin,user,body,'admin');if(auth instanceof Response)return auth
-      const fecha=String(body.fecha||'')
-      if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha))return json({ok:false,error:'fecha_invalida'})
-      const corte=new Date(fecha+'T23:59:59-03:00')
-      if(isNaN(corte.getTime())||corte.getTime()<=Date.now()||corte.getTime()>Date.now()+3*365*86400000)return json({ok:false,error:'fecha_invalida'})
-      const descripcion=String(body.descripcion||'').replace(/[\u0000-\u001F]/g,'').trim().slice(0,80)||null
-      const {error}=await admin.from('periodo_moderacion').upsert({id:true,fecha_corte:corte.toISOString(),descripcion,actualizado_por:user.id,updated_at:new Date().toISOString()})
-      if(error)throw error
-      const {error:errMods}=await admin.from('profiles').update({moderador_vence_at:corte.toISOString()}).eq('is_moderator',true).eq('is_admin',false).is('moderador_vence_at',null)
-      if(errMods)throw errMods
-      await auditar(admin,user.id,auth.llaveId,'fijar_periodo',{fecha,descripcion})
-      return json({ok:true,fechaCorte:corte.toISOString()})
-    }
-    case 'confirmarModerador': {
-      // Renueva a un moderador hasta la fecha de corte vigente (también reactiva a uno vencido).
+    case 'guardarGrupoModeracion': {
+      // Crea un grupo o cambia su nombre/fecha. Cambiar la fecha RENUEVA a todos sus integrantes hasta esa fecha
+      // (por eso es crítica: pide el archivo de llave). Antes de renovar, sacá del grupo a quien ya no sigue.
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       const auth=await autorizarModeracion(admin,user,body,'admin',true);if(auth instanceof Response)return auth
-      const periodo=await fechaCorteModeracion(admin)
-      if(!periodo.fechaCorte||!moderadorVigente(periodo.fechaCorte))return json({ok:false,error:'periodo_sin_fecha'})
+      const nombre=String(body.nombre||'').replace(/[\u0000-\u001F]/g,'').trim().slice(0,60)
+      const corte=fechaCorteDesde(body.fecha)
+      if(nombre.length<2)return json({ok:false,error:'grupo_nombre'})
+      if(!corte)return json({ok:false,error:'fecha_invalida'})
+      const id=uuidOrEmpty(body.id)
+      let grupoId=id
+      if(id){
+        const {error}=await admin.from('grupos_moderacion').update({nombre,fecha_corte:corte}).eq('id',id);if(error)throw error
+        const {error:errM}=await admin.from('profiles').update({moderador_vence_at:corte}).eq('grupo_moderacion_id',id).eq('is_moderator',true).eq('is_admin',false)
+        if(errM)throw errM
+      }else{
+        const {data,error}=await admin.from('grupos_moderacion').insert({nombre,fecha_corte:corte}).select('id').single();if(error)throw error
+        grupoId=String(data.id)
+      }
+      await auditar(admin,user.id,auth.llaveId,'guardar_grupo',{grupo:grupoId,nombre,hasta:corte})
+      if(id){
+        const {data:mods}=await admin.from('profiles').select('id').eq('grupo_moderacion_id',id).eq('is_moderator',true).eq('is_admin',false)
+        const filas=(mods||[]).map((m:any)=>({user_id:m.id,tipo:'noticia',contexto:'Tu período de moderación se renovó',
+          cuerpo:'Grupo «'+nombre+'»: seguís moderando hasta el '+fechaCorta(corte)+'.',link:'/?vista=moderacion',ref_id:m.id}))
+        if(filas.length)await admin.from('notificaciones').insert(filas)
+      }
+      return json({ok:true,id:grupoId})
+    }
+    case 'borrarGrupoModeracion': {
+      // Sus integrantes conservan la fecha que tenían, como período individual.
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'admin');if(auth instanceof Response)return auth
+      const id=uuidOrEmpty(body.id);if(!id)return json({ok:false,error:'datos_invalidos'})
+      const {error}=await admin.from('grupos_moderacion').delete().eq('id',id);if(error)throw error
+      await auditar(admin,user.id,auth.llaveId,'borrar_grupo',{grupo:id})
+      return json({ok:true})
+    }
+    case 'asignarPeriodoModerador': {
+      // Período de un moderador: un grupo, una fecha individual o sin vencimiento. Extiende permisos: crítica.
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'admin',true);if(auth instanceof Response)return auth
       const email=String(body.email||'').trim().toLowerCase()
       const u=await findUserByEmail(admin,email);if(!u)return json({ok:false,error:'no_encontrado'})
       const {data:p,error:errP}=await admin.from('profiles').select('is_moderator,is_admin').eq('id',u.id).maybeSingle()
       if(errP)throw errP
       if(!p?.is_moderator||p.is_admin)return json({ok:false,error:'no_es_moderador'})
-      const {error}=await admin.from('profiles').update({moderador_vence_at:periodo.fechaCorte}).eq('id',u.id)
-      if(error)throw error
-      await auditar(admin,user.id,auth.llaveId,'confirmar_moderador',{usuario:String(u.id),hasta:periodo.fechaCorte})
-      await admin.from('notificaciones').insert({user_id:u.id,tipo:'noticia',contexto:'Te confirmaron como moderador',
-        cuerpo:'Seguís en el equipo de moderación hasta el '+fechaCorta(periodo.fechaCorte)+'. ¡Gracias!',link:'/?vista=moderacion',ref_id:u.id})
-      return json({ok:true,hasta:periodo.fechaCorte})
+      let cambios:Record<string,unknown>
+      if(uuidOrEmpty(body.grupoId)){const g=await grupoModeracion(admin,uuidOrEmpty(body.grupoId));if(!g)return json({ok:false,error:'no_encontrado'});cambios={grupo_moderacion_id:g.id,moderador_vence_at:g.fecha_corte}}
+      else if(body.fecha){const corte=fechaCorteDesde(body.fecha);if(!corte)return json({ok:false,error:'fecha_invalida'});cambios={grupo_moderacion_id:null,moderador_vence_at:corte}}
+      else if(body.sinVencimiento===true)cambios={grupo_moderacion_id:null,moderador_vence_at:null}
+      else return json({ok:false,error:'datos_invalidos'})
+      const {error}=await admin.from('profiles').update(cambios).eq('id',u.id);if(error)throw error
+      await auditar(admin,user.id,auth.llaveId,'periodo_moderador',{usuario:String(u.id),...cambios})
+      if(cambios.moderador_vence_at){
+        await admin.from('notificaciones').insert({user_id:u.id,tipo:'noticia',contexto:'Se actualizó tu período de moderación',
+          cuerpo:'Seguís moderando hasta el '+fechaCorta(String(cambios.moderador_vence_at))+'.',link:'/?vista=moderacion',ref_id:u.id})
+      }
+      return json({ok:true})
+    }
+    case 'listarPapelera': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      return listarPapelera(admin)
+    }
+    case 'restaurarPapelera': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      return restaurarPapelera(admin,user,auth.llaveId,body)
+    }
+    case 'crearEmparejamiento': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      return crearEmparejamiento(admin,user,auth)
+    }
+    case 'completarEmparejamiento': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return completarEmparejamiento(admin,user,body)
     }
     case 'renunciarModeracion': {
       // Dejar el rol en el momento. Solo quita permisos, así que alcanza con la cuenta (no pide la llave).
@@ -2443,7 +2627,7 @@ async function handle(req: Request, body: any) {
         if(errCount)throw errCount
         if((count||0)<=1)return json({ok:false,error:'ultimo_admin'})
       }
-      const {error}=await admin.from('profiles').update({is_moderator:false,is_admin:false,moderador_vence_at:null}).eq('id',user.id)
+      const {error}=await admin.from('profiles').update({is_moderator:false,is_admin:false,moderador_vence_at:null,grupo_moderacion_id:null}).eq('id',user.id)
       if(error)throw error
       await admin.from('llaves_moderacion').update({estado:'revocada',revocada_at:new Date().toISOString()}).eq('user_id',user.id).neq('estado','revocada')
       await auditar(admin,user.id,null,'renunciar_moderacion',{rol:p.is_admin?'admin':'moderador'})
@@ -2456,7 +2640,7 @@ async function handle(req: Request, body: any) {
     case 'listarModeradores': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       const auth=await autorizarModeracion(admin,user,body,'admin');if(auth instanceof Response)return auth
-      const {data:equipo,error}=await admin.from('profiles').select('id,pseudonimo,is_moderator,is_admin,moderador_vence_at').or('is_moderator.eq.true,is_admin.eq.true').order('pseudonimo')
+      const {data:equipo,error}=await admin.from('profiles').select('id,pseudonimo,is_moderator,is_admin,moderador_vence_at,grupo_moderacion_id').or('is_moderator.eq.true,is_admin.eq.true').order('pseudonimo')
       if(error)throw error
       const miembros=[]
       for(const m of equipo||[]){
@@ -2464,9 +2648,12 @@ async function handle(req: Request, body: any) {
         const email=u.data.user?.email||''
         const vence=m.is_admin?null:(m.moderador_vence_at||null)
         miembros.push({email,pseudonimo:m.pseudonimo,rol:m.is_admin?'admin':'moderador',oficial:email.toLowerCase()===CUENTA_OFICIAL,vos:String(m.id)===user.id,
-          venceAt:vence,vencido:!m.is_admin&&!moderadorVigente(vence)})
+          venceAt:vence,vencido:!m.is_admin&&!moderadorVigente(vence),grupoId:m.is_admin?null:(m.grupo_moderacion_id||null)})
       }
-      return json({ok:true,moderadores:miembros,periodo:await fechaCorteModeracion(admin)})
+      const {data:grupos,error:errG}=await admin.from('grupos_moderacion').select('id,nombre,fecha_corte').order('fecha_corte')
+      if(errG)throw errG
+      return json({ok:true,moderadores:miembros,grupos:(grupos||[]).map((g:any)=>({id:g.id,nombre:g.nombre,fechaCorte:g.fecha_corte,
+        miembros:miembros.filter((m:any)=>m.grupoId===g.id).length}))})
     }
     case 'asignarModerador': {
       // Da rol de moderador o de administrador. Un admin nuevo igual necesita una llave de admin, que solo se
@@ -2476,9 +2663,11 @@ async function handle(req: Request, body: any) {
       const rol=body.rol==='admin'?'admin':'moderador'
       const email=String(body.email||'').trim().toLowerCase()
       const u=await findUserByEmail(admin,email);if(!u)return json({ok:false,error:'no_encontrado'})
-      const periodo=await fechaCorteModeracion(admin)
-      const corte=periodo.fechaCorte&&moderadorVigente(periodo.fechaCorte)?periodo.fechaCorte:null
-      const cambios=rol==='admin'?{is_admin:true}:{is_moderator:true,moderador_vence_at:corte}
+      // Período opcional: un grupo (vence con él) o una fecha individual. Sin nada, no vence.
+      let corte:string|null=null,grupoId:string|null=null
+      if(rol==='moderador'&&uuidOrEmpty(body.grupoId)){const g=await grupoModeracion(admin,uuidOrEmpty(body.grupoId));if(!g)return json({ok:false,error:'no_encontrado'});grupoId=g.id;corte=g.fecha_corte}
+      else if(rol==='moderador'&&body.fecha){corte=fechaCorteDesde(body.fecha);if(!corte)return json({ok:false,error:'fecha_invalida'})}
+      const cambios=rol==='admin'?{is_admin:true}:{is_moderator:true,moderador_vence_at:corte,grupo_moderacion_id:grupoId}
       const {error}=await admin.from('profiles').update(cambios).eq('id',u.id).select('id').single()
       if(error)throw error
       await auditar(admin,user.id,auth.llaveId,rol==='admin'?'asignar_admin':'asignar_moderador',{usuario:String(u.id)})
@@ -2497,7 +2686,7 @@ async function handle(req: Request, body: any) {
         if(errCount)throw errCount
         if((count||0)<=1)return json({ok:false,error:'ultimo_admin'})
       }
-      const cambios=rol==='admin'?{is_admin:false}:{is_moderator:false,moderador_vence_at:null}
+      const cambios=rol==='admin'?{is_admin:false}:{is_moderator:false,moderador_vence_at:null,grupo_moderacion_id:null}
       const {error}=await admin.from('profiles').update(cambios).eq('id',u.id)
       if(error)throw error
       // Sin el rol, sus llaves de ese rol dejan de servir.
@@ -2523,12 +2712,8 @@ async function handle(req: Request, body: any) {
       const resolucion={resuelto_por:user.id,fecha_resolucion:new Date().toISOString()}
       if(accion==='eliminar'){
         const datosPub=await datosPublicacion(admin,String(rep.tipo),String(rep.id_publicacion)),motivo=motivoModeracion(body)
-        // Se marcan como resueltas todas las denuncias pendientes de esa publicación y después se la borra.
-        const {error:upError}=await admin.from('denuncias').update({estado:'eliminada',...resolucion}).eq('id_publicacion',rep.id_publicacion).eq('estado','pendiente')
-        if(upError)throw upError
-        if(rep.tipo==='material'){const {error:errMat}=await admin.from('materiales').update({activo:false}).eq('id',rep.id_publicacion);if(errMat)throw errMat}
-        else if(rep.tipo==='clasificado'){const {error:errCl}=await admin.from('clasificados').delete().eq('id',rep.id_publicacion);if(errCl)throw errCl}
-        else await borrarPublicacion(admin,rep.tipo==='hilo'?'hilo':'respuesta',String(rep.id_publicacion),false)
+        // Va a la papelera (7 días, restaurable) y se resuelven todas las denuncias pendientes de esa publicación.
+        await moverAPapelera(admin,String(rep.tipo),String(rep.id_publicacion),user.id,motivo)
         await avisarAutorModeracion(admin,user.id,String(rep.tipo),String(rep.id_publicacion),datosPub,motivo)
       } else {
         const {error}=await admin.from('denuncias').update({estado:'descartada',...resolucion}).eq('id',id);if(error)throw error

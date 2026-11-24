@@ -49,7 +49,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261123p">
+    <link rel="stylesheet" href="/css/styles.css?v=20261123q">
 </head>
 
 <body>
@@ -308,6 +308,14 @@
                         <span class="descInicio">Jugá y subí al ranking</span>
                     </button>
 
+                    <button type="button" class="tarjetaInicio soloModeracion" data-vista="moderacion" hidden>
+                        <span class="iconoInicio">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 9.5 4-1.2 7-5 7-9.5V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+                        </span>
+                        <span class="tituloInicio">Moderación</span>
+                        <span class="descInicio">Denuncias, aportes, papelera y equipo</span>
+                    </button>
+
                     <button type="button" class="tarjetaInicio" data-vista="configuracion">
                         <span class="iconoInicio dorado">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2M12 19v2M4.2 6.2l1.4 1.4M18.4 16.4l1.4 1.4M3 12h2M19 12h2M4.2 17.8l1.4-1.4M18.4 7.6l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -558,6 +566,7 @@
                     <button type="button" role="tab" class="modPestania" data-panel="aportes" aria-selected="false">Aportes</button>
                     <button type="button" role="tab" class="modPestania" data-panel="material" aria-selected="false">Material</button>
                     <button type="button" role="tab" class="modPestania soloAdmin" data-panel="equipo" aria-selected="false" hidden>Equipo</button>
+                    <button type="button" role="tab" class="modPestania" data-panel="papelera" aria-selected="false">Papelera</button>
                     <button type="button" role="tab" class="modPestania soloAdmin" data-panel="registro" aria-selected="false" hidden>Registro</button>
                     <button type="button" role="tab" class="modPestania" data-panel="llave" aria-selected="false">Mi llave</button>
                 </div>
@@ -618,16 +627,17 @@
                         <p class="ayudaPerfil">Antes de aprobar una llave, pedile a esa persona su huella por otro medio (en persona o por mensaje) y compará que sea idéntica.</p>
                         <div id="listaLlaves"></div>
 
-                        <h3>Período de moderación</h3>
-                        <p class="ayudaPerfil">Los moderadores vencen en esta fecha (por ejemplo, las elecciones del centro de estudiantes). Quien siga en el equipo tiene que ser confirmado por un administrador; el resto pierde el rol solo. Los administradores no vencen. Se avisa 14 días antes.</p>
-                        <form id="formPeriodo" class="formEquipo">
-                            <label for="fechaPeriodo">Fin del período</label>
-                            <input type="date" id="fechaPeriodo" required>
-                            <label for="descPeriodo">Referencia (opcional)</label>
-                            <input type="text" id="descPeriodo" maxlength="80" placeholder="Elecciones del centro de estudiantes 2027">
-                            <button type="submit" class="btn-secundario">Guardar fecha</button>
+                        <h3>Períodos de moderación</h3>
+                        <p class="ayudaPerfil">Cada moderador vence en la fecha de su <b>grupo</b> (por ejemplo «Centro de estudiantes 2026», que vence en las elecciones) o en una <b>fecha individual</b>. Al vencer pierde el rol solo. Cambiar la fecha de un grupo renueva a todos sus integrantes: antes, sacá del grupo a quien ya no sigue. Los administradores no vencen. Se avisa 14 días antes.</p>
+                        <div id="listaGrupos"></div>
+                        <form id="formGrupo" class="formEquipo formGrupo">
+                            <label for="nombreGrupo">Nuevo grupo</label>
+                            <input type="text" id="nombreGrupo" maxlength="60" placeholder="Centro de estudiantes 2026" required>
+                            <label for="fechaGrupo">Vence el</label>
+                            <input type="date" id="fechaGrupo" required>
+                            <button type="submit" class="btn-secundario">Crear grupo</button>
                         </form>
-                        <p id="msgPeriodo" aria-live="polite"></p>
+                        <p id="msgGrupo" aria-live="polite"></p>
 
                         <h3>Moderadores</h3>
                         <p class="ayudaPerfil">Para sumar a alguien: dale el rol acá, esa persona crea su llave en «Mi llave» y vos la aprobás arriba. Los moderadores nuevos vencen al final del período.</p>
@@ -639,6 +649,9 @@
                             <option value="moderador">Moderador: denuncias, aportes y material</option>
                             <option value="admin">Administrador: además, equipo, llaves, noticias y registro</option>
                         </select>
+                        <label for="periodoNuevoModerador">Período (solo moderadores)</label>
+                        <select id="periodoNuevoModerador" class="selectPeriodo"></select>
+                        <input type="date" id="fechaNuevoModerador" hidden aria-label="Fecha individual de vencimiento">
                         <button type="submit" class="btn-secundario">Dar rol</button>
                     </form>
 
@@ -661,6 +674,11 @@
                     </div>
                 </section>
 
+                <section class="modPanel" role="tabpanel" data-panel="papelera" aria-label="Papelera" hidden>
+                    <p class="ayudaPerfil">Lo que quita la moderación queda acá 7 días, oculto para todos. Si fue un error, restauralo; si no, se borra solo cuando vence el plazo.</p>
+                    <div id="listaPapelera"></div>
+                </section>
+
                 <section class="modPanel" role="tabpanel" data-panel="registro" aria-label="Registro de moderación" hidden>
                     <p class="ayudaPerfil">Cada acción de moderación queda anotada con quién la hizo y con qué llave. Se guarda 180 días.</p>
                     <ol id="listaRegistro" class="listaRegistro"></ol>
@@ -668,6 +686,16 @@
 
                 <section class="modPanel" role="tabpanel" data-panel="llave" aria-label="Mi llave de moderación" hidden>
                     <p id="estadoRolPropio" class="aviso" hidden></p>
+                    <section id="seccionQR" class="seccionQR">
+                        <h3>Autorizar un celular con QR</h3>
+                        <p class="ayudaPerfil">Desde un dispositivo ya autorizado, generá un código y escanealo con la cámara del celular, con tu misma cuenta iniciada ahí. El celular queda autorizado sin usar el archivo. El código dura 3 minutos y sirve una sola vez.</p>
+                        <button type="button" id="btnGenerarQR" class="btn-secundario">Mostrar código QR</button>
+                        <div id="cajaQR" class="cajaQR" hidden>
+                            <div id="imagenQR" class="imagenQR" role="img" aria-label="Código QR para autorizar un celular"></div>
+                            <p id="estadoQR" class="ayudaPerfil" aria-live="polite"></p>
+                            <details><summary>¿No podés escanear?</summary><p class="ayudaPerfil">Abrí este enlace en el celular: <span id="enlaceQR" class="enlaceQR"></span></p></details>
+                        </div>
+                    </section>
                     <div id="misLlaves"></div>
 
                     <div class="crearLlave">
@@ -1021,6 +1049,11 @@
 
                 <p id="msgPerfil"></p>
 
+                <div class="soloModeracion" hidden>
+                    <h3 class="seccion-titulo">Moderación</h3>
+                    <button type="button" class="btn-secundario" data-nav="moderacion">Abrir el panel de moderación</button>
+                </div>
+
                 <div id="seccionSeguridadCuenta">
                     <h3 class="seccion-titulo">Seguridad de la cuenta</h3>
                     <p id="ayudaSeguridadCuenta" class="ayudaPerfil"></p>
@@ -1259,7 +1292,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261123p"></script>
+    <script src="/js/app.js?v=20261123q"></script>
 
     <!-- CAPTCHA anti-bots (Cloudflare Turnstile) para login, registro y recuperación. Sin SRI: Cloudflare lo actualiza
          solo y su documentación pide no fijarlo. Se renderiza recién cuando el formulario se usa. -->

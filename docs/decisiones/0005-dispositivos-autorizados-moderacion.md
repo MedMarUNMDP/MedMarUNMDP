@@ -40,3 +40,20 @@ cuenta o de sesión.
   - el vencimiento por inactividad y la revocación por dispositivo;
   - que no se puedan hacer acciones críticas sin el archivo.
 - Las autorizaciones viejas de «mantener 2 h» se descartan solas al leerlas.
+
+## Agregado (2026-11-23): autorizar un celular con QR
+
+Un dispositivo con la moderación desbloqueada genera un código de un solo uso (`crearEmparejamiento`). El código
+dura 3 minutos y el servidor guarda solo su hash. Se muestra como QR con `/?emparejar=<código>`.
+
+El celular tiene que tener la **misma cuenta** iniciada. Lo abre, confirma, crea su propia llave no exportable y la
+registra con `completarEmparejamiento`. Queda como hija del mismo archivo, con «(por QR)» en el nombre.
+
+Resguardos:
+- el código está ligado a la cuenta, sirve una sola vez y caduca;
+- crear un código nuevo invalida el anterior;
+- cada QR generado queda en el registro;
+- cada dispositivo nuevo avisa en la campana.
+
+Riesgo aceptado: quien controle un dispositivo autorizado puede sumar otro. Es el mismo nivel de confianza que
+ya tiene ese dispositivo para moderar, y las acciones críticas siguen pidiendo el archivo.

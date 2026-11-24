@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-periodo-mod"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-papelera-grupos-qr"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -214,6 +214,8 @@ const hilosPendientesConfirmacion = new Map()
         let hiloAbiertoId = null
         let respuestaObjetivoActual = null
         let esModeradorActual = false
+        // Moderadores vigentes y administradores ven las mismas opciones de moderación en el sitio.
+        function puedeModerar() { return !!(esModeradorActual || esAdminActual) }
         let esAdminActual = false
 
         for (let i = 1; i <= 40; i++) {
@@ -684,7 +686,8 @@ const hilosPendientesConfirmacion = new Map()
                 email_invalido: "El email no es válido.",
                 confirmacion_baja: "Escribí BORRAR para confirmar.",
                 confirmacion_renuncia: "Escribí RENUNCIO para confirmar.",
-                periodo_sin_fecha: "Primero fijá la fecha de fin del período (más arriba).",
+                grupo_nombre: "El nombre del grupo tiene que tener entre 2 y 60 caracteres.",
+                codigo_vencido: "El código venció o ya se usó.",
                 fecha_invalida: "La fecha tiene que ser futura y de los próximos 3 años.",
                 no_es_moderador: "Esa cuenta no es moderadora.",
                 baja_admin: "La cuenta de administración no se puede eliminar desde la web. Escribinos por mail.",
@@ -1018,7 +1021,7 @@ async function cargarBootstrap() {
                 : 'Tu cuenta entra con Google. Si querés, podés definir una contraseña para entrar también con email.'
             campoPasswordActual.style.display = conPassword ? 'block' : 'none'
             formCambiarPassword.style.display = 'block'
-            btnIrModeracion.style.display = esModeradorActual ? 'inline-block' : 'none'; actualizarAccesosModeracion()
+            btnIrModeracion.style.display = puedeModerar() ? 'inline-block' : 'none'; actualizarAccesosModeracion()
         }
 
         async function cargarForoBootstrap() {
@@ -1055,7 +1058,7 @@ async function cargarBootstrap() {
                 return
             }
             esModeradorActual = !!r.esModerador
-            btnIrModeracion.style.display = esModeradorActual ? 'inline-block' : 'none'; actualizarAccesosModeracion()
+            btnIrModeracion.style.display = puedeModerar() ? 'inline-block' : 'none'; actualizarAccesosModeracion()
             const data = busquedaForoActual ? r : (r.data || {})
             const item = { etiquetas: data.etiquetas || [], hilos: data.hilos || [], hayMas: !!data.hayMas, actualizadoEn: Date.now() }
             foroCacheCliente.set(key, item)
@@ -2740,7 +2743,7 @@ async function cargarBootstrap() {
 
             let acciones = "<button type='button' class='accionDenunciar' data-tipo='hilo' data-id='" + escapeAttr(h.id) + "'>Denunciar</button>"
 
-            if (h.esPropio || esModeradorActual) {
+            if (h.esPropio || puedeModerar()) {
                 acciones += "<button type='button' class='accionBorrar' data-tipo='hilo' data-id='" + escapeAttr(h.id) + "'>" + (h.esPropio ? "Borrar" : "Quitar (moderación)") + "</button>"
             }
 
@@ -2847,7 +2850,7 @@ async function cargarBootstrap() {
             const padre = esAnidada ? respuestasUI.find(function (x) { return String(x.id) === String(r.parentId) }) : null
 
             let acciones = r._optimista ? "" : "<button type='button' class='accionDenunciar' data-tipo='respuesta' data-id='" + escapeAttr(r.id) + "'>Denunciar</button>"
-            if (!r._optimista && (r.esPropio || esModeradorActual)) {
+            if (!r._optimista && (r.esPropio || puedeModerar())) {
                 acciones += "<button type='button' class='accionBorrar' data-tipo='respuesta' data-id='" + escapeAttr(r.id) + "'>" + (r.esPropio ? "Borrar" : "Quitar (moderación)") + "</button>"
             }
             if (!r._optimista) {
@@ -3050,7 +3053,7 @@ async function cargarBootstrap() {
             esModeradorActual = r.esModerador
             esAdminActual = r.esAdmin
 
-            btnIrModeracion.style.display = esModeradorActual ? "inline-block" : "none"; actualizarAccesosModeracion()
+            btnIrModeracion.style.display = puedeModerar() ? "inline-block" : "none"; actualizarAccesosModeracion()
 
         }
 
@@ -3257,11 +3260,28 @@ async function cargarBootstrap() {
 
         }
 
-        // ---- Período de moderación (los moderadores vencen en la fecha de corte; un admin los confirma) ----
-        let periodoModeracion = { fechaCorte: null, descripcion: "" }
+        // ---- Períodos de moderación: por grupo o individuales (ver migración 20261127170000) ----
+        let gruposModeracion = []
 
         function fechaDia(iso) {
             return new Date(iso).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "America/Argentina/Buenos_Aires" })
+        }
+        // ISO → «AAAA-MM-DD» en hora de Argentina, para los <input type="date">.
+        function fechaInput(iso) {
+            return iso ? new Intl.DateTimeFormat("en-CA", { timeZone: "America/Argentina/Buenos_Aires" }).format(new Date(iso)) : ""
+        }
+        function opcionesPeriodo(seleccion) {
+            return "<option value='sin'" + (seleccion === "sin" ? " selected" : "") + ">Sin vencimiento</option>" +
+                gruposModeracion.map(function (g) {
+                    return "<option value='g:" + escapeAttr(g.id) + "'" + (seleccion === "g:" + g.id ? " selected" : "") + ">Grupo «" + escapeHtml(g.nombre) + "» (vence el " + escapeHtml(fechaDia(g.fechaCorte)) + ")</option>"
+                }).join("") +
+                "<option value='fecha'" + (seleccion === "fecha" ? " selected" : "") + ">Fecha individual…</option>"
+        }
+        // Convierte la elección de un <select> de período en los parámetros de la API.
+        function parametrosPeriodo(valor, fecha) {
+            if (valor === "sin") return { sinVencimiento: true }
+            if (valor.indexOf("g:") === 0) return { grupoId: valor.slice(2) }
+            return fecha ? { fecha: fecha } : null
         }
 
         async function cargarModeradores() {
@@ -3270,30 +3290,59 @@ async function cargarBootstrap() {
 
             if (!r.ok) return
 
-            periodoModeracion = r.periodo || { fechaCorte: null, descripcion: "" }
-            const fecha = document.getElementById("fechaPeriodo")
-            if (periodoModeracion.fechaCorte) {
-                // Fecha local de Argentina en formato AAAA-MM-DD para el <input type="date">.
-                const p = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Argentina/Buenos_Aires" }).format(new Date(periodoModeracion.fechaCorte))
-                fecha.value = p
-            }
-            document.getElementById("descPeriodo").value = periodoModeracion.descripcion || ""
-            document.getElementById("msgPeriodo").textContent = periodoModeracion.fechaCorte
-                ? "Período actual: hasta el " + fechaDia(periodoModeracion.fechaCorte) + (periodoModeracion.descripcion ? " (" + periodoModeracion.descripcion + ")" : "") + "."
-                : "Todavía no hay fecha: los moderadores no vencen."
+            gruposModeracion = Array.isArray(r.grupos) ? r.grupos : []
+            renderizarGrupos()
+            const selNuevo = document.getElementById("periodoNuevoModerador")
+            selNuevo.innerHTML = opcionesPeriodo(gruposModeracion.length ? "g:" + gruposModeracion[0].id : "sin")
             renderizarModeradores(r.moderadores)
 
         }
 
-        document.getElementById("formPeriodo").addEventListener("submit", async function (e) {
+        document.getElementById("periodoNuevoModerador").addEventListener("change", function () {
+            document.getElementById("fechaNuevoModerador").hidden = this.value !== "fecha"
+        })
+
+        function renderizarGrupos() {
+            const cont = document.getElementById("listaGrupos")
+            cont.innerHTML = gruposModeracion.length ? "<ul class='listaGrupos'>" + gruposModeracion.map(function (g) {
+                const vencido = new Date(g.fechaCorte) <= new Date()
+                return "<li data-grupo='" + escapeAttr(g.id) + "'><span class='novedadFilaTexto'><b>" + escapeHtml(g.nombre) + "</b><span>" +
+                    (vencido ? "Venció el " : "Vence el ") + escapeHtml(fechaDia(g.fechaCorte)) + " · " + g.miembros + (g.miembros === 1 ? " integrante" : " integrantes") + "</span></span>" +
+                    "<input type='date' class='fechaGrupoEdit' value='" + escapeAttr(fechaInput(g.fechaCorte)) + "' aria-label='Nueva fecha de " + escapeAttr(g.nombre) + "'>" +
+                    "<button type='button' class='novedadAccion' data-renovar-grupo>Guardar fecha y renovar</button>" +
+                    "<button type='button' class='panelNotifAccion' data-borrar-grupo>Borrar grupo</button></li>"
+            }).join("") + "</ul>" : "<p class='ayudaPerfil'>Todavía no hay grupos. Sin grupo ni fecha, los moderadores no vencen.</p>"
+        }
+
+        document.getElementById("listaGrupos").addEventListener("click", async function (e) {
+            const li = e.target.closest("[data-grupo]")
+            if (!li) return
+            const g = gruposModeracion.find(function (x) { return x.id === li.dataset.grupo })
+            if (!g) return
+            if (e.target.closest("[data-renovar-grupo]")) {
+                const fecha = li.querySelector(".fechaGrupoEdit").value
+                if (!fecha) return
+                if (!confirm("¿Renovar el grupo «" + g.nombre + "» hasta el " + fecha.split("-").reverse().join("/") + "?\n\nSus " + g.miembros + " integrantes siguen moderando hasta esa fecha. Si alguien ya no sigue, sacalo antes del grupo.")) return
+                const r = await llamarModeracion("guardarGrupoModeracion", { id: g.id, nombre: g.nombre, fecha: fecha })
+                if (!r.ok) { if (r.error !== "moderacion_bloqueada") alert(mensajeError(r.error)); return }
+                mostrarAviso("Grupo renovado.")
+                cargarModeradores()
+            } else if (e.target.closest("[data-borrar-grupo]")) {
+                if (!confirm("¿Borrar el grupo «" + g.nombre + "»? Sus integrantes conservan la fecha que tenían, como período individual.")) return
+                const r = await llamarModeracion("borrarGrupoModeracion", { id: g.id })
+                if (!r.ok) { if (r.error !== "moderacion_bloqueada") alert(mensajeError(r.error)); return }
+                cargarModeradores()
+            }
+        })
+
+        document.getElementById("formGrupo").addEventListener("submit", async function (e) {
             e.preventDefault()
-            const msg = document.getElementById("msgPeriodo")
-            const fecha = document.getElementById("fechaPeriodo").value
-            if (!fecha) { msg.textContent = "Elegí una fecha."; return }
-            if (!confirm("¿Fijar el fin del período el " + fecha.split("-").reverse().join("/") + "? Los moderadores sin fecha pasan a vencer ese día.")) return
-            const r = await llamarModeracion("fijarPeriodoModeracion", { fecha: fecha, descripcion: document.getElementById("descPeriodo").value.trim() })
-            if (!r.ok) { msg.textContent = mensajeError(r.error); return }
-            mostrarAviso("Fecha del período guardada.")
+            const msg = document.getElementById("msgGrupo")
+            const r = await llamarModeracion("guardarGrupoModeracion", { nombre: document.getElementById("nombreGrupo").value.trim(), fecha: document.getElementById("fechaGrupo").value })
+            if (!r.ok) { if (r.error !== "moderacion_bloqueada") msg.textContent = mensajeError(r.error); return }
+            msg.textContent = ""
+            this.reset()
+            mostrarAviso("Grupo creado. Ahora asignale integrantes en la lista de moderadores.")
             cargarModeradores()
         })
 
@@ -3312,24 +3361,31 @@ async function cargarBootstrap() {
                 div.className = "moderadorItem"
 
                 const etiquetaRol = m.rol === "admin" ? "Administrador" : "Moderador"
-                const corte = periodoModeracion.fechaCorte
-                const puedeConfirmar = m.rol === "moderador" && corte && new Date(corte) > new Date() &&
-                    (!m.venceAt || new Date(m.venceAt) < new Date(corte))
+                const grupo = m.grupoId ? gruposModeracion.find(function (g) { return g.id === m.grupoId }) : null
+                const seleccion = grupo ? "g:" + grupo.id : m.venceAt ? "fecha" : "sin"
                 div.innerHTML =
                     "<span class='novedadFilaTexto'><b>" + escapeHtml(m.pseudonimo || m.email) + (m.vos ? " (vos)" : "") + "</b>" +
                     "<span>" + escapeHtml(m.email) +
-                    (m.rol === "moderador" ? " · " + (m.vencido ? "venció el " + escapeHtml(fechaDia(m.venceAt)) : m.venceAt ? "vence el " + escapeHtml(fechaDia(m.venceAt)) : "sin vencimiento") : "") +
+                    (m.rol === "moderador" ? " · " + (grupo ? "grupo «" + escapeHtml(grupo.nombre) + "» · " : "") +
+                        (m.vencido ? "venció el " + escapeHtml(fechaDia(m.venceAt)) : m.venceAt ? "vence el " + escapeHtml(fechaDia(m.venceAt)) : "sin vencimiento") : "") +
                     "</span></span>" +
                     "<span class='estadoChip " + (m.vencido ? "estado-rechazado" : m.rol === "admin" ? "estado-pendiente" : "estado-aprobado") + "'>" + (m.oficial ? "Cuenta oficial" : m.vencido ? "Vencido" : etiquetaRol) + "</span>" +
-                    (puedeConfirmar ? "<button type='button' class='novedadAccion' data-confirmar>Confirmar hasta el " + escapeHtml(fechaDia(corte)) + "</button>" : "") +
+                    (m.rol === "moderador"
+                        ? "<span class='periodoModerador'><select aria-label='Período de " + escapeAttr(m.pseudonimo || m.email) + "'>" + opcionesPeriodo(seleccion) + "</select>" +
+                          "<input type='date' value='" + escapeAttr(fechaInput(m.venceAt)) + "'" + (seleccion === "fecha" ? "" : " hidden") + " aria-label='Fecha individual'>" +
+                          "<button type='button' data-aplicar-periodo>Aplicar</button></span>"
+                        : "") +
                     (m.oficial || m.vos ? "" : "<button type='button' data-quitar-rol>Quitar rol</button>")
 
-                const btnConfirmar = div.querySelector("[data-confirmar]")
-                if (btnConfirmar) btnConfirmar.addEventListener("click", async function () {
-                    if (!confirm("¿Confirmar a " + (m.pseudonimo || m.email) + " como moderador hasta el " + fechaDia(corte) + "?")) return
-                    const r = await llamarModeracion("confirmarModerador", { email: m.email })
+                const sel = div.querySelector(".periodoModerador select")
+                if (sel) sel.addEventListener("change", function () { div.querySelector(".periodoModerador input").hidden = sel.value !== "fecha" })
+                const btnAplicar = div.querySelector("[data-aplicar-periodo]")
+                if (btnAplicar) btnAplicar.addEventListener("click", async function () {
+                    const params = parametrosPeriodo(sel.value, div.querySelector(".periodoModerador input").value)
+                    if (!params) { alert("Elegí la fecha."); return }
+                    const r = await llamarModeracion("asignarPeriodoModerador", Object.assign({ email: m.email }, params))
                     if (!r.ok) { if (r.error !== "moderacion_bloqueada") alert(mensajeError(r.error)); return }
-                    mostrarAviso("Moderador confirmado.")
+                    mostrarAviso("Período actualizado.")
                     cargarModeradores()
                 })
 
@@ -3361,7 +3417,9 @@ async function cargarBootstrap() {
 
             const rol = document.getElementById("rolNuevoModerador").value
             if (rol === "admin" && !confirm("¿Dar rol de ADMINISTRADOR a " + inputNuevoModerador.value.trim() + "?\n\nVa a poder ver el panel. Para administrar va a necesitar además una llave de administrador, que solo vos podés activar desde el SQL Editor de Supabase.")) { msgModerador.innerText = ""; return }
-            const r = await llamarModeracion("asignarModerador", { email: inputNuevoModerador.value.trim(), rol: rol })
+            const periodo = rol === "moderador" ? parametrosPeriodo(document.getElementById("periodoNuevoModerador").value, document.getElementById("fechaNuevoModerador").value) : {}
+            if (!periodo) { msgModerador.innerText = "Elegí la fecha del período."; return }
+            const r = await llamarModeracion("asignarModerador", Object.assign({ email: inputNuevoModerador.value.trim(), rol: rol }, periodo.sinVencimiento ? {} : periodo))
 
             if (r.ok) {
                 msgModerador.innerText = rol === "admin"
@@ -3751,6 +3809,8 @@ async function cargarBootstrap() {
             }
 
             await cargarBootstrap()
+            // Celular que llegó escaneando un QR de autorización (/?emparejar=…): se completa con la sesión y el rol listos.
+            completarEmparejamientoPendiente()
             iniciarRealtimeUsuario()
             cargarNotificaciones(true)
             iniciarActualizacionPeriodica()
@@ -5578,6 +5638,7 @@ async function cargarBootstrap() {
             else if (modPestania === "aportes") cargarAportes()
             else if (modPestania === "equipo") { cargarLlaves(); cargarModeradores() }
             else if (modPestania === "registro") cargarRegistro()
+            else if (modPestania === "papelera") cargarPapelera()
         }
 
         async function entrarAModeracion() {
@@ -5764,6 +5825,126 @@ async function cargarBootstrap() {
             }
         })
 
+        // ---- Papelera (7 días para restaurar lo que quitó la moderación) ----
+        const TIPOS_PAPELERA = { hilo: "Publicación del foro", respuesta: "Respuesta del foro", material: "Material", clasificado: "Aviso de Compra venta" }
+        async function cargarPapelera() {
+            const cont = document.getElementById("listaPapelera")
+            cont.innerHTML = esqueletoTarjetas(1)
+            const r = await llamarModeracion("listarPapelera", {})
+            if (!r.ok) { cont.innerHTML = "<p class='vacio'>" + escapeHtml(mensajeError(r.error)) + "</p>"; return }
+            const items = r.papelera || []
+            cont.innerHTML = items.length ? items.map(function (i) {
+                const dias = Math.max(0, Math.ceil((new Date(i.borraAt) - Date.now()) / 86400000))
+                return "<article class='aporteItem itemPapelera'>" +
+                    "<div class='tarjetaMaterialMeta'><span class='chipTipo'>" + escapeHtml(TIPOS_PAPELERA[i.tipo] || i.tipo) + "</span>" +
+                    "<span class='materiaMaterial'>" + (i.autor ? "de " + escapeHtml(i.autor) + " · " : "") + "quitado por " + escapeHtml(i.quitadoPor) + " " + escapeHtml(tiempoRelativo(i.quitadoAt)) + "</span></div>" +
+                    "<h3>" + escapeHtml(i.titulo) + "</h3>" +
+                    (i.detalle ? "<p class='descMaterial'>" + escapeHtml(i.detalle) + "</p>" : "") +
+                    (i.motivo ? "<p class='dominioAporte'>Motivo: " + escapeHtml(i.motivo) + "</p>" : "") +
+                    "<p class='dominioAporte'>Se borra definitivamente " + (dias <= 1 ? "en menos de un día" : "en " + dias + " días") + ".</p>" +
+                    "<div class='accionesMaterial'><button type='button' class='novedadAccion' data-restaurar='" + escapeAttr(i.id) + "' data-tipo='" + escapeAttr(i.tipo) + "'>Restaurar</button></div>" +
+                    "</article>"
+            }).join("") : "<p class='vacio'>La papelera está vacía.</p>"
+        }
+        document.getElementById("listaPapelera").addEventListener("click", async function (e) {
+            const btn = e.target.closest("[data-restaurar]")
+            if (!btn) return
+            if (!confirm("¿Restaurar? Vuelve a verse para todos y se le avisa a quien lo publicó.")) return
+            btn.disabled = true
+            const r = await llamarModeracion("restaurarPapelera", { tipo: btn.dataset.tipo, id: btn.dataset.restaurar })
+            if (!r.ok) { btn.disabled = false; alert(mensajeError(r.error)); return }
+            mostrarAviso("Restaurado.")
+            invalidarCacheForo()
+            materialesCargadosEn = 0
+            clasificadosCargadosEn = 0
+            cargarPapelera()
+        })
+
+        // ---- Autorizar un celular con QR (desde un dispositivo con la moderación desbloqueada) ----
+        let temporizadorQR = null
+        function cargarLibreriaQR() {
+            if (window.qrcode) return Promise.resolve()
+            return new Promise(function (ok, mal) {
+                const s = document.createElement("script")
+                s.src = "/js/vendor/qrcode-generator-1.4.4.js"
+                s.onload = ok; s.onerror = function () { mal(new Error("No se pudo cargar el generador de QR.")) }
+                document.head.appendChild(s)
+            })
+        }
+        document.getElementById("btnGenerarQR").addEventListener("click", async function () {
+            const caja = document.getElementById("cajaQR"), estado = document.getElementById("estadoQR")
+            const r = await llamarModeracion("crearEmparejamiento", {})
+            if (!r.ok) { if (r.error !== "moderacion_bloqueada") alert(mensajeError(r.error)); return }
+            try { await cargarLibreriaQR() } catch (err) { alert(err.message); return }
+            const enlace = location.origin + "/?emparejar=" + encodeURIComponent(r.codigo)
+            const qr = window.qrcode(0, "M")
+            qr.addData(enlace)
+            qr.make()
+            // El SVG lo arma la librería con datos propios (no hay texto de usuarios).
+            document.getElementById("imagenQR").innerHTML = qr.createSvgTag(6, 12)
+            document.getElementById("enlaceQR").textContent = enlace
+            caja.hidden = false
+            const inicio = Date.now(), vence = new Date(r.expira).getTime()
+            clearInterval(temporizadorQR)
+            let revisando = false
+            temporizadorQR = setInterval(async function () {
+                const quedan = Math.max(0, Math.round((vence - Date.now()) / 1000))
+                if (!quedan) {
+                    clearInterval(temporizadorQR)
+                    estado.textContent = "El código venció. Generá otro si lo necesitás."
+                    document.getElementById("imagenQR").innerHTML = ""
+                    return
+                }
+                estado.textContent = "Escanealo con el celular · vence en " + Math.floor(quedan / 60) + ":" + String(quedan % 60).padStart(2, "0")
+                // Cada 5 s se mira si apareció el dispositivo nuevo.
+                if (revisando || (Date.now() - inicio) % 5000 > 1000) return
+                revisando = true
+                const l = await llamar("misLlaves", {})
+                revisando = false
+                const nuevo = l.ok && (l.llaves || []).find(function (x) { return x.tipo === "dispositivo" && new Date(x.created_at).getTime() >= inicio - 5000 })
+                if (nuevo) {
+                    clearInterval(temporizadorQR)
+                    document.getElementById("imagenQR").innerHTML = ""
+                    estado.textContent = "¡Listo! «" + nuevo.nombre + "» quedó autorizado."
+                    cargarMisLlaves()
+                }
+            }, 1000)
+        })
+
+        // El celular abre /?emparejar=<código>: se guarda hasta tener la sesión y el rol, y se completa ahí.
+        const CLAVE_EMPAREJAR = "medmar:emparejar"
+        ;(function () {
+            const codigo = new URLSearchParams(location.search).get("emparejar")
+            if (!codigo) return
+            try { sessionStorage.setItem(CLAVE_EMPAREJAR, codigo) } catch (_) {}
+            try { history.replaceState(history.state, "", location.pathname + location.hash) } catch (_) {}
+        })()
+
+        async function completarEmparejamientoPendiente() {
+            let codigo = null
+            try { codigo = sessionStorage.getItem(CLAVE_EMPAREJAR) } catch (_) {}
+            if (!codigo || !sesion) return
+            try { sessionStorage.removeItem(CLAVE_EMPAREJAR) } catch (_) {}
+            if (!puedeModerar()) { alert("Esta cuenta no tiene rol de moderación. Iniciá sesión con la misma cuenta que en el otro dispositivo y escaneá de nuevo."); return }
+            if (!confirm("¿Autorizar este dispositivo para moderar con tu cuenta? Hacelo solo si vos generaste el código en tu otro dispositivo.")) return
+            try {
+                const par = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, false, ["sign", "verify"])
+                const pub = await crypto.subtle.exportKey("jwk", par.publicKey)
+                const publica = { kty: "EC", crv: "P-256", x: pub.x, y: pub.y }
+                const r = await llamar("completarEmparejamiento", { codigo: codigo, publicaDispositivo: publica, nombre: nombreDispositivo() })
+                if (!r.ok) { alert(r.error === "codigo_vencido" ? "El código venció o ya se usó. Generá otro en tu dispositivo autorizado." : (ERRORES_LLAVE[r.error] || mensajeError(r.error))); return }
+                modDispositivo = { huella: await huellaLlave(publica), privada: par.privateKey, tipo: "dispositivo" }
+                await guardarLlaveDispositivo(modDispositivo)
+                modSesion = { token: r.token, rol: r.rol, expira: Number(r.expira), tipo: "dispositivo" }
+                modLlave = modDispositivo
+                mostrarAviso("Este dispositivo quedó autorizado para moderar.")
+                mostrarSeccion("moderacion", "up")
+            } catch (err) {
+                console.error(err)
+                alert("No se pudo autorizar este dispositivo.")
+            }
+        }
+
         // ---- Registro de auditoría (admin) ----
         const ACCIONES_REGISTRO = {
             abrir_sesion: "desbloqueó la moderación", firma_invalida: "intentó desbloquear con una firma inválida",
@@ -5777,7 +5958,9 @@ async function cargarBootstrap() {
             mostrar_puntaje: "volvió a mostrar un puntaje del ranking",
             autorizar_dispositivo: "autorizó un dispositivo para moderar", revocar_dispositivo: "revocó un dispositivo",
             dispositivo_vencido: "tenía un dispositivo vencido (se revocó solo)",
-            fijar_periodo: "fijó la fecha del período de moderación", confirmar_moderador: "confirmó a un moderador para el período",
+            guardar_grupo: "creó o renovó un grupo de moderación", borrar_grupo: "borró un grupo de moderación",
+            periodo_moderador: "cambió el período de un moderador", restaurar: "restauró algo de la papelera",
+            crear_emparejamiento: "generó un QR para autorizar un celular",
             renunciar_moderacion: "dejó la moderación", quitar_clasificado: "quitó un aviso de Compra venta"
         }
 
@@ -5947,7 +6130,7 @@ async function cargarBootstrap() {
                     "<div class='accionesMaterial'>" +
                     (descarga ? "<a class='novedadAccion' href='" + escapeAttr(descarga) + "' target='_blank' rel='noopener noreferrer'>Descargar</a>" : "") +
                     "<a class='novedadAccion" + (descarga ? " secundaria" : "") + "' href='" + escapeAttr(m.link) + "' target='_blank' rel='noopener noreferrer'>" + (descarga ? "Ver en " : "Abrir en ") + escapeHtml(nombreSitio) + "</a>" +
-                    (esModeradorActual ? "<button type='button' class='novedadAccion secundaria quitarMaterial' data-quitar='" + escapeAttr(m.id) + "'>Quitar</button>" : "") +
+                    (puedeModerar() ? "<button type='button' class='novedadAccion secundaria quitarMaterial' data-quitar='" + escapeAttr(m.id) + "'>Quitar</button>" : "") +
                     "<button type='button' class='denunciarMaterial' data-denunciar-material='" + escapeAttr(m.id) + "'>Reportar</button>" +
                     "</div></article>"
             }).join("")
@@ -6402,7 +6585,7 @@ async function cargarBootstrap() {
                       (c.activo && !c.vencido ? "<button type='button' class='novedadAccion secundaria' data-gestionar-clasificado='renovar' data-id='" + escapeAttr(c.id) + "'>Renovar 60 días</button>" : "") +
                       "<button type='button' class='novedadAccion secundaria quitarMaterial' data-gestionar-clasificado='borrar' data-id='" + escapeAttr(c.id) + "'>Borrar</button>"
                     : (c.esMio ? "" : "<button type='button' class='novedadAccion' data-contactar-clasificado='" + escapeAttr(c.id) + "'>Escribir por chat</button>" +
-                        (esModeradorActual ? "<button type='button' class='novedadAccion secundaria quitarMaterial' data-quitar-clasificado='" + escapeAttr(c.id) + "'>Quitar (moderación)</button>" : "") +
+                        (puedeModerar() ? "<button type='button' class='novedadAccion secundaria quitarMaterial' data-quitar-clasificado='" + escapeAttr(c.id) + "'>Quitar (moderación)</button>" : "") +
                         "<button type='button' class='denunciarMaterial' data-denunciar-clasificado='" + escapeAttr(c.id) + "'>Denunciar</button>")) +
                 "</div></article>"
         }
