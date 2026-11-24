@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-notif-moderacion"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-dispositivos-mod"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -3719,7 +3719,7 @@ async function cargarBootstrap() {
             loginScreen.style.display = "block"
             document.body.classList.remove("enApp")
             try { detenerNotificaciones() } catch (_) {}
-            try { cerrarSesionModeracion(true); actualizarAccesosModeracion() } catch (_) {}
+            try { cerrarSesionModeracion(false); actualizarAccesosModeracion() } catch (_) {}
             seccionActual = "inicio"
             resetearHistorialPorLogout()
             actualizarVisibilidadPie()
@@ -5195,16 +5195,19 @@ async function cargarBootstrap() {
         //   cifrado con PBKDF2 (600 000 iteraciones) + AES-GCM; nunca se manda al servidor.
         // * Desbloquear = abrir el archivo con la contraseña, firmar un desafío de la API y recibir un token de
         //   30 min. Mientras la pestaña siga abierta, el token se renueva solo firmando otro desafío.
-        // * «Mantener desbloqueado 2 h» guarda la llave privada como CryptoKey NO exportable en IndexedDB de este
-        //   dispositivo (nadie puede leer sus bytes, ni siquiera este código). Se borra al bloquear o al salir.
+        // * Dispositivos autorizados (ADR 0005): con el archivo se autoriza este navegador, que crea su PROPIA llave
+        //   (CryptoKey NO exportable en IndexedDB, ligada a la cuenta) firmada por la del archivo. Desde ahí el
+        //   desbloqueo es automático con esa cuenta. Las acciones críticas de admin piden el archivo igual.
 
         const LLAVE_FORMATO = "medmar-llave"
         const LLAVE_ITERACIONES = 600000
         const LLAVE_MENSAJE = "medmar-moderacion-v1|"
-        const LLAVE_RECORDAR_MS = 2 * 3600 * 1000
+        const LLAVE_MENSAJE_DISPOSITIVO = "medmar-dispositivo-v1|"
 
-        let modSesion = null        // { token, rol, expira }
-        let modLlave = null         // { huella, privada: CryptoKey }
+        let modSesion = null        // { token, rol, expira, tipo: "archivo" | "dispositivo" }
+        let modLlave = null         // { huella, privada: CryptoKey } con la que se renueva la sesión
+        let modLlaveArchivo = null  // llave del archivo abierta en esta pestaña (solo en memoria)
+        let modDispositivo = null   // llave de este dispositivo autorizado, si hay
         let modPestania = "denuncias"
         let resolverDesbloqueo = null
 
@@ -5282,15 +5285,16 @@ async function cargarBootstrap() {
             })
         }
 
+        // Se guarda por cuenta (clave = userId): con otra cuenta en este navegador no se usa.
         async function guardarLlaveDispositivo(llave) {
             try {
                 const db = await abrirBaseLlaves()
                 await new Promise(function (ok, mal) {
                     const tx = db.transaction("llaves", "readwrite")
-                    tx.objectStore("llaves").put({ huella: llave.huella, privada: llave.privada, expira: Date.now() + LLAVE_RECORDAR_MS }, sesion.userId)
+                    tx.objectStore("llaves").put({ tipo: "dispositivo", huella: llave.huella, privada: llave.privada, userId: sesion.userId, creada: Date.now() }, sesion.userId)
                     tx.oncomplete = ok; tx.onerror = function () { mal(tx.error) }
                 })
-            } catch (e) { console.warn("[MedMarUNMDP] No se pudo recordar la llave", e) }
+            } catch (e) { console.warn("[MedMarUNMDP] No se pudo guardar la llave del dispositivo", e) }
         }
 
         async function leerLlaveDispositivo() {
@@ -5301,16 +5305,48 @@ async function cargarBootstrap() {
                     pedido.onsuccess = function () { ok(pedido.result) }
                     pedido.onerror = function () { mal(pedido.error) }
                 })
-                if (!dato || !dato.privada || Date.now() > dato.expira) { if (dato) borrarLlaveDispositivo(); return null }
-                return { huella: dato.huella, privada: dato.privada }
+                // Formato viejo («mantener 2 h», con la llave del archivo): se descarta.
+                if (!dato || !dato.privada || dato.tipo !== "dispositivo" || dato.userId !== sesion.userId) { if (dato) borrarLlaveDispositivo(); return null }
+                return { huella: dato.huella, privada: dato.privada, tipo: "dispositivo" }
             } catch (_) { return null }
         }
 
         async function borrarLlaveDispositivo() {
+            modDispositivo = null
             try {
                 const db = await abrirBaseLlaves()
-                db.transaction("llaves", "readwrite").objectStore("llaves").clear()
+                db.transaction("llaves", "readwrite").objectStore("llaves").delete(sesion.userId)
             } catch (_) {}
+        }
+
+        function nombreDispositivo() {
+            const ua = navigator.userAgent || ""
+            const nav = /Edg\//.test(ua) ? "Edge" : /OPR\//.test(ua) ? "Opera" : /Firefox\//.test(ua) ? "Firefox" : /Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : "Navegador"
+            const so = /Android/.test(ua) ? "Android" : /iPhone|iPad/.test(ua) ? "iPhone/iPad" : /Windows/.test(ua) ? "Windows" : /Mac OS/.test(ua) ? "Mac" : /Linux/.test(ua) ? "Linux" : "otro sistema"
+            return nav + " en " + so
+        }
+
+        // Autoriza este navegador: crea su llave (no exportable), la firma con la del archivo y la registra.
+        async function autorizarEsteDispositivo(llaveArchivo) {
+            const par = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, false, ["sign", "verify"])
+            const pub = await crypto.subtle.exportKey("jwk", par.publicKey)
+            const publica = { kty: "EC", crv: "P-256", x: pub.x, y: pub.y }
+            const huella = await huellaLlave(publica)
+            const d = await llamar("desafioModeracion", {})
+            if (!d.ok) throw errorLlave(d.error)
+            const firma = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, llaveArchivo.privada,
+                textoUtf8.encode(LLAVE_MENSAJE_DISPOSITIVO + d.desafio + "|" + huella))
+            const r = await llamar("autorizarDispositivo", {
+                desafio: d.desafio, huellaArchivo: llaveArchivo.huella, firma: bytesABase64url(firma),
+                publicaDispositivo: publica, nombre: nombreDispositivo()
+            })
+            if (!r.ok) throw errorLlave(r.error)
+            modDispositivo = { huella: huella, privada: par.privateKey, tipo: "dispositivo" }
+            await guardarLlaveDispositivo(modDispositivo)
+            modSesion = { token: r.token, rol: r.rol, expira: Number(r.expira), tipo: "archivo" }
+            modLlaveArchivo = llaveArchivo
+            modLlave = modDispositivo
+            actualizarEstadoModeracion()
         }
 
         // ---- Sesión de moderación ----
@@ -5320,33 +5356,62 @@ async function cargarBootstrap() {
             llave_desconocida: "Esta llave no está registrada para tu cuenta.",
             llave_pendiente: "Tu llave todavía no fue aprobada por un administrador.",
             llave_revocada: "Esta llave fue revocada. Creá una nueva en «Mi llave».",
+            dispositivo_vencido: "Este dispositivo dejó de estar autorizado (60 días sin usarlo o se revocó su archivo). Autorizalo de nuevo con tu archivo.",
             no_autorizado: "Tu cuenta no tiene permiso de moderación."
+        }
+
+        function errorLlave(codigo) {
+            const err = new Error(ERRORES_LLAVE[codigo] || mensajeError(codigo))
+            err.codigo = codigo
+            return err
         }
 
         async function firmarSesionModeracion(llave) {
             const d = await llamar("desafioModeracion", {})
-            if (!d.ok) throw new Error(ERRORES_LLAVE[d.error] || mensajeError(d.error))
+            if (!d.ok) throw errorLlave(d.error)
             const firma = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, llave.privada, textoUtf8.encode(LLAVE_MENSAJE + d.desafio))
             const r = await llamar("abrirSesionModeracion", { desafio: d.desafio, huella: llave.huella, firma: bytesABase64url(firma) })
-            if (!r.ok) throw new Error(ERRORES_LLAVE[r.error] || mensajeError(r.error))
-            modSesion = { token: r.token, rol: r.rol, expira: Number(r.expira) }
+            if (!r.ok) throw errorLlave(r.error)
+            modSesion = { token: r.token, rol: r.rol, expira: Number(r.expira), tipo: r.tipo || "archivo" }
             modLlave = llave
+            if (modSesion.tipo === "archivo") modLlaveArchivo = llave
             actualizarEstadoModeracion()
         }
+
+        // Errores que significan que la llave guardada en este dispositivo ya no sirve (no los de red).
+        const ERRORES_LLAVE_INVALIDA = ["llave_revocada", "dispositivo_vencido", "llave_desconocida", "firma_invalida", "no_autorizado"]
 
         function sesionModeracionVigente() {
             return !!(modSesion && Date.now() < modSesion.expira - 60000)
         }
 
         // Devuelve true si hay sesión de moderación (renovándola en silencio si se puede) o pide desbloquear.
-        async function asegurarSesionModeracion(sinPedir) {
+        // requiereArchivo: acciones críticas de admin, que solo aceptan una sesión abierta con la llave del archivo.
+        async function asegurarSesionModeracion(sinPedir, requiereArchivo) {
+            if (requiereArchivo) {
+                if (sesionModeracionVigente() && modSesion.tipo === "archivo") return true
+                if (modLlaveArchivo) {
+                    try { await firmarSesionModeracion(modLlaveArchivo); return true } catch (_) { modLlaveArchivo = null }
+                }
+                if (sinPedir) return false
+                return pedirDesbloqueo(true)
+            }
             if (sesionModeracionVigente()) return true
-            const llave = modLlave || await leerLlaveDispositivo()
+            if (!modLlave && !modDispositivo) modDispositivo = await leerLlaveDispositivo()
+            const llave = modLlave || modDispositivo
             if (llave) {
-                try { await firmarSesionModeracion(llave); return true } catch (e) { modLlave = null; borrarLlaveDispositivo() }
+                try { await firmarSesionModeracion(llave); return true } catch (e) {
+                    modLlave = null
+                    if (llave.tipo === "dispositivo" && ERRORES_LLAVE_INVALIDA.indexOf(e.codigo) >= 0) {
+                        borrarLlaveDispositivo()
+                        if (e.codigo === "dispositivo_vencido") mostrarAviso(ERRORES_LLAVE.dispositivo_vencido)
+                    } else if (llave.tipo === "dispositivo") {
+                        return false   // error de red u otro: no se borra la autorización
+                    }
+                }
             }
             if (sinPedir) return false
-            return pedirDesbloqueo()
+            return pedirDesbloqueo(false)
         }
 
         // Como llamar(), pero con el token de moderación. Si el servidor lo rechaza, renueva una vez y reintenta.
@@ -5358,13 +5423,20 @@ async function cargarBootstrap() {
                 if (!(await asegurarSesionModeracion())) return { ok: false, error: "moderacion_bloqueada" }
                 r = await llamar(accion, Object.assign({}, params, { tokenModeracion: modSesion.token }))
             }
+            if (!r.ok && r.error === "archivo_requerido") {
+                if (!(await asegurarSesionModeracion(false, true))) return { ok: false, error: "moderacion_bloqueada" }
+                r = await llamar(accion, Object.assign({}, params, { tokenModeracion: modSesion.token }))
+            }
             return r
         }
 
-        function pedirDesbloqueo() {
+        function pedirDesbloqueo(soloArchivo) {
             const modal = document.getElementById("modalLlave")
             document.getElementById("msgDesbloqueo").textContent = ""
             document.getElementById("passLlave").value = ""
+            document.getElementById("avisoArchivoRequerido").hidden = !soloArchivo
+            // Si este dispositivo ya está autorizado no se ofrece autorizarlo de nuevo.
+            document.getElementById("campoAutorizarDispositivo").hidden = !!modDispositivo
             abrirModal(modal)
             return new Promise(function (resolver) { resolverDesbloqueo = resolver })
         }
@@ -5388,11 +5460,13 @@ async function cargarBootstrap() {
             msg.textContent = "Verificando…"
             try {
                 const llave = await abrirArchivoLlave(await archivo.text(), pass)
-                await firmarSesionModeracion(llave)
-                if (document.getElementById("recordarLlave").checked) await guardarLlaveDispositivo(llave)
+                const autorizar = !modDispositivo && document.getElementById("autorizarDispositivo").checked
+                if (autorizar) await autorizarEsteDispositivo(llave)
+                else await firmarSesionModeracion(llave)
                 msg.textContent = ""
                 terminarDesbloqueo(true)
-                mostrarAviso(modSesion.rol === "admin" ? "Moderación desbloqueada como administrador." : "Moderación desbloqueada.")
+                mostrarAviso(autorizar ? "Dispositivo autorizado: desde acá ya no te va a pedir el archivo."
+                    : modSesion.rol === "admin" ? "Moderación desbloqueada como administrador." : "Moderación desbloqueada.")
                 if (seccionActual === "moderacion") cargarPestaniaModeracion()
             } catch (err) {
                 msg.textContent = err && err.message ? err.message : "No se pudo desbloquear."
@@ -5402,7 +5476,9 @@ async function cargarBootstrap() {
         function cerrarSesionModeracion(olvidarDispositivo) {
             modSesion = null
             modLlave = null
+            modLlaveArchivo = null
             if (olvidarDispositivo) borrarLlaveDispositivo()
+            else modDispositivo = null   // al cerrar sesión de la cuenta: queda guardada para la próxima vez
             actualizarEstadoModeracion()
         }
 
@@ -5420,12 +5496,15 @@ async function cargarBootstrap() {
             if (abierta) {
                 const hora = new Date(modSesion.expira).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })
                 estado.innerHTML = "<span class='estadoChip estado-aprobado'>Desbloqueada</span> " +
-                    (modSesion.rol === "admin" ? "como administrador" : "como moderador") + " · se renueva sola mientras uses esta pestaña (token hasta las " + escapeHtml(hora) + ")"
+                    (modSesion.rol === "admin" ? "como administrador" : "como moderador") +
+                    (modDispositivo ? " · dispositivo autorizado: se desbloquea solo" : " · se renueva sola mientras uses esta pestaña (hasta las " + escapeHtml(hora) + ")")
             } else {
                 estado.innerHTML = "<span class='estadoChip estado-rechazado'>Bloqueada</span> Necesitás tu llave para moderar."
             }
             document.getElementById("btnDesbloquearMod").hidden = abierta
-            document.getElementById("btnBloquearMod").hidden = !abierta
+            const btnBloquear = document.getElementById("btnBloquearMod")
+            btnBloquear.hidden = !abierta && !modDispositivo
+            btnBloquear.textContent = modDispositivo ? "Olvidar este dispositivo" : "Bloquear"
             const enLlave = modPestania === "llave"
             document.getElementById("panelModBloqueado").hidden = abierta || enLlave
             document.querySelectorAll(".modPanel").forEach(function (panel) {
@@ -5463,7 +5542,14 @@ async function cargarBootstrap() {
         document.getElementById("btnDesbloquearMod").addEventListener("click", async function () {
             if (await asegurarSesionModeracion()) cargarPestaniaModeracion()
         })
-        document.getElementById("btnBloquearMod").addEventListener("click", function () {
+        document.getElementById("btnBloquearMod").addEventListener("click", async function () {
+            if (modDispositivo) {
+                if (!confirm("¿Olvidar este dispositivo? Para volver a moderar acá vas a necesitar tu archivo de llave.")) return
+                // Se revoca también en el servidor: aunque alguien copie el navegador, esa llave ya no sirve.
+                const r = await llamar("misLlaves", {})
+                const propia = r.ok && (r.llaves || []).find(function (l) { return l.huella === modDispositivo.huella })
+                if (propia) await llamar("revocarLlave", { id: propia.id })
+            }
             cerrarSesionModeracion(true)
             mostrarAviso("Moderación bloqueada en este dispositivo.")
         })
@@ -5481,26 +5567,37 @@ async function cargarBootstrap() {
             const r = await llamar("misLlaves", {})
             if (!r.ok) { cont.innerHTML = r.error === "accion_invalida" ? "<p class='vacio'>Las llaves se están activando.</p>" : ""; return }
             const llaves = r.llaves || []
-            cont.innerHTML = llaves.length
-                ? "<h3>Tus llaves</h3><ul class='listaLlaves'>" + llaves.map(function (l) {
-                    return "<li><span class='novedadFilaTexto'><b class='huella'>" + escapeHtml(l.huella) + "</b><span>" +
-                        escapeHtml(l.nombre || "Sin nombre") + " · " + (l.rol === "admin" ? "Administrador" : "Moderador") +
-                        (l.ultimo_uso ? " · usada " + escapeHtml(tiempoRelativo(l.ultimo_uso)) : "") + "</span></span>" +
-                        "<span class='estadoChip estado-" + (l.estado === "activa" ? "aprobado" : l.estado === "pendiente" ? "pendiente" : "rechazado") + "'>" + escapeHtml(ESTADOS_LLAVE[l.estado] || l.estado) + "</span>" +
-                        "<button type='button' class='panelNotifAccion' data-revocar-propia='" + escapeAttr(l.id) + "'>Revocar</button></li>"
-                }).join("") + "</ul>"
-                : "<p class='ayudaPerfil'>Todavía no tenés ninguna llave.</p>"
+            if (!modDispositivo) modDispositivo = await leerLlaveDispositivo()
+            const archivos = llaves.filter(function (l) { return l.tipo !== "dispositivo" })
+            const dispositivos = llaves.filter(function (l) { return l.tipo === "dispositivo" })
+            const fila = function (l) {
+                const esEste = modDispositivo && l.huella === modDispositivo.huella
+                return "<li><span class='novedadFilaTexto'><b" + (l.tipo === "dispositivo" ? "" : " class='huella'") + ">" +
+                    escapeHtml(l.tipo === "dispositivo" ? (l.nombre || "Dispositivo") + (esEste ? " (este)" : "") : l.huella) + "</b><span>" +
+                    (l.tipo === "dispositivo" ? "Autorizado " + escapeHtml(tiempoRelativo(l.created_at)) : escapeHtml(l.nombre || "Sin nombre") + " · " + (l.rol === "admin" ? "Administrador" : "Moderador")) +
+                    (l.ultimo_uso ? " · usado " + escapeHtml(tiempoRelativo(l.ultimo_uso)) : "") + "</span></span>" +
+                    "<span class='estadoChip estado-" + (l.estado === "activa" ? "aprobado" : l.estado === "pendiente" ? "pendiente" : "rechazado") + "'>" + escapeHtml(ESTADOS_LLAVE[l.estado] || l.estado) + "</span>" +
+                    "<button type='button' class='panelNotifAccion' data-revocar-propia='" + escapeAttr(l.id) + "' data-tipo-llave='" + escapeAttr(l.tipo || "archivo") + "'>Revocar</button></li>"
+            }
+            cont.innerHTML = (archivos.length
+                ? "<h3>Tus archivos de llave</h3><ul class='listaLlaves'>" + archivos.map(fila).join("") + "</ul>"
+                : "<p class='ayudaPerfil'>Todavía no tenés ninguna llave.</p>") +
+                "<h3>Dispositivos autorizados</h3>" + (dispositivos.length
+                    ? "<p class='ayudaPerfil'>En estos navegadores moderás sin el archivo. Si no reconocés alguno, revocalo y cambiá tu contraseña.</p><ul class='listaLlaves'>" + dispositivos.map(fila).join("") + "</ul>"
+                    : "<p class='ayudaPerfil'>Ninguno todavía. Al desbloquear con tu archivo podés autorizar el dispositivo para no tener que usarlo cada vez.</p>")
         }
 
         document.getElementById("misLlaves").addEventListener("click", async function (e) {
             const btn = e.target.closest("[data-revocar-propia]")
             if (!btn) return
-            if (!confirm("¿Revocar esta llave? Ya no vas a poder moderar con ese archivo.")) return
+            const esDispositivo = btn.dataset.tipoLlave === "dispositivo"
+            if (!confirm(esDispositivo ? "¿Revocar este dispositivo? Ahí ya no se va a poder moderar sin el archivo."
+                : "¿Revocar esta llave? Ya no vas a poder moderar con ese archivo, y se revocan los dispositivos que autorizó.")) return
             const r = await llamar("revocarLlave", { id: btn.dataset.revocarPropia })
             if (!r.ok) { alert(mensajeError(r.error)); return }
             cerrarSesionModeracion(true)
             cargarMisLlaves()
-            mostrarAviso("Llave revocada.")
+            mostrarAviso(esDispositivo ? "Dispositivo revocado." : "Llave revocada.")
         })
 
         function descargarArchivo(nombre, contenido) {
@@ -5562,7 +5659,7 @@ async function cargarBootstrap() {
             const llaves = r.llaves || []
             cont.innerHTML = llaves.length ? "<ul class='listaLlaves'>" + llaves.map(function (l) {
                 return "<li><span class='novedadFilaTexto'><b>" + escapeHtml(l.pseudonimo) + " · <span class='huella'>" + escapeHtml(l.huella) + "</span></b><span>" +
-                    (l.rol === "admin" ? "Administrador" : "Moderador") + (l.nombre ? " · " + escapeHtml(l.nombre) : "") +
+                    (l.rol === "admin" ? "Administrador" : "Moderador") + (l.tipo === "dispositivo" ? " · dispositivo" : " · archivo") + (l.nombre ? " · " + escapeHtml(l.nombre) : "") +
                     (l.ultimo_uso ? " · usada " + escapeHtml(tiempoRelativo(l.ultimo_uso)) : "") + "</span></span>" +
                     "<span class='estadoChip estado-" + (l.estado === "activa" ? "aprobado" : "pendiente") + "'>" + escapeHtml(ESTADOS_LLAVE[l.estado] || l.estado) + "</span>" +
                     (l.estado === "pendiente" ? "<button type='button' class='novedadAccion' data-aprobar-llave='" + escapeAttr(l.id) + "' data-huella='" + escapeAttr(l.huella) + "' data-quien='" + escapeAttr(l.pseudonimo) + "'>Aprobar</button>" : "") +
@@ -5599,7 +5696,9 @@ async function cargarBootstrap() {
             asignar_admin: "dio rol de administrador", quitar_admin: "quitó un administrador",
             quitar_puntaje: "anuló un puntaje del ranking",
             ocultar_puntaje: "escondió un puntaje del ranking",
-            mostrar_puntaje: "volvió a mostrar un puntaje del ranking"
+            mostrar_puntaje: "volvió a mostrar un puntaje del ranking",
+            autorizar_dispositivo: "autorizó un dispositivo para moderar", revocar_dispositivo: "revocó un dispositivo",
+            dispositivo_vencido: "tenía un dispositivo vencido (se revocó solo)", quitar_clasificado: "quitó un aviso de Compra venta"
         }
 
         async function cargarRegistro() {

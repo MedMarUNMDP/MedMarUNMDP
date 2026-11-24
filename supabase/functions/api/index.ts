@@ -158,6 +158,7 @@ async function gestionarClasificado(admin: SupabaseClient, user: any, body: any)
 
 const RATE_LIMITS: Record<string, [number, number]> = {
   aceptarTerminos: [10, 600],
+  autorizarDispositivo: [10, 3600],
   solicitarBaja: [5, 3600],
   cancelarBaja: [10, 3600],
   listarClasificados: [60, 300],
@@ -735,11 +736,16 @@ async function resolverAporte(user: User, admin: SupabaseClient, body: any) {
 // vive solo en un archivo cifrado del moderador. Flujo: desafioModeracion → el navegador firma → abrirSesionModeracion
 // verifica la firma y entrega un token de 30 min → cada acción de moderación lo exige (autorizarModeracion).
 // Ver docs/decisiones/0004-llaves-de-moderacion.md y la migración 20261124120000_llaves_moderacion.sql.
+// Dispositivos (ADR 0005): el archivo autoriza un navegador (autorizarDispositivo), que guarda su propia llave no
+// exportable y desde ahí desbloquea solo. Las acciones críticas de admin siguen exigiendo la llave del archivo.
 
 const MOD_DESAFIO_MS = 2 * 60 * 1000
 const MOD_SESION_MS = 30 * 60 * 1000
 const MOD_MENSAJE = 'medmar-moderacion-v1|'
 const MAX_LLAVES_POR_USUARIO = 2
+const MOD_MENSAJE_DISPOSITIVO = 'medmar-dispositivo-v1|'
+const MAX_DISPOSITIVOS_POR_USUARIO = 6
+const DISPOSITIVO_INACTIVO_MS = 60 * 24 * 3600 * 1000   // sin usarse 60 días → hay que volver a autorizarlo
 // Cuenta oficial de MedMar: siempre admin, no se le puede quitar el rol desde la web.
 const CUENTA_OFICIAL = 'medmarunmdp@gmail.com'
 const RE_DESAFIO = /^([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\.(\d{13})\.([A-Za-z0-9_-]{43})$/
@@ -828,13 +834,15 @@ async function tieneRol(admin: SupabaseClient, userId: string, rol: 'moderador' 
 
 // Exige cuenta con el rol + token de moderación vigente + llave activa del mismo usuario con ese rol.
 // Devuelve { llaveId } o la Response de error ('llave_requerida' le indica al navegador que pida desbloquear).
-async function autorizarModeracion(admin: SupabaseClient, user: User, body: any, rol: 'moderador' | 'admin') {
+// critica = true: además exige que la sesión se haya abierto con la llave del ARCHIVO (no con un dispositivo).
+async function autorizarModeracion(admin: SupabaseClient, user: User, body: any, rol: 'moderador' | 'admin', critica = false) {
   if (!(await tieneRol(admin, user.id, rol))) return json({ ok: false, error: 'no_autorizado' })
   const t = await leerTokenModeracion(body?.tokenModeracion, user.id)
   if (!t || (rol === 'admin' && t.rol !== 'admin')) return json({ ok: false, error: 'llave_requerida' })
-  const { data: llave, error } = await admin.from('llaves_moderacion').select('id,user_id,rol,estado').eq('id', t.llaveId).maybeSingle()
+  const { data: llave, error } = await admin.from('llaves_moderacion').select('id,user_id,rol,estado,tipo').eq('id', t.llaveId).maybeSingle()
   if (error) throw error
   if (!llave || llave.estado !== 'activa' || String(llave.user_id) !== user.id || llave.rol !== t.rol) return json({ ok: false, error: 'llave_requerida' })
+  if (critica && llave.tipo !== 'archivo') return json({ ok: false, error: 'archivo_requerido' })
   if (llave.rol === 'admin' && !(await isAdmin(admin, user.id))) return json({ ok: false, error: 'no_autorizado' })
   return { llaveId: String(llave.id) }
 }
@@ -858,11 +866,22 @@ async function abrirSesionModeracion(user: User, admin: SupabaseClient, body: an
   if (!RE_HUELLA.test(huella) || !firma || firma.length !== 64) return json({ ok: false, error: 'datos_invalidos' })
 
   const { data: llave, error } = await admin.from('llaves_moderacion')
-    .select('id,user_id,rol,estado,public_key').eq('huella', huella).maybeSingle()
+    .select('id,user_id,rol,estado,public_key,tipo,padre_id,ultimo_uso,created_at').eq('huella', huella).maybeSingle()
   if (error) throw error
   if (!llave || String(llave.user_id) !== user.id) return json({ ok: false, error: 'llave_desconocida' })
   if (llave.estado === 'pendiente') return json({ ok: false, error: 'llave_pendiente' })
   if (llave.estado !== 'activa') return json({ ok: false, error: 'llave_revocada' })
+  if (llave.tipo === 'dispositivo') {
+    // Un dispositivo vale mientras su archivo siga activo y no pase mucho tiempo sin usarse.
+    const { data: padre, error: errPadre } = await admin.from('llaves_moderacion').select('estado').eq('id', llave.padre_id).maybeSingle()
+    if (errPadre) throw errPadre
+    const ultimo = new Date(llave.ultimo_uso || llave.created_at).getTime()
+    if (!padre || padre.estado !== 'activa' || Date.now() - ultimo > DISPOSITIVO_INACTIVO_MS) {
+      await admin.from('llaves_moderacion').update({ estado: 'revocada', revocada_at: new Date().toISOString() }).eq('id', llave.id)
+      await auditar(admin, user.id, String(llave.id), 'dispositivo_vencido')
+      return json({ ok: false, error: 'dispositivo_vencido' })
+    }
+  }
   if (!(await tieneRol(admin, user.id, llave.rol))) return json({ ok: false, error: 'no_autorizado' })
 
   const jwk = jwkPublicaValida(llave.public_key)
@@ -874,9 +893,75 @@ async function abrirSesionModeracion(user: User, admin: SupabaseClient, body: an
     return json({ ok: false, error: 'firma_invalida' })
   }
   await admin.from('llaves_moderacion').update({ ultimo_uso: new Date().toISOString() }).eq('id', llave.id)
-  await auditar(admin, user.id, String(llave.id), 'abrir_sesion', { rol: llave.rol })
+  // Los dispositivos renuevan la sesión solos cada 30 min: no se audita cada renovación (llenaría el registro).
+  if (llave.tipo !== 'dispositivo') await auditar(admin, user.id, String(llave.id), 'abrir_sesion', { rol: llave.rol })
   const { token, expira } = await crearTokenModeracion(user.id, String(llave.id), llave.rol)
-  return json({ ok: true, token, rol: llave.rol, expira })
+  return json({ ok: true, token, rol: llave.rol, expira, tipo: llave.tipo || 'archivo' })
+}
+
+// Autoriza un dispositivo: la llave del ARCHIVO firma «desafío + huella del dispositivo». Se guarda la parte pública
+// del dispositivo como llave hija (activa, mismo rol). Un dispositivo no puede autorizar a otro.
+async function autorizarDispositivo(user: User, admin: SupabaseClient, body: any) {
+  if (!(await tieneRol(admin, user.id, 'moderador'))) return json({ ok: false, error: 'no_autorizado' })
+  if (!(await desafioModeracionValido(body.desafio, user.id))) return json({ ok: false, error: 'desafio_vencido' })
+  const nonce = String(body.desafio).slice(0, 36)
+  const { error: errNonce } = await admin.from('idempotency_keys').insert({ user_id: user.id, operation_id: nonce, action: 'desafio_moderacion', response: {} })
+  if (errNonce) {
+    if (String((errNonce as any).code) === '23505') return json({ ok: false, error: 'desafio_vencido' })
+    throw errNonce
+  }
+  const huellaArchivo = String(body.huellaArchivo || '')
+  const firma = base64urlABytes(String(body.firma || ''))
+  const jwkDisp = jwkPublicaValida(body.publicaDispositivo)
+  if (!RE_HUELLA.test(huellaArchivo) || !firma || firma.length !== 64 || !jwkDisp) return json({ ok: false, error: 'datos_invalidos' })
+  try { await crypto.subtle.importKey('jwk', jwkDisp, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']) }
+  catch { return json({ ok: false, error: 'datos_invalidos' }) }
+  const huellaDisp = await huellaDeLlave(jwkDisp)
+
+  const { data: padre, error } = await admin.from('llaves_moderacion')
+    .select('id,user_id,rol,estado,public_key,tipo').eq('huella', huellaArchivo).maybeSingle()
+  if (error) throw error
+  if (!padre || String(padre.user_id) !== user.id || padre.tipo !== 'archivo') return json({ ok: false, error: 'llave_desconocida' })
+  if (padre.estado === 'pendiente') return json({ ok: false, error: 'llave_pendiente' })
+  if (padre.estado !== 'activa') return json({ ok: false, error: 'llave_revocada' })
+  if (!(await tieneRol(admin, user.id, padre.rol))) return json({ ok: false, error: 'no_autorizado' })
+  const jwkPadre = jwkPublicaValida(padre.public_key)
+  if (!jwkPadre) return json({ ok: false, error: 'llave_desconocida' })
+  const publica = await crypto.subtle.importKey('jwk', jwkPadre, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify'])
+  const mensaje = MOD_MENSAJE_DISPOSITIVO + String(body.desafio) + '|' + huellaDisp
+  if (!(await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, publica, firma, new TextEncoder().encode(mensaje)))) {
+    await auditar(admin, user.id, String(padre.id), 'firma_invalida')
+    return json({ ok: false, error: 'firma_invalida' })
+  }
+
+  // Tope de dispositivos: si se llegó, se revoca el que hace más tiempo que no se usa.
+  const { data: activos, error: errAct } = await admin.from('llaves_moderacion').select('id,ultimo_uso,created_at')
+    .eq('user_id', user.id).eq('tipo', 'dispositivo').eq('estado', 'activa')
+  if (errAct) throw errAct
+  if ((activos || []).length >= MAX_DISPOSITIVOS_POR_USUARIO) {
+    const viejo = [...activos!].sort((a: any, b: any) => new Date(a.ultimo_uso || a.created_at).getTime() - new Date(b.ultimo_uso || b.created_at).getTime())[0]
+    await admin.from('llaves_moderacion').update({ estado: 'revocada', revocada_at: new Date().toISOString() }).eq('id', viejo.id)
+  }
+  const nombre = String(body.nombre || '').replace(/[\u0000-\u001F]/g, '').trim().slice(0, 60) || 'Dispositivo'
+  const ahora = new Date().toISOString()
+  const { data: disp, error: errIns } = await admin.from('llaves_moderacion').insert({
+    user_id: user.id, rol: padre.rol, tipo: 'dispositivo', padre_id: padre.id, nombre, public_key: jwkDisp, huella: huellaDisp,
+    estado: 'activa', aprobada_por: user.id, aprobada_at: ahora, ultimo_uso: ahora,
+  }).select('id').single()
+  if (errIns) {
+    if (String((errIns as any).code) === '23505') return json({ ok: false, error: 'llave_duplicada' })
+    throw errIns
+  }
+  await admin.from('llaves_moderacion').update({ ultimo_uso: ahora }).eq('id', padre.id)
+  await auditar(admin, user.id, String(disp.id), 'autorizar_dispositivo', { nombre, huella: huellaDisp, archivo: huellaArchivo })
+  // Aviso a la propia cuenta: si no fue la persona, lo ve y lo revoca.
+  await admin.from('notificaciones').insert({
+    user_id: user.id, tipo: 'noticia', contexto: 'Autorizaste un dispositivo para moderar', link: '/?vista=moderacion', ref_id: disp.id,
+    cuerpo: (nombre + ' ya puede moderar sin pedir tu archivo de llave. Si no fuiste vos, revocalo en Moderación → Mi llave y cambiá tu contraseña.').slice(0, 400),
+  })
+  // La sesión de esta vez se abre con la llave del archivo: sirve también para acciones críticas.
+  const { token, expira } = await crearTokenModeracion(user.id, String(padre.id), padre.rol)
+  return json({ ok: true, token, rol: padre.rol, expira, tipo: 'archivo', huellaDispositivo: huellaDisp })
 }
 
 async function registrarLlave(user: User, admin: SupabaseClient, body: any) {
@@ -887,7 +972,7 @@ async function registrarLlave(user: User, admin: SupabaseClient, body: any) {
   if (!jwk) return json({ ok: false, error: 'datos_invalidos' })
   const nombre = String(body.nombre || '').replace(/[\u0000-\u001F]/g, '').trim().slice(0, 60) || null
   const { count, error: errCount } = await admin.from('llaves_moderacion').select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id).in('estado', ['pendiente', 'activa'])
+    .eq('user_id', user.id).eq('tipo', 'archivo').in('estado', ['pendiente', 'activa'])
   if (errCount) throw errCount
   if ((count || 0) >= MAX_LLAVES_POR_USUARIO) return json({ ok: false, error: 'llaves_limite' })
   try { await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']) }
@@ -914,8 +999,8 @@ async function registrarLlave(user: User, admin: SupabaseClient, body: any) {
 
 async function listarLlaves(admin: SupabaseClient) {
   const { data, error } = await admin.from('llaves_moderacion')
-    .select('id,user_id,rol,nombre,huella,estado,created_at,aprobada_at,ultimo_uso')
-    .neq('estado', 'revocada').order('created_at', { ascending: false }).limit(100)
+    .select('id,user_id,rol,nombre,huella,estado,created_at,aprobada_at,ultimo_uso,tipo')
+    .neq('estado', 'revocada').order('created_at', { ascending: false }).limit(150)
   if (error) throw error
   const pmap = await profileMap(admin, (data || []).map((l: any) => String(l.user_id)))
   return json({ ok: true, llaves: (data || []).map((l: any) => {
@@ -2222,13 +2307,17 @@ async function handle(req: Request, body: any) {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       return abrirSesionModeracion(user,admin,body)
     }
+    case 'autorizarDispositivo': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return autorizarDispositivo(user,admin,body)
+    }
     case 'registrarLlave': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       return registrarLlave(user,admin,body)
     }
     case 'misLlaves': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      const {data,error}=await admin.from('llaves_moderacion').select('id,rol,nombre,huella,estado,created_at,ultimo_uso').eq('user_id',user.id).neq('estado','revocada').order('created_at',{ascending:false})
+      const {data,error}=await admin.from('llaves_moderacion').select('id,rol,nombre,huella,estado,created_at,ultimo_uso,tipo,padre_id').eq('user_id',user.id).neq('estado','revocada').order('created_at',{ascending:false})
       if(error)throw error
       return json({ok:true,llaves:data||[]})
     }
@@ -2239,7 +2328,7 @@ async function handle(req: Request, body: any) {
     }
     case 'aprobarLlave': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      const auth=await autorizarModeracion(admin,user,body,'admin');if(auth instanceof Response)return auth
+      const auth=await autorizarModeracion(admin,user,body,'admin',true);if(auth instanceof Response)return auth
       const id=uuidOrEmpty(body.id);if(!id)return json({ok:false,error:'datos_invalidos'})
       const {data:llave,error:errLlave}=await admin.from('llaves_moderacion').select('id,user_id,rol,estado,huella').eq('id',id).maybeSingle()
       if(errLlave)throw errLlave
@@ -2255,20 +2344,25 @@ async function handle(req: Request, body: any) {
     case 'revocarLlave': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       const id=uuidOrEmpty(body.id);if(!id)return json({ok:false,error:'datos_invalidos'})
-      const {data:llave,error:errLlave}=await admin.from('llaves_moderacion').select('id,user_id,rol,estado,huella').eq('id',id).maybeSingle()
+      const {data:llave,error:errLlave}=await admin.from('llaves_moderacion').select('id,user_id,rol,estado,huella,tipo').eq('id',id).maybeSingle()
       if(errLlave)throw errLlave
       if(!llave||llave.estado==='revocada')return json({ok:false,error:'no_encontrado'})
-      const propiaSinLlave=String(llave.user_id)===user.id&&llave.rol!=='admin'
+      // Revocar un dispositivo propio siempre se puede con la cuenta (quita permisos, nunca los da).
+      const propiaSinLlave=String(llave.user_id)===user.id&&(llave.rol!=='admin'||llave.tipo==='dispositivo')
       // La propia llave se puede revocar solo con la cuenta (por si perdés el archivo); la de otro, solo un admin con su llave.
       let llaveUsada:string|null=null
       if(!propiaSinLlave){
         const auth=await autorizarModeracion(admin,user,body,'admin');if(auth instanceof Response)return auth
         llaveUsada=auth.llaveId
       }
-      const {error}=await admin.from('llaves_moderacion').update({estado:'revocada',revocada_at:new Date().toISOString()}).eq('id',id)
+      const revocada={estado:'revocada',revocada_at:new Date().toISOString()}
+      const {error}=await admin.from('llaves_moderacion').update(revocada).eq('id',id)
       if(error)throw error
-      await auditar(admin,user.id,llaveUsada,'revocar_llave',{llave:id,huella:llave.huella})
-      if(propiaSinLlave){
+      // Al revocar un archivo caen todos los dispositivos que autorizó.
+      const {error:errHijos}=await admin.from('llaves_moderacion').update(revocada).eq('padre_id',id).neq('estado','revocada')
+      if(errHijos)throw errHijos
+      await auditar(admin,user.id,llaveUsada,llave.tipo==='dispositivo'?'revocar_dispositivo':'revocar_llave',{llave:id,huella:llave.huella})
+      if(propiaSinLlave&&llave.tipo!=='dispositivo'){
         const {data:admins}=await admin.from('profiles').select('id').eq('is_admin',true)
         const pmap=await profileMap(admin,[user.id])
         const filas=(admins||[]).map((a:any)=>({user_id:a.id,tipo:'noticia',contexto:'Un moderador revocó su llave',cuerpo:`${pmap.get(user.id)?.pseudonimo||'Un moderador'} revocó la llave ${llave.huella}. Si después registra otra, confirmá con esa persona por otro medio que fue ella.`,link:'/?vista=moderacion',ref_id:id}))
@@ -2299,7 +2393,7 @@ async function handle(req: Request, body: any) {
       // Da rol de moderador o de administrador. Un admin nuevo igual necesita una llave de admin, que solo se
       // activa por SQL desde el dashboard: dar el rol desde la web no alcanza para administrar.
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      const auth=await autorizarModeracion(admin,user,body,'admin');if(auth instanceof Response)return auth
+      const auth=await autorizarModeracion(admin,user,body,'admin',true);if(auth instanceof Response)return auth
       const rol=body.rol==='admin'?'admin':'moderador'
       const email=String(body.email||'').trim().toLowerCase()
       const u=await findUserByEmail(admin,email);if(!u)return json({ok:false,error:'no_encontrado'})
@@ -2311,7 +2405,7 @@ async function handle(req: Request, body: any) {
     }
     case 'quitarModerador': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      const auth=await autorizarModeracion(admin,user,body,'admin');if(auth instanceof Response)return auth
+      const auth=await autorizarModeracion(admin,user,body,'admin',true);if(auth instanceof Response)return auth
       const rol=body.rol==='admin'?'admin':'moderador'
       const email=String(body.email||'').trim().toLowerCase()
       const u=await findUserByEmail(admin,email);if(!u)return json({ok:false,error:'no_encontrado'})
