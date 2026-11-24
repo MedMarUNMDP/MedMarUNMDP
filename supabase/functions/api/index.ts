@@ -19,8 +19,8 @@ const CHAT_DAYS = 14
 const TERMINOS_VERSION = '2026-11-23.2'
 const DIAS_ARREPENTIMIENTO_BAJA = 30
 
-// ==================== CLASIFICADOS ====================
-// Sección aparte del foro para que estudiantes vendan u ofrezcan, a título personal, cosas de la carrera.
+// ==================== CLASIFICADOS (COMPRA VENTA) ====================
+// En la web se llama «Compra venta». Sección aparte del foro para que estudiantes vendan u ofrezcan, a título personal, cosas de la carrera.
 // Nada de empresas ni negocios: eso lo dicen los Términos (sección 4) y lo hace cumplir la moderación por denuncias.
 const CATEGORIAS_CLASIFICADOS = ['resumenes', 'clases', 'equipo', 'libros', 'servicios', 'otros']
 const MAX_CLASIFICADOS_ACTIVOS = 5
@@ -47,7 +47,58 @@ async function listarClasificados(admin: SupabaseClient, user: any) {
     return { ...resto, autor: a?.pseudonimo || 'Estudiante', foto: a?.foto_url || '', esMio: String(autor_id) === user.id }
   })
   const misClasificados = (mios.data || []).map((c: any) => ({ ...c, vencido: c.expira_at <= ahora }))
-  return json({ ok: true, clasificados, misClasificados })
+  return json({ ok: true, clasificados, misClasificados, chats: await chatsCompraVenta(admin, user) })
+}
+
+// Conversaciones de Compra venta de la persona (interesado_id no null), con quién es la otra parte.
+async function chatsCompraVenta(admin: SupabaseClient, user: any) {
+  const { data: mias, error } = await admin.from('conversacion_participantes').select('conversacion_id').eq('user_id', user.id).limit(300)
+  if (error) throw error
+  const ids = (mias || []).map((p: any) => String(p.conversacion_id))
+  if (!ids.length) return []
+  const { data: convs, error: cErr } = await admin.from('conversaciones')
+    .select('id,materia,ultima_actividad,cantidad_mensajes,clasificado_id,interesado_id')
+    .in('id', ids).not('interesado_id', 'is', null).order('ultima_actividad', { ascending: false }).limit(50)
+  if (cErr) throw cErr
+  if (!convs?.length) return []
+  const { data: parts, error: pErr } = await admin.from('conversacion_participantes').select('conversacion_id,user_id')
+    .in('conversacion_id', convs.map((c: any) => c.id)).neq('user_id', user.id)
+  if (pErr) throw pErr
+  const otro = new Map((parts || []).map((p: any) => [String(p.conversacion_id), String(p.user_id)]))
+  const perfiles = await profileMap(admin, [...otro.values()])
+  return convs.map((c: any) => {
+    const p = perfiles.get(otro.get(String(c.id)) || '')
+    return {
+      id: String(c.id), titulo: String(c.materia || '').replace(/^Compra venta · /, ''), con: p?.pseudonimo || 'Cuenta eliminada',
+      foto: p?.foto_url || '', soyVendedor: String(c.interesado_id) !== user.id, avisoActivo: !!c.clasificado_id,
+      ultimaActividad: c.ultima_actividad, cantidadMensajes: Number(c.cantidad_mensajes || 0),
+    }
+  })
+}
+
+// Abre (o crea) el chat entre quien publicó el aviso y quien le quiere escribir. Uno por aviso y por interesado.
+async function contactarClasificado(admin: SupabaseClient, user: any, body: any) {
+  const id = uuidOrEmpty(body.id)
+  if (!id) return json({ ok: false, error: 'datos_invalidos' })
+  const { data: aviso, error } = await admin.from('clasificados').select('id,autor_id,titulo,activo,expira_at').eq('id', id).maybeSingle()
+  if (error) throw error
+  if (!aviso || !aviso.activo || new Date(aviso.expira_at) <= new Date()) return json({ ok: false, error: 'no_encontrado' })
+  if (String(aviso.autor_id) === user.id) return json({ ok: false, error: 'clasificado_propio' })
+  const buscar = () => admin.from('conversaciones').select('id').eq('clasificado_id', id).eq('interesado_id', user.id).maybeSingle()
+  const { data: previa, error: prevErr } = await buscar()
+  if (prevErr) throw prevErr
+  if (previa) return json({ ok: true, conversacionId: String(previa.id) })
+  const { data: conv, error: insErr } = await admin.from('conversaciones')
+    .insert({ materia: ('Compra venta · ' + aviso.titulo).slice(0, 140), clasificado_id: id, interesado_id: user.id }).select('id').single()
+  if (insErr) {
+    if (pgCode(insErr) === '23505') { const { data: otra } = await buscar(); if (otra) return json({ ok: true, conversacionId: String(otra.id) }) }
+    throw insErr
+  }
+  const { error: partErr } = await admin.from('conversacion_participantes').insert([
+    { conversacion_id: conv.id, user_id: user.id }, { conversacion_id: conv.id, user_id: aviso.autor_id },
+  ])
+  if (partErr) { await admin.from('conversaciones').delete().eq('id', conv.id); throw partErr }
+  return json({ ok: true, conversacionId: String(conv.id), nuevo: true })
 }
 
 async function publicarClasificado(admin: SupabaseClient, user: any, body: any) {
@@ -112,6 +163,7 @@ const RATE_LIMITS: Record<string, [number, number]> = {
   listarClasificados: [60, 300],
   publicarClasificado: [6, 3600],
   gestionarClasificado: [30, 600],
+  contactarClasificado: [20, 3600],
   guardar: [8, 600],
   editar: [12, 600],
   borrar: [20, 600],
@@ -1900,6 +1952,10 @@ async function handle(req: Request, body: any) {
     case 'publicarClasificado': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       return publicarClasificado(admin,user,body)
+    }
+    case 'contactarClasificado': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return contactarClasificado(admin,user,body)
     }
     case 'gestionarClasificado': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl

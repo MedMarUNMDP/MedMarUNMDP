@@ -39,9 +39,10 @@ Para ubicarte: `Grep "// ====" web/js/app.js` y leé solo el rango que necesitá
   Barra de botones + vista previa: `montarBarraFormato(textarea)`.
 - **Material**: los sitios admitidos los manda la API en `listarMateriales` (`sitios`); la web los usa para avisar y
   mostrar «Abrir en Canva». Para sumar un sitio se edita solo `SITIOS_MATERIAL` en la API. Se puede reportar un material.
-- **Clasificados** (`#vistaClasificados`, sección CLASIFICADOS): ventas y servicios personales de estudiantes, aparte del foro.
-  API `listarClasificados`/`publicarClasificado`/`gestionarClasificado`; denuncias con tipo `clasificado`. En el celular se entra
-  desde Inicio o el Foro (la barra inferior queda con 5 botones). Texto siempre escapado, sin convertir en enlaces.
+- **Compra venta** (en el código «clasificados»: `#vistaClasificados`, sección CLASIFICADOS): ventas y servicios personales de
+  estudiantes, aparte del foro; 6.º botón de la barra inferior, junto al Foro. API `listarClasificados` (avisos, los tuyos y tus
+  chats), `publicarClasificado`, `gestionarClasificado`, `contactarClasificado` (abre o crea el chat); denuncias tipo `clasificado`.
+  **Chat**: reutiliza `#panelChat`, que `ubicarPanelChat` mueve a `#zonaChatClasificados` (`chatVista`). Texto siempre escapado.
 - **Baja de cuenta** (sección BAJA DE CUENTA): `solicitarBaja` (escribir BORRAR) la programa a 30 días; `#avisoBaja` y Perfil ofrecen
   `cancelarBaja`. La borra la función `maintenance`.
 - **Encuestas del foro** (sección ENCUESTAS DEL FORO): `crearHilo` con `encuesta`, `verHilo` devuelve `hilo.encuesta`, `votarEncuesta`.

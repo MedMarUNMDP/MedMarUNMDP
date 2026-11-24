@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-clasificados-baja"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-compra-venta-chat"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -50,6 +50,8 @@ let intercambiosUI = []
 let ultimaActualizacionUsuario = 0
 let datosUsuarioRefreshEnCurso = null
 let chatAbiertoId = null
+// Dónde se muestra el chat abierto: "intercambios" (chat de un intercambio) o "clasificados" (Compra venta).
+let chatVista = "intercambios"
 let chatCantidadServidor = 0
 let chatDatosServidorCargados = false
 let chatPollingTimer = null
@@ -570,9 +572,10 @@ const hilosPendientesConfirmacion = new Map()
                 }
 
                 if (estadoNormalizado.overlay === "chat") {
-                    mostrarSeccion("intercambios", null, false)
+                    const vistaChat = estadoNormalizado.vista === "clasificados" ? "clasificados" : "intercambios"
+                    mostrarSeccion(vistaChat, null, false)
                     if (chatAbiertoId !== estadoNormalizado.id) {
-                        await abrirChat(estadoNormalizado.id, false)
+                        await abrirChat(estadoNormalizado.id, false, vistaChat)
                     }
                     return
                 }
@@ -681,6 +684,7 @@ const hilosPendientesConfirmacion = new Map()
                 baja_admin: "La cuenta de administración no se puede eliminar desde la web. Escribinos por mail.",
                 clasificado_titulo: "El título tiene que tener entre 3 y 100 caracteres.",
                 clasificado_descripcion: "La descripción tiene que tener entre 10 y 1500 caracteres.",
+                clasificado_propio: "Es tu propio aviso.",
                 clasificados_maximo: "Ya tenés 5 avisos activos. Pausá o borrá alguno para publicar otro.",
                 declaracion_clasificado: "Confirmá que lo ofrecés a título personal y que cumple las reglas.",
                 encuesta_invalida: "Revisá la encuesta: la pregunta y cada opción tienen un largo máximo.",
@@ -3122,7 +3126,7 @@ async function cargarBootstrap() {
             marcarNavActiva(nombre)
             if (pieInicio) pieInicio.classList.toggle("oculto", nombre !== "inicio")
 
-            if (nombre !== 'intercambios' && chatAbiertoId) cerrarChat()
+            if (nombre !== chatVista && chatAbiertoId) cerrarChat()
 
             if (nombre === "foro") {
                 cargarForoBootstrap()
@@ -3191,7 +3195,7 @@ async function cargarBootstrap() {
                     : ""
 
                 div.innerHTML =
-                    "<div class='hiloMeta'>Denuncia sobre " + (d.tipo === "material" ? "un material" : d.tipo === "clasificado" ? "un aviso de Clasificados" : "un " + escapeHtml(d.tipo)) + " · " + formatearFecha(d.fecha) + "</div>" +
+                    "<div class='hiloMeta'>Denuncia sobre " + (d.tipo === "material" ? "un material" : d.tipo === "clasificado" ? "un aviso de Compra venta" : "un " + escapeHtml(d.tipo)) + " · " + formatearFecha(d.fecha) + "</div>" +
                     (d.motivo ? "<div class='hiloMeta'>Motivo: " + escapeHtml(d.motivo) + "</div>" : "") +
                     "<div class='contenidoDenunciado'>" + contenidoTexto + "</div>" +
                     autorHtml +
@@ -4166,16 +4170,33 @@ async function cargarBootstrap() {
             msgChat.innerText = ''
         }
 
-        async function abrirChat(conversacionId, actualizarHistorial) {
+        // El mismo panel de chat sirve para intercambios y para Compra venta: se mueve a la vista que corresponda.
+        function ubicarPanelChat(vista) {
+            const contenidoCV = document.getElementById("contenidoClasificados")
+            if (vista === "clasificados") {
+                document.getElementById("zonaChatClasificados").appendChild(panelChat)
+                contenidoCV.hidden = true
+                listaIntercambios.style.display = 'block'
+                btnCerrarChat.textContent = '← Volver a Compra venta'
+            } else {
+                listaIntercambios.after(panelChat)
+                contenidoCV.hidden = false
+                listaIntercambios.style.display = 'none'
+                btnCerrarChat.textContent = '← Volver a intercambios'
+            }
+        }
+
+        async function abrirChat(conversacionId, actualizarHistorial, vista) {
             if (!conversacionId) return
+            chatVista = vista === "clasificados" ? "clasificados" : "intercambios"
             if (actualizarHistorial !== false) {
-                navegarHistorial(crearEstadoNavegacion("intercambios", "chat", conversacionId), false)
+                navegarHistorial(crearEstadoNavegacion(chatVista, "chat", conversacionId), false)
             }
             chatAbiertoId = conversacionId
             mensajesChatUI = []
             chatCantidadServidor = 0
             chatDatosServidorCargados = false
-            listaIntercambios.style.display = 'none'
+            ubicarPanelChat(chatVista)
             panelChat.style.display = 'block'
 
             const cache = chatCacheCliente.get(String(conversacionId))
@@ -4228,7 +4249,7 @@ async function cargarBootstrap() {
             // Fallback muy lento: solo si Realtime NO está suscripto se reconcilia cada 30 s
             // (con Realtime activo, el polling solo gastaba invocaciones del plan Free).
             const programar = function() {
-                if (!chatAbiertoId || chatAbiertoId !== idChat || seccionActual !== 'intercambios') return
+                if (!chatAbiertoId || chatAbiertoId !== idChat || seccionActual !== chatVista) return
                 chatPollingTimer = setTimeout(async function() {
                     chatPollingTimer = null
                     if (!chatAbiertoId || chatAbiertoId !== idChat || document.visibilityState !== 'visible' || chatRealtimeEstado === 'SUBSCRIBED') {
@@ -4269,6 +4290,8 @@ async function cargarBootstrap() {
             chatEnvioEnCurso = false
             panelChat.style.display = 'none'
             listaIntercambios.style.display = 'block'
+            document.getElementById("contenidoClasificados").hidden = false
+            if (chatVista === "clasificados") { listaIntercambios.after(panelChat); chatVista = "intercambios"; cargarClasificados(true) }
             inputMensajeChat.value = ''
             msgChat.innerText = ''
         }
@@ -5065,8 +5088,10 @@ async function cargarBootstrap() {
                 mostrarSeccion("foro", "up")
                 if (n.ref_id) abrirHilo(n.ref_id)
             } else if (n.tipo === "mensaje") {
-                mostrarSeccion("intercambios", "down")
-                if (n.ref_id) abrirChat(n.ref_id)
+                // Los chats de Compra venta tienen como contexto «Compra venta · <título del aviso>».
+                const vistaChat = /^Compra venta · /.test(String(n.contexto || "")) ? "clasificados" : "intercambios"
+                mostrarSeccion(vistaChat, "down")
+                if (n.ref_id) abrirChat(n.ref_id, true, vistaChat)
             } else if (n.tipo === "intercambio") {
                 mostrarSeccion("intercambios", "down")
             } else if (n.tipo === "aporte" && n.ref_id === REF_AVISO_APORTES) {
@@ -6125,7 +6150,7 @@ async function cargarBootstrap() {
             libros: "Libros usados", servicios: "Servicios", otros: "Otros"
         }
         const CLASIFICADOS_FRESCURA_MS = 60 * 1000
-        let clasificadosUI = [], misClasificadosUI = [], clasificadosCargadosEn = 0, filtroCategoriaClasificado = ""
+        let clasificadosUI = [], misClasificadosUI = [], chatsClasificadosUI = [], clasificadosCargadosEn = 0, filtroCategoriaClasificado = ""
         const listaClasificados = document.getElementById("listaClasificados")
         const buscarClasificado = document.getElementById("buscarClasificado")
         const panelClasificado = document.getElementById("panelClasificado")
@@ -6140,11 +6165,12 @@ async function cargarBootstrap() {
             if (!clasificadosUI.length) listaClasificados.innerHTML = esqueletoTarjetas(2)
             const r = await llamar("listarClasificados", {})
             if (!r.ok) {
-                if (!clasificadosUI.length) listaClasificados.innerHTML = "<p class='vacio'>" + escapeHtml(r.error === "accion_invalida" ? "Clasificados se está activando. Probá de nuevo en un rato." : mensajeError(r.error)) + "</p>"
+                if (!clasificadosUI.length) listaClasificados.innerHTML = "<p class='vacio'>" + escapeHtml(r.error === "accion_invalida" ? "Compra venta se está activando. Probá de nuevo en un rato." : mensajeError(r.error)) + "</p>"
                 return
             }
             clasificadosUI = Array.isArray(r.clasificados) ? r.clasificados : []
             misClasificadosUI = Array.isArray(r.misClasificados) ? r.misClasificados : []
+            chatsClasificadosUI = Array.isArray(r.chats) ? r.chats : []
             clasificadosCargadosEn = Date.now()
             renderizarClasificados()
         }
@@ -6170,7 +6196,8 @@ async function cargarBootstrap() {
                         : "<button type='button' class='novedadAccion secundaria' data-gestionar-clasificado='activar' data-id='" + escapeAttr(c.id) + "'>Volver a publicar</button>") +
                       (c.activo && !c.vencido ? "<button type='button' class='novedadAccion secundaria' data-gestionar-clasificado='renovar' data-id='" + escapeAttr(c.id) + "'>Renovar 60 días</button>" : "") +
                       "<button type='button' class='novedadAccion secundaria quitarMaterial' data-gestionar-clasificado='borrar' data-id='" + escapeAttr(c.id) + "'>Borrar</button>"
-                    : (c.esMio ? "" : "<button type='button' class='denunciarMaterial' data-denunciar-clasificado='" + escapeAttr(c.id) + "'>Denunciar</button>")) +
+                    : (c.esMio ? "" : "<button type='button' class='novedadAccion' data-contactar-clasificado='" + escapeAttr(c.id) + "'>Escribir por chat</button>" +
+                        "<button type='button' class='denunciarMaterial' data-denunciar-clasificado='" + escapeAttr(c.id) + "'>Denunciar</button>")) +
                 "</div></article>"
         }
 
@@ -6185,6 +6212,15 @@ async function cargarBootstrap() {
                 ? lista.map(function (c) { return tarjetaClasificado(c, false) }).join("")
                 : "<div class='materialVacio'><b>" + (clasificadosUI.length ? "No hay avisos con ese filtro" : "Todavía no hay avisos") + "</b>" +
                   "<span>¿Tenés algo para vender u ofrecer? Publicá el primero.</span></div>"
+            document.getElementById("seccionChatsClasificados").hidden = !chatsClasificadosUI.length
+            document.getElementById("listaChatsClasificados").innerHTML = chatsClasificadosUI.map(function (ch) {
+                return "<li><button type='button' class='chatCV' data-abrir-chat-cv='" + escapeAttr(ch.id) + "'>" +
+                    avatarHtml(ch.con, ch.foto, "") +
+                    "<span class='chatCVTexto'><b>" + escapeHtml(ch.titulo) + "</b>" +
+                    "<small>" + (ch.soyVendedor ? "Te escribió " : "Con ") + escapeHtml(ch.con) +
+                    (ch.cantidadMensajes ? " · " + ch.cantidadMensajes + (ch.cantidadMensajes === 1 ? " mensaje" : " mensajes") : " · sin mensajes") +
+                    (ch.avisoActivo ? "" : " · aviso cerrado") + "</small></span></button></li>"
+            }).join("")
             const seccion = document.getElementById("seccionMisClasificados")
             seccion.hidden = !misClasificadosUI.length
             document.getElementById("listaMisClasificados").innerHTML = misClasificadosUI.map(function (c) { return tarjetaClasificado(c, true) }).join("")
@@ -6237,6 +6273,17 @@ async function cargarBootstrap() {
                 renderizarClasificados()
                 return
             }
+            const contactar = e.target.closest("[data-contactar-clasificado]")
+            if (contactar) {
+                contactar.disabled = true
+                const r = await llamar("contactarClasificado", { id: contactar.dataset.contactarClasificado })
+                contactar.disabled = false
+                if (!r.ok) { mostrarAviso(mensajeError(r.error)); return }
+                abrirChat(r.conversacionId, true, "clasificados")
+                return
+            }
+            const chatCV = e.target.closest("[data-abrir-chat-cv]")
+            if (chatCV) { abrirChat(chatCV.dataset.abrirChatCv, true, "clasificados"); return }
             const denunciar = e.target.closest("[data-denunciar-clasificado]")
             if (denunciar) {
                 const motivo = prompt("¿Qué pasa con este aviso? (por ejemplo: es una empresa o academia, vende copias de libros o medicamentos, es una estafa)")

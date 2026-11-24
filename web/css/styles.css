@@ -1768,6 +1768,13 @@
         .contactoClasificado { margin:0; font-size:.88rem; overflow-wrap:anywhere; }
         .autorClasificado { display:flex; align-items:center; gap:8px; margin:2px 0 0; font-size:.8rem; color:var(--ink-soft); }
         .autorClasificado .avatar { width:24px; height:24px; }
+        .listaChatsCV { list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+        .chatCV { display:flex; align-items:center; gap:10px; width:100%; margin:0; padding:10px 12px; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); color:var(--ink); text-align:left; cursor:pointer; }
+        .chatCV:hover { background:var(--surface-2); }
+        .chatCV .avatar { width:36px; height:36px; flex:0 0 auto; }
+        .chatCVTexto { display:grid; min-width:0; }
+        .chatCVTexto b { font-size:.92rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .chatCVTexto small { color:var(--ink-soft); font-size:.8rem; }
         .linkEnTexto { display:inline; width:auto; margin:0; padding:0; border:0; background:none; color:var(--link); font:inherit; text-decoration:underline; cursor:pointer; }
         .modalTerminos { z-index:10060; background:rgba(8,20,18,.86); }
         .terminosCaja { max-width:560px; }
@@ -2931,11 +2938,15 @@
 
         /* ---------- MATERIAL DE ESTUDIO ---------- */
 
-        /* La barra inferior pasa a 5 destinos (Material). */
-        body.enApp .navApp { grid-template-columns: repeat(5, 1fr); }
+        /* La barra inferior tiene 6 destinos (Material y Compra venta): íconos y textos más compactos. */
+        body.enApp .navApp { grid-template-columns: repeat(6, minmax(0, 1fr)); padding-left: 4px; padding-right: 4px; }
+        @media (max-width: 899px) {
+            body.enApp .navItem { font-size: .66rem; line-height: 1.15; text-align: center; padding: 4px 0; }
+            body.enApp .navItem svg { width: 44px; padding: 4px 10px; }
+        }
         @media (max-width: 380px) {
-            .navItem { font-size: .66rem; }
-            .navItem svg { width: 48px; padding: 4px 12px; }
+            .navItem { font-size: .62rem; }
+            .navItem svg { width: 40px; padding: 4px 9px; }
         }
 
         .materialCabecera {
