@@ -159,6 +159,9 @@ async function gestionarClasificado(admin: SupabaseClient, user: any, body: any)
 const RATE_LIMITS: Record<string, [number, number]> = {
   aceptarTerminos: [10, 600],
   autorizarDispositivo: [10, 3600],
+  fijarPeriodoModeracion: [20, 3600],
+  confirmarModerador: [60, 3600],
+  renunciarModeracion: [5, 3600],
   solicitarBaja: [5, 3600],
   cancelarBaja: [10, 3600],
   listarClasificados: [60, 300],
@@ -536,9 +539,10 @@ const REF_AVISO_APORTES = '00000000-0000-4000-8000-00000a9047e5'
 const REF_AVISO_DENUNCIAS = '00000000-0000-4000-8000-0000000de0c1'
 async function avisarModeradores(admin: SupabaseClient, tipo: 'aporte' | 'denuncia', ref: string,
   texto: (cantidad: number) => string, ultimo: string, excepto = '') {
-  const { data: mods, error } = await admin.from('profiles').select('id').or('is_moderator.eq.true,is_admin.eq.true').limit(200)
+  const { data: equipo, error } = await admin.from('profiles').select('id,is_admin,moderador_vence_at').or('is_moderator.eq.true,is_admin.eq.true').limit(200)
   if (error) { console.warn('aviso_moderadores', error.message); return }
-  for (const m of mods || []) {
+  const mods = (equipo || []).filter((m: any) => m.is_admin || moderadorVigente(m.moderador_vence_at))
+  for (const m of mods) {
     if (String(m.id) === excepto) continue
     // Dos intentos: si otro aviso creó la notificación entre la lectura y el insert (23505), se vuelve a leer y se suma.
     for (let intento = 0; intento < 2; intento++) {
@@ -557,6 +561,19 @@ async function avisarModeradores(admin: SupabaseClient, tipo: 'aporte' | 'denunc
 function avisarModeradoresAporte(admin: SupabaseClient, titulo: string) {
   return avisarModeradores(admin, 'aporte', REF_AVISO_APORTES,
     n => n === 1 ? 'Hay un aporte de material para revisar' : 'Hay ' + n + ' aportes de material para revisar', titulo)
+}
+
+// Período de moderación (migración 20261127160000): el rol de moderador vence en profiles.moderador_vence_at.
+function moderadorVigente(venceAt: string | null | undefined) {
+  return !venceAt || new Date(venceAt).getTime() > Date.now()
+}
+async function fechaCorteModeracion(admin: SupabaseClient) {
+  const { data, error } = await admin.from('periodo_moderacion').select('fecha_corte,descripcion').eq('id', true).maybeSingle()
+  if (error) throw error
+  return { fechaCorte: data?.fecha_corte || null, descripcion: data?.descripcion || '' }
+}
+function fechaCorta(iso: string) {
+  return new Date(iso).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 // Qué es y de quién es una publicación (para avisarle al autor si la moderación la quita).
@@ -1394,7 +1411,7 @@ async function bootstrap(user: User, client: SupabaseClient, admin: SupabaseClie
   if (rl) return rl
 
   const [{ data: profile, error: profileError }, { data: solicitudes, error: reqError }, { data: exchanges, error: exError }] = await Promise.all([
-    admin.from('profiles').select('id,pseudonimo,foto_url,is_moderator,is_admin,profile_completed,terminos_version,baja_programada_para').eq('id', user.id).single(),
+    admin.from('profiles').select('id,pseudonimo,foto_url,is_moderator,is_admin,profile_completed,terminos_version,baja_programada_para,moderador_vence_at').eq('id', user.id).single(),
     client.from('solicitudes').select('id,materia,tengo,busco,status,created_at,updated_at,completed_at,exchange_id').eq('user_id', user.id).eq('status', 'activa').order('created_at', { ascending: false }),
     client.from('intercambio_participantes').select('intercambio_id,solicitud_id,user_id,tengo,busco,intercambios!inner(id,materia,created_at,completed_at)').eq('user_id', user.id),
   ])
@@ -1445,7 +1462,9 @@ async function bootstrap(user: User, client: SupabaseClient, admin: SupabaseClie
       terminosVersion: profile.terminos_version || '', terminosVigente: TERMINOS_VERSION, bajaProgramada: profile.baja_programada_para || null },
     solicitudes: solicitudes || [],
     intercambios: [...exchangeMap.values()],
-    rol: { esModerador: !!profile.is_moderator, esAdmin: !!profile.is_admin },
+    rol: { esModerador: !!profile.is_moderator && moderadorVigente(profile.moderador_vence_at), esAdmin: !!profile.is_admin,
+      moderadorVence: profile.is_moderator && !profile.is_admin ? profile.moderador_vence_at || null : null,
+      moderadorVencido: !!profile.is_moderator && !profile.is_admin && !moderadorVigente(profile.moderador_vence_at) },
   }})
 }
 
@@ -2376,18 +2395,78 @@ async function handle(req: Request, body: any) {
       return registroModeracion(admin)
     }
     case 'soyModerador': { const rl=await rateLimit(admin,action,user.id);if(rl)return rl; return json({ok:true,esModerador:await isModerator(admin,user.id),esAdmin:await isAdmin(admin,user.id)}) }
+    case 'fijarPeriodoModeracion': {
+      // Fecha de corte del período (por ejemplo, las elecciones del centro de estudiantes). Los moderadores sin fecha
+      // pasan a vencer ahí; los que ya tienen una la conservan (para seguir después hay que confirmarlos).
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'admin');if(auth instanceof Response)return auth
+      const fecha=String(body.fecha||'')
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha))return json({ok:false,error:'fecha_invalida'})
+      const corte=new Date(fecha+'T23:59:59-03:00')
+      if(isNaN(corte.getTime())||corte.getTime()<=Date.now()||corte.getTime()>Date.now()+3*365*86400000)return json({ok:false,error:'fecha_invalida'})
+      const descripcion=String(body.descripcion||'').replace(/[\u0000-\u001F]/g,'').trim().slice(0,80)||null
+      const {error}=await admin.from('periodo_moderacion').upsert({id:true,fecha_corte:corte.toISOString(),descripcion,actualizado_por:user.id,updated_at:new Date().toISOString()})
+      if(error)throw error
+      const {error:errMods}=await admin.from('profiles').update({moderador_vence_at:corte.toISOString()}).eq('is_moderator',true).eq('is_admin',false).is('moderador_vence_at',null)
+      if(errMods)throw errMods
+      await auditar(admin,user.id,auth.llaveId,'fijar_periodo',{fecha,descripcion})
+      return json({ok:true,fechaCorte:corte.toISOString()})
+    }
+    case 'confirmarModerador': {
+      // Renueva a un moderador hasta la fecha de corte vigente (también reactiva a uno vencido).
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'admin',true);if(auth instanceof Response)return auth
+      const periodo=await fechaCorteModeracion(admin)
+      if(!periodo.fechaCorte||!moderadorVigente(periodo.fechaCorte))return json({ok:false,error:'periodo_sin_fecha'})
+      const email=String(body.email||'').trim().toLowerCase()
+      const u=await findUserByEmail(admin,email);if(!u)return json({ok:false,error:'no_encontrado'})
+      const {data:p,error:errP}=await admin.from('profiles').select('is_moderator,is_admin').eq('id',u.id).maybeSingle()
+      if(errP)throw errP
+      if(!p?.is_moderator||p.is_admin)return json({ok:false,error:'no_es_moderador'})
+      const {error}=await admin.from('profiles').update({moderador_vence_at:periodo.fechaCorte}).eq('id',u.id)
+      if(error)throw error
+      await auditar(admin,user.id,auth.llaveId,'confirmar_moderador',{usuario:String(u.id),hasta:periodo.fechaCorte})
+      await admin.from('notificaciones').insert({user_id:u.id,tipo:'noticia',contexto:'Te confirmaron como moderador',
+        cuerpo:'Seguís en el equipo de moderación hasta el '+fechaCorta(periodo.fechaCorte)+'. ¡Gracias!',link:'/?vista=moderacion',ref_id:u.id})
+      return json({ok:true,hasta:periodo.fechaCorte})
+    }
+    case 'renunciarModeracion': {
+      // Dejar el rol en el momento. Solo quita permisos, así que alcanza con la cuenta (no pide la llave).
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      if(String(body.confirmacion||'').trim().toUpperCase()!=='RENUNCIO')return json({ok:false,error:'confirmacion_renuncia'})
+      const {data:p,error:errP}=await admin.from('profiles').select('is_moderator,is_admin,pseudonimo').eq('id',user.id).maybeSingle()
+      if(errP)throw errP
+      if(!p||(!p.is_moderator&&!p.is_admin))return json({ok:false,error:'no_autorizado'})
+      if(p.is_admin){
+        if(String(user.email||'').toLowerCase()===CUENTA_OFICIAL)return json({ok:false,error:'cuenta_oficial'})
+        const {count,error:errCount}=await admin.from('profiles').select('id',{count:'exact',head:true}).eq('is_admin',true)
+        if(errCount)throw errCount
+        if((count||0)<=1)return json({ok:false,error:'ultimo_admin'})
+      }
+      const {error}=await admin.from('profiles').update({is_moderator:false,is_admin:false,moderador_vence_at:null}).eq('id',user.id)
+      if(error)throw error
+      await admin.from('llaves_moderacion').update({estado:'revocada',revocada_at:new Date().toISOString()}).eq('user_id',user.id).neq('estado','revocada')
+      await auditar(admin,user.id,null,'renunciar_moderacion',{rol:p.is_admin?'admin':'moderador'})
+      const {data:admins}=await admin.from('profiles').select('id').eq('is_admin',true)
+      const filas=(admins||[]).map((a:any)=>({user_id:a.id,tipo:'noticia',contexto:(p.pseudonimo||'Alguien')+' dejó la moderación',
+        cuerpo:'Renunció a su rol de '+(p.is_admin?'administrador':'moderador')+' desde su cuenta. Sus llaves y dispositivos quedaron revocados.',link:'/?vista=moderacion',ref_id:user.id}))
+      if(filas.length)await admin.from('notificaciones').insert(filas)
+      return json({ok:true})
+    }
     case 'listarModeradores': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       const auth=await autorizarModeracion(admin,user,body,'admin');if(auth instanceof Response)return auth
-      const {data:equipo,error}=await admin.from('profiles').select('id,pseudonimo,is_moderator,is_admin').or('is_moderator.eq.true,is_admin.eq.true').order('pseudonimo')
+      const {data:equipo,error}=await admin.from('profiles').select('id,pseudonimo,is_moderator,is_admin,moderador_vence_at').or('is_moderator.eq.true,is_admin.eq.true').order('pseudonimo')
       if(error)throw error
       const miembros=[]
       for(const m of equipo||[]){
         const u=await admin.auth.admin.getUserById(String(m.id))
         const email=u.data.user?.email||''
-        miembros.push({email,pseudonimo:m.pseudonimo,rol:m.is_admin?'admin':'moderador',oficial:email.toLowerCase()===CUENTA_OFICIAL,vos:String(m.id)===user.id})
+        const vence=m.is_admin?null:(m.moderador_vence_at||null)
+        miembros.push({email,pseudonimo:m.pseudonimo,rol:m.is_admin?'admin':'moderador',oficial:email.toLowerCase()===CUENTA_OFICIAL,vos:String(m.id)===user.id,
+          venceAt:vence,vencido:!m.is_admin&&!moderadorVigente(vence)})
       }
-      return json({ok:true,moderadores:miembros})
+      return json({ok:true,moderadores:miembros,periodo:await fechaCorteModeracion(admin)})
     }
     case 'asignarModerador': {
       // Da rol de moderador o de administrador. Un admin nuevo igual necesita una llave de admin, que solo se
@@ -2397,7 +2476,9 @@ async function handle(req: Request, body: any) {
       const rol=body.rol==='admin'?'admin':'moderador'
       const email=String(body.email||'').trim().toLowerCase()
       const u=await findUserByEmail(admin,email);if(!u)return json({ok:false,error:'no_encontrado'})
-      const cambios=rol==='admin'?{is_admin:true}:{is_moderator:true}
+      const periodo=await fechaCorteModeracion(admin)
+      const corte=periodo.fechaCorte&&moderadorVigente(periodo.fechaCorte)?periodo.fechaCorte:null
+      const cambios=rol==='admin'?{is_admin:true}:{is_moderator:true,moderador_vence_at:corte}
       const {error}=await admin.from('profiles').update(cambios).eq('id',u.id).select('id').single()
       if(error)throw error
       await auditar(admin,user.id,auth.llaveId,rol==='admin'?'asignar_admin':'asignar_moderador',{usuario:String(u.id)})
@@ -2416,7 +2497,7 @@ async function handle(req: Request, body: any) {
         if(errCount)throw errCount
         if((count||0)<=1)return json({ok:false,error:'ultimo_admin'})
       }
-      const cambios=rol==='admin'?{is_admin:false}:{is_moderator:false}
+      const cambios=rol==='admin'?{is_admin:false}:{is_moderator:false,moderador_vence_at:null}
       const {error}=await admin.from('profiles').update(cambios).eq('id',u.id)
       if(error)throw error
       // Sin el rol, sus llaves de ese rol dejan de servir.

@@ -1618,6 +1618,9 @@
                 color: var(--on-danger);
             }
 
+            .moderadorItem { gap: 8px; flex-wrap: wrap; }
+            .moderadorItem button[data-confirmar] { background: var(--brand); color: var(--on-brand); }
+
         /* ---------- FIRMA ---------- */
 
         #firma {

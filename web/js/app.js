@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-dispositivos-mod"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-periodo-mod"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -52,6 +52,8 @@ let datosUsuarioRefreshEnCurso = null
 let chatAbiertoId = null
 // Dónde se muestra el chat abierto: "intercambios" (chat de un intercambio) o "clasificados" (Compra venta).
 let chatVista = "intercambios"
+// Rol propio según bootstrap (incluye el vencimiento del período de moderación).
+let rolPropio = null
 let chatCantidadServidor = 0
 let chatDatosServidorCargados = false
 let chatPollingTimer = null
@@ -681,6 +683,10 @@ const hilosPendientesConfirmacion = new Map()
             const mensajes = {
                 email_invalido: "El email no es válido.",
                 confirmacion_baja: "Escribí BORRAR para confirmar.",
+                confirmacion_renuncia: "Escribí RENUNCIO para confirmar.",
+                periodo_sin_fecha: "Primero fijá la fecha de fin del período (más arriba).",
+                fecha_invalida: "La fecha tiene que ser futura y de los próximos 3 años.",
+                no_es_moderador: "Esa cuenta no es moderadora.",
                 baja_admin: "La cuenta de administración no se puede eliminar desde la web. Escribinos por mail.",
                 clasificado_titulo: "El título tiene que tener entre 3 y 100 caracteres.",
                 clasificado_descripcion: "La descripción tiene que tener entre 10 y 1500 caracteres.",
@@ -1005,6 +1011,7 @@ async function cargarBootstrap() {
             renderizarIntercambios(intercambiosUI)
             esModeradorActual = !!(data.rol && data.rol.esModerador)
             esAdminActual = !!(data.rol && data.rol.esAdmin)
+            rolPropio = data.rol || null
             const conPassword = cuentaTienePassword()
             ayudaSeguridadCuenta.textContent = conPassword
                 ? 'Para cambiar tu contraseña, confirmá primero la actual.'
@@ -3250,15 +3257,45 @@ async function cargarBootstrap() {
 
         }
 
+        // ---- Período de moderación (los moderadores vencen en la fecha de corte; un admin los confirma) ----
+        let periodoModeracion = { fechaCorte: null, descripcion: "" }
+
+        function fechaDia(iso) {
+            return new Date(iso).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "America/Argentina/Buenos_Aires" })
+        }
+
         async function cargarModeradores() {
 
             const r = await llamarModeracion("listarModeradores", {})
 
             if (!r.ok) return
 
+            periodoModeracion = r.periodo || { fechaCorte: null, descripcion: "" }
+            const fecha = document.getElementById("fechaPeriodo")
+            if (periodoModeracion.fechaCorte) {
+                // Fecha local de Argentina en formato AAAA-MM-DD para el <input type="date">.
+                const p = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Argentina/Buenos_Aires" }).format(new Date(periodoModeracion.fechaCorte))
+                fecha.value = p
+            }
+            document.getElementById("descPeriodo").value = periodoModeracion.descripcion || ""
+            document.getElementById("msgPeriodo").textContent = periodoModeracion.fechaCorte
+                ? "Período actual: hasta el " + fechaDia(periodoModeracion.fechaCorte) + (periodoModeracion.descripcion ? " (" + periodoModeracion.descripcion + ")" : "") + "."
+                : "Todavía no hay fecha: los moderadores no vencen."
             renderizarModeradores(r.moderadores)
 
         }
+
+        document.getElementById("formPeriodo").addEventListener("submit", async function (e) {
+            e.preventDefault()
+            const msg = document.getElementById("msgPeriodo")
+            const fecha = document.getElementById("fechaPeriodo").value
+            if (!fecha) { msg.textContent = "Elegí una fecha."; return }
+            if (!confirm("¿Fijar el fin del período el " + fecha.split("-").reverse().join("/") + "? Los moderadores sin fecha pasan a vencer ese día.")) return
+            const r = await llamarModeracion("fijarPeriodoModeracion", { fecha: fecha, descripcion: document.getElementById("descPeriodo").value.trim() })
+            if (!r.ok) { msg.textContent = mensajeError(r.error); return }
+            mostrarAviso("Fecha del período guardada.")
+            cargarModeradores()
+        })
 
         function renderizarModeradores(moderadores) {
 
@@ -3275,13 +3312,28 @@ async function cargarBootstrap() {
                 div.className = "moderadorItem"
 
                 const etiquetaRol = m.rol === "admin" ? "Administrador" : "Moderador"
+                const corte = periodoModeracion.fechaCorte
+                const puedeConfirmar = m.rol === "moderador" && corte && new Date(corte) > new Date() &&
+                    (!m.venceAt || new Date(m.venceAt) < new Date(corte))
                 div.innerHTML =
                     "<span class='novedadFilaTexto'><b>" + escapeHtml(m.pseudonimo || m.email) + (m.vos ? " (vos)" : "") + "</b>" +
-                    "<span>" + escapeHtml(m.email) + "</span></span>" +
-                    "<span class='estadoChip " + (m.rol === "admin" ? "estado-pendiente" : "estado-aprobado") + "'>" + (m.oficial ? "Cuenta oficial" : etiquetaRol) + "</span>" +
-                    (m.oficial || m.vos ? "" : "<button type='button'>Quitar rol</button>")
+                    "<span>" + escapeHtml(m.email) +
+                    (m.rol === "moderador" ? " · " + (m.vencido ? "venció el " + escapeHtml(fechaDia(m.venceAt)) : m.venceAt ? "vence el " + escapeHtml(fechaDia(m.venceAt)) : "sin vencimiento") : "") +
+                    "</span></span>" +
+                    "<span class='estadoChip " + (m.vencido ? "estado-rechazado" : m.rol === "admin" ? "estado-pendiente" : "estado-aprobado") + "'>" + (m.oficial ? "Cuenta oficial" : m.vencido ? "Vencido" : etiquetaRol) + "</span>" +
+                    (puedeConfirmar ? "<button type='button' class='novedadAccion' data-confirmar>Confirmar hasta el " + escapeHtml(fechaDia(corte)) + "</button>" : "") +
+                    (m.oficial || m.vos ? "" : "<button type='button' data-quitar-rol>Quitar rol</button>")
 
-                const btnQuitar = div.querySelector("button")
+                const btnConfirmar = div.querySelector("[data-confirmar]")
+                if (btnConfirmar) btnConfirmar.addEventListener("click", async function () {
+                    if (!confirm("¿Confirmar a " + (m.pseudonimo || m.email) + " como moderador hasta el " + fechaDia(corte) + "?")) return
+                    const r = await llamarModeracion("confirmarModerador", { email: m.email })
+                    if (!r.ok) { if (r.error !== "moderacion_bloqueada") alert(mensajeError(r.error)); return }
+                    mostrarAviso("Moderador confirmado.")
+                    cargarModeradores()
+                })
+
+                const btnQuitar = div.querySelector("[data-quitar-rol]")
                 if (btnQuitar) btnQuitar.addEventListener("click", async function () {
 
                     if (!confirm("¿Quitarle a " + m.email + " el rol de " + etiquetaRol.toLowerCase() + "? Sus llaves de ese rol dejan de funcionar.")) return
@@ -5579,15 +5631,41 @@ async function cargarBootstrap() {
                     "<span class='estadoChip estado-" + (l.estado === "activa" ? "aprobado" : l.estado === "pendiente" ? "pendiente" : "rechazado") + "'>" + escapeHtml(ESTADOS_LLAVE[l.estado] || l.estado) + "</span>" +
                     "<button type='button' class='panelNotifAccion' data-revocar-propia='" + escapeAttr(l.id) + "' data-tipo-llave='" + escapeAttr(l.tipo || "archivo") + "'>Revocar</button></li>"
             }
+            const estadoRol = document.getElementById("estadoRolPropio")
+            if (rolPropio && rolPropio.moderadorVencido) {
+                estadoRol.hidden = false
+                estadoRol.textContent = "Tu rol de moderación venció el " + fechaDia(rolPropio.moderadorVence) + ". Si seguís en el equipo, pedile a un administrador que te confirme."
+            } else if (rolPropio && rolPropio.moderadorVence) {
+                estadoRol.hidden = false
+                estadoRol.textContent = "Tu rol de moderación vale hasta el " + fechaDia(rolPropio.moderadorVence) + ". Después un administrador tiene que confirmarte para seguir."
+            } else estadoRol.hidden = true
+            const renuncia = "<h3>Dejar de moderar</h3><p class='ayudaPerfil'>Si ya no vas a moderar, podés dejar el rol ahora. Se revocan tus llaves y dispositivos al instante y se avisa a los administradores. Para volver, un administrador te tiene que dar el rol de nuevo.</p>" +
+                "<button type='button' class='btn-secundario btnPeligro' data-renunciar>Dejar de moderar</button>"
             cont.innerHTML = (archivos.length
                 ? "<h3>Tus archivos de llave</h3><ul class='listaLlaves'>" + archivos.map(fila).join("") + "</ul>"
                 : "<p class='ayudaPerfil'>Todavía no tenés ninguna llave.</p>") +
                 "<h3>Dispositivos autorizados</h3>" + (dispositivos.length
                     ? "<p class='ayudaPerfil'>En estos navegadores moderás sin el archivo. Si no reconocés alguno, revocalo y cambiá tu contraseña.</p><ul class='listaLlaves'>" + dispositivos.map(fila).join("") + "</ul>"
-                    : "<p class='ayudaPerfil'>Ninguno todavía. Al desbloquear con tu archivo podés autorizar el dispositivo para no tener que usarlo cada vez.</p>")
+                    : "<p class='ayudaPerfil'>Ninguno todavía. Al desbloquear con tu archivo podés autorizar el dispositivo para no tener que usarlo cada vez.</p>") +
+                ((esModeradorActual || esAdminActual || (rolPropio && rolPropio.moderadorVencido)) ? renuncia : "")
         }
 
         document.getElementById("misLlaves").addEventListener("click", async function (e) {
+            if (e.target.closest("[data-renunciar]")) {
+                const texto = prompt("Vas a dejar tu rol de " + (esAdminActual ? "administrador" : "moderador") + " ahora mismo. Para confirmar, escribí RENUNCIO:")
+                if (texto === null) return
+                const r = await llamar("renunciarModeracion", { confirmacion: texto })
+                if (!r.ok) { alert(mensajeError(r.error)); return }
+                esModeradorActual = false
+                esAdminActual = false
+                rolPropio = null
+                cerrarSesionModeracion(true)
+                actualizarAccesosModeracion()
+                try { localStorage.removeItem("medmar:perfil:" + sesion.userId) } catch (_) {}
+                mostrarSeccion("inicio", "up")
+                mostrarAviso("Dejaste la moderación. ¡Gracias por tu tiempo!")
+                return
+            }
             const btn = e.target.closest("[data-revocar-propia]")
             if (!btn) return
             const esDispositivo = btn.dataset.tipoLlave === "dispositivo"
@@ -5698,7 +5776,9 @@ async function cargarBootstrap() {
             ocultar_puntaje: "escondió un puntaje del ranking",
             mostrar_puntaje: "volvió a mostrar un puntaje del ranking",
             autorizar_dispositivo: "autorizó un dispositivo para moderar", revocar_dispositivo: "revocó un dispositivo",
-            dispositivo_vencido: "tenía un dispositivo vencido (se revocó solo)", quitar_clasificado: "quitó un aviso de Compra venta"
+            dispositivo_vencido: "tenía un dispositivo vencido (se revocó solo)",
+            fijar_periodo: "fijó la fecha del período de moderación", confirmar_moderador: "confirmó a un moderador para el período",
+            renunciar_moderacion: "dejó la moderación", quitar_clasificado: "quitó un aviso de Compra venta"
         }
 
         async function cargarRegistro() {
