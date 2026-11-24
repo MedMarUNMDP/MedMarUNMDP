@@ -163,6 +163,7 @@ const RATE_LIMITS: Record<string, [number, number]> = {
   listarClasificados: [60, 300],
   publicarClasificado: [6, 3600],
   gestionarClasificado: [30, 600],
+  quitarClasificado: [60, 600],
   contactarClasificado: [20, 3600],
   guardar: [8, 600],
   editar: [12, 600],
@@ -531,26 +532,70 @@ function sitiosMaterialPublicos() {
 
 // Aviso agrupado a moderadores: una sola notificación sin leer por moderador, con la cantidad acumulada.
 const REF_AVISO_APORTES = '00000000-0000-4000-8000-00000a9047e5'
-async function avisarModeradoresAporte(admin: SupabaseClient, titulo: string) {
+const REF_AVISO_DENUNCIAS = '00000000-0000-4000-8000-0000000de0c1'
+async function avisarModeradores(admin: SupabaseClient, tipo: 'aporte' | 'denuncia', ref: string,
+  texto: (cantidad: number) => string, ultimo: string, excepto = '') {
   const { data: mods, error } = await admin.from('profiles').select('id').or('is_moderator.eq.true,is_admin.eq.true').limit(200)
-  if (error) { console.warn('aviso_aportes', error.message); return }
+  if (error) { console.warn('aviso_moderadores', error.message); return }
   for (const m of mods || []) {
-    // Dos intentos: si otro aporte creó la notificación entre la lectura y el insert (23505), se vuelve a leer y se suma.
+    if (String(m.id) === excepto) continue
+    // Dos intentos: si otro aviso creó la notificación entre la lectura y el insert (23505), se vuelve a leer y se suma.
     for (let intento = 0; intento < 2; intento++) {
       const { data: previa } = await admin.from('notificaciones').select('id,cantidad')
-        .eq('user_id', m.id).eq('tipo', 'aporte').eq('ref_id', REF_AVISO_APORTES).eq('leida', false).maybeSingle()
+        .eq('user_id', m.id).eq('tipo', tipo).eq('ref_id', ref).eq('leida', false).maybeSingle()
       const cantidad = Number(previa?.cantidad || 0) + 1
-      const fila = {
-        contexto: cantidad === 1 ? 'Hay un aporte de material para revisar' : 'Hay ' + cantidad + ' aportes de material para revisar',
-        cuerpo: ('Último: ' + titulo).slice(0, 400), cantidad, updated_at: new Date().toISOString(),
-      }
+      const fila = { contexto: texto(cantidad).slice(0, 160), cuerpo: ('Último: ' + ultimo).slice(0, 400), cantidad, updated_at: new Date().toISOString() }
       const res = previa
         ? await admin.from('notificaciones').update(fila).eq('id', previa.id)
-        : await admin.from('notificaciones').insert({ user_id: m.id, tipo: 'aporte', ref_id: REF_AVISO_APORTES, ...fila })
+        : await admin.from('notificaciones').insert({ user_id: m.id, tipo, ref_id: ref, ...fila })
       if (!res.error) break
-      if (pgCode(res.error) !== '23505' || intento) { console.warn('aviso_aportes', res.error.message); break }
+      if (pgCode(res.error) !== '23505' || intento) { console.warn('aviso_moderadores', res.error.message); break }
     }
   }
+}
+function avisarModeradoresAporte(admin: SupabaseClient, titulo: string) {
+  return avisarModeradores(admin, 'aporte', REF_AVISO_APORTES,
+    n => n === 1 ? 'Hay un aporte de material para revisar' : 'Hay ' + n + ' aportes de material para revisar', titulo)
+}
+
+// Qué es y de quién es una publicación (para avisarle al autor si la moderación la quita).
+const NOMBRE_TIPO_PUBLICACION: Record<string, string> = { hilo: 'publicación del foro', respuesta: 'respuesta del foro', material: 'material', clasificado: 'aviso de Compra venta' }
+async function datosPublicacion(admin: SupabaseClient, tipo: string, id: string): Promise<{ autor: string, titulo: string } | null> {
+  if (tipo === 'hilo') {
+    const { data } = await admin.from('hilos').select('autor_id,titulo').eq('id', id).maybeSingle()
+    return data ? { autor: String(data.autor_id), titulo: String(data.titulo) } : null
+  }
+  if (tipo === 'respuesta') {
+    const { data } = await admin.from('respuestas').select('autor_id,contenido').eq('id', id).maybeSingle()
+    return data ? { autor: String(data.autor_id), titulo: String(data.contenido).replace(/\s+/g, ' ').slice(0, 70) } : null
+  }
+  if (tipo === 'clasificado') {
+    const { data } = await admin.from('clasificados').select('autor_id,titulo').eq('id', id).maybeSingle()
+    return data ? { autor: String(data.autor_id), titulo: String(data.titulo) } : null
+  }
+  if (tipo === 'material') {
+    // El autor es quien mandó el aporte; si lo cargó un moderador directamente no hay a quién avisar.
+    const { data } = await admin.from('materiales').select('titulo,aporte_id').eq('id', id).maybeSingle()
+    if (!data?.aporte_id) return null
+    const { data: ap } = await admin.from('aportes_material').select('user_id').eq('id', data.aporte_id).maybeSingle()
+    return ap ? { autor: String(ap.user_id), titulo: String(data.titulo) } : null
+  }
+  return null
+}
+async function avisarAutorModeracion(admin: SupabaseClient, moderadorId: string, tipo: string, id: string,
+  datos: { autor: string, titulo: string } | null, motivo: string) {
+  if (!datos || datos.autor === moderadorId) return
+  const que = NOMBRE_TIPO_PUBLICACION[tipo] || 'publicación'
+  const { error } = await admin.from('notificaciones').insert({
+    user_id: datos.autor, tipo: 'moderacion', ref_id: id, contexto: datos.titulo.slice(0, 160),
+    cuerpo: ('La moderación quitó tu ' + que + '.' + (motivo ? ' Motivo: ' + motivo : ' No cumplía los Términos y Condiciones.') +
+      ' Si creés que es un error, escribinos a MedMarUNMDP@gmail.com.').slice(0, 400),
+    link: '/terminos/',
+  })
+  if (error) console.warn('aviso_moderacion_autor', error.message)
+}
+function motivoModeracion(body: any) {
+  return String(body?.motivo || '').replace(/\s+/g, ' ').trim().slice(0, 200)
 }
 const MAX_APORTES_DIA = 5            // por persona, en 24 h
 const MAX_APORTES_PENDIENTES = 5     // por persona, esperando revisión
@@ -1848,8 +1893,10 @@ async function handle(req: Request, body: any) {
 
       if (String(hilo.autor_id) !== user.id) {
         const auth = await autorizarModeracion(admin, user, body, 'moderador'); if (auth instanceof Response) return auth
+        const datos = await datosPublicacion(admin, 'hilo', id), motivo = motivoModeracion(body)
         await borrarPublicacion(admin, 'hilo', id)
-        await auditar(admin, user.id, auth.llaveId, 'borrar_hilo', { id })
+        await auditar(admin, user.id, auth.llaveId, 'borrar_hilo', { id, motivo })
+        await avisarAutorModeracion(admin, user.id, 'hilo', id, datos, motivo)
         return json({ ok: true })
       }
 
@@ -1871,8 +1918,10 @@ async function handle(req: Request, body: any) {
 
       if (String(respuesta.autor_id) !== user.id) {
         const auth = await autorizarModeracion(admin, user, body, 'moderador'); if (auth instanceof Response) return auth
+        const datos = await datosPublicacion(admin, 'respuesta', id), motivo = motivoModeracion(body)
         await borrarPublicacion(admin, 'respuesta', id)
-        await auditar(admin, user.id, auth.llaveId, 'borrar_respuesta', { id })
+        await auditar(admin, user.id, auth.llaveId, 'borrar_respuesta', { id, motivo })
+        await avisarAutorModeracion(admin, user.id, 'respuesta', id, datos, motivo)
         return json({ ok: true })
       }
 
@@ -2017,6 +2066,9 @@ async function handle(req: Request, body: any) {
       const {data:previa}=await admin.from('denuncias').select('id').eq('id_publicacion',id).eq('denunciante_id',user.id).eq('estado','pendiente').limit(1)
       if((previa||[]).length)return json({ok:true,repetida:true})
       const {error}=await admin.from('denuncias').insert({tipo,id_publicacion:id,denunciante_id:user.id,motivo});if(error)throw error
+      await avisarModeradores(admin,'denuncia',REF_AVISO_DENUNCIAS,
+        n=>n===1?'Hay una denuncia nueva para revisar':'Hay '+n+' denuncias nuevas para revisar',
+        (NOMBRE_TIPO_PUBLICACION[tipo]||tipo)+(motivo?' · '+motivo:''),user.id)
       return json({ok:true})
     }
     case 'iniciarPartida': {
@@ -2090,9 +2142,26 @@ async function handle(req: Request, body: any) {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
       const id=uuidOrEmpty(body.id);if(!id)return json({ok:false,error:'datos_invalidos'})
+      const datos=await datosPublicacion(admin,'material',id),motivo=motivoModeracion(body)
       const {error}=await admin.from('materiales').update({activo:false}).eq('id',id)
       if(error)throw error
-      await auditar(admin,user.id,auth.llaveId,'quitar_material',{id})
+      await auditar(admin,user.id,auth.llaveId,'quitar_material',{id,motivo})
+      await avisarAutorModeracion(admin,user.id,'material',id,datos,motivo)
+      return json({ok:true})
+    }
+    case 'quitarClasificado': {
+      // Moderación: borra un aviso de Compra venta (sin esperar una denuncia) y le avisa a quien lo publicó.
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      const id=uuidOrEmpty(body.id);if(!id)return json({ok:false,error:'datos_invalidos'})
+      const datos=await datosPublicacion(admin,'clasificado',id),motivo=motivoModeracion(body)
+      if(!datos)return json({ok:false,error:'no_encontrado'})
+      const {error:dErr}=await admin.from('denuncias').update({estado:'eliminada',resuelto_por:user.id,fecha_resolucion:new Date().toISOString()}).eq('id_publicacion',id).eq('estado','pendiente')
+      if(dErr)throw dErr
+      const {error}=await admin.from('clasificados').delete().eq('id',id)
+      if(error)throw error
+      await auditar(admin,user.id,auth.llaveId,'quitar_clasificado',{id,motivo,titulo:datos.titulo})
+      await avisarAutorModeracion(admin,user.id,'clasificado',id,datos,motivo)
       return json({ok:true})
     }
     case 'quitarPuntaje': {
@@ -2278,12 +2347,14 @@ async function handle(req: Request, body: any) {
       if(!rep)return json({ok:false,error:'no_encontrado'})
       const resolucion={resuelto_por:user.id,fecha_resolucion:new Date().toISOString()}
       if(accion==='eliminar'){
+        const datosPub=await datosPublicacion(admin,String(rep.tipo),String(rep.id_publicacion)),motivo=motivoModeracion(body)
         // Se marcan como resueltas todas las denuncias pendientes de esa publicación y después se la borra.
         const {error:upError}=await admin.from('denuncias').update({estado:'eliminada',...resolucion}).eq('id_publicacion',rep.id_publicacion).eq('estado','pendiente')
         if(upError)throw upError
         if(rep.tipo==='material'){const {error:errMat}=await admin.from('materiales').update({activo:false}).eq('id',rep.id_publicacion);if(errMat)throw errMat}
         else if(rep.tipo==='clasificado'){const {error:errCl}=await admin.from('clasificados').delete().eq('id',rep.id_publicacion);if(errCl)throw errCl}
         else await borrarPublicacion(admin,rep.tipo==='hilo'?'hilo':'respuesta',String(rep.id_publicacion),false)
+        await avisarAutorModeracion(admin,user.id,String(rep.tipo),String(rep.id_publicacion),datosPub,motivo)
       } else {
         const {error}=await admin.from('denuncias').update({estado:'descartada',...resolucion}).eq('id',id);if(error)throw error
       }

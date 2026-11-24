@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-compra-venta-chat"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-notif-moderacion"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -1545,6 +1545,12 @@ async function cargarBootstrap() {
 
         }
 
+        // Moderación: motivo opcional que le llega a quien publicó (notificación «moderacion»). null = canceló.
+        function pedirMotivoModeracion(que) {
+            const motivo = prompt("Vas a quitar " + que + ". Escribí el motivo para la persona que lo publicó (opcional, le llega como notificación):", "")
+            return motivo === null ? null : motivo.trim().slice(0, 200)
+        }
+
         async function borrarPublicacion(tipo, id) {
 
             if (!confirm("¿Seguro que querés borrar esto?")) return
@@ -1552,7 +1558,11 @@ async function cargarBootstrap() {
             const accion = tipo === "hilo" ? "borrarHilo" : "borrarRespuesta"
             let r = await llamar(accion, { id })
             // Contenido de otra persona: el servidor pide la llave de moderación.
-            if (!r.ok && r.error === "llave_requerida") r = await llamarModeracion(accion, { id })
+            if (!r.ok && r.error === "llave_requerida") {
+                const motivo = pedirMotivoModeracion(tipo === "hilo" ? "esta publicación" : "esta respuesta")
+                if (motivo === null) return
+                r = await llamarModeracion(accion, { id, motivo })
+            }
             if (!r.ok && r.error === "moderacion_bloqueada") return
 
             if (r.ok) {
@@ -2724,7 +2734,7 @@ async function cargarBootstrap() {
             let acciones = "<button type='button' class='accionDenunciar' data-tipo='hilo' data-id='" + escapeAttr(h.id) + "'>Denunciar</button>"
 
             if (h.esPropio || esModeradorActual) {
-                acciones += "<button type='button' class='accionBorrar' data-tipo='hilo' data-id='" + escapeAttr(h.id) + "'>Borrar</button>"
+                acciones += "<button type='button' class='accionBorrar' data-tipo='hilo' data-id='" + escapeAttr(h.id) + "'>" + (h.esPropio ? "Borrar" : "Quitar (moderación)") + "</button>"
             }
 
             detalleHiloContenido.innerHTML =
@@ -2831,7 +2841,7 @@ async function cargarBootstrap() {
 
             let acciones = r._optimista ? "" : "<button type='button' class='accionDenunciar' data-tipo='respuesta' data-id='" + escapeAttr(r.id) + "'>Denunciar</button>"
             if (!r._optimista && (r.esPropio || esModeradorActual)) {
-                acciones += "<button type='button' class='accionBorrar' data-tipo='respuesta' data-id='" + escapeAttr(r.id) + "'>Borrar</button>"
+                acciones += "<button type='button' class='accionBorrar' data-tipo='respuesta' data-id='" + escapeAttr(r.id) + "'>" + (r.esPropio ? "Borrar" : "Quitar (moderación)") + "</button>"
             }
             if (!r._optimista) {
                 acciones = "<button type='button' class='btnResponderRespuesta' data-id='" + escapeAttr(r.id) + "'>Responder</button>" + acciones
@@ -3224,9 +3234,13 @@ async function cargarBootstrap() {
 
         async function resolverDenunciaClick(id, accion) {
 
-            if (accion === "eliminar" && !confirm("¿Seguro que querés eliminar esta publicación?")) return
+            let motivo = ""
+            if (accion === "eliminar") {
+                motivo = pedirMotivoModeracion("lo denunciado")
+                if (motivo === null) return
+            }
 
-            const r = await llamarModeracion("resolverDenuncia", { id, decision: accion })
+            const r = await llamarModeracion("resolverDenuncia", { id, decision: accion, motivo })
 
             if (r.ok) {
                 cargarDenuncias()
@@ -4960,6 +4974,13 @@ async function cargarBootstrap() {
                         (n.cuerpo ? "<span class='notifCuerpo'>" + escapeHtml(n.cuerpo) + "</span>" : "")
                     return "<b>Tu aporte «" + escapeHtml(n.contexto || "") + "»</b>" +
                         (n.cuerpo ? "<span class='notifCuerpo'>" + escapeHtml(n.cuerpo) + "</span>" : "")
+                case "moderacion":
+                    return "<b>Moderación · «" + escapeHtml(n.contexto || "") + "»</b>" +
+                        (n.cuerpo ? "<span class='notifCuerpo'>" + escapeHtml(n.cuerpo) + "</span>" : "")
+                case "denuncia":
+                case "recordatorio":
+                    return "<b>" + escapeHtml(n.contexto || "") + "</b>" +
+                        (n.cuerpo ? "<span class='notifCuerpo'>" + escapeHtml(n.cuerpo) + "</span>" : "")
                 case "noticia":
                     return "<b>" + escapeHtml(n.contexto || "Novedad de MedMar") + "</b>" +
                         (n.cuerpo ? "<span class='notifCuerpo'>" + escapeHtml(n.cuerpo) + "</span>" : "")
@@ -5099,8 +5120,11 @@ async function cargarBootstrap() {
                 elegirPestaniaModeracion("aportes")
             } else if (n.tipo === "aporte") {
                 mostrarSeccion("material", "up")
-            } else if (n.tipo === "noticia" && n.link) {
-                const vistaInterna = /^\/\?vista=(juegos|material|moderacion|foro|intercambios)$/.exec(n.link)
+            } else if (n.tipo === "denuncia") {
+                mostrarSeccion("moderacion", "up")
+                elegirPestaniaModeracion("denuncias")
+            } else if ((n.tipo === "noticia" || n.tipo === "recordatorio") && n.link) {
+                const vistaInterna = /^\/\?vista=(juegos|material|moderacion|foro|intercambios|clasificados|configuracion)$/.exec(n.link)
                 if (vistaInterna) mostrarSeccion(vistaInterna[1], "up")
                 else if (/^\/(?!\/)/.test(n.link) && n.link.indexOf("\\") < 0) location.href = n.link
                 else if (/^https:\/\//i.test(n.link)) window.open(n.link, "_blank", "noopener")
@@ -5778,8 +5802,9 @@ async function cargarBootstrap() {
             }
             const quitar = e.target.closest("[data-quitar]")
             if (quitar) {
-                if (!confirm("¿Quitar este material del catálogo? Deja de verse para todos.")) return
-                const r = await llamarModeracion("quitarMaterial", { id: quitar.dataset.quitar })
+                const motivo = pedirMotivoModeracion("este material del catálogo (deja de verse para todos)")
+                if (motivo === null) return
+                const r = await llamarModeracion("quitarMaterial", { id: quitar.dataset.quitar, motivo })
                 if (!r.ok) { alert(mensajeError(r.error)); return }
                 materialesUI = materialesUI.filter(function (m) { return m.id !== quitar.dataset.quitar })
                 renderizarMateriales()
@@ -5916,7 +5941,8 @@ async function cargarBootstrap() {
                           "<label for='apM-" + idc + "'>Materia</label><select id='apM-" + idc + "'>" + opcionesMateria + "</select>" +
                           "<label for='apTi-" + idc + "'>Tipo</label><select id='apTi-" + idc + "'>" +
                           Object.keys(TIPOS_MATERIAL).map(function (t) { return "<option value='" + t + "'" + (t === a.tipo ? " selected" : "") + ">" + TIPOS_MATERIAL[t] + "</option>" }).join("") + "</select>" +
-                          "<a class='linkAporte' href='" + escapeAttr(a.link) + "' target='_blank' rel='noopener noreferrer'>Abrir en " + escapeHtml(a.sitio || "el sitio") + " ↗</a>" +
+                          "<p class='etiquetaLinkAporte'>Enlace" + (a.sitio ? " (" + escapeHtml(a.sitio) + ")" : "") + ":</p>" +
+                          "<a class='linkAporte linkAporteCompleto' href='" + escapeAttr(a.link) + "' target='_blank' rel='noopener noreferrer'>" + escapeHtml(a.link) + " ↗</a>" +
                           "<p class='dominioAporte'>Dominio: <b>" + escapeHtml(a.dominio || "") + "</b>. Revisá que abra, que sea público y que sea material de estudio legal.</p>" +
                           (a.libre ? "<p class='dominioAporte avisoExterno'>Es una página que cualquiera puede crear y cambiar después de aprobada: aprobala solo si confiás en el contenido y en quien la manda.</p>" : "")
                         : "<h3>" + escapeHtml(a.titulo) + "</h3>" + (a.materia ? "<p class='materiaMaterial'>" + escapeHtml(a.materia) + "</p>" : "")) +
@@ -6197,6 +6223,7 @@ async function cargarBootstrap() {
                       (c.activo && !c.vencido ? "<button type='button' class='novedadAccion secundaria' data-gestionar-clasificado='renovar' data-id='" + escapeAttr(c.id) + "'>Renovar 60 días</button>" : "") +
                       "<button type='button' class='novedadAccion secundaria quitarMaterial' data-gestionar-clasificado='borrar' data-id='" + escapeAttr(c.id) + "'>Borrar</button>"
                     : (c.esMio ? "" : "<button type='button' class='novedadAccion' data-contactar-clasificado='" + escapeAttr(c.id) + "'>Escribir por chat</button>" +
+                        (esModeradorActual ? "<button type='button' class='novedadAccion secundaria quitarMaterial' data-quitar-clasificado='" + escapeAttr(c.id) + "'>Quitar (moderación)</button>" : "") +
                         "<button type='button' class='denunciarMaterial' data-denunciar-clasificado='" + escapeAttr(c.id) + "'>Denunciar</button>")) +
                 "</div></article>"
         }
@@ -6280,6 +6307,16 @@ async function cargarBootstrap() {
                 contactar.disabled = false
                 if (!r.ok) { mostrarAviso(mensajeError(r.error)); return }
                 abrirChat(r.conversacionId, true, "clasificados")
+                return
+            }
+            const quitarCV = e.target.closest("[data-quitar-clasificado]")
+            if (quitarCV) {
+                const motivo = pedirMotivoModeracion("este aviso de Compra venta")
+                if (motivo === null) return
+                const r = await llamarModeracion("quitarClasificado", { id: quitarCV.dataset.quitarClasificado, motivo })
+                if (!r.ok) { if (r.error !== "moderacion_bloqueada") alert(mensajeError(r.error)); return }
+                mostrarAviso("Aviso quitado. Se le avisó a quien lo publicó.")
+                cargarClasificados(true)
                 return
             }
             const chatCV = e.target.closest("[data-abrir-chat-cv]")

@@ -45,6 +45,8 @@ Para ubicarte: `Grep "// ====" web/js/app.js` y leé solo el rango que necesitá
   **Chat**: reutiliza `#panelChat`, que `ubicarPanelChat` mueve a `#zonaChatClasificados` (`chatVista`). Texto siempre escapado.
 - **Baja de cuenta** (sección BAJA DE CUENTA): `solicitarBaja` (escribir BORRAR) la programa a 30 días; `#avisoBaja` y Perfil ofrecen
   `cancelarBaja`. La borra la función `maintenance`.
+- **Moderación en el lugar**: foro, respuestas, material y Compra venta muestran «Quitar (moderación)» a moderadores; siempre
+  piden un motivo opcional (`pedirMotivoModeracion`) que le llega al autor como notificación `moderacion`.
 - **Encuestas del foro** (sección ENCUESTAS DEL FORO): `crearHilo` con `encuesta`, `verHilo` devuelve `hilo.encuesta`, `votarEncuesta`.
 - `index.html` tiene una **Content Security Policy** en `<meta>`: un CDN, embed o dominio nuevo hay que sumarlo ahí o no carga.
 - **Cloudflare** está delante de GitHub Pages (proxy): agrega HSTS, `X-Frame-Options`, `frame-ancestors`, `nosniff` y

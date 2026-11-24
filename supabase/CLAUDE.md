@@ -19,7 +19,9 @@ se aplica acá impacta producción.
 (intercambio de comisiones, matching por ciclos en `finalize_exchange`) · `conversaciones`, `conversacion_participantes`,
 `mensajes` (chat de un intercambio, 14 días) · `hilos` (`is_sensitive`; opcionalmente una `encuestas` con sus `votos_encuesta`: anónima = la API nunca devuelve quién votó), `respuestas` (anidadas con `parent_id`,
 FK al mismo hilo), `likes_hilos`, `likes_respuestas` (foro) ·
-`denuncias` (moderación) · `notificaciones` (campana: las crean triggers en `respuestas`, `mensajes` e
+`denuncias` (moderación) · `notificaciones` (tipos extra: `moderacion` = aviso al autor cuando la moderación quita algo, con motivo (`avisarAutorModeracion`);
+`denuncia` = aviso agrupado a moderadores (`avisarModeradores`); `recordatorio` = `recordatorios_diarios()` por pg_cron a las 12 UTC:
+avisos por vencer/vencidos, solicitudes por vencer, cuentas por borrarse. Campana: las crean triggers en `respuestas`, `mensajes` e
 `intercambio_participantes` vía `notificar()`, agrupando avisos sin leer del mismo destino; las noticias las publica un admin
 con `publicarNoticia`; select solo propias, en Realtime) · `materiales` (catálogo de enlaces a sitios admitidos: lista cerrada `SITIOS_MATERIAL` en la API, ~120 dominios legales; no se suben archivos) y
 `aportes_material` (aportes de estudiantes por enlace de un sitio admitido o sugerencia, con declaración de derechos; avisan a moderadores en la campana; revisados por moderadores; anti-spam en
