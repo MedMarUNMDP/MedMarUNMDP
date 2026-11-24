@@ -49,7 +49,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261123s">
+    <link rel="stylesheet" href="/css/styles.css?v=20261124a">
 </head>
 
 <body>
@@ -569,6 +569,7 @@
                     <button type="button" role="tab" class="modPestania" data-panel="papelera" aria-selected="false">Papelera</button>
                     <button type="button" role="tab" class="modPestania soloAdmin" data-panel="registro" aria-selected="false" hidden>Registro</button>
                     <button type="button" role="tab" class="modPestania" data-panel="llave" aria-selected="false">Mi llave</button>
+                    <button type="button" role="tab" class="modPestania" data-panel="guia" aria-selected="false">Guía</button>
                 </div>
 
                 <section id="panelModBloqueado" class="modBloqueado" hidden>
@@ -577,6 +578,7 @@
                     <span>Para ver y resolver esto necesitás tu archivo de llave y su contraseña, además de tu cuenta.</span>
                     <button type="button" class="btn-primario" data-desbloquear>Desbloquear con mi llave</button>
                     <button type="button" class="panelNotifAccion" data-ir-llave>¿Todavía no tenés llave? Creala</button>
+                    <button type="button" class="panelNotifAccion" data-ir-guia>¿Primera vez? Leé la guía de moderación</button>
                 </section>
 
                 <section class="modPanel" role="tabpanel" data-panel="denuncias" aria-label="Denuncias pendientes">
@@ -677,6 +679,131 @@
                 <section class="modPanel" role="tabpanel" data-panel="papelera" aria-label="Papelera" hidden>
                     <p class="ayudaPerfil">Lo que quita la moderación queda acá 7 días, oculto para todos. Si fue un error, restauralo; si no, se borra solo cuando vence el plazo.</p>
                     <div id="listaPapelera"></div>
+                </section>
+
+                <section class="modPanel guiaMod" role="tabpanel" data-panel="guia" aria-label="Guía de moderación" hidden>
+                    <div class="guiaIntro">
+                        <h3>Guía de moderación</h3>
+                        <p>Moderar en MedMar es cuidar que la comunidad sea un lugar útil y respetuoso. <b>No es censurar opiniones</b>: se puede discutir, criticar y no estar de acuerdo. Se quita lo que rompe las <a href="/terminos/#convivencia" target="_blank" rel="noopener">normas de convivencia</a> o pone en riesgo a alguien.</p>
+                        <p class="ayudaPerfil">Tocá cada tema para desplegarlo. Si tenés dudas, consultá con el equipo antes de actuar.</p>
+                    </div>
+
+                    <details class="guiaTema" open>
+                        <summary><span class="guiaNum">1</span>Primeros pasos</summary>
+                        <ol class="guiaPasos">
+                            <li>Un administrador te da el rol de moderador.</li>
+                            <li>En <b>Mi llave</b> creá tu llave: se descarga un archivo <code>.medmarkey</code> protegido con una contraseña que elegís vos. Guardalo bien: si lo perdés no se recupera.</li>
+                            <li>Mandale a un administrador la <b>huella</b> que aparece en pantalla por otro medio (en persona o por mensaje). Cuando la compare y la apruebe, tu llave queda activa.</li>
+                            <li>Tocá <b>Desbloquear</b> y elegí el archivo con su contraseña. Ese dispositivo queda <b>autorizado</b>: las próximas veces se desbloquea solo, sin el archivo.</li>
+                            <li>Para el celular: iniciá sesión con tu cuenta en el celular y, desde el dispositivo ya autorizado, abrí <b>Mi llave → Mostrar código QR</b> y escanealo.</li>
+                        </ol>
+                        <button type="button" class="guiaIr" data-ir-mod="llave">Ir a Mi llave →</button>
+                    </details>
+
+                    <details class="guiaTema">
+                        <summary><span class="guiaNum">2</span>Denuncias</summary>
+                        <p>Acá llegan las publicaciones, respuestas, materiales y avisos de Compra venta que alguien denunció. Ves el contenido, el motivo y el <b>autor real</b> (aunque haya publicado con seudónimo).</p>
+                        <ul>
+                            <li><b>Descartar</b>: la denuncia no corresponde. El contenido queda como está.</li>
+                            <li><b>Eliminar / Quitar</b>: rompe las normas. Va a la papelera y al autor le llega un aviso.</li>
+                        </ul>
+                        <p class="guiaNota">La identidad del autor real es <b>confidencial</b>: no la compartas ni la uses fuera de la moderación.</p>
+                        <button type="button" class="guiaIr" data-ir-mod="denuncias">Ir a Denuncias →</button>
+                    </details>
+
+                    <details class="guiaTema">
+                        <summary><span class="guiaNum">3</span>Quitar algo desde cualquier parte del sitio</summary>
+                        <p>No hace falta esperar una denuncia. Con la moderación desbloqueada, vas a ver <b>«Quitar (moderación)»</b> en:</p>
+                        <ul>
+                            <li>publicaciones y respuestas del <b>Foro</b>;</li>
+                            <li>el <b>Material</b> publicado;</li>
+                            <li>los avisos de <b>Compra venta</b>.</li>
+                        </ul>
+                        <p>Te pide un <b>motivo</b> (opcional, pero recomendado): le llega a quien lo publicó. Escribilo con respeto y claridad, por ejemplo «Tenía datos que permitían identificar a un paciente».</p>
+                        <p>En el <b>ranking de los juegos</b> podés <b>Esconder</b> un puntaje sospechoso (se puede revertir) o <b>Anular</b>lo (se borra y no se puede deshacer). Ante la duda, escondé.</p>
+                    </details>
+
+                    <details class="guiaTema">
+                        <summary><span class="guiaNum">4</span>Aportes de material</summary>
+                        <p>El material que manda la comunidad no se publica hasta que alguien lo revisa. Antes de aprobar, <b>abrí el enlace</b> y fijate que:</p>
+                        <ul class="guiaCheck">
+                            <li>abra y esté compartido como público;</li>
+                            <li>sea material de estudio de la carrera;</li>
+                            <li><b>no tenga datos ni fotos de pacientes</b>;</li>
+                            <li>no sea un libro con derechos, un resumen pago de otra persona ni un examen que la cátedra no publicó.</li>
+                        </ul>
+                        <p>Podés corregir el título, la materia y el tipo antes de <b>Aprobar y publicar</b>. Si no cumple, <b>Rechazar</b>. Las sugerencias sin archivo se marcan como tenidas en cuenta o se descartan.</p>
+                        <p>En <b>Material</b> también podés publicar algo directamente, sin pasar por la revisión.</p>
+                        <button type="button" class="guiaIr" data-ir-mod="aportes">Ir a Aportes →</button>
+                    </details>
+
+                    <details class="guiaTema">
+                        <summary><span class="guiaNum">5</span>Papelera: nada se borra en el momento</summary>
+                        <p>Todo lo que quita la moderación queda <b>7 días en la papelera</b>, oculto para todos. Si te equivocaste, o el autor reclama con razón, tocá <b>Restaurar</b>: vuelve a verse y se le avisa a quien lo publicó. Pasados los 7 días se borra solo.</p>
+                        <p class="guiaNota">Excepción: anular un puntaje del ranking se borra en el momento.</p>
+                        <button type="button" class="guiaIr" data-ir-mod="papelera">Ir a la Papelera →</button>
+                    </details>
+
+                    <details class="guiaTema">
+                        <summary><span class="guiaNum">6</span>¿Qué se quita y qué no?</summary>
+                        <div class="guiaCriterios">
+                            <div class="guiaSi">
+                                <b>Se quita</b>
+                                <ul>
+                                    <li>Datos, fotos o casos que permitan identificar a un paciente.</li>
+                                    <li>Insultos, acoso, amenazas o burlas dirigidas a una persona.</li>
+                                    <li>Discriminación de cualquier tipo.</li>
+                                    <li>Datos personales de otras personas sin permiso (teléfonos, capturas de chats, fotos).</li>
+                                    <li>Contenido sexual, o que promueva autolesiones o trastornos alimentarios.</li>
+                                    <li>Material con derechos de autor sin permiso o respuestas de exámenes en curso.</li>
+                                    <li>Spam, enlaces engañosos y publicidad en el foro.</li>
+                                    <li>En Compra venta: negocios o comercios (solo se permite lo personal de estudiantes: resúmenes propios, clases, equipo usado, servicios relacionados).</li>
+                                </ul>
+                            </div>
+                            <div class="guiaNo">
+                                <b>No se quita</b>
+                                <ul>
+                                    <li>Críticas respetuosas a una cátedra, a la facultad o a MedMar.</li>
+                                    <li>Opiniones con las que no estás de acuerdo.</li>
+                                    <li>Errores honestos: mejor responder corrigiendo.</li>
+                                    <li>Preguntas repetidas o fuera de tema (se pueden orientar con una respuesta).</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p class="guiaNota"><b>Buenas prácticas:</b> no moderes publicaciones tuyas ni conflictos en los que estés involucrado; si no estás seguro, preguntá al equipo antes. Ante un riesgo para alguien (amenazas, autolesiones), quitalo y avisá a un administrador enseguida.</p>
+                    </details>
+
+                    <details class="guiaTema">
+                        <summary><span class="guiaNum">7</span>Seguridad de tu cuenta de moderación</summary>
+                        <ul>
+                            <li>No compartas tu archivo de llave ni su contraseña con nadie, tampoco con otros moderadores.</li>
+                            <li>No autorices computadoras compartidas (biblioteca, sala de informática).</li>
+                            <li>Si perdés el celular o la compu, entrá a <b>Mi llave</b> desde otro dispositivo y <b>revocá</b> ese dispositivo.</li>
+                            <li>En una computadora que ya no vas a usar, tocá <b>Olvidar este dispositivo</b>.</li>
+                            <li>Cada acción queda registrada con quién la hizo y desde qué llave.</li>
+                        </ul>
+                        <p class="guiaNota">Aunque alguien robe la contraseña de tu cuenta, no puede moderar desde otro dispositivo sin tu archivo.</p>
+                    </details>
+
+                    <details class="guiaTema">
+                        <summary><span class="guiaNum">8</span>Tu período y cómo dejar de moderar</summary>
+                        <p>La moderación dura un período (por ejemplo, hasta las elecciones del centro de estudiantes). Te avisamos <b>14 días antes</b> de que venza; para seguir, un administrador te tiene que renovar. Si vence, perdés el rol solo.</p>
+                        <p>Si querés dejarlo antes, en <b>Mi llave</b> está <b>Dejar de moderar</b>: es inmediato y no hace falta esperar a nadie.</p>
+                        <button type="button" class="guiaIr" data-ir-mod="llave">Ir a Mi llave →</button>
+                    </details>
+
+                    <details class="guiaTema guiaAdmin" hidden>
+                        <summary><span class="guiaNum">★</span>Solo administradores</summary>
+                        <ul>
+                            <li><b>Sumar a alguien</b>: en <b>Equipo</b> dale el rol con su email y elegí el período. Esa persona crea su llave y vos la aprobás.</li>
+                            <li><b>Aprobar llaves</b>: pedile la huella por otro medio y comparala completa antes de tocar <b>Aprobar</b>.</li>
+                            <li><b>Períodos</b>: armá grupos (por ejemplo «Centro de estudiantes 2026») con su fecha de vencimiento, o poné una fecha individual. Cambiar la fecha de un grupo renueva a todos sus integrantes: antes, sacá a quien ya no sigue.</li>
+                            <li><b>Noticias</b>: le llegan a todas las cuentas. Usalas solo para novedades importantes.</li>
+                            <li><b>Registro</b>: muestra todas las acciones de moderación de los últimos 180 días.</li>
+                        </ul>
+                        <p class="guiaNota">Aprobar llaves y dar o quitar roles piden el <b>archivo de llave</b> aunque el dispositivo esté autorizado.</p>
+                        <button type="button" class="guiaIr" data-ir-mod="equipo">Ir a Equipo →</button>
+                    </details>
                 </section>
 
                 <section class="modPanel" role="tabpanel" data-panel="registro" aria-label="Registro de moderación" hidden>
@@ -1292,7 +1419,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261123s"></script>
+    <script src="/js/app.js?v=20261124a"></script>
 
     <!-- CAPTCHA anti-bots (Cloudflare Turnstile) para login, registro y recuperación. Sin SRI: Cloudflare lo actualiza
          solo y su documentación pide no fijarlo. Se renderiza recién cuando el formulario se usa. -->

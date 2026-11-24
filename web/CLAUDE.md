@@ -50,6 +50,8 @@ Para ubicarte: `Grep "// ====" web/js/app.js` y leé solo el rango que necesitá
   `cancelarBaja`. La borra la función `maintenance`.
 - **Moderación en el lugar**: foro, respuestas, material y Compra venta muestran «Quitar (moderación)» a moderadores; siempre
   piden un motivo opcional (`pedirMotivoModeracion`) que le llega al autor como notificación `moderacion`.
+- **Guía de moderación**: pestaña «Guía» del panel (`.guiaMod` en `index.html`, texto estático). Se ve aunque la moderación esté
+  bloqueada; la parte `.guiaAdmin` solo para admins; botones `[data-ir-mod]` llevan a cada pestaña. Si cambia cómo se modera, actualizala.
 - **Encuestas del foro** (sección ENCUESTAS DEL FORO): `crearHilo` con `encuesta`, `verHilo` devuelve `hilo.encuesta`, `votarEncuesta`.
 - `index.html` tiene una **Content Security Policy** en `<meta>`: un CDN, embed o dominio nuevo hay que sumarlo ahí o no carga.
 - **Cloudflare** está delante de GitHub Pages (proxy): agrega HSTS, `X-Frame-Options`, `frame-ancestors`, `nosniff` y

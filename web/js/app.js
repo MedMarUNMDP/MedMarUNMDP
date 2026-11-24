@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-selectores"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-24-guia-moderacion"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -5653,7 +5653,7 @@ async function cargarBootstrap() {
         function actualizarAccesosModeracion() {
             const visible = !!(esModeradorActual || esAdminActual)
             document.querySelectorAll(".soloModeracion").forEach(function (el) { el.hidden = !visible })
-            document.querySelectorAll(".modPestania.soloAdmin").forEach(function (el) { el.hidden = !esAdminActual })
+            document.querySelectorAll(".modPestania.soloAdmin, .guiaAdmin").forEach(function (el) { el.hidden = !esAdminActual })
         }
 
         function actualizarEstadoModeracion() {
@@ -5672,7 +5672,8 @@ async function cargarBootstrap() {
             const btnBloquear = document.getElementById("btnBloquearMod")
             btnBloquear.hidden = !abierta && !modDispositivo
             btnBloquear.textContent = modDispositivo ? "Olvidar este dispositivo" : "Bloquear"
-            const enLlave = modPestania === "llave"
+            // «Mi llave» y la guía se ven aunque la moderación esté bloqueada.
+            const enLlave = modPestania === "llave" || modPestania === "guia"
             document.getElementById("panelModBloqueado").hidden = abierta || enLlave
             document.querySelectorAll(".modPanel").forEach(function (panel) {
                 panel.hidden = panel.dataset.panel !== modPestania || (!abierta && !enLlave)
@@ -5707,6 +5708,13 @@ async function cargarBootstrap() {
         document.querySelectorAll(".modPestania").forEach(function (t) {
             t.addEventListener("click", function () { elegirPestaniaModeracion(t.dataset.panel) })
         })
+        // Botones «Ir a …» de la guía de moderación.
+        document.querySelector(".guiaMod").addEventListener("click", function (e) {
+            const b = e.target.closest("[data-ir-mod]")
+            if (!b) return
+            elegirPestaniaModeracion(b.dataset.irMod)
+            document.getElementById("vistaModeracion").scrollIntoView({ block: "start", behavior: "smooth" })
+        })
         document.getElementById("btnDesbloquearMod").addEventListener("click", async function () {
             if (await asegurarSesionModeracion()) cargarPestaniaModeracion()
         })
@@ -5723,6 +5731,7 @@ async function cargarBootstrap() {
         })
         document.getElementById("panelModBloqueado").addEventListener("click", async function (e) {
             if (e.target.closest("[data-ir-llave]")) { elegirPestaniaModeracion("llave"); return }
+            if (e.target.closest("[data-ir-guia]")) { elegirPestaniaModeracion("guia"); return }
             if (e.target.closest("[data-desbloquear]") && await asegurarSesionModeracion()) cargarPestaniaModeracion()
         })
         setInterval(function () { if (seccionActual === "moderacion") actualizarEstadoModeracion() }, 30000)
