@@ -328,7 +328,7 @@
   const FICHAS_DATA = globalThis.InmuneFichas || null;
   const MODOS_API = globalThis.InmuneModos || null;
   const PREGUNTAS_DATA = globalThis.InmunePreguntasNucleos || null;
-  const GAME_VERSION = '3.11.1';
+  const GAME_VERSION = '3.11.2';
   // Arte propio de los jefes de núcleo (assets/boss_*.webp, recortados de docs/arte/jefes-nucleo-3x3.png).
   const BOSS_ART = {
     'escherichia-coli':'boss_stec', 'mycobacterium-tuberculosis':'boss_granuloma', 'neisseria-meningitidis':'boss_meningococo',
@@ -2736,12 +2736,13 @@
     setTimeout(refreshFullscreenRecovery,220);
   }
 
-  // ---- Reportes anónimos (bugs, sugerencias, correcciones) → planilla de Drive vía Apps Script ----
-  // Misma URL que web/js/app.js (ver tools/reportes-apps-script/README.md). Vacía = no se muestran los botones.
-  const REPORTES_URL='';
+  // ---- Reportes anónimos (bugs, sugerencias, correcciones) → acción enviarReporte de la API de MedMar ----
+  // Llegan a la pestaña «Reportes» del panel de moderación (no se guarda quién lo mandó). Hace falta la sesión de MedMar.
   const reportLayer=$('reportLayer');
   let lastRunInfo='';
-  if(REPORTES_URL)document.querySelectorAll('.report-open').forEach(b=>{b.hidden=false;b.addEventListener('click',()=>{$('reportStatus').textContent='';reportLayer.classList.add('open');setTimeout(()=>$('reportMessage').focus(),60);});});
+  document.querySelectorAll('.report-open').forEach(b=>{b.hidden=false;b.addEventListener('click',()=>{
+    $('reportStatus').textContent=storedSession()?'':'Para mandar un reporte, iniciá sesión en medmar.com.ar (en este mismo navegador).';
+    reportLayer.classList.add('open');setTimeout(()=>$('reportMessage').focus(),60);});});
   $('reportClose').addEventListener('click',()=>reportLayer.classList.remove('open'));
   window.addEventListener('is:run-start',e=>{const d=e.detail||{};lastRunInfo=`${d.modo||d.infection||''} · ${d.map||''} · ${d.infectionDifficulty||''} · ${d.evolutionDifficulty||''}${d.debug?' · laboratorio':''}`;});
   $('reportForm').addEventListener('submit',async ev=>{
@@ -2752,12 +2753,14 @@
     try{const r=JSON.parse(localStorage.getItem('medmar:reportes')||'null');if(r&&r.dia===hoy)reg=r;}catch(_){}
     if(reg.cantidad>=10){status.textContent='Por hoy ya mandaste varios reportes. ¡Gracias!';return;}
     if(Date.now()-reg.ultimo<30000){status.textContent='Esperá unos segundos antes de mandar otro.';return;}
+    if(!storedSession()){status.textContent='Para mandar un reporte, iniciá sesión en medmar.com.ar (en este mismo navegador).';return;}
     const button=$('reportForm').querySelector('button[type="submit"]');button.disabled=true;status.textContent='Enviando…';
     const datos={tipo:$('reportType').value,seccion:'Juego · Inmune Survivors',mensaje,website:$('reportWebsite').value,origen:'juego',
       version:document.querySelector('script[src*="game.js"]')?.src.split('build=')[1]||'',detalle:lastRunInfo,
       dispositivo:`${mobileViewport()?'táctil':'mouse'} · ${window.innerWidth}×${window.innerHeight} · ${navigator.userAgent.slice(0,110)}`};
     try{
-      await fetch(REPORTES_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(datos)});
+      const r=await medmarApi('enviarReporte',datos);
+      if(!r.ok){status.textContent=r.error==='sesion_invalida'?'Tu sesión de MedMar venció: volvé a iniciar sesión en medmar.com.ar.':r.error==='rate_limit'?'Mandaste varios seguidos. Probá de nuevo en un rato.':'No se pudo enviar. Probá de nuevo en un rato.';return;}
       reg.cantidad++;reg.ultimo=Date.now();try{localStorage.setItem('medmar:reportes',JSON.stringify(reg));}catch(_){}
       $('reportForm').reset();status.textContent='¡Gracias! Lo recibimos.';
     }catch(_){status.textContent='No se pudo enviar. Revisá la conexión y probá de nuevo.';}

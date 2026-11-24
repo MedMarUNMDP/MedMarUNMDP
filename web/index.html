@@ -49,7 +49,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261124b">
+    <link rel="stylesheet" href="/css/styles.css?v=20261124c">
 </head>
 
 <body>
@@ -324,7 +324,7 @@
                         <span class="descInicio">Pseudónimo, foto y más</span>
                     </button>
 
-                    <button type="button" class="tarjetaInicio tarjetaReportes" data-vista="reportes" id="tarjetaReportes" hidden>
+                    <button type="button" class="tarjetaInicio tarjetaReportes" data-vista="reportes" id="tarjetaReportes">
                         <span class="iconoInicio">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 5h14v10H9l-4 4V5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 8v3.2M12 13.3v.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                         </span>
@@ -564,6 +564,7 @@
                 <div class="modPestanias" role="tablist" aria-label="Secciones de moderación">
                     <button type="button" role="tab" class="modPestania" data-panel="denuncias" aria-selected="true">Denuncias</button>
                     <button type="button" role="tab" class="modPestania" data-panel="aportes" aria-selected="false">Aportes</button>
+                    <button type="button" role="tab" class="modPestania" data-panel="reportes" aria-selected="false">Reportes</button>
                     <button type="button" role="tab" class="modPestania" data-panel="material" aria-selected="false">Material</button>
                     <button type="button" role="tab" class="modPestania soloAdmin" data-panel="equipo" aria-selected="false" hidden>Equipo</button>
                     <button type="button" role="tab" class="modPestania" data-panel="papelera" aria-selected="false">Papelera</button>
@@ -588,6 +589,18 @@
                 <section class="modPanel" role="tabpanel" data-panel="aportes" aria-label="Aportes de material" hidden>
                     <p class="ayudaPerfil">Revisá el enlace antes de aprobar: que abra, que sea material de estudio y que no tenga datos de pacientes. Podés corregir el título, la materia y el tipo.</p>
                     <div id="listaAportes"></div>
+                </section>
+
+                <section class="modPanel" role="tabpanel" data-panel="reportes" aria-label="Reportes y sugerencias" hidden>
+                    <p class="ayudaPerfil">Errores, ideas y correcciones que manda la comunidad desde la web y el juego. Son anónimos. Marcá en qué estado está cada uno, así el resto del equipo sabe qué falta.</p>
+                    <label for="filtroReportes">Mostrar</label>
+                    <select id="filtroReportes">
+                        <option value="abiertos">Nuevos y en revisión</option>
+                        <option value="resuelto">Resueltos</option>
+                        <option value="descartado">Descartados</option>
+                        <option value="todos">Todos</option>
+                    </select>
+                    <div id="listaReportes"></div>
                 </section>
 
                 <section class="modPanel" role="tabpanel" data-panel="material" aria-label="Agregar material" hidden>
@@ -738,14 +751,27 @@
                     </details>
 
                     <details class="guiaTema">
-                        <summary><span class="guiaNum">5</span>Papelera: nada se borra en el momento</summary>
+                        <summary><span class="guiaNum">5</span>Reportes, sugerencias y avisos por mail</summary>
+                        <p>En <b>Reportes</b> llegan los errores, ideas y correcciones que la comunidad manda desde «Sugerencias y reportes» (en Inicio) y desde el juego. Son anónimos.</p>
+                        <ul>
+                            <li><b>En revisión</b>: alguien del equipo lo está viendo.</li>
+                            <li><b>Resuelto</b>: se arregló o se tuvo en cuenta.</li>
+                            <li><b>Descartar</b>: no corresponde o está repetido.</li>
+                            <li><b>Nota</b>: dejá un comentario para el resto del equipo (por ejemplo, «lo arreglo el finde»).</li>
+                        </ul>
+                        <p>Cuando llegan denuncias, aportes o reportes nuevos te avisamos en la campana y <b>por mail</b> (como mucho un mail por tema cada 4 horas). El enlace del mail abre directo la pestaña. Podés apagar los mails en <b>Mi llave</b>.</p>
+                        <button type="button" class="guiaIr" data-ir-mod="reportes">Ir a Reportes →</button>
+                    </details>
+
+                    <details class="guiaTema">
+                        <summary><span class="guiaNum">6</span>Papelera: nada se borra en el momento</summary>
                         <p>Todo lo que quita la moderación queda <b>7 días en la papelera</b>, oculto para todos. Si te equivocaste, o el autor reclama con razón, tocá <b>Restaurar</b>: vuelve a verse y se le avisa a quien lo publicó. Pasados los 7 días se borra solo.</p>
                         <p class="guiaNota">Excepción: anular un puntaje del ranking se borra en el momento.</p>
                         <button type="button" class="guiaIr" data-ir-mod="papelera">Ir a la Papelera →</button>
                     </details>
 
                     <details class="guiaTema">
-                        <summary><span class="guiaNum">6</span>¿Qué se quita y qué no?</summary>
+                        <summary><span class="guiaNum">7</span>¿Qué se quita y qué no?</summary>
                         <div class="guiaCriterios">
                             <div class="guiaSi">
                                 <b>Se quita</b>
@@ -774,7 +800,7 @@
                     </details>
 
                     <details class="guiaTema">
-                        <summary><span class="guiaNum">7</span>Seguridad de tu cuenta de moderación</summary>
+                        <summary><span class="guiaNum">8</span>Seguridad de tu cuenta de moderación</summary>
                         <ul>
                             <li>No compartas tu archivo de llave ni su contraseña con nadie, tampoco con otros moderadores.</li>
                             <li>No autorices computadoras compartidas (biblioteca, sala de informática).</li>
@@ -786,7 +812,7 @@
                     </details>
 
                     <details class="guiaTema">
-                        <summary><span class="guiaNum">8</span>Tu período y cómo dejar de moderar</summary>
+                        <summary><span class="guiaNum">9</span>Tu período y cómo dejar de moderar</summary>
                         <p>La moderación dura un período (por ejemplo, hasta las elecciones del centro de estudiantes). Te avisamos <b>14 días antes</b> de que venza; para seguir, un administrador te tiene que renovar. Si vence, perdés el rol solo.</p>
                         <p>Si querés dejarlo antes, en <b>Mi llave</b> está <b>Dejar de moderar</b>: es inmediato y no hace falta esperar a nadie.</p>
                         <button type="button" class="guiaIr" data-ir-mod="llave">Ir a Mi llave →</button>
@@ -813,6 +839,7 @@
 
                 <section class="modPanel" role="tabpanel" data-panel="llave" aria-label="Mi llave de moderación" hidden>
                     <p id="estadoRolPropio" class="aviso" hidden></p>
+                    <label class="labelCheckbox prefMailsMod"><input type="checkbox" id="chkMailsModeracion" checked> <span><b>Recibir avisos por mail</b>: denuncias, aportes y reportes nuevos, como mucho uno por tema cada 4 horas.</span></label>
                     <section id="seccionQR" class="seccionQR">
                         <h3>Autorizar un celular con QR</h3>
                         <p class="ayudaPerfil">Desde un dispositivo ya autorizado, generá un código y escanealo con la cámara del celular, con tu misma cuenta iniciada ahí. El celular queda autorizado sin usar el archivo. El código dura 3 minutos y sirve una sola vez.</p>
@@ -1099,7 +1126,7 @@
             <div id="vistaReportes" style="display:none">
                 <h2 class="seccion-titulo" style="margin-top:0">Sugerencias y reportes</h2>
                 <p class="ayudaPerfil">Contanos un error, una idea o algo que haya que corregir (también en el contenido de los juegos).
-                    <b>Es anónimo</b>: no se envía tu email ni tu usuario, solo lo que escribas y datos técnicos de la página.</p>
+                    <b>Es anónimo</b>: no se guarda quién lo mandó, solo lo que escribas y datos técnicos de la página (versión y tipo de dispositivo). Lo lee el equipo de moderación.</p>
                 <form id="formReporte" novalidate>
                     <label for="reporteTipo">Tipo</label>
                     <select id="reporteTipo">
@@ -1114,7 +1141,10 @@
                         <option>Intercambio de comisiones</option>
                         <option>Chat</option>
                         <option>Foro</option>
+                        <option>Material</option>
+                        <option>Compra venta</option>
                         <option>Juegos</option>
+                        <option>Notificaciones</option>
                         <option>Perfil</option>
                         <option>Inicio de sesión</option>
                     </select>
@@ -1439,7 +1469,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261124b"></script>
+    <script src="/js/app.js?v=20261124c"></script>
 
     <!-- CAPTCHA anti-bots (Cloudflare Turnstile) para login, registro y recuperación. Sin SRI: Cloudflare lo actualiza
          solo y su documentación pide no fijarlo. Se renderiza recién cuando el formulario se usa. -->

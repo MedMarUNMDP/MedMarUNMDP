@@ -2,6 +2,12 @@
 
 Formato: la versión más nueva arriba. Al publicar una versión, agregá una sección nueva acá y subí `?build=` en index.html (ver CLAUDE.md del juego). El historial previo a v3.1 está en `README.txt`.
 
+## v3.11.2
+
+**Reportes**
+- «Reportar o sugerir» ya funciona: el reporte llega al panel de moderación de MedMar (anónimo, no se guarda
+  quién lo mandó). Hace falta tener la sesión de MedMar iniciada en el mismo navegador.
+
 ## v3.11.1
 
 **Ranking**

@@ -812,6 +812,16 @@
         .btnPeligroLleno:hover { background: var(--red-700) !important; }
         #errorModalTexto { color: var(--red-600); font-size: .88rem; margin: 6px 0 0; }
 
+        /* ---------- REPORTES (moderación) ---------- */
+        .mensajeReporte { margin: 8px 0 4px; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
+        .chipEstadoReporte { font-size: .74rem; font-weight: 600; padding: 2px 8px; border-radius: var(--r-pill); background: var(--surface-sunken); color: var(--ink-soft); }
+        .chipEstadoReporte.estado-nuevo { background: var(--red-soft); color: var(--red-700); }
+        .chipEstadoReporte.estado-revisando { background: var(--gold-soft); color: var(--ink); }
+        .chipEstadoReporte.estado-resuelto { background: var(--brand-soft); color: var(--brand); }
+        .datosTecnicos summary { cursor: pointer; font-size: .84rem; color: var(--ink-soft); margin-top: 4px; }
+        #filtroReportes + .selectPersonalizado, #filtroReportes { margin-bottom: 12px; }
+        .prefMailsMod { margin: 0 0 16px; }
+
         /* ---------- GUÍA DE MODERACIÓN ---------- */
         .guiaIntro { margin-bottom: 14px; }
         .guiaIntro h3 { margin-top: 0; }

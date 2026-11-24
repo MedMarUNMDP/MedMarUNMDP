@@ -61,8 +61,8 @@ Los bugs JUEGO-01 a 14 se corrigieron en v3.5. Queda pendiente:
 - [ ] Rasgos de comportamiento (cápsula, toxina, intracelular…), uno por vez con tests.
 
 **Reportes anónimos**
-- [ ] Instalar el Apps Script (`tools/reportes-apps-script/README.md`) y pegar la URL en `REPORTES_URL`
-      (`web/js/app.js` y `games/inmune-survivors/game.js`). Hasta entonces la opción no se muestra.
+- [x] Los reportes de la web y del juego van a la API (`enviarReporte`) y se ven en Moderación → Reportes (2026-11-24).
+- [ ] Cargar las credenciales de Gmail (`tools/gmail/README.md`) para que salgan los mails (al equipo y de intercambios).
 
 **Integración**
 - [x] Sección Juegos con acceso a Inmune Survivors y ranking por modo (búsqueda por pseudónimo, tu posición).

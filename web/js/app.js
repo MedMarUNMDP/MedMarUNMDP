@@ -1,14 +1,11 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-24-pedir-texto"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-24-reportes"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
         const SUPABASE_URL = "https://ekfwdrsehhmrqxxlefyx.supabase.co"
         const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ZZQREdrsOfFn8vIOaO3S0w_S7NKP9KS"
         const SUPABASE_FUNCTION_NAME = "api"
-        // URL de la aplicación web de Apps Script que guarda los reportes anónimos en una planilla de Drive
-        // (ver tools/reportes-apps-script/README.md). Vacía = la sección de reportes no se muestra.
-        const REPORTES_URL = ""
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
             auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
         })
@@ -1154,6 +1151,7 @@ async function cargarBootstrap() {
             esModeradorActual = !!(data.rol && data.rol.esModerador)
             esAdminActual = !!(data.rol && data.rol.esAdmin)
             rolPropio = data.rol || null
+            document.getElementById("chkMailsModeracion").checked = !(data.rol && data.rol.mailsModeracion === false)
             const conPassword = cuentaTienePassword()
             ayudaSeguridadCuenta.textContent = conPassword
                 ? 'Para cambiar tu contraseña, confirmá primero la actual.'
@@ -3949,6 +3947,11 @@ async function cargarBootstrap() {
             }
 
             await cargarBootstrap()
+            if (moderacionPedida) {
+                const pestania = moderacionPedida
+                moderacionPedida = null
+                if (esModeradorActual || esAdminActual) { modPestania = pestania; mostrarSeccion("moderacion", "up") }
+            }
             // Celular que llegó escaneando un QR de autorización (/?emparejar=…): se completa con la sesión y el rol listos.
             completarEmparejamientoPendiente()
             iniciarRealtimeUsuario()
@@ -4857,15 +4860,14 @@ async function cargarBootstrap() {
         })
 
         // ==================== SUGERENCIAS Y REPORTES ====================
-        // Anónimos: no se manda email, usuario ni token, solo lo que escribe la persona y contexto técnico.
-        // Apps Script no responde a preflight CORS: se manda como text/plain con mode "no-cors" (respuesta opaca).
+        // Van a la API (enviarReporte) y se ven en Moderación → Reportes. Anónimos: la API no guarda quién lo mandó,
+        // solo lo que escribe la persona y contexto técnico.
 
         const formReporte = document.getElementById("formReporte")
         const msgReporte = document.getElementById("msgReporte")
         const LIMITE_REPORTES_DIA = 10
         const ESPERA_ENTRE_REPORTES_MS = 30000
 
-        if (REPORTES_URL) document.getElementById("tarjetaReportes").hidden = false
 
         function registroReportes() {
             const hoy = new Date().toISOString().slice(0, 10)
@@ -4897,13 +4899,14 @@ async function cargarBootstrap() {
                 dispositivo: (window.matchMedia("(pointer: coarse)").matches ? "táctil" : "mouse") + " · " + window.innerWidth + "×" + window.innerHeight + " · " + navigator.userAgent.slice(0, 110)
             }
             try {
-                await fetch(REPORTES_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(datos) })
+                const r = await llamar("enviarReporte", datos)
+                if (!r.ok) { msgReporte.innerText = mensajeError(r.error); return }
                 registro.cantidad += 1
                 registro.ultimo = Date.now()
                 try { localStorage.setItem("medmar:reportes", JSON.stringify(registro)) } catch (_) {}
                 formReporte.reset()
                 msgReporte.innerText = ""
-                mostrarAviso("¡Gracias! Lo recibimos. Lo vamos a leer para mejorar MedMar.")
+                mostrarAviso("¡Gracias! Le llegó al equipo de moderación.")
             } catch (err) {
                 msgReporte.innerText = mensajeError("conexion")
             } finally {
@@ -5374,7 +5377,7 @@ async function cargarBootstrap() {
                 mostrarSeccion("material", "up")
             } else if (n.tipo === "denuncia") {
                 mostrarSeccion("moderacion", "up")
-                elegirPestaniaModeracion("denuncias")
+                elegirPestaniaModeracion(n.ref_id === REF_AVISO_REPORTES ? "reportes" : "denuncias")
             } else if ((n.tipo === "noticia" || n.tipo === "recordatorio") && n.link) {
                 const vistaInterna = /^\/\?vista=(juegos|material|moderacion|foro|intercambios|clasificados|configuracion)$/.exec(n.link)
                 if (vistaInterna) mostrarSeccion(vistaInterna[1], "up")
@@ -5780,6 +5783,7 @@ async function cargarBootstrap() {
             else if (modPestania === "equipo") { cargarLlaves(); cargarModeradores() }
             else if (modPestania === "registro") cargarRegistro()
             else if (modPestania === "papelera") cargarPapelera()
+            else if (modPestania === "reportes") cargarReportes()
         }
 
         async function entrarAModeracion() {
@@ -5995,6 +5999,72 @@ async function cargarBootstrap() {
 
         // ---- Papelera (7 días para restaurar lo que quitó la moderación) ----
         const TIPOS_PAPELERA = { hilo: "Publicación del foro", respuesta: "Respuesta del foro", material: "Material", clasificado: "Aviso de Compra venta" }
+        // ---------- Reportes (bugs, sugerencias, correcciones) ----------
+        const ESTADOS_REPORTE_TEXTO = { nuevo: "Nuevo", revisando: "En revisión", resuelto: "Resuelto", descartado: "Descartado" }
+        async function cargarReportes() {
+            const cont = document.getElementById("listaReportes")
+            cont.innerHTML = esqueletoTarjetas(1)
+            const r = await llamarModeracion("listarReportes", { estado: document.getElementById("filtroReportes").value })
+            if (!r.ok) { cont.innerHTML = "<p class='vacio'>" + escapeHtml(mensajeError(r.error)) + "</p>"; return }
+            const items = r.reportes || []
+            cont.innerHTML = items.length ? items.map(function (i) {
+                const abierto = i.estado === "nuevo" || i.estado === "revisando"
+                const boton = function (estado, texto, sec) {
+                    return "<button type='button' class='novedadAccion" + (sec ? " secundaria" : "") + "' data-estado-reporte='" + estado + "'>" + texto + "</button>"
+                }
+                const tecnico = [i.version && "Versión: " + i.version, i.detalle && "Partida: " + i.detalle, i.dispositivo && "Dispositivo: " + i.dispositivo].filter(Boolean)
+                return "<article class='aporteItem reporteItem' data-id='" + escapeAttr(i.id) + "' data-estado='" + escapeAttr(i.estado) + "' data-nota='" + escapeAttr(i.nota) + "'>" +
+                    "<div class='tarjetaMaterialMeta'><span class='chipTipo'>" + escapeHtml(i.tipoTexto) + "</span>" +
+                    "<span class='chipEstadoReporte estado-" + escapeAttr(i.estado) + "'>" + escapeHtml(ESTADOS_REPORTE_TEXTO[i.estado] || i.estado) + "</span>" +
+                    "<span class='materiaMaterial'>" + escapeHtml(i.seccion) + " · " + (i.origen === "juego" ? "desde el juego" : "desde la web") + " · " + escapeHtml(tiempoRelativo(i.fecha)) + "</span></div>" +
+                    "<p class='mensajeReporte'>" + escapeHtml(i.mensaje) + "</p>" +
+                    (i.nota ? "<p class='dominioAporte'><b>Nota del equipo:</b> " + escapeHtml(i.nota) + (i.revisadoPor ? " (" + escapeHtml(i.revisadoPor) + ")" : "") + "</p>"
+                        : i.revisadoPor ? "<p class='dominioAporte'>Último cambio: " + escapeHtml(i.revisadoPor) + "</p>" : "") +
+                    (tecnico.length ? "<details class='datosTecnicos'><summary>Datos técnicos</summary><p class='dominioAporte'>" + tecnico.map(escapeHtml).join("<br>") + "</p></details>" : "") +
+                    "<div class='accionesMaterial'>" +
+                    (abierto
+                        ? (i.estado === "nuevo" ? boton("revisando", "En revisión") : "") + boton("resuelto", "Resuelto") + boton("descartado", "Descartar", true)
+                        : boton("nuevo", "Reabrir", true)) +
+                    "<button type='button' class='novedadAccion secundaria' data-nota-reporte>" + (i.nota ? "Editar nota" : "Nota") + "</button>" +
+                    "</div></article>"
+            }).join("") : "<p class='vacio'>" + (document.getElementById("filtroReportes").value === "abiertos" ? "No hay reportes pendientes." : "No hay reportes acá.") + "</p>"
+        }
+        document.getElementById("filtroReportes").addEventListener("change", cargarReportes)
+        document.getElementById("listaReportes").addEventListener("click", async function (e) {
+            const btn = e.target.closest("[data-estado-reporte], [data-nota-reporte]")
+            if (!btn) return
+            const item = btn.closest(".reporteItem")
+            const params = { id: item.dataset.id, estado: btn.dataset.estadoReporte || item.dataset.estado }
+            if (btn.hasAttribute("data-nota-reporte")) {
+                const nota = await pedirTexto({
+                    titulo: "Nota del equipo",
+                    texto: "La ven solo moderadores y administradores. Dejala vacía para borrarla.",
+                    etiqueta: "Nota",
+                    placeholder: "Ej.: ya está arreglado en la próxima versión",
+                    boton: "Guardar",
+                    max: 400
+                })
+                if (nota === null) return
+                params.nota = nota
+            }
+            btn.disabled = true
+            const r = await llamarModeracion("gestionarReporte", params)
+            if (!r.ok) { btn.disabled = false; if (r.error !== "moderacion_bloqueada") alert(mensajeError(r.error)); return }
+            mostrarAviso(params.nota !== undefined ? "Nota guardada." : "Reporte marcado como «" + (ESTADOS_REPORTE_TEXTO[params.estado] || params.estado).toLowerCase() + "».")
+            cargarReportes()
+        })
+
+        // Mails del equipo: preferencia propia (no pide la llave).
+        document.getElementById("chkMailsModeracion").addEventListener("change", async function () {
+            const chk = this
+            chk.disabled = true
+            const r = await llamar("preferenciaMailsModeracion", { activar: chk.checked })
+            chk.disabled = false
+            if (!r.ok) { chk.checked = !chk.checked; alert(mensajeError(r.error)); return }
+            if (rolPropio) rolPropio.mailsModeracion = chk.checked
+            mostrarAviso(chk.checked ? "Vas a recibir los avisos del equipo por mail." : "Listo: ya no te mandamos mails del equipo.")
+        })
+
         async function cargarPapelera() {
             const cont = document.getElementById("listaPapelera")
             cont.innerHTML = esqueletoTarjetas(1)
@@ -6118,7 +6188,7 @@ async function cargarBootstrap() {
             abrir_sesion: "desbloqueó la moderación", firma_invalida: "intentó desbloquear con una firma inválida",
             registrar_llave: "registró una llave", aprobar_llave: "aprobó una llave", revocar_llave: "revocó una llave",
             borrar_hilo: "borró una publicación", borrar_respuesta: "borró una respuesta", resolver_denuncia: "resolvió una denuncia",
-            resolver_aporte: "resolvió un aporte", agregar_material: "agregó material", quitar_material: "quitó material",
+            resolver_aporte: "resolvió un aporte", gestionar_reporte: "actualizó un reporte", agregar_material: "agregó material", quitar_material: "quitó material",
             publicar_noticia: "publicó una noticia", asignar_moderador: "dio rol de moderador", quitar_moderador: "quitó un moderador",
             asignar_admin: "dio rol de administrador", quitar_admin: "quitó un administrador",
             quitar_puntaje: "anuló un puntaje del ranking",
@@ -6157,6 +6227,7 @@ async function cargarBootstrap() {
         const MATERIAL_FRESCURA_MS = 5 * 60 * 1000
         // Mismo ref_id que usa la API para el aviso agrupado de aportes a moderadores.
         const REF_AVISO_APORTES = "00000000-0000-4000-8000-00000a9047e5"
+        const REF_AVISO_REPORTES = "00000000-0000-4000-8000-00000e9047e5"
         let sitiosMaterial = []
 
         // Sitio admitido de un enlace (el dominio más largo que coincide), o null.
@@ -6697,6 +6768,12 @@ async function cargarBootstrap() {
 
         // Enlaces desde el juego: /?vista=juegos&ranking=<modo>. Se leen una vez y se limpian de la URL.
         const parametrosIniciales = new URLSearchParams(location.search)
+        // Enlaces de los mails al equipo: /?vista=moderacion&pestania=<denuncias|aportes|reportes>. Se abre después del
+        // bootstrap (hace falta saber el rol); si no sos del equipo, no pasa nada.
+        let moderacionPedida = parametrosIniciales.get("vista") === "moderacion"
+            ? (["denuncias", "aportes", "reportes", "papelera"].indexOf(parametrosIniciales.get("pestania")) >= 0 ? parametrosIniciales.get("pestania") : "denuncias")
+            : null
+        if (moderacionPedida) { try { history.replaceState(history.state, "", location.pathname + location.hash) } catch (_) {} }
         let vistaInicialPedida = parametrosIniciales.get("vista") === "juegos" ? "juegos" : null
         if (vistaInicialPedida) {
             const modoPedido = parametrosIniciales.get("ranking")

@@ -163,6 +163,10 @@ const RATE_LIMITS: Record<string, [number, number]> = {
   borrarGrupoModeracion: [30, 3600],
   asignarPeriodoModerador: [60, 3600],
   listarPapelera: [60, 600],
+  enviarReporte: [5, 3600],
+  listarReportes: [60, 600],
+  gestionarReporte: [120, 600],
+  preferenciaMailsModeracion: [20, 3600],
   restaurarPapelera: [60, 600],
   crearEmparejamiento: [10, 600],
   completarEmparejamiento: [10, 3600],
@@ -542,9 +546,43 @@ function sitiosMaterialPublicos() {
 // Aviso agrupado a moderadores: una sola notificación sin leer por moderador, con la cantidad acumulada.
 const REF_AVISO_APORTES = '00000000-0000-4000-8000-00000a9047e5'
 const REF_AVISO_DENUNCIAS = '00000000-0000-4000-8000-0000000de0c1'
+const REF_AVISO_REPORTES = '00000000-0000-4000-8000-00000e9047e5'
+
+// Mails al equipo (cola notificacion_queue → función maintenance → Gmail). Como mucho uno por tema cada
+// HORAS_ENTRE_MAILS_EQUIPO por persona, así una ola de denuncias no llena la casilla (ni el cupo diario de Gmail).
+const HORAS_ENTRE_MAILS_EQUIPO = 4
+const MAIL_EQUIPO: Record<string, { asunto: string, pestania: string }> = {
+  [REF_AVISO_APORTES]: { asunto: 'Hay aportes de material para revisar', pestania: 'aportes' },
+  [REF_AVISO_DENUNCIAS]: { asunto: 'Hay denuncias para revisar', pestania: 'denuncias' },
+  [REF_AVISO_REPORTES]: { asunto: 'Llegaron reportes o sugerencias', pestania: 'reportes' },
+}
+async function encolarMailEquipo(admin: SupabaseClient, userId: string, ref: string, resumen: string, ultimo: string) {
+  const conf = MAIL_EQUIPO[ref]
+  if (!conf) return
+  const tipo = 'equipo_' + conf.pestania
+  const desde = new Date(Date.now() - HORAS_ENTRE_MAILS_EQUIPO * 3600000).toISOString()
+  const { data: previo, error: pErr } = await admin.from('notificacion_queue').select('id').eq('user_id', userId).eq('tipo', tipo).gt('created_at', desde).limit(1)
+  if (pErr) { console.warn('mail_equipo', pErr.message); return }
+  if ((previo || []).length) return
+  const cuerpo = [
+    resumen + '.',
+    '',
+    'Último: ' + ultimo.replace(/\s+/g, ' ').slice(0, 300),
+    '',
+    'Revisalo en el panel de moderación:',
+    'https://medmar.com.ar/?vista=moderacion&pestania=' + conf.pestania,
+    '',
+    '—',
+    'Te llega porque sos parte del equipo de moderación de MedMar. Mientras haya novedades te escribimos como mucho',
+    'una vez cada ' + HORAS_ENTRE_MAILS_EQUIPO + ' horas por tema. Podés apagar estos mails en Moderación → Mi llave.',
+  ].join('\n')
+  const { error } = await admin.from('notificacion_queue').insert({ user_id: userId, tipo, asunto: 'MedMar · ' + conf.asunto, cuerpo })
+  if (error) console.warn('mail_equipo', error.message)
+}
+
 async function avisarModeradores(admin: SupabaseClient, tipo: 'aporte' | 'denuncia', ref: string,
   texto: (cantidad: number) => string, ultimo: string, excepto = '') {
-  const { data: equipo, error } = await admin.from('profiles').select('id,is_admin,moderador_vence_at').or('is_moderator.eq.true,is_admin.eq.true').limit(200)
+  const { data: equipo, error } = await admin.from('profiles').select('id,is_admin,moderador_vence_at,mails_moderacion').or('is_moderator.eq.true,is_admin.eq.true').limit(200)
   if (error) { console.warn('aviso_moderadores', error.message); return }
   const mods = (equipo || []).filter((m: any) => m.is_admin || moderadorVigente(m.moderador_vence_at))
   for (const m of mods) {
@@ -558,10 +596,62 @@ async function avisarModeradores(admin: SupabaseClient, tipo: 'aporte' | 'denunc
       const res = previa
         ? await admin.from('notificaciones').update(fila).eq('id', previa.id)
         : await admin.from('notificaciones').insert({ user_id: m.id, tipo, ref_id: ref, ...fila })
-      if (!res.error) break
+      if (!res.error) { if (m.mails_moderacion !== false) await encolarMailEquipo(admin, String(m.id), ref, fila.contexto, ultimo); break }
       if (pgCode(res.error) !== '23505' || intento) { console.warn('aviso_moderadores', res.error.message); break }
     }
   }
+}
+
+// ---------- Reportes (bugs, sugerencias, correcciones) ----------
+// Anónimos: no se guarda quién lo mandó. La sesión solo sirve para el rate limit.
+const TIPOS_REPORTE: Record<string, string> = { bug: 'Bug', sugerencia: 'Sugerencia', correccion: 'Corrección de contenido', otro: 'Otro' }
+const ESTADOS_REPORTE = ['nuevo', 'revisando', 'resuelto', 'descartado']
+function textoReporte(valor: unknown, max: number, multilinea = false) {
+  const limpio = String(valor || '').replace(multilinea ? /[\u0000-\u0008\u000b-\u001f\u007f]/g : /[\u0000-\u001f\u007f]/g, ' ').trim()
+  return limpio.slice(0, max)
+}
+async function enviarReporte(admin: SupabaseClient, user: User, body: any) {
+  if (String(body.website || '')) return json({ ok: true })  // campo trampa: bots
+  const crudo = String(body.tipo || '')
+  const tipo = TIPOS_REPORTE[crudo] ? crudo : (Object.keys(TIPOS_REPORTE).find((k) => TIPOS_REPORTE[k] === crudo) || '')
+  const mensaje = textoReporte(body.mensaje, 2000, true)
+  if (!tipo || mensaje.length < 10) return json({ ok: false, error: 'datos_invalidos' })
+  const fila = {
+    tipo, mensaje, seccion: textoReporte(body.seccion, 60) || 'General', origen: body.origen === 'juego' ? 'juego' : 'web',
+    version: textoReporte(body.version, 80) || null, detalle: textoReporte(body.detalle, 200) || null, dispositivo: textoReporte(body.dispositivo, 200) || null,
+  }
+  const { error } = await admin.from('reportes').insert(fila)
+  if (error) throw error
+  await avisarModeradores(admin, 'denuncia', REF_AVISO_REPORTES,
+    (n) => n === 1 ? 'Llegó un reporte o sugerencia' : 'Llegaron ' + n + ' reportes o sugerencias',
+    TIPOS_REPORTE[tipo] + ' · ' + fila.seccion + ' · ' + mensaje.slice(0, 200), user.id)
+  return json({ ok: true })
+}
+async function listarReportes(admin: SupabaseClient, body: any) {
+  const filtro = String(body.estado || 'abiertos')
+  let q = admin.from('reportes').select('id,tipo,seccion,mensaje,origen,version,detalle,dispositivo,estado,nota,revisado_por,created_at,updated_at')
+    .order('created_at', { ascending: false }).limit(150)
+  if (filtro === 'abiertos') q = q.in('estado', ['nuevo', 'revisando'])
+  else if (ESTADOS_REPORTE.includes(filtro)) q = q.eq('estado', filtro)
+  const { data, error } = await q
+  if (error) throw error
+  const perfiles = await profileMap(admin, (data || []).map((r: any) => r.revisado_por).filter(Boolean).map(String))
+  return json({ ok: true, reportes: (data || []).map((r: any) => ({
+    id: r.id, tipo: r.tipo, tipoTexto: TIPOS_REPORTE[r.tipo] || r.tipo, seccion: r.seccion, mensaje: r.mensaje, origen: r.origen,
+    version: r.version || '', detalle: r.detalle || '', dispositivo: r.dispositivo || '', estado: r.estado, nota: r.nota || '',
+    revisadoPor: r.revisado_por ? (perfiles.get(String(r.revisado_por))?.pseudonimo || '—') : '', fecha: r.created_at, actualizado: r.updated_at,
+  })) })
+}
+async function gestionarReporte(admin: SupabaseClient, user: User, llaveId: string, body: any) {
+  const id = uuidOrEmpty(body.id), estado = String(body.estado || '')
+  if (!id || !ESTADOS_REPORTE.includes(estado)) return json({ ok: false, error: 'datos_invalidos' })
+  const cambios: Record<string, unknown> = { estado, revisado_por: user.id, updated_at: new Date().toISOString() }
+  if (body.nota !== undefined) cambios.nota = textoReporte(body.nota, 400, true) || null
+  const { data, error } = await admin.from('reportes').update(cambios).eq('id', id).select('id').maybeSingle()
+  if (error) throw error
+  if (!data) return json({ ok: false, error: 'no_encontrado' })
+  await auditar(admin, user.id, llaveId, 'gestionar_reporte', { id, estado })
+  return json({ ok: true })
 }
 function avisarModeradoresAporte(admin: SupabaseClient, titulo: string) {
   return avisarModeradores(admin, 'aporte', REF_AVISO_APORTES,
@@ -1556,7 +1646,7 @@ async function bootstrap(user: User, client: SupabaseClient, admin: SupabaseClie
   if (rl) return rl
 
   const [{ data: profile, error: profileError }, { data: solicitudes, error: reqError }, { data: exchanges, error: exError }] = await Promise.all([
-    admin.from('profiles').select('id,pseudonimo,foto_url,is_moderator,is_admin,profile_completed,terminos_version,baja_programada_para,moderador_vence_at').eq('id', user.id).single(),
+    admin.from('profiles').select('id,pseudonimo,foto_url,is_moderator,is_admin,profile_completed,terminos_version,baja_programada_para,moderador_vence_at,mails_moderacion').eq('id', user.id).single(),
     client.from('solicitudes').select('id,materia,tengo,busco,status,created_at,updated_at,completed_at,exchange_id').eq('user_id', user.id).eq('status', 'activa').order('created_at', { ascending: false }),
     client.from('intercambio_participantes').select('intercambio_id,solicitud_id,user_id,tengo,busco,intercambios!inner(id,materia,created_at,completed_at)').eq('user_id', user.id),
   ])
@@ -1609,7 +1699,8 @@ async function bootstrap(user: User, client: SupabaseClient, admin: SupabaseClie
     intercambios: [...exchangeMap.values()],
     rol: { esModerador: !!profile.is_moderator && moderadorVigente(profile.moderador_vence_at), esAdmin: !!profile.is_admin,
       moderadorVence: profile.is_moderator && !profile.is_admin ? profile.moderador_vence_at || null : null,
-      moderadorVencido: !!profile.is_moderator && !profile.is_admin && !moderadorVigente(profile.moderador_vence_at) },
+      moderadorVencido: !!profile.is_moderator && !profile.is_admin && !moderadorVigente(profile.moderador_vence_at),
+      mailsModeracion: profile.mails_moderacion !== false },
   }})
 }
 
@@ -2362,6 +2453,26 @@ async function handle(req: Request, body: any) {
       const {data,error}=await client.from('aportes_material').select('id,clase,titulo,materia,estado,motivo,created_at').order('created_at',{ascending:false}).limit(20)
       if(error)throw error
       return json({ok:true,aportes:data||[]})
+    }
+    case 'enviarReporte': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return enviarReporte(admin,user,body)
+    }
+    case 'listarReportes': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      return listarReportes(admin,body)
+    }
+    case 'gestionarReporte': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      return gestionarReporte(admin,user,auth.llaveId,body)
+    }
+    case 'preferenciaMailsModeracion': {
+      // Preferencia propia: no da ni quita permisos, así que no pide la llave.
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const {error}=await admin.from('profiles').update({mails_moderacion:body.activar===true}).eq('id',user.id);if(error)throw error
+      return json({ok:true,mailsModeracion:body.activar===true})
     }
     case 'listarAportes': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
