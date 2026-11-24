@@ -14,7 +14,7 @@ se aplica acá impacta producción.
 
 ## Modelo de datos (resumen)
 
-`profiles` (`is_moderator`/`is_admin` booleanos, pseudónimo único sin distinguir mayúsculas, `foto_url`, `profile_completed`) ·
+`profiles` (`is_moderator`/`is_admin` booleanos, `terminos_version`/`terminos_aceptados_at` = aceptación de Términos y Privacidad vía `aceptarTerminos`, versión vigente en `TERMINOS_VERSION`, pseudónimo único sin distinguir mayúsculas, `foto_url`, `profile_completed`) ·
 `solicitudes` → `intercambios` + `intercambio_participantes`
 (intercambio de comisiones, matching por ciclos en `finalize_exchange`) · `conversaciones`, `conversacion_participantes`,
 `mensajes` (chat de un intercambio, 14 días) · `hilos` (`is_sensitive`; opcionalmente una `encuestas` con sus `votos_encuesta`: anónima = la API nunca devuelve quién votó), `respuestas` (anidadas con `parent_id`,

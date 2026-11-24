@@ -1754,6 +1754,17 @@
         .bloqueSensible { position:relative; }
         .bloqueSensible.ocultoSensible .contenidoForoRich { filter:blur(18px); user-select:none; pointer-events:none; max-height:260px; overflow:hidden; }
         .revelarSensible { display:block; margin:10px 0; border:1px solid var(--foro-line); background:var(--foro-card); color:var(--foro-text); border-radius:9px; padding:9px 12px; cursor:pointer; }
+        .modalTerminos { z-index:10060; background:rgba(8,20,18,.86); }
+        .terminosCaja { max-width:560px; }
+        .terminosCaja p, .terminosResumen { font-size:.92rem; line-height:1.5; }
+        .terminosResumen { margin:6px 0 12px; padding-left:1.2em; }
+        .terminosResumen li { margin:4px 0; }
+        .terminosAcciones { display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; margin-top:8px; }
+        .terminosAcciones button { width:auto; }
+        .aceptoTerminos { display:flex; gap:10px; align-items:flex-start; font-size:.86rem; line-height:1.45; margin:10px 0; cursor:pointer; text-align:left; }
+        .aceptoTerminos input { width:auto; margin:3px 0 0; flex:0 0 auto; }
+        .legalLogin { font-size:.78rem; color:var(--ink-soft); text-align:center; margin:14px 0 0; line-height:1.5; }
+        .legalPieApp { font-size:.85rem; }
         .modalSetupPerfil { z-index:10050; background:rgba(8,20,18,.82); }
         .setupPerfilCaja { width:min(520px,calc(100% - 28px)); max-height:90vh; overflow:auto; }
         .setupPerfilCaja label { display:block; font-weight:600; margin:12px 0 6px; }

@@ -49,7 +49,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261126d">
+    <link rel="stylesheet" href="/css/styles.css?v=20261123t">
 </head>
 
 <body>
@@ -132,11 +132,18 @@
                     <button type="button" class="btnMostrarPassword" data-target="regPasswordConfirm" aria-label="Mostrar contraseña"><svg class="iconoOjo" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
                 </div>
 
+                <label class="aceptoTerminos" for="regAceptoTerminos">
+                    <input type="checkbox" id="regAceptoTerminos" required>
+                    <span>Tengo 16 años o más, leí y acepto los <a href="/terminos/" target="_blank" rel="noopener">Términos y Condiciones</a> y la <a href="/privacidad/" target="_blank" rel="noopener">Política de Privacidad</a>, incluida la transferencia de mis datos a servidores en Estados Unidos.</span>
+                </label>
+
                 <div class="captchaAuth" id="captchaRegistro" data-captcha></div>
                 <button type="submit" class="btn-primario">Crear cuenta</button>
             </form>
 
             <p id="authMsg"></p>
+
+            <p class="legalLogin">Al continuar con Google o con tu email aceptás los <a href="/terminos/">Términos</a> y la <a href="/privacidad/">Política de Privacidad</a>.<br>© 2026 MedMar · Proyecto independiente y sin fines de lucro.</p>
 
         </div>
 
@@ -951,7 +958,9 @@
         Proyecto independiente creado por <b>Simón Moreno</b>.<br>
         No afiliado oficialmente a la Facultad de Ciencias de la Salud (UNMDP).<br><br>
 
-        <a href="mailto:MedMarUNMDP@gmail.com">Contactar a MedMarUNMDP</a>
+        <a href="mailto:MedMarUNMDP@gmail.com">Contactar a MedMarUNMDP</a><br><br>
+
+        <span class="legalPieApp"><a href="/terminos/">Términos y Condiciones</a> · <a href="/privacidad/">Política de Privacidad</a> · © 2026 MedMar. Todos los derechos reservados.</span>
 
     </div>
 
@@ -999,6 +1008,30 @@
                 <p id="msgSetupPerfil" role="status"></p>
                 <button type="submit" class="btn-primario setupContinuar">Guardar y continuar</button>
             </form>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL: ACEPTAR TÉRMINOS (cuentas sin la versión vigente) ==================== -->
+    <div id="modalTerminos" class="modalFondo modalTerminos" aria-modal="true" role="dialog" aria-labelledby="tituloTerminos">
+        <div class="modalCaja terminosCaja">
+            <div class="modalEncabezado"><h2 id="tituloTerminos">Términos y Privacidad</h2></div>
+            <p>Para seguir usando MedMar necesitamos que leas y aceptes los <a href="/terminos/" target="_blank" rel="noopener">Términos y Condiciones</a> y la <a href="/privacidad/" target="_blank" rel="noopener">Política de Privacidad</a>. En resumen:</p>
+            <ul class="terminosResumen">
+                <li>MedMar es gratuito, independiente y sin fines de lucro: no hay publicidad ni se venden datos.</li>
+                <li>No se permite promocionar empresas, academias, cursos pagos ni vender apuntes o servicios.</li>
+                <li>Nunca publiques datos que identifiquen a un paciente. El contenido médico es para estudiar, no es consejo médico.</li>
+                <li>Lo que publicás sigue siendo tuyo; no subas material con derechos de autor ajenos.</li>
+                <li>Tus datos se guardan en servidores de Estados Unidos (Supabase). Podés pedir verlos, corregirlos o borrarlos.</li>
+            </ul>
+            <label class="aceptoTerminos" for="chkAceptoTerminos">
+                <input type="checkbox" id="chkAceptoTerminos">
+                <span>Tengo 16 años o más, leí y acepto los Términos y la Política de Privacidad, incluida la transferencia de mis datos a Estados Unidos.</span>
+            </label>
+            <p id="msgTerminos" role="status"></p>
+            <div class="terminosAcciones">
+                <button type="button" id="btnRechazarTerminos" class="btn-secundario">No acepto</button>
+                <button type="button" id="btnAceptarTerminos" class="btn-primario" disabled>Acepto</button>
+            </div>
         </div>
     </div>
 
@@ -1098,7 +1131,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261126d"></script>
+    <script src="/js/app.js?v=20261123t"></script>
 
     <!-- CAPTCHA anti-bots (Cloudflare Turnstile) para login, registro y recuperación. Sin SRI: Cloudflare lo actualiza
          solo y su documentación pide no fijarlo. Se renderiza recién cuando el formulario se usa. -->

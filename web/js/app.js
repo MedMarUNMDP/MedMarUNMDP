@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-26-material-sitios"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-terminos"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -852,7 +852,78 @@ async function cargarBootstrap() {
             aplicarBootstrap(r.data)
             try { localStorage.setItem(cacheKey, JSON.stringify({ data: r.data, ts: Date.now() })) } catch (_) {}
             if (r.data && r.data.perfil && r.data.perfil.profileCompleted === false) mostrarSetupPerfil(r.data.perfil)
+            if (r.data && r.data.perfil) verificarTerminos(r.data.perfil)
         }
+
+        // ==================== TÉRMINOS Y PRIVACIDAD ====================
+        // La API guarda qué versión aceptó cada cuenta (aceptarTerminos) y la devuelve en bootstrap. Si no es la vigente:
+        // quien acaba de registrarse marcando la casilla la acepta sola; el resto ve una ventana que no se puede cerrar.
+        // Tiene que coincidir con TERMINOS_VERSION de la API (y con la fecha de versión de /terminos/ y /privacidad/).
+        const TERMINOS_VERSION = "2026-11-23"
+        const CLAVE_TERMINOS_REGISTRO = "medmar:terminosRegistro"
+        const modalTerminos = document.getElementById("modalTerminos")
+        const chkAceptoTerminos = document.getElementById("chkAceptoTerminos")
+        const btnAceptarTerminos = document.getElementById("btnAceptarTerminos")
+        const msgTerminos = document.getElementById("msgTerminos")
+
+        async function enviarAceptacionTerminos() {
+            const r = await llamar("aceptarTerminos", { version: TERMINOS_VERSION })
+            if (r.ok && sesion) {
+                // Actualiza el perfil en caché para no volver a preguntar con datos viejos.
+                try {
+                    const cacheKey = "medmar:perfil:" + sesion.userId
+                    const local = JSON.parse(localStorage.getItem(cacheKey) || "null")
+                    if (local && local.data && local.data.perfil) {
+                        local.data.perfil.terminosVersion = TERMINOS_VERSION
+                        localStorage.setItem(cacheKey, JSON.stringify(local))
+                    }
+                } catch (_) {}
+            }
+            return r
+        }
+
+        async function verificarTerminos(perfil) {
+            // Sin terminosVigente la respuesta es de una API anterior (o de la caché vieja): no se pregunta nada.
+            if (!sesion || !perfil || !perfil.terminosVigente) return
+            if (perfil.terminosVersion === TERMINOS_VERSION) return
+            let aceptadosAlRegistrarse = false
+            try { aceptadosAlRegistrarse = localStorage.getItem(CLAVE_TERMINOS_REGISTRO) === TERMINOS_VERSION } catch (_) {}
+            if (aceptadosAlRegistrarse) {
+                const r = await enviarAceptacionTerminos()
+                if (r.ok) { try { localStorage.removeItem(CLAVE_TERMINOS_REGISTRO) } catch (_) {} return }
+            }
+            mostrarModalTerminos()
+        }
+
+        function mostrarModalTerminos() {
+            chkAceptoTerminos.checked = false
+            btnAceptarTerminos.disabled = true
+            msgTerminos.textContent = ""
+            modalTerminos.classList.add("abierto")
+            modalTerminos.style.display = "flex"
+            document.body.style.overflow = "hidden"
+        }
+        function ocultarModalTerminos() {
+            modalTerminos.classList.remove("abierto")
+            modalTerminos.style.display = "none"
+            if (!modalSetupPerfil.classList.contains("abierto")) document.body.style.overflow = ""
+        }
+        chkAceptoTerminos.addEventListener("change", function () { btnAceptarTerminos.disabled = !chkAceptoTerminos.checked })
+        btnAceptarTerminos.addEventListener("click", async function () {
+            if (!chkAceptoTerminos.checked) return
+            btnAceptarTerminos.disabled = true
+            msgTerminos.textContent = "Guardando..."
+            const r = await enviarAceptacionTerminos()
+            if (r.ok) { ocultarModalTerminos(); return }
+            btnAceptarTerminos.disabled = false
+            msgTerminos.textContent = r.error === "version_invalida"
+                ? "Hay una versión nueva de los términos. Recargá la página para verla."
+                : mensajeError(r.error)
+        })
+        document.getElementById("btnRechazarTerminos").addEventListener("click", function () {
+            msgTerminos.textContent = "Sin aceptar los términos no podés usar MedMar. Si querés que borremos tu cuenta y tus datos, escribinos a MedMarUNMDP@gmail.com desde el email de la cuenta."
+            setTimeout(function () { ocultarModalTerminos(); logoutBtn.click() }, 4500)
+        })
 
         function aplicarBootstrap(data) {
             if (!data) return
@@ -1208,6 +1279,13 @@ async function cargarBootstrap() {
                 authMsg.innerText = 'Las contraseñas no coinciden.'
                 return
             }
+
+            if (!document.getElementById("regAceptoTerminos").checked) {
+                authMsg.innerText = 'Para crear la cuenta tenés que aceptar los Términos y la Política de Privacidad.'
+                return
+            }
+            // La aceptación se guarda en la cuenta al primer ingreso (verificarTerminos), que puede ser después de confirmar el email.
+            try { localStorage.setItem(CLAVE_TERMINOS_REGISTRO, TERMINOS_VERSION) } catch (_) {}
 
             authMsg.innerText = "Creando cuenta..."
 

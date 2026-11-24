@@ -4,6 +4,10 @@ Sitio estático servido en https://medmar.com.ar (GitHub Pages). Sin framework, 
 
 ## Archivos
 
+- `terminos/index.html`, `privacidad/index.html` + `css/legal.css` — páginas legales estáticas (sin JS de la app). Si cambian de
+  fondo, subí la versión: `TERMINOS_VERSION` en `js/app.js` **y** en la API (deben coincidir) y la fecha de las dos páginas;
+  todas las cuentas vuelven a ver la ventana de aceptación (`#modalTerminos`, sección TÉRMINOS Y PRIVACIDAD de `app.js`).
+  El registro exige la casilla `#regAceptoTerminos`; la aceptación se guarda al primer ingreso (`aceptarTerminos`).
 - `index.html` — solo estructura (pantallas y modales). Cada vista es un `<div id="vista…">` que se muestra/oculta por JS.
 - `css/styles.css` — todos los estilos. Secciones marcadas con `/* ---------- NOMBRE ---------- */`.
   Arranca con el bloque **TOKENS**: única fuente de colores (roles como `--surface`, `--brand`, `--ink-soft`,

@@ -1,0 +1,42 @@
+/* Páginas legales de MedMar (/terminos/ y /privacidad/): estáticas, sin JS de la app. Mismos colores de marca. */
+:root {
+    --bg: #f5f8f6; --surface: #ffffff; --ink: #172421; --ink-soft: #4d6059; --line: #d5e0db;
+    --brand: #07514e; --brand-soft: #e2eeeb; --gold-soft: #f2e6c9; --gold: #927710; --link: #17665f;
+    color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #101917; --surface: #1b2723; --ink: #f0f5f2; --ink-soft: #c0cec8; --line: #3b4c46;
+        --brand: #8fc5ba; --brand-soft: #263e3a; --gold-soft: #3a331a; --gold: #e1cf83; --link: #a9d9cc;
+        color-scheme: dark;
+    }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Public Sans", Arial, sans-serif; line-height: 1.65; }
+a { color: var(--link); }
+.legalCabecera { background: #07514e; color: #fffdf4; }
+.legalCabecera .contenedor { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+.legalCabecera a { color: #fffdf4; text-decoration: none; display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; }
+.legalCabecera img { width: 34px; height: 34px; border-radius: 50%; }
+.contenedor { max-width: 860px; margin: 0 auto; }
+main.contenedor { padding: 24px 16px 48px; }
+h1 { font-family: "Fraunces", Georgia, serif; font-size: 2rem; line-height: 1.2; margin: 8px 0 4px; }
+h2 { font-size: 1.22rem; margin: 2em 0 .5em; padding-top: .4em; border-top: 1px solid var(--line); scroll-margin-top: 12px; }
+h3 { font-size: 1.02rem; margin: 1.3em 0 .3em; }
+.version { color: var(--ink-soft); font-size: .92rem; margin: 0 0 16px; }
+.resumen { background: var(--brand-soft); border-left: 4px solid var(--brand); border-radius: 12px; padding: 14px 18px; margin: 16px 0 8px; }
+.resumen h2 { border: 0; margin: 0 0 6px; padding: 0; font-size: 1.05rem; }
+.resumen ul { margin: 0; padding-left: 1.2em; }
+.aviso { background: var(--gold-soft); border-left: 4px solid var(--gold); border-radius: 12px; padding: 12px 16px; margin: 14px 0; }
+.indice { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 18px; margin: 18px 0; }
+.indice ol { margin: 6px 0 0; padding-left: 1.3em; columns: 2; column-gap: 28px; }
+@media (max-width: 640px) { .indice ol { columns: 1; } h1 { font-size: 1.6rem; } }
+ul, ol { padding-left: 1.3em; }
+li { margin: .25em 0; }
+.legalPie { border-top: 1px solid var(--line); margin-top: 40px; padding-top: 16px; font-size: .9rem; color: var(--ink-soft); }
+.legalPie nav { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 8px; }
+table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: .93rem; }
+.tablaScroll { overflow-x: auto; }
+th, td { border-bottom: 1px solid var(--line); padding: 7px 8px; text-align: left; vertical-align: top; }
+th { background: var(--surface); }
+@media print { .legalCabecera, .indice { display: none; } body { background: #fff; color: #000; } }
