@@ -32,6 +32,9 @@ Para ubicarte: `Grep "// ====" web/js/app.js` y leé solo el rango que necesitá
 - Lecturas repetidas se deduplican (`ACCIONES_LECTURA_DEDUPE`) y se cachean en cliente (`foroCacheCliente`, `localStorage` `medmar:*`).
   Si agregás una acción de lectura frecuente, sumala ahí: ahorra invocaciones del plan Free.
 - Realtime de Supabase solo para chat y `solicitudes` (matches); el resto es por request.
+- **Desplegables**: todos los `<select>` se reemplazan visualmente por el selector propio (sección SELECTOR PERSONALIZADO,
+  `mejorarSelectsEn` + MutationObserver, también los que se agregan después). El `<select>` sigue siendo la fuente de verdad;
+  `select.value = …`, opciones nuevas y `form.reset()` se reflejan solos. Para dejar uno nativo: `data-nativo`.
 - Textos de usuario: siempre pasar por `escapeHtml()` / `escapeAttr()` antes de insertarlos con `innerHTML`.
 - **Formato del foro** (sección FORMATO DE PUBLICACIONES): markdown liviano propio (`renderizarFormato`: títulos, negrita,
   cursiva, listas, citas, cuadros `> [!nota|importante|consejo]`, tablas, código, separadores). Escapa primero y

@@ -797,10 +797,20 @@
         }
 
         .selectorOpcion {
-            padding: 10px 14px;
-            font-size: 0.9rem;
+            padding: 12px 14px;
+            font-size: 0.92rem;
             cursor: pointer;
         }
+
+        /* Cerca del final de la pantalla el menú se abre hacia arriba. */
+        .selectPersonalizado.haciaArriba .selectorPanel { top: auto; bottom: calc(100% + 6px); transform: translateY(6px) scale(0.98); }
+        .selectPersonalizado.haciaArriba.abierto .selectorPanel { transform: translateY(0) scale(1); }
+        .selectPersonalizado.abierto { z-index: 45; }
+        .selectorTexto { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .selectorTrigger:disabled { opacity: .6; cursor: not-allowed; }
+        /* Selectores chicos dentro de filas (moderación, ranking): no ocupan todo el ancho. */
+        .periodoModerador .selectPersonalizado, .moderadorItem .selectPersonalizado { margin-top: 0; min-width: 180px; max-width: 260px; }
+        .periodoModerador .selectorTrigger { padding: 6px 10px; font-size: .82rem; }
 
             .selectorOpcion:hover {
                 background: var(--teal-50);

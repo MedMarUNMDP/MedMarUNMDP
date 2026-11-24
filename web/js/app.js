@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-papelera-grupos-qr"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-23-selectores"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -237,8 +237,13 @@ const hilosPendientesConfirmacion = new Map()
         // más prolijo en celular. El <select> original queda oculto pero sigue
         // existiendo y sigue siendo la fuente de verdad (form.materia.value, etc.)
         // así el resto del código no necesita cambiar.
+        // Se aplica a TODOS los <select> del sitio, también a los que se crean después (mejorarSelectsEn +
+        // MutationObserver). Las opciones se leen al abrir, y los cambios por código (select.value = …, opciones
+        // nuevas, form.reset()) se reflejan solos. Para dejar uno nativo: atributo data-nativo.
 
+        // La opción con valor "" es el placeholder si el campo es obligatorio; si no, se puede elegir («Todas las materias»).
         function extraerOpciones(select) {
+            const vacioElegible = !select.required
 
             const grupos = []
             let grupoSuelto = null
@@ -248,14 +253,14 @@ const hilosPendientesConfirmacion = new Map()
                 if (nodo.tagName === "OPTGROUP") {
 
                     const items = Array.from(nodo.children)
-                        .filter(function (op) { return op.value })
+                        .filter(function (op) { return (op.value || vacioElegible) && !op.disabled && !op.hidden })
                         .map(function (op) { return { valor: op.value, texto: op.textContent } })
 
                     grupos.push({ nombre: nodo.label, items })
 
                 } else if (nodo.tagName === "OPTION") {
 
-                    if (!nodo.value) return
+                    if ((!nodo.value && !vacioElegible) || nodo.disabled || nodo.hidden) return
 
                     if (!grupoSuelto) {
                         grupoSuelto = { nombre: null, items: [] }
@@ -276,9 +281,13 @@ const hilosPendientesConfirmacion = new Map()
 
             config = config || {}
 
-            const placeholderOption = select.querySelector("option[value='']")
-            const placeholder = placeholderOption ? placeholderOption.textContent : (config.placeholder || "Seleccionar")
-            const grupos = extraerOpciones(select)
+            if (select.dataset.mejorado) return
+            select.dataset.mejorado = "1"
+            let grupos = extraerOpciones(select)
+            function placeholderActual() {
+                const op = select.querySelector("option[value='']")
+                return op ? op.textContent : (config.placeholder || "Seleccionar")
+            }
 
             select.style.display = "none"
 
@@ -303,6 +312,8 @@ const hilosPendientesConfirmacion = new Map()
                 })
             }
 
+            if (!etiqueta && select.getAttribute("aria-label")) trigger.setAttribute("aria-label", select.getAttribute("aria-label"))
+
             const panel = document.createElement("div")
             panel.className = "selectorPanel"
             panel.setAttribute("role", "listbox")
@@ -316,7 +327,7 @@ const hilosPendientesConfirmacion = new Map()
 
                 inputBusqueda = document.createElement("input")
                 inputBusqueda.type = "text"
-                inputBusqueda.placeholder = "Buscar materia..."
+                inputBusqueda.placeholder = config.textoBusqueda || "Buscar..."
 
                 contBusqueda.appendChild(inputBusqueda)
                 panel.appendChild(contBusqueda)
@@ -335,6 +346,8 @@ const hilosPendientesConfirmacion = new Map()
 
             function actualizarTrigger() {
 
+                grupos = extraerOpciones(select)
+                trigger.disabled = select.disabled
                 let actual = null
 
                 grupos.forEach(function (g) {
@@ -345,12 +358,15 @@ const hilosPendientesConfirmacion = new Map()
 
                 trigger.innerHTML = ""
 
-                if (actual) {
-                    trigger.appendChild(document.createTextNode(actual.texto))
+                if (actual && actual.valor !== "") {
+                    const texto = document.createElement("span")
+                    texto.className = "selectorTexto"
+                    texto.textContent = actual.texto
+                    trigger.appendChild(texto)
                 } else {
                     const span = document.createElement("span")
-                    span.className = "placeholder"
-                    span.textContent = placeholder
+                    span.className = "placeholder selectorTexto"
+                    span.textContent = actual ? actual.texto : placeholderActual()
                     trigger.appendChild(span)
                 }
 
@@ -390,7 +406,7 @@ const hilosPendientesConfirmacion = new Map()
 
                         div.addEventListener("click", function () {
                             select.value = op.valor
-                            select.dispatchEvent(new Event("change"))
+                            select.dispatchEvent(new Event("change", { bubbles: true }))
                             actualizarTrigger()
                             cerrarPanel()
                         })
@@ -413,8 +429,14 @@ const hilosPendientesConfirmacion = new Map()
 
             function abrirPanel() {
 
+                grupos = extraerOpciones(select)
                 wrapper.classList.add("abierto")
                 renderOpciones("")
+                // Si no entra abajo (celular, final de la página), se abre hacia arriba.
+                const caja = trigger.getBoundingClientRect()
+                wrapper.classList.toggle("haciaArriba", window.innerHeight - caja.bottom < 300 && caja.top > window.innerHeight - caja.bottom)
+                const marcada = contenedorOpciones.querySelector(".seleccionada")
+                if (marcada) marcada.scrollIntoView({ block: "nearest" })
 
                 if (inputBusqueda) {
                     inputBusqueda.value = ""
@@ -433,6 +455,10 @@ const hilosPendientesConfirmacion = new Map()
             function manejarClickAfuera(e) {
                 if (!wrapper.contains(e.target)) cerrarPanel()
             }
+
+            wrapper.addEventListener("keydown", function (e) {
+                if (e.key === "Escape" && wrapper.classList.contains("abierto")) { e.stopPropagation(); cerrarPanel(); trigger.focus() }
+            })
 
             trigger.addEventListener("click", function () {
                 if (wrapper.classList.contains("abierto")) {
@@ -464,11 +490,40 @@ const hilosPendientesConfirmacion = new Map()
             // un cambio hecho directamente sobre select.value (ver iniciarEdicion, etc.)
             select.refrescarSelector = actualizarTrigger
 
+            // Cambios por código: value/selectedIndex, opciones nuevas, reset del formulario y eventos change.
+            ;["value", "selectedIndex"].forEach(function (prop) {
+                const desc = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, prop)
+                Object.defineProperty(select, prop, {
+                    configurable: true,
+                    get: function () { return desc.get.call(this) },
+                    set: function (v) { desc.set.call(this, v); actualizarTrigger() }
+                })
+            })
+            new MutationObserver(actualizarTrigger).observe(select, { childList: true, subtree: true, attributes: true, attributeFilter: ["disabled"] })
+            select.addEventListener("change", actualizarTrigger)
+            if (select.form) select.form.addEventListener("reset", function () { setTimeout(actualizarTrigger, 0) })
+
         }
 
-        mejorarSelect(form.materia, { conBusqueda: true, placeholder: "Seleccionar materia" })
+        mejorarSelect(form.materia, { conBusqueda: true, placeholder: "Seleccionar materia", textoBusqueda: "Buscar materia..." })
         mejorarSelect(tengo, { placeholder: "Seleccionar comisión" })
         mejorarSelect(busco, { placeholder: "Seleccionar comisión" })
+
+        // El resto de los <select> (formularios, filtros, moderación…), incluidos los que se agregan después.
+        function mejorarSelectsEn(raiz) {
+            if (!raiz || !raiz.querySelectorAll) return
+            const lista = raiz.tagName === "SELECT" ? [raiz] : raiz.querySelectorAll("select")
+            Array.prototype.forEach.call(lista, function (sel) {
+                if (sel.dataset.mejorado || sel.hasAttribute("data-nativo") || sel.multiple) return
+                // Las listas de materias se llenan después: llevan buscador aunque al principio estén vacías.
+                const muchas = sel.options.length > 12 || sel.classList.contains("selectMaterias")
+                mejorarSelect(sel, { conBusqueda: muchas, textoBusqueda: sel.classList.contains("selectMaterias") ? "Buscar materia..." : "Buscar..." })
+            })
+        }
+        mejorarSelectsEn(document.body)
+        new MutationObserver(function (cambios) {
+            cambios.forEach(function (c) { c.addedNodes.forEach(function (n) { if (n.nodeType === 1) mejorarSelectsEn(n) }) })
+        }).observe(document.body, { childList: true, subtree: true })
 
         function refrescarSelectoresFormulario() {
             if (form.materia.refrescarSelector) form.materia.refrescarSelector()
