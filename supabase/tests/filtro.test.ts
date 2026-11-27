@@ -1,0 +1,67 @@
+// Tests del filtro automático de contenido (supabase/functions/api/filtro.ts). Corren con `npm test` (Node quita los tipos).
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import { normalizar, revisarSeudonimo, revisarTexto } from '../functions/api/filtro.ts'
+
+const retira = (texto: string, categoria?: string) => {
+  const r = revisarTexto(texto)
+  assert.ok(r, 'debería retirarse: ' + texto)
+  if (categoria) assert.equal(r!.categoria, categoria, texto + ' → ' + r!.regla)
+}
+const permite = (texto: string) => {
+  const r = revisarTexto(texto)
+  assert.equal(r, null, 'debería permitirse: ' + texto + (r ? ' (regla ' + r.regla + ')' : ''))
+}
+
+test('normaliza tildes, leet, letras estiradas y separadas', () => {
+  assert.equal(normalizar('Sos un P3L0TUDÓ!!'), ' sos un pelotudo ')
+  assert.equal(normalizar('boluuuuudo'), ' boluudo ')
+  assert.equal(normalizar('h.d.p'), ' hdp ')
+  assert.equal(normalizar('forrrrro'), ' forro ')
+})
+
+test('retira insultos dirigidos', () => {
+  for (const t of ['sos un pelotudo', 'Sos una re forra', 'vos sos un PELOTUDO de verdad', 'sos un p3l0tud0', 'sos un pelooootudo',
+    'qué pelotudo que sos', 'el profe es un imbécil', 'pedazo de forro', 'callate pelotudo', 'cerrá el orto',
+    'sos una mierda', 'hijo de puta', 'HDP', 'h.d.p.', 'la concha de tu madre', 'andate a la mierda', 'andá a cagar',
+    'la puta que te parió', 'forro de mierda', 'sos un hijo de re mil puta']) retira(t, 'acoso')
+})
+
+test('permite malas palabras no dirigidas y el habla de todos los días', () => {
+  for (const t of ['qué boludo, me olvidé el apunte', 'la puta madre, desaprobé', 'esta cursada es una mierda', 'qué mierda pasó con el aula',
+    'che boludo, ¿alguien tiene el resumen?', 'callate que no te escucho, jaja', 'me re cagué en el parcial', 'qué forro el horario nuevo',
+    'el foro de mierda no carga', 'te voy a buscar el apunte', 'te mato si no venís jaja', 'la vida es una basura a veces',
+    'fumar es un cáncer', 'tengo el resumen de patología']) permite(t)
+})
+
+test('no filtra vocabulario médico', () => {
+  for (const t of ['Lesiones del pene y la vagina', 'Abordaje de la víctima de violación en la guardia', 'Ideación suicida: evaluación del riesgo',
+    'Cáncer de mama: estadificación', 'Paciente con hemorragia en el ano', 'Clasificación de las lesiones negras de piel',
+    'Síndrome de Down: no usar términos como mogólico (es discriminatorio)', 'Pacientes trans y travestis: atención sin discriminación']) permite(t)
+})
+
+test('retira discriminación', () => {
+  for (const t of ['negros de mierda', 'bolivianos de mierda', 'maricón', 'sudacas', 'putos de mierda', 'judíos asquerosos', 'maten a los gays'])
+    retira(t, 'discriminacion')
+})
+
+test('retira amenazas e incitación a hacerse daño', () => {
+  for (const t of ['te voy a matar', 'te cago a trompadas', 'ojalá te mueras', 'matate', 'suicidate', 'deberías matarte', 'te vamos a romper la cara'])
+    retira(t, 'acoso')
+})
+
+test('retira acoso sexual', () => {
+  for (const t of ['te voy a coger', 'chupame la pija', 'pasame el pack', 'mandame nudes']) retira(t, 'contenido_inapropiado')
+})
+
+test('datos de pacientes: DNI, CUIL e historia clínica; mails y teléfonos se permiten', () => {
+  for (const t of ['Paciente Juan, DNI 34.567.890, ingresó por guardia', 'dni: 34567890', 'HC 123456', 'historia clínica n° 98765',
+    'CUIL 20-34567890-3', 'el paciente 34.567.890 tiene']) retira(t, 'pacientes')
+  for (const t of ['escribime a juan@gmail.com', 'mi cel es 223 512-3456', 'llamame al +54 9 223 5123456', 'vendo a $1.500.000',
+    'cuesta 12.500.000 pesos', 'llevá el DNI al parcial', 'la HC hay que completarla entera', 'aula 3, 14 hs']) permite(t)
+})
+
+test('seudónimos', () => {
+  for (const s of ['ElPelotudo', 'hijodeputa22', 'La Puta Ama', 'Nazi_88', 'forro.total', 'sorete']) assert.ok(revisarSeudonimo(s), s)
+  for (const s of ['Juan Pérez', 'Computadora', 'Anatomista', 'Conchita', 'Dr. House', 'Nazareno', 'Patricio', 'Escucha']) assert.equal(revisarSeudonimo(s), null, s)
+})

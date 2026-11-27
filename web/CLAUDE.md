@@ -53,6 +53,8 @@ Para ubicarte: `Grep "// ====" web/js/app.js` y leé solo el rango que necesitá
 - **Guía de moderación**: pestaña «Guía» del panel (`.guiaMod` en `index.html`, texto estático). Se ve aunque la moderación esté
   bloqueada; la parte `.guiaAdmin` solo para admins; botones `[data-ir-mod]` llevan a cada pestaña. Si cambia cómo se modera, actualizala.
 - **Sanciones** (sección SANCIONES, ADR 0006): `#avisoSancion` con cuenta regresiva y `#modalSancion` (motivo, alcance, descargo único). La sanción llega en bootstrap, `miSancion` y el error `suspendido`. `pedirMotivoModeracion` devuelve `{ motivo, sancion }` (opción «Aplicar un strike»). Pestaña Moderación → Sanciones. Cada pedido lleva `dispositivoId` (`medmar:dispositivo`, se conserva al cerrar sesión).
+- **Filtro automático** (ADR 0007): la API devuelve `contenido_filtrado` + `motivo` (se muestra con `mensajeError`) y `pseudonimo_no_permitido`. Fotos de perfil: `fotoPermitida` (NSFWJS en `/vendor/nsfwjs`, se carga al cambiar la foto; `/vendor` no se reprocesa al publicar).
+- **Mantener sesión** (sección MANTENER SESIÓN INICIADA, arriba de todo): `#chkRecordarSesion` en el login y `#chkRecordarConfig` en Perfil → `medmar:recordarSesion`. Sin mantener: se borra al cerrar el navegador (pestañas por `BroadcastChannel` + `sessionStorage`) o tras 12 h sin uso; supabase-js usa un storage propio que espera esa decisión.
 - **Encuestas del foro** (sección ENCUESTAS DEL FORO): `crearHilo` con `encuesta`, `verHilo` devuelve `hilo.encuesta`, `votarEncuesta`.
 - `index.html` tiene una **Content Security Policy** en `<meta>`: un CDN, embed o dominio nuevo hay que sumarlo ahí o no carga.
 - **Cloudflare** está delante de GitHub Pages (proxy): agrega HSTS, `X-Frame-Options`, `frame-ancestors`, `nosniff` y

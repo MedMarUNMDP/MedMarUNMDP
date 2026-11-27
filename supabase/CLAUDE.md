@@ -7,6 +7,7 @@ se aplica acá impacta producción.
 
 - `functions/api/index.ts` — Edge Function principal (Deno). Un único endpoint POST que despacha por `body.accion`
   en el `switch` de `handle()`. Acción pública: solo `health`; el resto exige `Authorization: Bearer` (`legacyLogin` se quitó en la auditoría de seguridad de 2026-11: la tabla legacy estaba vacía).
+- `functions/api/filtro.ts` — filtro automático de contenido (ADR 0007): `revisarTexto` (foro y Compra venta: lo detectado se inserta directo en la papelera con `eliminado_por = null`) y `revisarSeudonimo`. Reglas propias para rioplatense; tests en `supabase/tests/filtro.test.ts` (corren con `npm test`). Si cambiás una regla, sumá el caso al test.
 - `functions/maintenance/index.ts` — invocada por cron con header `x-medmar-cron-secret`. Procesa `notificacion_queue`
   (RPC `claim_notification_batch`) y envía mails vía Gmail API con backoff exponencial.
 - `migrations/` — SQL en orden por timestamp. `…_schema_inicial.sql` es idempotente (`if not exists`, `create or replace`)

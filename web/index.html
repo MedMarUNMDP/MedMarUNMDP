@@ -49,7 +49,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261129a">
+    <link rel="stylesheet" href="/css/styles.css?v=20261129b">
 </head>
 
 <body>
@@ -72,6 +72,9 @@
         <!-- ==================== LOGIN ==================== -->
 
         <div id="loginScreen" style="margin-top: 26px;">
+
+            <label class="checkOpcion recordarSesion"><input type="checkbox" id="chkRecordarSesion"> Mantener la sesión iniciada en este dispositivo</label>
+            <p class="ayudaPerfil ayudaRecordar">Si no lo marcás, la sesión se cierra al cerrar el navegador o tras 12 h sin usar MedMar. No lo marques en computadoras compartidas.</p>
 
             <button type="button" id="btnGoogleLogin" class="btn-secundario btnGoogleLogin">Continuar con Google</button>
 
@@ -805,6 +808,7 @@
                     <details class="guiaTema">
                         <summary><span class="guiaNum">6</span>Papelera: nada se borra en el momento</summary>
                         <p>Todo lo que quita la moderación queda <b>7 días en la papelera</b>, oculto para todos. Si te equivocaste, o el autor reclama con razón, tocá <b>Restaurar</b>: vuelve a verse y se le avisa a quien lo publicó. Pasados los 7 días se borra solo.</p>
+                        <p><b>Filtro automático:</b> lo que el filtro retira solo (insultos dirigidos, discriminación, amenazas, acoso sexual o DNI/historia clínica) también cae acá, con «Filtro automático» como autor de la quita y el motivo. Te avisamos en la campana. Revisalo: si fue un falso positivo, restauralo. El filtro no aplica strikes; si corresponde, sancioná vos.</p>
                         <p class="guiaNota">Excepción: anular un puntaje del ranking se borra en el momento.</p>
                         <button type="button" class="guiaIr" data-ir-mod="papelera">Ir a la Papelera →</button>
                     </details>
@@ -1290,6 +1294,8 @@
                 </div>
 
                 <h3 class="seccion-titulo">Sesión</h3>
+                <label class="checkOpcion"><input type="checkbox" id="chkRecordarConfig"> Mantener la sesión iniciada en este dispositivo</label>
+                <p class="ayudaPerfil">Si lo desmarcás, la sesión se cierra al cerrar el navegador o tras 12 h sin usar MedMar.</p>
                 <button type="button" id="logoutBtn" class="btn-secundario">Cerrar sesión</button>
 
                 <div id="seccionBajaCuenta" class="seccionBajaCuenta">
@@ -1555,7 +1561,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261129a"></script>
+    <script src="/js/app.js?v=20261129b"></script>
 
     <!-- CAPTCHA anti-bots (Cloudflare Turnstile) para login, registro y recuperación. Sin SRI: Cloudflare lo actualiza
          solo y su documentación pide no fijarlo. Se renderiza recién cuando el formulario se usa. -->

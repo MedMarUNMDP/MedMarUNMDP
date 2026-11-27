@@ -1,13 +1,72 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-29-sanciones"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-29-filtro-y-sesion"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
         const SUPABASE_URL = "https://ekfwdrsehhmrqxxlefyx.supabase.co"
         const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ZZQREdrsOfFn8vIOaO3S0w_S7NKP9KS"
         const SUPABASE_FUNCTION_NAME = "api"
+        // ==================== MANTENER SESIÓN INICIADA ====================
+        // Al iniciar sesión se elige si queda guardada en el dispositivo (por defecto, no). Sin «mantener», la sesión
+        // termina al cerrar el navegador (ninguna pestaña de MedMar abierta) o tras 12 h sin usar MedMar.
+        // La sesión vive siempre en localStorage (la comparten las pestañas y los juegos). Cada pestaña que la tiene
+        // se marca en sessionStorage; una pestaña nueva sin marca pregunta por BroadcastChannel si hay otra abierta
+        // y, si nadie responde, borra la sesión antes de que supabase-js la lea (por eso el storage propio).
+        const CLAVE_SESION_SUPABASE = "sb-ekfwdrsehhmrqxxlefyx-auth-token"
+        const CLAVE_RECORDAR_SESION = "medmar:recordarSesion"     // "1" mantener, "0" no
+        const CLAVE_VISITA = "medmar:visitaActiva"                // sessionStorage
+        const CLAVE_ULTIMA_ACTIVIDAD = "medmar:ultimaActividad"
+        const MS_INACTIVIDAD_SESION = 12 * 3600 * 1000
+        const canalSesion = typeof BroadcastChannel === "function" ? new BroadcastChannel("medmar-sesion") : null
+        if (canalSesion) canalSesion.addEventListener("message", function (e) {
+            try { if (e.data === "hola" && sessionStorage.getItem(CLAVE_VISITA)) canalSesion.postMessage("aca") } catch (_) {}
+        })
+        function recordarSesionActivo() {
+            try { return localStorage.getItem(CLAVE_RECORDAR_SESION) === "1" } catch (_) { return true }
+        }
+        function guardarPreferenciaSesion(recordar) {
+            try {
+                localStorage.setItem(CLAVE_RECORDAR_SESION, recordar ? "1" : "0")
+                sessionStorage.setItem(CLAVE_VISITA, "1")
+                localStorage.setItem(CLAVE_ULTIMA_ACTIVIDAD, String(Date.now()))
+            } catch (_) {}
+        }
+        let ultimaMarcaActividad = 0
+        function marcarActividad() {
+            if (Date.now() - ultimaMarcaActividad < 60000) return
+            ultimaMarcaActividad = Date.now()
+            try { localStorage.setItem(CLAVE_ULTIMA_ACTIVIDAD, String(ultimaMarcaActividad)) } catch (_) {}
+        }
+        const sesionDeVisitaLista = (async function () {
+            try {
+                if (!localStorage.getItem(CLAVE_SESION_SUPABASE)) return
+                // Sesiones de antes de esta opción: se tratan como «mantener» (no se cierra la de nadie por sorpresa).
+                if (localStorage.getItem(CLAVE_RECORDAR_SESION) === null) localStorage.setItem(CLAVE_RECORDAR_SESION, "1")
+                if (recordarSesionActivo()) return
+                const inactiva = Date.now() - Number(localStorage.getItem(CLAVE_ULTIMA_ACTIVIDAD) || 0) > MS_INACTIVIDAD_SESION
+                if (!inactiva && sessionStorage.getItem(CLAVE_VISITA)) return
+                let otraPestania = false
+                if (!inactiva && canalSesion) {
+                    otraPestania = await new Promise(function (resolver) {
+                        const espera = setTimeout(function () { canalSesion.removeEventListener("message", oir); resolver(false) }, 300)
+                        function oir(e) { if (e.data === "aca") { clearTimeout(espera); canalSesion.removeEventListener("message", oir); resolver(true) } }
+                        canalSesion.addEventListener("message", oir)
+                        canalSesion.postMessage("hola")
+                    })
+                }
+                if (otraPestania) { sessionStorage.setItem(CLAVE_VISITA, "1"); return }
+                localStorage.removeItem(CLAVE_SESION_SUPABASE)
+                sessionStorage.removeItem(CLAVE_VISITA)
+            } catch (_) {}
+        })()
+        const almacenamientoSesion = {
+            getItem: async function (clave) { await sesionDeVisitaLista; try { return localStorage.getItem(clave) } catch (_) { return null } },
+            setItem: function (clave, valor) { try { localStorage.setItem(clave, valor) } catch (_) {} },
+            removeItem: function (clave) { try { localStorage.removeItem(clave) } catch (_) {} }
+        }
+
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-            auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+            auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storage: almacenamientoSesion, storageKey: CLAVE_SESION_SUPABASE }
         })
 
         let sesion = null
@@ -847,10 +906,14 @@ const hilosPendientesConfirmacion = new Map()
             return motivo === null ? null : { motivo: motivo, sancion: sancionPedidaTexto }
         }
 
+        let ultimoMotivoFiltro = ""
         function mensajeError(codigo) {
+            if (codigo === "contenido_filtrado") return "No se publicó: el filtro automático detectó " + (ultimoMotivoFiltro ? "«" + ultimoMotivoFiltro.toLowerCase() + "»" : "contenido que no cumple las normas de convivencia") +
+                ". Quedó 7 días en revisión: si es un error, un moderador la puede restaurar (avisanos desde Reportes)."
 
             const mensajes = {
                 email_invalido: "El email no es válido.",
+                pseudonimo_no_permitido: "Ese seudónimo no está permitido por las normas de convivencia. Elegí otro.",
                 suspendido: "Tu cuenta está suspendida y no podés hacer esto por ahora. Tocá «Ver detalle» en el aviso de arriba.",
                 motivo_sancion: "Escribí un motivo (al menos 3 caracteres).",
                 sancion_propia: "No podés sancionarte ni revisar tus propias sanciones.",
@@ -1135,6 +1198,42 @@ const hilosPendientesConfirmacion = new Map()
             mostrarAviso("Descargo enviado. Te avisamos cuando el equipo lo revise.")
         })
 
+        // ==================== REVISIÓN LOCAL DE FOTOS DE PERFIL ====================
+        // Antes de subir una foto, NSFWJS (MobileNetV2, ~2,6 MB, en /vendor/nsfwjs, ADR 0007) la clasifica en el navegador.
+        // Se carga recién la primera vez que alguien cambia la foto. Si no carga (navegador viejo), se deja subir: queda
+        // la denuncia. Corre en el navegador, así que alguien que llame a la API a mano lo esquiva; es un primer filtro.
+        const MENSAJE_FOTO_NO_PERMITIDA = "Esa foto no se puede usar: el filtro automático detectó contenido sexual. Elegí otra. Si es un error, avisanos desde Reportes."
+        const UMBRAL_FOTO_EXPLICITA = 0.6
+        let modeloFotos = null
+        function cargarScript(src) {
+            return new Promise(function (resolver, fallar) {
+                const s = document.createElement("script")
+                s.src = src
+                s.onload = resolver
+                s.onerror = fallar
+                document.head.appendChild(s)
+            })
+        }
+        async function fotoPermitida(base64) {
+            try {
+                if (!modeloFotos) modeloFotos = (async function () {
+                    if (!window.nsfwjs) await cargarScript("/vendor/nsfwjs/nsfwjs.min.js")
+                    return window.nsfwjs.load("/vendor/nsfwjs/mobilenet_v2/", { size: 224 })
+                })()
+                const modelo = await modeloFotos
+                const img = new Image()
+                img.src = "data:image/jpeg;base64," + base64
+                await img.decode()
+                const clases = {}
+                ;(await modelo.classify(img, 5)).forEach(function (c) { clases[c.className] = c.probability })
+                return (clases.Porn || 0) + (clases.Hentai || 0) < UMBRAL_FOTO_EXPLICITA
+            } catch (e) {
+                console.warn("[MedMarUNMDP] No se pudo revisar la foto", e)
+                modeloFotos = null
+                return true
+            }
+        }
+
         // ==================== LLAMADAS AL SERVIDOR ====================
 
         const llamadasEnCurso = new Map()
@@ -1149,6 +1248,7 @@ const hilosPendientesConfirmacion = new Map()
             const tarea = (async function () {
                 const inicioRequest = performance.now()
                 const body = Object.assign({ accion: accion }, params || {}, DISPOSITIVO_ID ? { dispositivoId: DISPOSITIVO_ID } : {})
+                if (incluirToken) marcarActividad()
 
                 try {
                     const resultado = await supabaseClient.functions.invoke(SUPABASE_FUNCTION_NAME, { body: body })
@@ -1158,6 +1258,7 @@ const hilosPendientesConfirmacion = new Map()
                     }
                     const data = resultado.data || { ok: false, error: "servidor", ambiguo: true }
                     if (data.error === "suspendido" && data.sancion) actualizarSancion(data.sancion)
+                    if (data.error === "contenido_filtrado") ultimoMotivoFiltro = data.motivo || ""
                     console.debug("[MedMarUNMDP]", accion, Math.round(performance.now() - inicioRequest) + "ms")
                     return data
                 } catch (err) {
@@ -1577,9 +1678,19 @@ async function cargarBootstrap() {
             panelRecuperarPassword.style.display = 'none'
         })
 
+        const chkRecordarSesion = document.getElementById("chkRecordarSesion")
+        const chkRecordarConfig = document.getElementById("chkRecordarConfig")
+        function reflejarPreferenciaSesion() { chkRecordarConfig.checked = recordarSesionActivo() }
+        sesionDeVisitaLista.then(reflejarPreferenciaSesion)
+        chkRecordarConfig.addEventListener("change", function () {
+            guardarPreferenciaSesion(chkRecordarConfig.checked)
+            mostrarAviso(chkRecordarConfig.checked ? "La sesión va a quedar iniciada en este dispositivo." : "La sesión se va a cerrar al cerrar el navegador o tras 12 h sin usar MedMar.")
+        })
+
         // Google OAuth: Supabase maneja el redirect, callback y sesión.
         btnGoogleLogin.addEventListener('click', async function() {
             authMsg.innerText = 'Ingresando con Google…'
+            guardarPreferenciaSesion(chkRecordarSesion.checked)
             const { error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
                 options: { redirectTo: window.location.origin + window.location.pathname }
@@ -1680,6 +1791,7 @@ async function cargarBootstrap() {
             const email = document.getElementById("loginEmail").value.trim()
             const password = document.getElementById("loginPassword").value
 
+            guardarPreferenciaSesion(chkRecordarSesion.checked)
             const login = await iniciarSesionConSupabase(email, password)
 
             if (login.error || !login.data?.session) {
@@ -1723,6 +1835,7 @@ async function cargarBootstrap() {
 
             authMsg.innerText = "Creando cuenta..."
 
+            guardarPreferenciaSesion(chkRecordarSesion.checked)
             const captchaRegistro = await tokenCaptcha('captchaRegistro')
             const { data, error } = await supabaseClient.auth.signUp({
                 email,
@@ -1817,6 +1930,8 @@ async function cargarBootstrap() {
                 try {
                     msgSetupPerfil.textContent = 'Procesando y subiendo la foto…'
                     const base64 = await recortarYComprimirImagen(archivo, 256)
+                    msgSetupPerfil.textContent = 'Revisando la foto…'
+                    if (!(await fotoPermitida(base64))) { btn.disabled = false; msgSetupPerfil.textContent = MENSAJE_FOTO_NO_PERMITIDA; return }
                     const upload = await llamarMutacionResiliente('actualizarFoto', { imagen: base64, mimeType: 'image/jpeg' }, 2)
                     if (!upload.ok) { btn.disabled = false; msgSetupPerfil.textContent = 'No se pudo subir la foto. Probá con un archivo más pequeño.'; return }
                     foto = upload.foto
@@ -3866,6 +3981,8 @@ async function cargarBootstrap() {
 
         logoutBtn.addEventListener("click", async function () {
             await supabaseClient.auth.signOut()
+            try { localStorage.removeItem(CLAVE_RECORDAR_SESION); sessionStorage.removeItem(CLAVE_VISITA) } catch (_) {}
+            chkRecordarSesion.checked = false
             limpiarDatosDeSesion(true)
             ocultarSetupPerfil()
             resetearHistorialPorLogout()
@@ -4390,6 +4507,8 @@ async function cargarBootstrap() {
             try {
 
                 const base64 = await recortarYComprimirImagen(archivo, 256)
+                msgFoto.innerText = "Revisando la foto..."
+                if (!(await fotoPermitida(base64))) { msgFoto.innerText = MENSAJE_FOTO_NO_PERMITIDA; inputArchivoFoto.value = ""; return }
 
                 msgFoto.innerText = "Subiendo..."
 
@@ -5606,7 +5725,7 @@ async function cargarBootstrap() {
                 mostrarSeccion("material", "up")
             } else if (n.tipo === "denuncia") {
                 mostrarSeccion("moderacion", "up")
-                elegirPestaniaModeracion(n.ref_id === REF_AVISO_REPORTES ? "reportes" : n.ref_id === REF_AVISO_APELACIONES ? "sanciones" : "denuncias")
+                elegirPestaniaModeracion(n.ref_id === REF_AVISO_REPORTES ? "reportes" : n.ref_id === REF_AVISO_APELACIONES ? "sanciones" : n.ref_id === REF_AVISO_FILTRO ? "papelera" : "denuncias")
             } else if (n.tipo === "sancion") {
                 verSancionActual()
             } else if ((n.tipo === "noticia" || n.tipo === "recordatorio") && n.link) {
@@ -6607,6 +6726,7 @@ async function cargarBootstrap() {
         const REF_AVISO_APORTES = "00000000-0000-4000-8000-00000a9047e5"
         const REF_AVISO_REPORTES = "00000000-0000-4000-8000-00000e9047e5"
         const REF_AVISO_APELACIONES = "00000000-0000-4000-8000-0000a9e1ac10"
+        const REF_AVISO_FILTRO = "00000000-0000-4000-8000-0000f117e0a0"
         let sitiosMaterial = []
 
         // Sitio admitido de un enlace (el dominio más largo que coincide), o null.

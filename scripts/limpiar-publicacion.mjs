@@ -24,7 +24,7 @@ const archivos = []
   }
 })(raiz)
 
-const codigo = archivos.filter((f) => /\.(js|css)$/.test(f))
+const codigo = archivos.filter((f) => /\.(js|css)$/.test(f) && !f.split(path.sep).includes('vendor'))
 const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx'
 let pesoAntes = 0
 for (const f of codigo) pesoAntes += fs.statSync(f).size

@@ -1,0 +1,4 @@
+NSFWJS 4.4.0 (MIT, Infinite Red) — https://github.com/infinitered/nsfwjs
+nsfwjs.min.js: dist/browser del paquete npm nsfwjs@4.4.0 (incluye TensorFlow.js), verificado contra la integridad del registro npm.
+mobilenet_v2/: modelo MobileNetV2 del repositorio (tag v4.4.0); el binario coincide con el del paquete npm.
+Lo usa web/js/app.js (fotoPermitida) para revisar fotos de perfil en el navegador. Ver docs/decisiones/0007.

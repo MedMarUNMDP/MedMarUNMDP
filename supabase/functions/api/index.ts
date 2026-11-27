@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient, type User } from 'npm:@supabase/supabase-js@2'
+import { revisarSeudonimo, revisarTexto, type ResultadoFiltro } from './filtro.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const PUBLISHABLE_KEY = Deno.env.get('SUPABASE_PUBLISHABLE_KEY') || Deno.env.get('SUPABASE_ANON_KEY')!
@@ -118,12 +119,17 @@ async function publicarClasificado(admin: SupabaseClient, user: any, body: any) 
     .eq('autor_id', user.id).eq('activo', true).gt('expira_at', new Date().toISOString())
   if (cErr) throw cErr
   if (Number(count || 0) >= MAX_CLASIFICADOS_ACTIVOS) return json({ ok: false, error: 'clasificados_maximo' })
+  const filtro = revisarTexto(titulo + '\n' + descripcion + '\n' + (precio || ''))
   const { data, error } = await admin.from('clasificados').insert({
-    autor_id: user.id, categoria, titulo, descripcion, precio, contacto, operation_id: operationId,
+    autor_id: user.id, categoria, titulo, descripcion, precio, contacto, operation_id: operationId, ...marcaFiltro(filtro),
   }).select('id').single()
   if (error) {
     if (pgCode(error) === '23505') return json({ ok: true, repetido: true })
     throw error
+  }
+  if (filtro) {
+    await avisarFiltro(admin, user.id, 'clasificado', String(data.id), titulo, filtro)
+    return json(respuestaFiltrada(filtro))
   }
   return json({ ok: true, id: String(data.id) })
 }
@@ -554,6 +560,7 @@ const REF_AVISO_APORTES = '00000000-0000-4000-8000-00000a9047e5'
 const REF_AVISO_DENUNCIAS = '00000000-0000-4000-8000-0000000de0c1'
 const REF_AVISO_REPORTES = '00000000-0000-4000-8000-00000e9047e5'
 const REF_AVISO_APELACIONES = '00000000-0000-4000-8000-0000a9e1ac10'
+const REF_AVISO_FILTRO = '00000000-0000-4000-8000-0000f117e0a0'
 
 // Mails al equipo (cola notificacion_queue → función maintenance → Gmail). Como mucho uno por tema cada
 // HORAS_ENTRE_MAILS_EQUIPO por persona, así una ola de denuncias no llena la casilla (ni el cupo diario de Gmail).
@@ -563,6 +570,7 @@ const MAIL_EQUIPO: Record<string, { asunto: string, pestania: string }> = {
   [REF_AVISO_DENUNCIAS]: { asunto: 'Hay denuncias para revisar', pestania: 'denuncias' },
   [REF_AVISO_REPORTES]: { asunto: 'Llegaron reportes o sugerencias', pestania: 'reportes' },
   [REF_AVISO_APELACIONES]: { asunto: 'Hay descargos de cuentas suspendidas', pestania: 'sanciones' },
+  [REF_AVISO_FILTRO]: { asunto: 'El filtro automático retiró publicaciones', pestania: 'papelera' },
 }
 async function encolarMailEquipo(admin: SupabaseClient, userId: string, ref: string, resumen: string, ultimo: string) {
   const conf = MAIL_EQUIPO[ref]
@@ -723,6 +731,29 @@ async function avisarAutorModeracion(admin: SupabaseClient, moderadorId: string,
   })
   if (error) console.warn('aviso_moderacion_autor', error.message)
 }
+// ---------- Filtro automático (filtro.ts, ADR 0007) ----------
+// Lo que el filtro detecta se guarda igual, pero directo en la papelera (eliminado_por = null): nadie lo ve, la persona
+// recibe el motivo y un moderador lo puede restaurar en los 7 días normales.
+function marcaFiltro(r: ResultadoFiltro | null) {
+  return r ? { eliminado_at: new Date().toISOString(), eliminado_por: null, motivo_eliminacion: ('Filtro automático: ' + r.motivo).slice(0, 200) } : {}
+}
+async function avisarFiltro(admin: SupabaseClient, userId: string, tipo: string, id: string, titulo: string, r: ResultadoFiltro) {
+  const que = NOMBRE_TIPO_PUBLICACION[tipo] || 'publicación'
+  const { error } = await admin.from('notificaciones').insert({
+    user_id: userId, tipo: 'moderacion', ref_id: id, contexto: titulo.replace(/\s+/g, ' ').slice(0, 160),
+    cuerpo: ('El filtro automático retiró tu ' + que + ': ' + r.motivo + '. Queda 7 días en revisión: si fue un error, ' +
+      'el equipo de moderación la puede restaurar (avisanos desde Reportes).').slice(0, 400),
+    link: '/terminos/#convivencia',
+  })
+  if (error) console.warn('aviso_filtro', error.message)
+  await avisarModeradores(admin, 'denuncia', REF_AVISO_FILTRO,
+    (n) => n === 1 ? 'El filtro automático retiró una publicación' : 'El filtro automático retiró ' + n + ' publicaciones',
+    r.motivo + ' · ' + titulo.replace(/\s+/g, ' ').slice(0, 160), userId)
+}
+function respuestaFiltrada(r: ResultadoFiltro) {
+  return { ok: false, error: 'contenido_filtrado', motivo: r.motivo }
+}
+
 // ---------- Papelera: lo que quita la moderación queda 7 días oculto y se puede restaurar ----------
 const TABLA_PAPELERA: Record<string, string> = { hilo: 'hilos', respuesta: 'respuestas', material: 'materiales', clasificado: 'clasificados' }
 async function moverAPapelera(admin: SupabaseClient, tipo: string, id: string, moderadorId: string, motivo: string) {
@@ -771,7 +802,7 @@ async function listarPapelera(admin: SupabaseClient) {
   const perfiles = await profileMap(admin, items.flatMap((i) => [i.autor, i.eliminado_por].filter(Boolean).map(String)))
   return json({ ok: true, papelera: items.sort((a, b) => String(b.eliminado_at).localeCompare(String(a.eliminado_at))).map((i) => ({
     tipo: i.tipo, id: String(i.id), titulo: String(i.titulo || '').slice(0, 140), detalle: String(i.detalle || '').slice(0, 300),
-    autor: i.autor ? (perfiles.get(String(i.autor))?.pseudonimo || 'Estudiante') : '', quitadoPor: perfiles.get(String(i.eliminado_por || ''))?.pseudonimo || '—',
+    autor: i.autor ? (perfiles.get(String(i.autor))?.pseudonimo || 'Estudiante') : '', quitadoPor: i.eliminado_por ? (perfiles.get(String(i.eliminado_por))?.pseudonimo || '—') : 'Filtro automático',
     motivo: i.motivo_eliminacion || '', quitadoAt: i.eliminado_at, borraAt: new Date(new Date(i.eliminado_at).getTime() + 7 * 86400000).toISOString(),
   })) })
 }
@@ -2541,7 +2572,8 @@ async function handle(req: Request, body: any) {
       const linksCheck=validateContentLinks(contenido)
       if(!linksCheck.ok) return json({ok:false,error:linksCheck.demasiados?'demasiados_enlaces':'enlace_no_permitido',url:linksCheck.invalid})
       const isSensitive=body.isSensitive===true || body.sensible==='1'
-      const {data,error}=await admin.from('hilos').insert({autor_id:user.id,es_anonimo:false,titulo,contenido,etiquetas:tags,link:null,is_sensitive:isSensitive,operation_id:operationId}).select('id').single()
+      const filtro=revisarTexto([titulo,contenido,...(encuesta?[encuesta.pregunta,...(encuesta.opciones||[])]:[])].join('\n'))
+      const {data,error}=await admin.from('hilos').insert({autor_id:user.id,es_anonimo:false,titulo,contenido,etiquetas:tags,link:null,is_sensitive:isSensitive,operation_id:operationId,...marcaFiltro(filtro)}).select('id').single()
       if(error){
         if((error as any).code==='23505'){ const {data:existing}=await client.from('hilos').select('id').eq('operation_id',operationId).single(); if(existing){
           // Si un intento anterior se cortó entre el hilo y la encuesta, se completa ahora.
@@ -2553,6 +2585,12 @@ async function handle(req: Request, body: any) {
       if(encuesta){
         const {error:errEncuesta}=await admin.from('encuestas').insert({hilo_id:data.id,...encuesta})
         if(errEncuesta){await admin.from('hilos').delete().eq('id',data.id);throw errEncuesta}
+      }
+      if(filtro){
+        const filtrada=respuestaFiltrada(filtro)
+        await saveIdempotent(admin,user.id,action,operationId,filtrada)
+        await avisarFiltro(admin,user.id,'hilo',String(data.id),titulo,filtro)
+        return json(filtrada)
       }
       const hiloCreado=await getOrBuildThreadResponse(client,user.id,String(data.id))
       const response={ok:true,id:String(data.id),hilo:encuesta?{...hiloCreado,encuesta:await datosEncuesta(admin,String(data.id),user.id)}:hiloCreado}
@@ -2571,8 +2609,10 @@ async function handle(req: Request, body: any) {
       if(!linksCheck.ok) return json({ok:false,error:linksCheck.demasiados?'demasiados_enlaces':'enlace_no_permitido',url:linksCheck.invalid})
       const {data:thread}=await client.from('hilos').select('id').eq('id',hiloId).single(); if(!thread)return json({ok:false,error:'no_encontrado'})
       if(parentId){const {data:parent,error:parentError}=await client.from('respuestas').select('id').eq('id',parentId).eq('hilo_id',hiloId).maybeSingle();if(parentError)throw parentError;if(!parent)return json({ok:false,error:'respuesta_invalida'})}
-      const {data,error}=await admin.from('respuestas').insert({hilo_id:hiloId,parent_id:parentId||null,autor_id:user.id,es_anonimo:false,contenido,operation_id:operationId}).select('id').single()
+      const filtro=revisarTexto(contenido)
+      const {data,error}=await admin.from('respuestas').insert({hilo_id:hiloId,parent_id:parentId||null,autor_id:user.id,es_anonimo:false,contenido,operation_id:operationId,...marcaFiltro(filtro)}).select('id').single()
       if(error){ if((error as any).code==='23503')return json({ok:false,error:parentId?'respuesta_invalida':'no_encontrado'}); if((error as any).code==='23505'){const {data:existing}=await client.from('respuestas').select('id').eq('operation_id',operationId).single(); if(existing)return json(await getOrBuildResponseResponse(client,user.id,String(existing.id)))} throw error }
+      if(filtro){const filtrada=respuestaFiltrada(filtro);await saveIdempotent(admin,user.id,action,operationId,filtrada);await avisarFiltro(admin,user.id,'respuesta',String(data.id),contenido,filtro);return json(filtrada)}
       const response=await getOrBuildResponseResponse(client,user.id,String(data.id),true); await saveIdempotent(admin,user.id,action,operationId,response); return json(response)
     }
     case 'guardar': {
@@ -2690,6 +2730,7 @@ async function handle(req: Request, body: any) {
       const pseudonimo=String(body.pseudonimo||'').trim().normalize('NFC')
       const foto=String(body.foto||'').trim()
       if(!/^[A-Za-zÀ-ÿ0-9 _.-]{3,24}$/.test(pseudonimo)) return json({ok:false,error:'pseudonimo_invalido'})
+      if(revisarSeudonimo(pseudonimo)) return json({ok:false,error:'pseudonimo_no_permitido'})
       const presetAllowed = /^https:\/\/medmar\.com\.ar\/assets\/avatars\/[a-z0-9_-]+\.svg$/i.test(foto)
       const existingPhoto = !foto || presetAllowed || fotoPropiaValida(foto, user.id)
       if(!existingPhoto) return json({ok:false,error:'foto_invalida'})
@@ -2755,7 +2796,7 @@ async function handle(req: Request, body: any) {
     }
     case 'actualizarPseudonimo': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
-      const pseudonimo=String(body.pseudonimo||'').trim().normalize('NFC');if(!/^[A-Za-zÀ-ÿ0-9 _.-]{3,24}$/.test(pseudonimo))return json({ok:false,error:'pseudonimo_invalido'});const {data,error}=await admin.from('profiles').update({pseudonimo}).eq('id',user.id).select('pseudonimo').single();if(error){if((error as any).code==='23505')return json({ok:false,error:'pseudonimo_en_uso'});throw error}return json({ok:true,pseudonimo:data.pseudonimo})
+      const pseudonimo=String(body.pseudonimo||'').trim().normalize('NFC');if(!/^[A-Za-zÀ-ÿ0-9 _.-]{3,24}$/.test(pseudonimo))return json({ok:false,error:'pseudonimo_invalido'});if(revisarSeudonimo(pseudonimo))return json({ok:false,error:'pseudonimo_no_permitido'});const {data,error}=await admin.from('profiles').update({pseudonimo}).eq('id',user.id).select('pseudonimo').single();if(error){if((error as any).code==='23505')return json({ok:false,error:'pseudonimo_en_uso'});throw error}return json({ok:true,pseudonimo:data.pseudonimo})
     }
     case 'actualizarFoto': {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
