@@ -1748,6 +1748,16 @@ async function bootstrap(user: User, client: SupabaseClient, admin: SupabaseClie
   }})
 }
 
+// Etiquetas de las últimas 1000 publicaciones con cuántas veces se usó cada una (la web sugiere las más usadas).
+function contarEtiquetas(filas: any[]) {
+  const usos: Record<string, number> = {}
+  for (const r of filas) for (const tag of Array.isArray(r.etiquetas) ? r.etiquetas : []) {
+    if (typeof tag === 'string' && tag) usos[tag] = (usos[tag] || 0) + 1
+  }
+  const etiquetas = Object.keys(usos).sort((a, b) => usos[b] - usos[a] || a.localeCompare(b, 'es'))
+  return { etiquetas, usos }
+}
+
 async function foroBootstrap(user: User, client: SupabaseClient, admin: SupabaseClient, etiqueta: string) {
   const rl = await rateLimit(admin, 'foroBootstrap', user.id)
   if (rl) return rl
@@ -1756,13 +1766,8 @@ async function foroBootstrap(user: User, client: SupabaseClient, admin: Supabase
     getThreadPage(client, user.id, etiqueta, 0),
   ])
   if (tagsRes.error) throw tagsRes.error
-  const rawTags: string[] = (tagsRes.data || []).flatMap((r: any): string[] =>
-    Array.isArray(r.etiquetas)
-      ? r.etiquetas.filter((tag: unknown): tag is string => typeof tag === 'string')
-      : []
-  )
-  const tags: string[] = Array.from(new Set<string>(rawTags)).sort((a: string, b: string) => a.localeCompare(b, 'es'))
-  return json({ ok: true, esModerador: await isModerator(admin, user.id), data: { etiquetas: tags, ...threadsRes } })
+  const { etiquetas, usos } = contarEtiquetas(tagsRes.data || [])
+  return json({ ok: true, esModerador: await isModerator(admin, user.id), data: { etiquetas, usos, ...threadsRes } })
 }
 
 async function getThreadPage(client: SupabaseClient, userId: string, etiqueta: string, offset: number, busqueda = '') {
@@ -2515,15 +2520,9 @@ async function handle(req: Request, body: any) {
     case 'foroBootstrap': return foroBootstrap(user, client, admin, String(body.etiqueta || '').trim().toLowerCase().slice(0, MAX_TAG_LENGTH))
     case 'listarEtiquetas': {
       const rl = await rateLimit(admin, action, user.id); if (rl) return rl
-      const { data, error } = await client.from('hilos').select('etiquetas').limit(1000)
+      const { data, error } = await client.from('hilos').select('etiquetas').order('created_at', { ascending: false }).limit(1000)
       if (error) throw error
-      const rawTags: string[] = (data || []).flatMap((r: any): string[] =>
-        Array.isArray(r.etiquetas)
-          ? r.etiquetas.filter((tag: unknown): tag is string => typeof tag === 'string')
-          : []
-      )
-      const tags: string[] = Array.from(new Set<string>(rawTags)).sort((a: string, b: string) => a.localeCompare(b, 'es'))
-      return json({ ok: true, etiquetas: tags })
+      return json({ ok: true, ...contarEtiquetas(data || []) })
     }
     case 'listarHilos': {
       const rl = await rateLimit(admin, action, user.id); if (rl) return rl

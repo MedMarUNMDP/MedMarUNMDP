@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-29-filtro-y-sesion"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-29-etiquetas"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -212,7 +212,6 @@ const hilosPendientesConfirmacion = new Map()
         const contadorContenido = document.getElementById("contadorContenido")
 
         const inputFiltroEtiqueta = document.getElementById("inputBuscarForo")
-        const listaEtiquetasDisponibles = document.getElementById("listaEtiquetasDisponibles")
         const ayudaFiltroEtiqueta = document.getElementById("ayudaFiltroEtiqueta")
         const btnFiltrar = document.getElementById("btnBuscarForo")
         const btnQuitarFiltro = document.getElementById("btnQuitarFiltro")
@@ -1520,31 +1519,298 @@ async function cargarBootstrap() {
             esModeradorActual = !!r.esModerador
             btnIrModeracion.style.display = puedeModerar() ? 'inline-block' : 'none'; actualizarAccesosModeracion()
             const data = busquedaForoActual ? r : (r.data || {})
-            const item = { etiquetas: data.etiquetas || [], hilos: data.hilos || [], hayMas: !!data.hayMas, actualizadoEn: Date.now() }
+            const item = { etiquetas: data.etiquetas || [], usos: data.usos || {}, hilos: data.hilos || [], hayMas: !!data.hayMas, actualizadoEn: Date.now() }
             foroCacheCliente.set(key, item)
             if (key === claveForo("", "")) guardarResumenForo(item.hilos)
-            renderizarEtiquetasCliente(item.etiquetas)
+            renderizarEtiquetasCliente(item.etiquetas, item.usos)
             renderizarHilos(item.hilos, true)
             paginaHilosActual = item.hilos.length
             btnCargarMas.style.display = item.hayMas ? 'block' : 'none'
             foroCargado = true
         }
 
-        function renderizarEtiquetasCliente(etiquetas) {
-            listaEtiquetasDisponibles.innerHTML = ''
-            mapaEtiquetasDisponibles = new Map()
-            etiquetas.forEach(function (etiqueta) {
-                mapaEtiquetasDisponibles.set(normalizarEtiqueta(etiqueta), etiqueta)
-                const option = document.createElement('option')
-                option.value = etiqueta
-                listaEtiquetasDisponibles.appendChild(option)
-            })
-            if (ayudaFiltroEtiqueta) {
-                ayudaFiltroEtiqueta.textContent = etiquetas.length
-                    ? 'Elegí una de las etiquetas existentes para filtrar.'
-                    : 'Todavía no hay etiquetas publicadas.'
-            }
+        // Las búsquedas de texto (listarHilos) no traen etiquetas: se conservan las que ya había.
+        function renderizarEtiquetasCliente(etiquetas, usos) {
+            if (!Array.isArray(etiquetas) || !etiquetas.length) return
+            actualizarEtiquetasConocidas(etiquetas, usos || {})
         }
+
+        // ==================== ETIQUETAS: SUGERENCIAS Y BUSCADOR ====================
+        // Las etiquetas existentes (con cuántas veces se usaron) llegan en foroBootstrap / listarEtiquetas.
+        // - Al escribir una publicación: se eligen como chips; mientras escribís aparecen etiquetas parecidas (sin
+        //   importar tildes ni errores de tipeo) y la opción de crear una nueva. Debajo se sugieren según el texto.
+        // - En el foro: buscador de etiquetas con las mismas sugerencias y las más usadas como atajos.
+        // «Fisiologia» y «fisiología» son la misma: si ya existe, se usa la que existe.
+        const MAX_ETIQUETAS_HILO = 5
+        const MAX_LARGO_ETIQUETA = 24
+        // Base para que haya sugerencias aunque todavía nadie las haya usado.
+        const ETIQUETAS_BASE = ["anatomía", "fisiología", "histología", "embriología", "bioquímica", "biología celular", "genética",
+            "microbiología", "inmunología", "parasitología", "farmacología", "patología", "semiología", "salud pública", "epidemiología",
+            "pediatría", "ginecología", "obstetricia", "cirugía", "clínica médica", "psiquiatría", "psicología", "neurología", "cardiología",
+            "parcial", "final", "resumen", "apuntes", "material", "bibliografía", "casos clínicos", "práctico", "cursada", "consulta",
+            "comisiones", "prácticas", "pfo", "ingreso", "abcc", "cfsh"]
+        let etiquetasConocidas = new Map()   // clave normalizada → { etiqueta, usos }
+
+        function claveEtiqueta(texto) {
+            return String(texto || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9ñ ]+/g, " ").replace(/\s+/g, " ").trim()
+        }
+        // Igual que cleanTags de la API: minúsculas, letras, números, espacio, guion y guion bajo; hasta 24 caracteres.
+        function limpiarEtiqueta(texto) {
+            return String(texto || "").normalize("NFC").toLowerCase().replace(/[^\p{L}\p{N} _-]/gu, "").replace(/\s+/g, " ").trim().slice(0, MAX_LARGO_ETIQUETA)
+        }
+        function actualizarEtiquetasConocidas(etiquetas, usos) {
+            const mapa = new Map()
+            ETIQUETAS_BASE.forEach(function (e) { mapa.set(claveEtiqueta(e), { etiqueta: e, usos: 0 }) })
+            ;(etiquetas || []).forEach(function (e) {
+                const clave = claveEtiqueta(e)
+                if (!clave) return
+                const n = Number((usos || {})[e]) || 1
+                const previo = mapa.get(clave)
+                // Si hay dos variantes (con y sin tilde), gana la más usada.
+                if (!previo || previo.usos < n) mapa.set(clave, { etiqueta: e, usos: n + (previo ? previo.usos : 0) })
+                else previo.usos += n
+            })
+            etiquetasConocidas = mapa
+            renderizarEtiquetasPopulares()
+        }
+
+        function distancia(a, b) {
+            if (Math.abs(a.length - b.length) > 2) return 3
+            let previa = Array.from({ length: b.length + 1 }, function (_, j) { return j })
+            for (let i = 1; i <= a.length; i++) {
+                const fila = [i]
+                for (let j = 1; j <= b.length; j++) {
+                    fila[j] = Math.min(previa[j] + 1, fila[j - 1] + 1, previa[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1))
+                }
+                previa = fila
+            }
+            return previa[b.length]
+        }
+
+        // Etiquetas parecidas a lo escrito, de más a menos parecidas (y más usadas primero ante un empate).
+        function etiquetasSimilares(texto, limite, excluir) {
+            const q = claveEtiqueta(texto)
+            if (!q) return []
+            const fuera = new Set((excluir || []).map(claveEtiqueta))
+            const tolerancia = q.length >= 7 ? 2 : q.length >= 4 ? 1 : 0
+            const resultado = []
+            etiquetasConocidas.forEach(function (info, clave) {
+                if (fuera.has(clave)) return
+                let puntaje = 0
+                if (clave === q) puntaje = 100
+                else if (clave.startsWith(q)) puntaje = 80
+                else if (clave.split(" ").some(function (p) { return p.startsWith(q) })) puntaje = 70
+                else if (q.length >= 3 && clave.includes(q)) puntaje = 60
+                else if (tolerancia) {
+                    const d = Math.min(distancia(q, clave), distancia(q, clave.slice(0, q.length)))
+                    if (d <= tolerancia) puntaje = 45 - d * 8
+                }
+                if (puntaje) resultado.push({ etiqueta: info.etiqueta, usos: info.usos, puntaje: puntaje + Math.min(12, Math.log2(info.usos + 1) * 3) })
+            })
+            return resultado.sort(function (a, b) { return b.puntaje - a.puntaje || b.usos - a.usos }).slice(0, limite || 8)
+        }
+
+        // Si lo escrito ya existe (aunque cambie una tilde), se usa la existente.
+        function etiquetaCanonica(texto) {
+            const limpia = limpiarEtiqueta(texto)
+            const existente = etiquetasConocidas.get(claveEtiqueta(limpia))
+            return existente ? existente.etiqueta : limpia
+        }
+
+        // Lista desplegable reutilizable (composer y buscador del foro). opciones: { alElegir(etiqueta), permitirCrear, excluir() }
+        function autocompletarEtiquetas(input, lista, opciones) {
+            let activa = -1
+            let items = []
+            function cerrar() {
+                lista.hidden = true
+                lista.innerHTML = ""
+                input.setAttribute("aria-expanded", "false")
+                input.removeAttribute("aria-activedescendant")
+                activa = -1
+                items = []
+            }
+            function marcar(i) {
+                activa = i
+                lista.querySelectorAll("[role=option]").forEach(function (li, j) { li.setAttribute("aria-selected", String(j === i)) })
+                if (i >= 0) input.setAttribute("aria-activedescendant", lista.id + "-" + i)
+                else input.removeAttribute("aria-activedescendant")
+            }
+            function abrir() {
+                const texto = input.value
+                const limpia = limpiarEtiqueta(texto)
+                const similares = etiquetasSimilares(texto, 7, opciones.excluir ? opciones.excluir() : [])
+                items = similares.map(function (s) { return { etiqueta: s.etiqueta, usos: s.usos } })
+                const existe = etiquetasConocidas.has(claveEtiqueta(limpia))
+                if (opciones.permitirCrear && limpia.length >= 2 && !existe) items.push({ etiqueta: limpia, nueva: true })
+                if (!items.length) { cerrar(); return }
+                lista.innerHTML = items.map(function (it, i) {
+                    return "<li role='option' id='" + lista.id + "-" + i + "' aria-selected='false' data-i='" + i + "'>" +
+                        (it.nueva ? "<span class='etiquetaNueva'>Crear</span> #" + escapeHtml(it.etiqueta)
+                            : "#" + escapeHtml(it.etiqueta) + (it.usos ? "<span class='usosEtiqueta'>" + it.usos + (it.usos === 1 ? " publicación" : " publicaciones") + "</span>" : "")) +
+                        "</li>"
+                }).join("")
+                lista.hidden = false
+                input.setAttribute("aria-expanded", "true")
+                marcar(-1)
+            }
+            function elegir(i) {
+                const it = items[i]
+                if (!it) return
+                cerrar()
+                opciones.alElegir(it.etiqueta)
+            }
+            input.addEventListener("input", abrir)
+            input.addEventListener("focus", function () { if (input.value.trim()) abrir() })
+            input.addEventListener("blur", function () { setTimeout(cerrar, 150) })
+            input.addEventListener("keydown", function (e) {
+                if (e.key === "ArrowDown" && items.length) { e.preventDefault(); marcar((activa + 1) % items.length) }
+                else if (e.key === "ArrowUp" && items.length) { e.preventDefault(); marcar(activa <= 0 ? items.length - 1 : activa - 1) }
+                else if (e.key === "Escape" && !lista.hidden) { e.preventDefault(); cerrar() }
+                else if (e.key === "Enter" || (e.key === "," && opciones.permitirCrear)) {
+                    if (activa >= 0) { e.preventDefault(); elegir(activa) }
+                    else if (opciones.permitirCrear && limpiarEtiqueta(input.value)) { e.preventDefault(); cerrar(); opciones.alElegir(etiquetaCanonica(input.value)) }
+                    else if (opciones.alEnter) { e.preventDefault(); cerrar(); opciones.alEnter() }
+                }
+            })
+            // mousedown (no click): se elige antes de que el blur cierre la lista.
+            lista.addEventListener("mousedown", function (e) {
+                const li = e.target.closest("[data-i]")
+                if (!li) return
+                e.preventDefault()
+                elegir(Number(li.dataset.i))
+            })
+            return { cerrar: cerrar }
+        }
+
+        // ---- Composer: chips + sugerencias ----
+        const listaElegidas = document.getElementById("etiquetasElegidas")
+        const inputNuevaEtiqueta = document.getElementById("inputNuevaEtiqueta")
+        const zonaSugeridas = document.getElementById("etiquetasSugeridas")
+        let etiquetasElegidas = []
+
+        function renderizarEtiquetasElegidas() {
+            listaElegidas.innerHTML = etiquetasElegidas.map(function (e, i) {
+                return "<li class='chipEtiquetaElegida'>#" + escapeHtml(e) + "<button type='button' data-quitar-etiqueta='" + i + "' aria-label='Quitar la etiqueta " + escapeAttr(e) + "'>×</button></li>"
+            }).join("")
+            inputEtiquetas.value = etiquetasElegidas.join(", ")
+            const llena = etiquetasElegidas.length >= MAX_ETIQUETAS_HILO
+            inputNuevaEtiqueta.disabled = llena
+            inputNuevaEtiqueta.placeholder = llena ? "Llegaste a 5 etiquetas" : etiquetasElegidas.length ? "Agregar otra…" : "Escribí para buscar o crear una etiqueta"
+            document.getElementById("notaMaterialForo").hidden = !etiquetasElegidas.some(function (e) { return /^(material|resumen|apuntes|bibliografia|bibliografía)$/.test(e) })
+            sugerirEtiquetasPorTexto()
+        }
+        function agregarEtiqueta(e) {
+            const etiqueta = etiquetaCanonica(e)
+            if (!etiqueta || etiquetasElegidas.length >= MAX_ETIQUETAS_HILO) return
+            if (etiquetasElegidas.some(function (x) { return claveEtiqueta(x) === claveEtiqueta(etiqueta) })) { inputNuevaEtiqueta.value = ""; return }
+            etiquetasElegidas.push(etiqueta)
+            inputNuevaEtiqueta.value = ""
+            renderizarEtiquetasElegidas()
+            if (!inputNuevaEtiqueta.disabled) inputNuevaEtiqueta.focus()
+        }
+        function reiniciarSelectorEtiquetas() {
+            etiquetasElegidas = []
+            inputNuevaEtiqueta.value = ""
+            renderizarEtiquetasElegidas()
+        }
+        autocompletarEtiquetas(inputNuevaEtiqueta, document.getElementById("sugerenciasEtiqueta"), {
+            permitirCrear: true,
+            alElegir: agregarEtiqueta,
+            excluir: function () { return etiquetasElegidas }
+        })
+        inputNuevaEtiqueta.addEventListener("keydown", function (e) {
+            if (e.key === "Backspace" && !inputNuevaEtiqueta.value && etiquetasElegidas.length) {
+                etiquetasElegidas.pop()
+                renderizarEtiquetasElegidas()
+            }
+        })
+        listaElegidas.addEventListener("click", function (e) {
+            const b = e.target.closest("[data-quitar-etiqueta]")
+            if (!b) return
+            etiquetasElegidas.splice(Number(b.dataset.quitarEtiqueta), 1)
+            renderizarEtiquetasElegidas()
+            inputNuevaEtiqueta.focus()
+        })
+
+        // Sugeridas según el título y el texto: etiquetas conocidas que aparecen (o casi) en lo que escribiste.
+        function etiquetasDelTexto(texto, limite) {
+            const norm = " " + claveEtiqueta(texto) + " "
+            if (norm.trim().length < 3) return []
+            const palabras = norm.trim().split(" ").filter(function (p) { return p.length >= 6 })
+            const elegidas = new Set(etiquetasElegidas.map(claveEtiqueta))
+            const res = []
+            etiquetasConocidas.forEach(function (info, clave) {
+                if (elegidas.has(clave) || clave.length < 3) return
+                let puntaje = 0
+                if (norm.includes(" " + clave + " ")) puntaje = 10
+                else if (clave.length >= 6 && !clave.includes(" ") && palabras.some(function (p) { return distancia(p, clave) <= 1 })) puntaje = 6
+                if (puntaje) res.push({ etiqueta: info.etiqueta, puntaje: puntaje + Math.min(8, Math.log2(info.usos + 1) * 2) })
+            })
+            // Enlaces a material (Drive, Docs, etc.): «material».
+            if (/https?:\/\/(drive|docs)\.google\.com|canva\.com|notion\.(so|site)|\.pdf\b/i.test(texto) && !elegidas.has("material") && !res.some(function (r) { return claveEtiqueta(r.etiqueta) === "material" })) {
+                res.push({ etiqueta: (etiquetasConocidas.get("material") || { etiqueta: "material" }).etiqueta, puntaje: 9 })
+            }
+            return res.sort(function (a, b) { return b.puntaje - a.puntaje }).slice(0, limite || 5).map(function (r) { return r.etiqueta })
+        }
+        let temporizadorSugeridas = null
+        function sugerirEtiquetasPorTexto() {
+            clearTimeout(temporizadorSugeridas)
+            temporizadorSugeridas = setTimeout(function () {
+                const lugar = MAX_ETIQUETAS_HILO - etiquetasElegidas.length
+                const sugeridas = lugar > 0 ? etiquetasDelTexto(inputTitulo.value + "\n" + inputContenido.value, Math.min(5, lugar)) : []
+                zonaSugeridas.hidden = !sugeridas.length
+                zonaSugeridas.innerHTML = sugeridas.length ? "<span>Sugeridas:</span>" + sugeridas.map(function (e) {
+                    return "<button type='button' class='chipSugerida' data-sugerida='" + escapeAttr(e) + "'>+ #" + escapeHtml(e) + "</button>"
+                }).join("") : ""
+            }, 250)
+        }
+        inputTitulo.addEventListener("input", sugerirEtiquetasPorTexto)
+        inputContenido.addEventListener("input", sugerirEtiquetasPorTexto)
+        zonaSugeridas.addEventListener("click", function (e) {
+            const b = e.target.closest("[data-sugerida]")
+            if (b) agregarEtiqueta(b.dataset.sugerida)
+        })
+
+        // ---- Foro: buscador de etiquetas y las más usadas ----
+        const inputBuscarEtiqueta = document.getElementById("inputBuscarEtiqueta")
+        function filtrarPorEtiqueta(etiqueta) {
+            etiquetaFiltroActual = String(etiqueta || "").toLowerCase()
+            busquedaForoActual = ""
+            inputFiltroEtiqueta.value = ""
+            inputBuscarEtiqueta.value = ""
+            btnQuitarFiltro.style.display = "inline-flex"
+            if (ayudaFiltroEtiqueta) ayudaFiltroEtiqueta.textContent = "Etiqueta: #" + etiqueta
+            renderizarEtiquetasPopulares()
+            cargarHilos(true)
+        }
+        autocompletarEtiquetas(inputBuscarEtiqueta, document.getElementById("sugerenciasFiltroEtiqueta"), {
+            permitirCrear: false,
+            alElegir: filtrarPorEtiqueta,
+            alEnter: function () {
+                const parecidas = etiquetasSimilares(inputBuscarEtiqueta.value, 1)
+                if (parecidas.length) filtrarPorEtiqueta(parecidas[0].etiqueta)
+            }
+        })
+        function renderizarEtiquetasPopulares() {
+            const cont = document.getElementById("etiquetasPopulares")
+            if (!cont) return
+            const usadas = []
+            etiquetasConocidas.forEach(function (info) { if (info.usos) usadas.push(info) })
+            usadas.sort(function (a, b) { return b.usos - a.usos })
+            cont.innerHTML = usadas.slice(0, 10).map(function (info) {
+                const activa = etiquetaFiltroActual && claveEtiqueta(info.etiqueta) === claveEtiqueta(etiquetaFiltroActual)
+                return "<button type='button' class='chipPopular' data-filtrar-etiqueta='" + escapeAttr(info.etiqueta) + "' aria-pressed='" + (activa ? "true" : "false") + "'>#" + escapeHtml(info.etiqueta) + "</button>"
+            }).join("")
+            cont.hidden = !usadas.length
+        }
+        document.getElementById("etiquetasPopulares").addEventListener("click", function (e) {
+            const b = e.target.closest("[data-filtrar-etiqueta]")
+            if (!b) return
+            if (b.getAttribute("aria-pressed") === "true") btnQuitarFiltro.click()
+            else filtrarPorEtiqueta(b.dataset.filtrarEtiqueta)
+        })
+        actualizarEtiquetasConocidas([], {})
+
 
         // ==================== CONTRASEÑAS / AUTENTICACIÓN SUPABASE ====================
 
@@ -2115,7 +2381,6 @@ async function cargarBootstrap() {
             "prnt.sc", "lightshot.com", "pinetools.com", "screenapp.io", "imgur.com", "ibb.co", "postimg.cc", "imgbb.com", "imageshack.com", "imgbox.com"
         ]
 
-        let mapaEtiquetasDisponibles = new Map()
 
         function hostPermitidoLocal(hostname) {
             const host = (hostname || "").toLowerCase().replace(/\.$/, "")
@@ -2133,19 +2398,16 @@ async function cargarBootstrap() {
             }
         }
 
-        function normalizarEtiqueta(texto) {
-            return (texto || "").trim().toLowerCase()
-        }
 
         async function cargarEtiquetasDisponibles() {
             const cache = foroCacheCliente.get(claveForo('', ''))
             if (cache && cache.actualizadoEn && Date.now() - cache.actualizadoEn < FRESCURA_FORO_CLIENTE_MS && Array.isArray(cache.etiquetas)) {
-                renderizarEtiquetasCliente(cache.etiquetas)
+                renderizarEtiquetasCliente(cache.etiquetas, cache.usos)
                 return
             }
             const r = await llamar("listarEtiquetas", {})
             if (!r.ok) return
-            renderizarEtiquetasCliente(r.etiquetas || [])
+            renderizarEtiquetasCliente(r.etiquetas || [], r.usos)
         }
 
         function aplicarFiltroEtiqueta() {
@@ -2234,6 +2496,7 @@ async function cargarBootstrap() {
                     hilos: hilosConfirmados,
                     hayMas: !!r.hayMas,
                     etiquetas: foroCacheCliente.get(key)?.etiquetas || [],
+                    usos: foroCacheCliente.get(key)?.usos || {},
                     actualizadoEn: Date.now()
                 }
                 foroCacheCliente.set(key, item)
@@ -2267,6 +2530,7 @@ async function cargarBootstrap() {
                 hilos: hilosConfirmados,
                 hayMas: !!r.hayMas,
                 etiquetas: foroCacheCliente.get(key)?.etiquetas || [],
+                    usos: foroCacheCliente.get(key)?.usos || {},
                 actualizadoEn: Date.now()
             }
             foroCacheCliente.set(key, item)
@@ -2555,12 +2819,7 @@ async function cargarBootstrap() {
                 div.querySelectorAll(".etiquetaChip").forEach(function (chip) {
                     chip.addEventListener("click", function (e) {
                         e.stopPropagation()
-                        etiquetaFiltroActual = chip.dataset.etiqueta.toLowerCase()
-                        busquedaForoActual = ''
-                        inputFiltroEtiqueta.value = ''
-                        btnQuitarFiltro.style.display = "inline-flex"
-                        if (ayudaFiltroEtiqueta) ayudaFiltroEtiqueta.textContent = 'Etiqueta: ' + chip.dataset.etiqueta
-                        cargarHilos(true)
+                        filtrarPorEtiqueta(chip.dataset.etiqueta)
                     })
                 })
 
@@ -2594,6 +2853,7 @@ async function cargarBootstrap() {
             inputFiltroEtiqueta.value = ''
             btnQuitarFiltro.style.display = 'none'
             if (ayudaFiltroEtiqueta) ayudaFiltroEtiqueta.textContent = ''
+            renderizarEtiquetasPopulares()
             cargarHilos(true)
         })
 
@@ -2765,6 +3025,7 @@ async function cargarBootstrap() {
                 hilosPendientesConfirmacion.delete(tempId)
                 msgHilo.innerText = ""
                 formHilo.reset()
+                reiniciarSelectorEtiquetas()
                 reiniciarEncuestaCompose()
                 inputContenido.style.height = ""
                 contadorContenido.textContent = "0 / 5000"

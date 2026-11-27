@@ -1828,6 +1828,37 @@
         .avisoBaja { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin:10px 0 14px; padding:12px 16px; border:1px solid var(--red-600); border-left-width:4px; border-radius:var(--r-md); background:var(--surface); font-size:.92rem; }
         .avisoBaja[hidden] { display:none; }
         .avisoBaja button { width:auto; margin:0; }
+        /* ---------- ETIQUETAS: SELECTOR Y BUSCADOR ---------- */
+        .selectorEtiquetas, .buscadorEtiqueta { position: relative; }
+        .selectorEtiquetas > label { display:block; font-weight:600; font-size:.9rem; margin:0 0 6px; }
+        .ayudaEtiquetas { font-weight:400; font-size:.8rem; color:var(--ink-soft); }
+        p.ayudaEtiquetas { margin:6px 0 0; }
+        .cajaEtiquetas { display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:6px 8px; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); }
+        .cajaEtiquetas:focus-within { border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-soft); }
+        .cajaEtiquetas input, .composeExtra .cajaEtiquetas input { flex:1 1 140px; min-width:120px; border:0 !important; box-shadow:none !important; outline:none; padding:6px 2px !important; margin:0 !important; background:transparent; }
+        .etiquetasElegidas { display:contents; list-style:none; margin:0; padding:0; }
+        .chipEtiquetaElegida { display:inline-flex; align-items:center; gap:4px; padding:3px 4px 3px 10px; border-radius:var(--r-pill); background:var(--brand-soft); color:var(--brand); font-size:.84rem; font-weight:600; }
+        .chipEtiquetaElegida button { width:auto; min-width:24px; height:24px; margin:0; padding:0 6px; border:0; border-radius:var(--r-pill); background:transparent; color:inherit; font-size:1rem; line-height:1; cursor:pointer; }
+        .chipEtiquetaElegida button:hover { background:rgba(0,0,0,.08); }
+        .sugerenciasEtiqueta { position:absolute; left:0; right:0; z-index:30; margin:4px 0 0; padding:4px; list-style:none; max-height:260px; overflow-y:auto; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); box-shadow:var(--shadow-md, 0 8px 24px rgba(0,0,0,.12)); }
+        .sugerenciasEtiqueta li { display:flex; align-items:center; gap:8px; padding:9px 10px; border-radius:8px; cursor:pointer; font-size:.9rem; }
+        .sugerenciasEtiqueta li[aria-selected="true"], .sugerenciasEtiqueta li:hover { background:var(--brand-soft); }
+        .usosEtiqueta { margin-left:auto; font-size:.76rem; color:var(--ink-soft); }
+        .etiquetaNueva { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em; padding:2px 6px; border-radius:6px; background:var(--gold-soft); color:var(--ink); }
+        .etiquetasSugeridas { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:8px 0 0; font-size:.82rem; color:var(--ink-soft); }
+        .etiquetasSugeridas[hidden], .etiquetasPopulares[hidden] { display:none; }
+        .chipSugerida, .chipPopular { width:auto; margin:0; padding:4px 10px; border:1px dashed var(--brand); border-radius:var(--r-pill); background:transparent; color:var(--brand); font-size:.8rem; font-weight:600; cursor:pointer; }
+        .chipSugerida:hover, .chipPopular:hover { background:var(--brand-soft); }
+        .filtroEtiquetasForo { margin:-6px 0 14px; }
+        .buscadorEtiqueta { display:flex; align-items:center; gap:6px; max-width:340px; padding:0 10px; border:1px solid var(--line); border-radius:var(--r-pill); background:var(--surface); }
+        .buscadorEtiqueta:focus-within { border-color:var(--brand); }
+        .hashEtiqueta { color:var(--ink-soft); font-weight:700; }
+        .buscadorEtiqueta input { flex:1; min-width:0; margin:0 !important; padding:8px 0 !important; border:0 !important; box-shadow:none !important; outline:none; background:transparent; font-size:.9rem; }
+        .buscadorEtiqueta .sugerenciasEtiqueta { top:100%; }
+        .etiquetasPopulares { display:flex; gap:6px; margin:10px 0 0; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; }
+        .chipPopular { border-style:solid; border-color:var(--line); color:var(--ink-soft); white-space:nowrap; flex:none; }
+        .chipPopular[aria-pressed="true"] { background:var(--brand); border-color:var(--brand); color:var(--on-brand, #fff); }
+
         /* ---------- SANCIONES ---------- */
         .avisoSancion { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin:10px 0 14px; padding:12px 16px; border:1px solid var(--red-600); border-left-width:4px; border-radius:var(--r-md); background:var(--red-soft); color:var(--ink); font-size:.92rem; }
         .avisoSancion[hidden] { display:none; }
