@@ -2762,7 +2762,7 @@ async function handle(req: Request, body: any) {
       // La bienvenida (web/ayuda/bienvenida.md) ya se vio: no se vuelve a mostrar hasta que cambie BIENVENIDA_VERSION en la web.
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       const version=String(body.version||'')
-      if(!/^d{4}-d{2}-d{2}(.d{1,3})?$/.test(version))return json({ok:false,error:'version_invalida'})
+      if(!/^\d{4}-\d{2}-\d{2}(\.\d{1,3})?$/.test(version))return json({ok:false,error:'version_invalida'})
       const {error}=await admin.from('profiles').update({bienvenida_version:version}).eq('id',user.id)
       if(error)throw error
       return json({ok:true})
