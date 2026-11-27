@@ -100,12 +100,24 @@ const REGLAS: Regla[] = [
   r('pack', 'sexual', ' (?:pasame|mandame|pasa|manda|vendo|compro) (?:el |tu |un |tus )?' + alt(['pack', 'nudes', 'fotos en bolas', 'fotos desnuda', 'fotos desnudo', 'fotos hot']) + ' '),
 ]
 
+// Un NN.NNN.NNN suelto puede ser cualquier cifra («46.044.703 habitantes»): cuenta como DNI solo con un rótulo
+// cerca (hasta ~30 caracteres antes o ~12 después: «paciente Juan, DNI 34.567.890», «34.567.890 (DNI)»).
+const RE_NUMERO_CON_PUNTOS = /(?<![$\d.,]\s?)\b\d{2}\.\d{3}\.\d{3}\b(?!\s*(?:pesos|ars|\$|usd|dolares|dólares))/gi
+const RE_ROTULO_PACIENTE = /(?:^|[^a-záéíóúñ])(?:d\.?\s?n\.?\s?i|documento|pacientes?|h\.?\s?c|historia\s+cl[ií]nica)(?![a-záéíóúñ])/i
+function dniConRotulo(texto: string) {
+  for (const m of texto.matchAll(RE_NUMERO_CON_PUNTOS)) {
+    const inicio = m.index ?? 0, fin = inicio + m[0].length
+    if (RE_ROTULO_PACIENTE.test(texto.slice(Math.max(0, inicio - 30), inicio)) || RE_ROTULO_PACIENTE.test(texto.slice(fin, fin + 12))) return true
+  }
+  return false
+}
+
 // Datos de pacientes: sobre el texto original (con números).
-const REGLAS_DATOS: { id: string, re: RegExp }[] = [
-  { id: 'dni_rotulado', re: /\bd\.?\s?n\.?\s?i\.?(?:\s*(?:n[°ºo.]?|nro\.?|n[uú]mero|:|#))?\s*\d{1,2}[.\s]?\d{3}[.\s]?\d{3}\b/i },
-  { id: 'dni_con_puntos', re: /(?<![$\d.,]\s?)\b\d{2}\.\d{3}\.\d{3}\b(?!\s*(?:pesos|ars|\$|usd|dolares|dólares))/i },
-  { id: 'cuil', re: /\b(?:20|23|24|27)-\d{8}-\d\b/ },
-  { id: 'historia_clinica', re: /\b(?:h\.?\s?c\.?|historia\s+cl[ií]nica)\s*(?:n[°ºo.]?|nro\.?|n[uú]mero|#|:)?\s*\d{4,}/i },
+const REGLAS_DATOS: { id: string, prueba: (texto: string) => boolean }[] = [
+  { id: 'dni_rotulado', prueba: (t) => /\bd\.?\s?n\.?\s?i\.?(?:\s*(?:n[°ºo.]?|nro\.?|n[uú]mero|:|#))?\s*\d{1,2}[.\s]?\d{3}[.\s]?\d{3}\b/i.test(t) },
+  { id: 'dni_con_puntos', prueba: dniConRotulo },
+  { id: 'cuil', prueba: (t) => /\b(?:20|23|24|27)-\d{8}-\d\b/.test(t) },
+  { id: 'historia_clinica', prueba: (t) => /\b(?:h\.?\s?c\.?|historia\s+cl[ií]nica)\s*(?:n[°ºo.]?|nro\.?|n[uú]mero|#|:)?\s*\d{4,}/i.test(t) },
 ]
 
 // Lo más grave primero: «putos de mierda» es discriminación antes que agresión.
@@ -116,7 +128,7 @@ export function revisarTexto(texto: string): ResultadoFiltro | null {
   const original = String(texto || '')
   if (!original.trim()) return null
   for (const d of REGLAS_DATOS) {
-    if (d.re.test(original)) return { categoria: MOTIVOS.pacientes[0], motivo: MOTIVOS.pacientes[1], regla: d.id }
+    if (d.prueba(original)) return { categoria: MOTIVOS.pacientes[0], motivo: MOTIVOS.pacientes[1], regla: d.id }
   }
   const norm = normalizar(original)
   for (const regla of REGLAS_POR_PRIORIDAD) {
@@ -126,16 +138,23 @@ export function revisarTexto(texto: string): ResultadoFiltro | null {
 }
 
 // Seudónimos: además de las reglas de texto, no pueden CONTENER palabras ofensivas ni estar formados por ellas.
-const SUBCADENAS_SEUDONIMO = ['hijodeputa', 'hdp', 'pelotud', 'mierda', 'verga', 'poronga', 'garcha', 'mogolic', 'mongolic', 'maricon',
-  'sudaca', 'negrata', 'nazi', 'hitler', 'violador', 'pedofil', 'conchatumadre', 'conchadetumadre', 'chupapija', 'chupala', 'forro', 'sorete', 'malparid']
+// Subcadenas: solo raíces que no aparecen dentro de nombres o apellidos reales.
+const SUBCADENAS_SEUDONIMO = ['hijodeputa', 'hdp', 'pelotud', 'mierda', 'poronga', 'garcha', 'mogolic', 'mongolic', 'maricon',
+  'sudaca', 'negrata', 'hitler', 'violador', 'pedofil', 'conchatumadre', 'conchadetumadre', 'chupapija', 'chupala', 'forro', 'sorete', 'malparid']
+// Estas sí aparecen dentro de apellidos y nombres («Vergara», «Nazira», «Nazir»): cuentan solo como palabra entera,
+// separando también las mayúsculas pegadas («VergaLoca», «ElNazi» → «verga loca», «el nazi»).
+const PALABRAS_ENTERAS_SEUDONIMO = new Set(['verga', 'vergas', 'vergon', 'nazi', 'nazis', 'nazismo', 'nazista', 'neonazi', 'neonazis'])
+// «gil» no está: es un apellido común («Juan Gil») y como insulto suelto es leve (las malas palabras sueltas se permiten).
 const PALABRAS_SEUDONIMO = new Set(['puto', 'puta', 'putos', 'putas', 'trolo', 'trola', 'trava', 'pija', 'pito', 'culo', 'orto', 'ojete', 'teta', 'tetas',
-  'concha', 'garche', 'coger', 'cogeme', 'pajero', 'pajera', 'idiota', 'imbecil', 'boludo', 'boluda', 'tarado', 'tarada', 'gil', 'ano', 'pene', 'vagina'])
+  'concha', 'garche', 'coger', 'cogeme', 'pajero', 'pajera', 'idiota', 'imbecil', 'boludo', 'boluda', 'tarado', 'tarada', 'ano', 'pene', 'vagina'])
 
 export function revisarSeudonimo(seudonimo: string): ResultadoFiltro | null {
   const norm = normalizar(seudonimo)
   const junto = norm.replace(/ /g, '')
   const palabras = norm.trim().split(' ')
-  if (SUBCADENAS_SEUDONIMO.some((s) => junto.includes(s)) || palabras.some((p) => PALABRAS_SEUDONIMO.has(p))) {
+  const palabrasCamel = normalizar(String(seudonimo || '').replace(/([a-zà-ÿ0-9])([A-ZÀ-Þ])/g, '$1 $2')).trim().split(' ')
+  if (SUBCADENAS_SEUDONIMO.some((s) => junto.includes(s)) || palabras.some((p) => PALABRAS_SEUDONIMO.has(p)) ||
+    palabrasCamel.some((p) => PALABRAS_ENTERAS_SEUDONIMO.has(p))) {
     return { categoria: MOTIVOS.seudonimo[0], motivo: MOTIVOS.seudonimo[1], regla: 'seudonimo' }
   }
   const texto = revisarTexto(seudonimo)

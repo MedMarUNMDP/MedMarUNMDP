@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-29-ayuda"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-30-revision"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -122,6 +122,8 @@ const imagenesResueltasCliente = new Map()
 let mensajesChatUI = []
 let chatEnvioEnCurso = false
 let hiloPublicacionEnCurso = false
+// Reintentos diferidos (publicar hilo o respuesta): se cancelan al cerrar sesión para no publicar con otra cuenta.
+const timersReintentoSesion = new Set()
 const hilosPendientesConfirmacion = new Map()
 
         const loginScreen = document.getElementById("loginScreen")
@@ -383,7 +385,7 @@ const hilosPendientesConfirmacion = new Map()
 
                 inputBusqueda = document.createElement("input")
                 inputBusqueda.type = "text"
-                inputBusqueda.placeholder = config.textoBusqueda || "Buscar..."
+                inputBusqueda.placeholder = config.textoBusqueda || "Buscar…"
 
                 contBusqueda.appendChild(inputBusqueda)
                 panel.appendChild(contBusqueda)
@@ -561,7 +563,7 @@ const hilosPendientesConfirmacion = new Map()
 
         }
 
-        mejorarSelect(form.materia, { conBusqueda: true, placeholder: "Seleccionar materia", textoBusqueda: "Buscar materia..." })
+        mejorarSelect(form.materia, { conBusqueda: true, placeholder: "Seleccionar materia", textoBusqueda: "Buscar materia…" })
         mejorarSelect(tengo, { placeholder: "Seleccionar comisión" })
         mejorarSelect(busco, { placeholder: "Seleccionar comisión" })
 
@@ -573,7 +575,7 @@ const hilosPendientesConfirmacion = new Map()
                 if (sel.dataset.mejorado || sel.hasAttribute("data-nativo") || sel.multiple) return
                 // Las listas de materias se llenan después: llevan buscador aunque al principio estén vacías.
                 const muchas = sel.options.length > 12 || sel.classList.contains("selectMaterias")
-                mejorarSelect(sel, { conBusqueda: muchas, textoBusqueda: sel.classList.contains("selectMaterias") ? "Buscar materia..." : "Buscar..." })
+                mejorarSelect(sel, { conBusqueda: muchas, textoBusqueda: sel.classList.contains("selectMaterias") ? "Buscar materia…" : "Buscar…" })
             })
         }
         mejorarSelectsEn(document.body)
@@ -754,6 +756,19 @@ const hilosPendientesConfirmacion = new Map()
             history.replaceState({ medmarAuth: "login" }, "", location.href)
         }
 
+        // Envío de formulario protegido: mientras el pedido está en curso, otro envío se ignora y el botón queda deshabilitado.
+        function sinDobleEnvio(manejador) {
+            return async function (e) {
+                const form = this
+                if (form.dataset.enviando === "1") { e.preventDefault(); return }
+                form.dataset.enviando = "1"
+                const botones = Array.prototype.filter.call(form.querySelectorAll("button[type=submit], button:not([type])"), function (b) { return !b.disabled })
+                botones.forEach(function (b) { b.disabled = true })
+                try { return await manejador.call(form, e) }
+                finally { delete form.dataset.enviando; botones.forEach(function (b) { b.disabled = false }) }
+            }
+        }
+
         // ==================== MODALES ====================
 
         // Al abrir un modal el foco entra en él; al cerrarlo vuelve al control que lo abrió.
@@ -771,7 +786,8 @@ const hilosPendientesConfirmacion = new Map()
 
         function cerrarModal(modal) {
             modal.classList.remove("abierto")
-            document.removeEventListener("keydown", cerrarModalConEscape)
+            // Si queda otra ventana abierta, Escape y Tab tienen que seguir funcionando en ella.
+            if (!document.querySelector(".modalFondo.abierto")) document.removeEventListener("keydown", cerrarModalConEscape)
             if (focoAntesDelModal && document.contains(focoAntesDelModal)) focoAntesDelModal.focus()
             focoAntesDelModal = null
         }
@@ -779,19 +795,39 @@ const hilosPendientesConfirmacion = new Map()
         // El modal de bienvenida es obligatorio: no se cierra con Escape ni tocando afuera
         // (antes se cerraba y dejaba el body con overflow:hidden, sin scroll).
         function cerrarModalConEscape(e) {
+            if (e.key === "Tab") { atraparFocoEnModal(e); return }
             if (e.key === "Escape") {
                 document.querySelectorAll(".modalFondo.abierto").forEach(function (modal) {
                     if (modal === modalTexto) terminarTexto(null)
                     else if (modal === modalSancion) cerrarModalSancion()
-                    else if (modal !== modalSetupPerfil) cerrarModal(modal)
+                    else if (modal.id === "modalLlave") terminarDesbloqueo(false)
+                    else if (modal !== modalSetupPerfil && modal !== modalTerminos) cerrarModal(modal)
                 })
             }
         }
 
+        // Tab y Shift+Tab no salen de la ventana abierta (la última del DOM es la de arriba).
+        function atraparFocoEnModal(e) {
+            const abiertos = document.querySelectorAll(".modalFondo.abierto")
+            const modal = abiertos[abiertos.length - 1]
+            if (!modal) return
+            const focos = Array.prototype.filter.call(
+                modal.querySelectorAll("a[href], button:not([disabled]), input:not([disabled]):not([type=hidden]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])"),
+                function (el) { return el.offsetParent !== null }
+            )
+            if (!focos.length) return
+            const primero = focos[0], ultimo = focos[focos.length - 1]
+            if (!modal.contains(document.activeElement)) { e.preventDefault(); primero.focus() }
+            else if (e.shiftKey && document.activeElement === primero) { e.preventDefault(); ultimo.focus() }
+            else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primero.focus() }
+        }
+
         document.querySelectorAll(".modalFondo").forEach(function (fondo) {
             fondo.addEventListener("click", function (e) {
-                if (e.target !== fondo || fondo === modalSetupPerfil || fondo.id === "modalTexto" || fondo.id === "modalSancion") return
-                if (fondo === modalCompose) {
+                if (e.target !== fondo || fondo === modalSetupPerfil || fondo === modalTerminos || fondo.id === "modalTexto" || fondo.id === "modalSancion") return
+                if (fondo.id === "modalLlave") {
+                    terminarDesbloqueo(false)
+                } else if (fondo === modalCompose) {
                     volverHistorialOverlay("compose", function () { cerrarModal(fondo) })
                 } else {
                     cerrarModal(fondo)
@@ -931,7 +967,6 @@ const hilosPendientesConfirmacion = new Map()
                 grupo_nombre: "El nombre del grupo tiene que tener entre 2 y 60 caracteres.",
                 codigo_vencido: "El código venció o ya se usó.",
                 fecha_invalida: "La fecha tiene que ser futura y de los próximos 3 años.",
-                no_es_moderador: "Esa cuenta no es moderadora.",
                 baja_admin: "La cuenta de administración no se puede eliminar desde la web. Escribinos por mail.",
                 clasificado_titulo: "El título tiene que tener entre 3 y 100 caracteres.",
                 clasificado_descripcion: "La descripción tiene que tener entre 10 y 1500 caracteres.",
@@ -962,6 +997,10 @@ const hilosPendientesConfirmacion = new Map()
                 material_duplicado: "Ese enlace ya está publicado en Material.",
                 datos_material_incompletos: "Para publicarlo falta la materia o el tipo de material.",
                 ya_resuelto: "Ese aporte ya fue revisado.",
+                ya_resuelta: "Esa denuncia ya fue resuelta por otra persona del equipo. Actualizá la lista.",
+                sancion_simultanea: "Otra persona del equipo acaba de sancionar a esta cuenta. Revisá sus sanciones antes de aplicar otra.",
+                perfil_ya_completo: "Tu perfil ya estaba completo. Para cambiar tu seudónimo o tu foto, entrá a Perfil.",
+                pedido_muy_grande: "Lo que mandaste es demasiado grande. Probá con menos texto o una imagen más liviana.",
                 password_corta: "La contraseña debe tener al menos 8 caracteres.",
                 password_no_coincide: "Las contraseñas no coinciden.",
                 email_ya_registrado: "Ese email ya tiene una cuenta creada.",
@@ -990,12 +1029,10 @@ const hilosPendientesConfirmacion = new Map()
                 titulo_invalido: "El título no puede estar vacío ni superar los 140 caracteres.",
                 contenido_invalido: "El contenido no puede estar vacío ni superar los 5000 caracteres.",
                 respuesta_invalida: "No se encontró esa respuesta para este hilo. Actualizá la conversación e intentá de nuevo.",
-                link_invalido: "El enlace no tiene un formato HTTPS válido.",
                 link_no_permitido: "Ese sitio no está permitido. Solo aceptamos dominios seguros de YouTube, Google, UNMDP, sitios académicos autorizados, Spotify y Steam.",
-                servidor_ocupado: "El servidor está ocupado en este momento. Probá de nuevo.",
                 rate_limit: "Hiciste demasiadas solicitudes en poco tiempo. Esperá un momento y probá de nuevo.",
-                pseudonimo_invalido: "El pseudónimo debe tener entre 3 y 24 caracteres.",
-                pseudonimo_en_uso: "Ese pseudónimo ya lo está usando otra persona.",
+                pseudonimo_invalido: "El seudónimo debe tener entre 3 y 24 caracteres.",
+                pseudonimo_en_uso: "Ese seudónimo ya lo está usando otra persona.",
                 enlace_no_permitido: "El texto contiene un enlace a un dominio que MedMar no admite.",
                 demasiados_enlaces: "Podés incluir hasta 10 enlaces por publicación.",
                 ya_es_moderador: "Esa persona ya es moderadora.",
@@ -1013,8 +1050,11 @@ const hilosPendientesConfirmacion = new Map()
             sesion = s || null
         }
 
+        // La API rechazó el token: se descarta también en supabase-js (si no, sigue en el storage y vuelve al recargar).
+        // signOut local dispara SIGNED_OUT, que limpia el resto de los datos guardados de la cuenta.
         function borrarSesionLocal() {
             sesion = null
+            try { supabaseClient.auth.signOut({ scope: "local" }).catch(function () {}) } catch (_) {}
         }
 
         function cargarSesionLocal() {
@@ -1314,7 +1354,7 @@ async function cargarBootstrap() {
                 if (local && local.data) {
                     aplicarBootstrap(local.data)
                     if (local.data.perfil && local.data.perfil.profileCompleted === false) mostrarSetupPerfil(local.data.perfil)
-                    if (local.ts && Date.now() - Number(local.ts) < FRESCURA_USUARIO_CLIENTE_MS) { verificarBienvenida(local.data.perfil); return }
+                    if (local.ts && Date.now() - Number(local.ts) < FRESCURA_USUARIO_CLIENTE_MS) { if (local.data.perfil) verificarTerminos(local.data.perfil); verificarBienvenida(local.data.perfil); return }
                 }
             } catch (_) {}
 
@@ -1387,9 +1427,9 @@ async function cargarBootstrap() {
             const msg = document.getElementById("msgBaja")
             const texto = document.getElementById("confirmarBaja").value.trim().toUpperCase()
             if (texto !== "BORRAR") { msg.textContent = "Escribí BORRAR para confirmar."; return }
-            if (!confirm("Tu cuenta se va a eliminar en 30 días. Hasta entonces podés cancelarlo. ¿Seguir?")) return
+            if (!confirm("Tu cuenta se va a eliminar en 30 días y tus solicitudes de intercambio activas se cancelan ahora. Hasta entonces podés cancelar la eliminación. ¿Seguir?")) return
             this.disabled = true
-            msg.textContent = "Programando..."
+            msg.textContent = "Programando…"
             const r = await llamar("solicitarBaja", { confirmacion: texto })
             this.disabled = false
             if (!r.ok) { msg.textContent = mensajeError(r.error); return }
@@ -1398,7 +1438,9 @@ async function cargarBootstrap() {
             bajaProgramadaActual = r.bajaProgramada
             actualizarPerfilEnCache({ bajaProgramada: bajaProgramadaActual })
             renderizarEstadoBaja()
-            mostrarAviso("Listo: tu cuenta se elimina el " + fechaLargaBaja(bajaProgramadaActual) + ".")
+            // El servidor canceló tus solicitudes activas: se vuelven a pedir para que no sigan en pantalla.
+            refrescarDatosUsuario(true)
+            mostrarAviso("Listo: tu cuenta se elimina el " + fechaLargaBaja(bajaProgramadaActual) + ". Tus solicitudes de intercambio activas se cancelaron.")
         })
         document.addEventListener("click", async function (e) {
             const btn = e.target.closest("[data-cancelar-baja]")
@@ -1444,7 +1486,7 @@ async function cargarBootstrap() {
         btnAceptarTerminos.addEventListener("click", async function () {
             if (!chkAceptoTerminos.checked) return
             btnAceptarTerminos.disabled = true
-            msgTerminos.textContent = "Guardando..."
+            msgTerminos.textContent = "Guardando…"
             const r = await enviarAceptacionTerminos()
             if (r.ok) { ocultarModalTerminos(); return }
             btnAceptarTerminos.disabled = false
@@ -1524,6 +1566,8 @@ async function cargarBootstrap() {
             const item = { etiquetas: data.etiquetas || [], usos: data.usos || {}, hilos: data.hilos || [], hayMas: !!data.hayMas, actualizadoEn: Date.now() }
             foroCacheCliente.set(key, item)
             if (key === claveForo("", "")) guardarResumenForo(item.hilos)
+            // Se cambió de filtro mientras llegaba la respuesta: queda en caché, pero no se dibuja.
+            if (key !== claveForoActual()) return
             renderizarEtiquetasCliente(item.etiquetas, item.usos)
             renderizarHilos(item.hilos, true)
             paginaHilosActual = item.hilos.length
@@ -1822,13 +1866,40 @@ async function cargarBootstrap() {
         // así que los lectores de pantalla lo anuncian. Los errores siguen junto al formulario.
         let temporizadorAviso = null
 
+        // Defensa extra para enlaces que vienen de la base: solo https (la API ya lo valida al guardarlos).
+        function soloHttps(url) { return String(url || "").toLowerCase().indexOf("https://") === 0 ? String(url) : "#" }
+
+        // Error de la API para la persona: el mensaje claro; el detalle técnico solo en la consola.
+        function alertaError(r) {
+            if (r && r.detalle) console.warn("[MedMar]", r.error, r.detalle)
+            alert(mensajeError(r && r.error))
+        }
+
+        // Aviso fijo mientras el dispositivo no tiene conexión (los pedidos fallarían igual).
+        function actualizarAvisoConexion() {
+            let aviso = document.getElementById("avisoSinConexion")
+            if (navigator.onLine) { if (aviso) aviso.hidden = true; return }
+            if (!aviso) {
+                aviso = document.createElement("div")
+                aviso.id = "avisoSinConexion"
+                aviso.className = "avisoSinConexion"
+                aviso.setAttribute("role", "status")
+                aviso.textContent = "Sin conexión. Lo que hagas ahora puede no guardarse hasta que vuelva internet."
+                document.body.appendChild(aviso)
+            }
+            aviso.hidden = false
+        }
+        window.addEventListener("online", actualizarAvisoConexion)
+        window.addEventListener("offline", actualizarAvisoConexion)
+
         function mostrarAviso(texto) {
             const zona = document.getElementById("zonaAvisos")
             if (!zona) return
             zona.textContent = texto
             zona.classList.add("visible")
             clearTimeout(temporizadorAviso)
-            temporizadorAviso = setTimeout(function () { zona.classList.remove("visible") }, 4500)
+            // Los textos largos quedan más tiempo en pantalla (unos 60 ms por letra, mínimo 4,5 s).
+            temporizadorAviso = setTimeout(function () { zona.classList.remove("visible") }, Math.max(4500, String(texto).length * 60))
         }
 
         // Tarjetas grises que ocupan el lugar del contenido mientras carga.
@@ -2053,9 +2124,9 @@ async function cargarBootstrap() {
             return { data, error }
         }
 
-        formLogin.addEventListener("submit", async function (e) {
+        formLogin.addEventListener("submit", sinDobleEnvio(async function (e) {
             e.preventDefault()
-            authMsg.innerText = "Ingresando..."
+            authMsg.innerText = "Ingresando…"
             const email = document.getElementById("loginEmail").value.trim()
             const password = document.getElementById("loginPassword").value
 
@@ -2075,9 +2146,9 @@ async function cargarBootstrap() {
             formLogin.reset()
             authMsg.innerText = ''
             mostrarApp()
-        })
+        }))
 
-        formRegistro.addEventListener("submit", async function (e) {
+        formRegistro.addEventListener("submit", sinDobleEnvio(async function (e) {
             e.preventDefault()
 
             const email = document.getElementById("regEmail").value.trim()
@@ -2101,7 +2172,7 @@ async function cargarBootstrap() {
             // La aceptación se guarda en la cuenta al primer ingreso (verificarTerminos), que puede ser después de confirmar el email.
             try { localStorage.setItem(CLAVE_TERMINOS_REGISTRO, TERMINOS_VERSION) } catch (_) {}
 
-            authMsg.innerText = "Creando cuenta..."
+            authMsg.innerText = "Creando cuenta…"
 
             guardarPreferenciaSesion(chkRecordarSesion.checked)
             const captchaRegistro = await tokenCaptcha('captchaRegistro')
@@ -2134,9 +2205,9 @@ async function cargarBootstrap() {
                 } else if (/weak.*password|password.*weak/i.test(message + ' ' + code)) {
                     authMsg.innerText = 'La contraseña no cumple los requisitos de seguridad.'
                 } else if (/database error saving new user|database error|unexpected failure/i.test(message)) {
-                    authMsg.innerText = 'Supabase no pudo completar la creación de la cuenta. Revisá Authentication → Logs para ver el error del registro.'
+                    authMsg.innerText = 'No pudimos crear la cuenta. Probá de nuevo en unos minutos o escribinos a MedMarUNMDP@gmail.com.'
                 } else if (/error sending.*(email|confirmation)|smtp|mail provider/i.test(message)) {
-                    authMsg.innerText = 'La cuenta no pudo terminar de crearse porque falló el envío del correo de confirmación. Hay que revisar la configuración de emails de Supabase.'
+                    authMsg.innerText = 'No pudimos mandarte el mail de confirmación. Probá de nuevo en unos minutos o escribinos a MedMarUNMDP@gmail.com.'
                 } else {
                     authMsg.innerText = 'No se pudo crear la cuenta. Revisá los datos e intentá nuevamente.'
                 }
@@ -2155,7 +2226,7 @@ async function cargarBootstrap() {
                 authMsg.innerText = 'Cuenta creada. Revisá tu email para confirmar la cuenta.'
                 console.debug('[MedMarUNMDP] Registro creado sin sesión; requiere confirmación de email.', data.user?.id || '')
             }
-        })
+        }))
 
         const AVATAR_BASE_URL = 'https://medmar.com.ar/assets/avatars/'
         function mostrarSetupPerfil(perfil) {
@@ -2207,7 +2278,7 @@ async function cargarBootstrap() {
             }
             const result = await llamarMutacionResiliente('completarPerfil', { pseudonimo, foto }, 3)
             btn.disabled = false
-            if (!result.ok) { msgSetupPerfil.textContent = result.error === 'pseudonimo_en_uso' ? 'Ese pseudónimo ya está ocupado. Elegí otro.' : (result.error === 'pseudonimo_invalido' ? 'El pseudónimo no cumple el formato.' : 'No se pudo guardar. Intentá nuevamente.'); return }
+            if (!result.ok) { msgSetupPerfil.textContent = result.error === 'pseudonimo_en_uso' ? 'Ese seudónimo ya está ocupado. Elegí otro.' : (result.error === 'pseudonimo_invalido' ? 'El seudónimo no cumple el formato.' : 'No se pudo guardar. Intentá nuevamente.'); return }
             inputPseudonimo.value = result.perfil.pseudonimo
             fotoActual = result.perfil.foto || ''
             actualizarAvataresEnPantalla(result.perfil.pseudonimo)
@@ -2251,14 +2322,14 @@ async function cargarBootstrap() {
             hiloActualUI = null
             respuestasUI = []
             limpiarRespuestaObjetivo()
-            requestAnimationFrame(function () { foroLista.scrollIntoView({ behavior: "smooth", block: "start" }) })
+            requestAnimationFrame(function () { foroLista.scrollIntoView({ behavior: movimientoReducido() ? "auto" : "smooth", block: "start" }) })
         }
 
         function mostrarDetalleHilo() {
             foroLista.style.display = "none"
             foroDetalle.style.display = "block"
             actualizarAvatarComposerRespuesta()
-            requestAnimationFrame(function () { foroDetalle.scrollIntoView({ behavior: "smooth", block: "start" }) })
+            requestAnimationFrame(function () { foroDetalle.scrollIntoView({ behavior: movimientoReducido() ? "auto" : "smooth", block: "start" }) })
         }
 
         function formatearFecha(fecha) {
@@ -2298,7 +2369,7 @@ async function cargarBootstrap() {
             if (r.ok) {
                 alert("Gracias, un moderador va a revisarlo.")
             } else {
-                alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : "") )
+                alertaError(r)
             }
 
         }
@@ -2306,7 +2377,13 @@ async function cargarBootstrap() {
         // Moderación: motivo opcional que le llega a quien publicó (notificación «moderacion»). null = canceló.
         async function borrarPublicacion(tipo, id) {
 
-            if (!confirm("¿Seguro que querés borrar esto?")) return
+            // Lo propio se confirma acá; lo ajeno lo confirma la ventana de motivo de moderación (no se pregunta dos veces).
+            const propio = tipo === "hilo"
+                ? !!(hiloActualUI && String(hiloActualUI.id) === String(id) && hiloActualUI.esPropio)
+                : !!respuestasUI.find(function (x) { return String(x.id) === String(id) && x.esPropio })
+            if (propio && !confirm(tipo === "hilo"
+                ? "¿Borrar tu publicación? Se borran también sus respuestas y no se puede deshacer."
+                : "¿Borrar tu respuesta? No se puede deshacer.")) return
 
             const accion = tipo === "hilo" ? "borrarHilo" : "borrarRespuesta"
             let r = await llamar(accion, { id })
@@ -2320,6 +2397,7 @@ async function cargarBootstrap() {
             if (!r.ok && r.error === "moderacion_bloqueada") return
 
             if (r.ok) {
+                mostrarAviso(tipo === "hilo" ? "Publicación borrada." : "Respuesta borrada.")
                 if (tipo === "hilo") {
                     navegarHistorial(crearEstadoNavegacion("foro", null), true)
                     mostrarListaHilos(false)
@@ -2338,7 +2416,7 @@ async function cargarBootstrap() {
                     await abrirHilo(hiloId, false)
                 }
             } else {
-                alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : "") )
+                alertaError(r)
             }
 
         }
@@ -2472,6 +2550,8 @@ async function cargarBootstrap() {
             }
 
             const r = await llamar("listarHilos", { etiqueta: etiquetaFiltroActual, busqueda: busquedaForoActual, desde: reiniciar ? 0 : paginaHilosActual })
+            // Se cambió de filtro o búsqueda mientras llegaba la respuesta: esta ya no corresponde.
+            if (key !== claveForoActual()) return false
 
             if (!r.ok) {
                 listaHilos.style.opacity = ''
@@ -2711,6 +2791,13 @@ async function cargarBootstrap() {
 
         async function toggleLikeUI(tipo, id, btn) {
             if (!sesion) return
+            // Un pedido por vez: con dos toques rápidos las respuestas podían llegar desordenadas.
+            if (btn.dataset.enCurso === "1") return
+            btn.dataset.enCurso = "1"
+            try { await toggleLikeEnServidor(tipo, id, btn) } finally { delete btn.dataset.enCurso }
+        }
+
+        async function toggleLikeEnServidor(tipo, id, btn) {
             const root = btn.closest('.hiloItem, #detalleHiloContenido, .respuestaItem') || btn.parentElement
             const wasLiked = btn.classList.contains('activo')
             const countEl = btn.querySelector('.likeCount')
@@ -2764,7 +2851,7 @@ async function cargarBootstrap() {
             btn.setAttribute('aria-label', wasLiked ? 'Quitar me gusta' : 'Me gusta'); btn.setAttribute('aria-pressed', wasLiked ? 'true' : 'false')
             if (heartEl) heartEl.classList.toggle('relleno', wasLiked)
             if (countEl) countEl.textContent = oldLikes
-            alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : ""))
+            alertaError(r)
         }
 
         function renderizarHilos(hilos, reiniciar) {
@@ -2835,8 +2922,11 @@ async function cargarBootstrap() {
 
         }
 
-        btnCargarMas.addEventListener("click", function () {
-            cargarHilos(false)
+        // Deshabilitado mientras carga: un doble toque duplicaba hilos y salteaba una página.
+        btnCargarMas.addEventListener("click", async function () {
+            if (btnCargarMas.disabled) return
+            btnCargarMas.disabled = true
+            try { await cargarHilos(false) } finally { btnCargarMas.disabled = false }
         })
 
         if (formBusquedaForo) formBusquedaForo.addEventListener('submit', function (e) {
@@ -3075,16 +3165,33 @@ async function cargarBootstrap() {
                     const estado = temp.querySelector(".estadoOptimista")
                     if (estado) estado.textContent = "Confirmando publicación… No la vuelvas a publicar."
                 }
-                msgHilo.innerText = "La publicación quedó en verificación. No la vuelvas a publicar."
+                mostrarAviso("Tu publicación quedó en verificación. No la vuelvas a publicar.")
                 // Reintento de fondo con la misma operación: el backend es idempotente.
-                setTimeout(async function() {
+                const usuarioAlPublicar = sesion && sesion.userId
+                const timerReintento = setTimeout(async function() {
+                    timersReintentoSesion.delete(timerReintento)
+                    if (!sesion || sesion.userId !== usuarioAlPublicar) return
                     const rr = await llamarMutacionResiliente("crearHilo", paramsHilo, 2)
-                    if (rr.ok) {
+                    const temp2 = [...listaHilos.querySelectorAll("[data-temp-hilo]")].find(function (x) { return x.dataset.tempHilo === tempId })
+                    if (!rr.ok) {
+                        // No se pudo confirmar: se libera el botón y el texto queda en el formulario para reintentar.
                         hilosPendientesConfirmacion.delete(tempId)
                         hiloPublicacionEnCurso = false
                         if (btnAbrirCompose) btnAbrirCompose.disabled = false
                         if (btnSubmitHilo) btnSubmitHilo.disabled = false
-                        const temp2 = [...listaHilos.querySelectorAll("[data-temp-hilo]")].find(function (x) { return x.dataset.tempHilo === tempId })
+                        if (temp2) temp2.remove()
+                        sincronizarHilosEnSegundoPlano()
+                        mostrarAviso("No pudimos confirmar tu publicación. Si en un rato no aparece en el foro, volvé a publicarla: el texto quedó guardado en «Crear publicación».")
+                        return
+                    }
+                    {
+                        hilosPendientesConfirmacion.delete(tempId)
+                        hiloPublicacionEnCurso = false
+                        if (btnAbrirCompose) btnAbrirCompose.disabled = false
+                        if (btnSubmitHilo) btnSubmitHilo.disabled = false
+                        formHilo.reset()
+                        reiniciarSelectorEtiquetas()
+                        reiniciarEncuestaCompose()
                         if (temp2) {
                             temp2.remove()
                             const hReal2 = Object.assign({}, hOptimista, { id: String(rr.id || tempId), _optimista: false, _estadoOptimista: "", likes: 0, meGusta: false })
@@ -3096,6 +3203,7 @@ async function cargarBootstrap() {
                         msgHilo.innerText = ""
                     }
                 }, 15000)
+                timersReintentoSesion.add(timerReintento)
                 return
             }
 
@@ -3112,7 +3220,7 @@ async function cargarBootstrap() {
                 borrarSesionLocal()
                 mostrarLogin()
             } else {
-                alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : ""))
+                alertaError(r)
             }
 
         })
@@ -3154,18 +3262,19 @@ async function cargarBootstrap() {
                 marcarHiloVisto(cache.data.hilo)
                 respuestasUI = combinarRespuestasConPendientes(cache.data.respuestas || [])
                 renderizarRespuestas(respuestasUI)
-                if (cacheFresco) {
-                    llamar("verHilo", { id }).then(function(r) {
-                        if (r.ok) hiloCacheCliente.set(String(id), { data: { hilo: r.hilo, respuestas: r.respuestas }, actualizadoEn: Date.now() })
-                    })
-                    return
-                }
+                // Caché de menos de 20 s: no se pide de nuevo (ahorra invocaciones del plan Free).
+                if (cacheFresco) return
             } else {
                 detalleHiloContenido.innerHTML = esqueletoTarjetas(1)
                 listaRespuestas.innerHTML = ""
             }
 
             const r = await llamar("verHilo", { id })
+            // Si mientras tanto se abrió otro hilo, esta respuesta ya no corresponde.
+            if (String(hiloAbiertoId) !== String(id)) {
+                if (r.ok) hiloCacheCliente.set(String(id), { data: { hilo: r.hilo, respuestas: r.respuestas }, actualizadoEn: Date.now() })
+                return
+            }
 
             if (!r.ok) {
 
@@ -3548,7 +3657,7 @@ async function cargarBootstrap() {
             respuestaObjetivoActual = null
             if (respuestaContexto) respuestaContexto.hidden = true
             if (respuestaContextoTexto) respuestaContextoTexto.textContent = ""
-            if (inputRespuesta) inputRespuesta.placeholder = "Escribí una respuesta..."
+            if (inputRespuesta) inputRespuesta.placeholder = "Escribí una respuesta…"
         }
 
         btnCancelarRespuesta.addEventListener("click", limpiarRespuestaObjetivo)
@@ -3741,7 +3850,10 @@ async function cargarBootstrap() {
                 msgRespuesta.innerText = mensajeError("mensaje_en_verificacion")
                 // No restauramos el texto: el servidor puede haberlo guardado.
                 // El próximo verHilo reconciliará la respuesta gracias al contenido.
-                setTimeout(async function() {
+                const usuarioAlResponder = sesion && sesion.userId
+                const timerRespuesta = setTimeout(async function() {
+                    timersReintentoSesion.delete(timerRespuesta)
+                    if (!sesion || sesion.userId !== usuarioAlResponder) return
                     const rr = await llamarMutacionResiliente("crearRespuesta", {
                         hiloId: hiloIdEnviado,
                         parentId: parentId,
@@ -3762,6 +3874,7 @@ async function cargarBootstrap() {
                         abrirHilo(hiloIdEnviado, false)
                     }
                 }, 15000)
+                timersReintentoSesion.add(timerRespuesta)
                 return
             }
 
@@ -3777,7 +3890,7 @@ async function cargarBootstrap() {
                 mostrarListaHilos()
                 cargarHilos(true)
             } else {
-                alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : ""))
+                alertaError(r)
             }
 
         })
@@ -3856,6 +3969,10 @@ async function cargarBootstrap() {
             mostrarSeccion("foro", "up")
         })
 
+        const TITULO_ORIGINAL = document.title
+        const TITULOS_VISTA = { intercambios: "Intercambios", foro: "Foro", juegos: "Juegos", material: "Material", clasificados: "Compra venta",
+            configuracion: "Perfil", reportes: "Reportar un error", ayuda: "Ayuda", moderacion: "Moderación" }
+
         function mostrarSeccion(nombre, modoNavegacion, actualizarHistorial) {
 
             if (nombre === "moderacion" && !(esModeradorActual || esAdminActual)) nombre = "inicio"
@@ -3899,9 +4016,20 @@ async function cargarBootstrap() {
 
             if (nombre === "moderacion") entrarAModeracion()
 
+            // Título de la pestaña y foco: el lector de pantalla anuncia la vista nueva (solo si cambió de vista).
+            document.title = TITULOS_VISTA[nombre] ? TITULOS_VISTA[nombre] + " · MedMar" : TITULO_ORIGINAL
+            if (anterior && anterior !== nombre) {
+                const vistaEl = document.getElementById("vista" + nombre.charAt(0).toUpperCase() + nombre.slice(1))
+                const titulo = vistaEl && vistaEl.querySelector("h1, h2")
+                if (titulo && document.activeElement && !vistaEl.contains(document.activeElement)) {
+                    if (!titulo.hasAttribute("tabindex")) titulo.setAttribute("tabindex", "-1")
+                    titulo.focus({ preventScroll: true })
+                }
+            }
+
             requestAnimationFrame(function () {
                 if (modoNavegacion === "up" || nombre === "inicio") {
-                    window.scrollTo({ top: 0, behavior: "smooth" })
+                    window.scrollTo({ top: 0, behavior: movimientoReducido() ? "auto" : "smooth" })
                     return
                 }
 
@@ -3915,7 +4043,7 @@ async function cargarBootstrap() {
                     nombre === "ayuda" ? vistaAyuda :
                     vistaModeracion
 
-                if (destino) destino.scrollIntoView({ behavior: "smooth", block: "start" })
+                if (destino) destino.scrollIntoView({ behavior: movimientoReducido() ? "auto" : "smooth", block: "start" })
             })
 
         }
@@ -3998,7 +4126,7 @@ async function cargarBootstrap() {
                 cargarDenuncias()
                 avisarResultadoSancion(r)
             } else {
-                alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : "") )
+                alertaError(r)
             }
 
         }
@@ -4078,7 +4206,7 @@ async function cargarBootstrap() {
             }
         })
 
-        document.getElementById("formGrupo").addEventListener("submit", async function (e) {
+        document.getElementById("formGrupo").addEventListener("submit", sinDobleEnvio(async function (e) {
             e.preventDefault()
             const msg = document.getElementById("msgGrupo")
             const r = await llamarModeracion("guardarGrupoModeracion", { nombre: document.getElementById("nombreGrupo").value.trim(), fecha: document.getElementById("fechaGrupo").value })
@@ -4087,7 +4215,7 @@ async function cargarBootstrap() {
             this.reset()
             mostrarAviso("Grupo creado. Ahora asignale integrantes en la lista de moderadores.")
             cargarModeradores()
-        })
+        }))
 
         function renderizarModeradores(moderadores) {
 
@@ -4142,7 +4270,7 @@ async function cargarBootstrap() {
                     if (r.ok) {
                         cargarModeradores()
                     } else {
-                        alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : "") )
+                        alertaError(r)
                     }
 
                 })
@@ -4153,10 +4281,10 @@ async function cargarBootstrap() {
 
         }
 
-        formModerador.addEventListener("submit", async function (e) {
+        formModerador.addEventListener("submit", sinDobleEnvio(async function (e) {
 
             e.preventDefault()
-            msgModerador.innerText = "Agregando..."
+            msgModerador.innerText = "Agregando…"
 
             const rol = document.getElementById("rolNuevoModerador").value
             if (rol === "admin" && !confirm("¿Dar rol de ADMINISTRADOR a " + inputNuevoModerador.value.trim() + "?\n\nVa a poder ver el panel. Para administrar va a necesitar además una llave de administrador, que solo vos podés activar desde el SQL Editor de Supabase.")) { msgModerador.innerText = ""; return }
@@ -4172,10 +4300,10 @@ async function cargarBootstrap() {
                 cargarModeradores()
             } else {
                 msgModerador.innerText = ""
-                alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : "") )
+                alertaError(r)
             }
 
-        })
+        }))
 
         // ==================== CERRAR SESIÓN ====================
 
@@ -4231,6 +4359,7 @@ async function cargarBootstrap() {
             foroLista.style.display = "block"
             foroDetalle.style.display = "none"
             limpiarRespuestaObjetivo()
+            limpiarEstadoDeOtrasSecciones()
 
             if (borrarAlmacenamiento) {
                 try {
@@ -4244,8 +4373,41 @@ async function cargarBootstrap() {
             }
         }
 
+        // Lo que guardan otras secciones (declaradas más abajo): aportes, Compra venta, baja, borradores y reintentos.
+        // try/catch por si se llama antes de que esas variables existan (al arrancar).
+        function limpiarEstadoDeOtrasSecciones() {
+            try {
+                misAportesCargados = false
+                clasificadosUI = []; misClasificadosUI = []; chatsClasificadosUI = []; clasificadosCargadosEn = 0
+                bajaProgramadaActual = null
+                avisoBaja.hidden = true
+                hiloPublicacionEnCurso = false
+                btnAbrirCompose.disabled = false
+                if (temporizadorQR) { clearInterval(temporizadorQR); temporizadorQR = null }
+                timersReintentoSesion.forEach(function (t) { clearTimeout(t) })
+                timersReintentoSesion.clear()
+                formHilo.reset()
+                reiniciarSelectorEtiquetas()
+                reiniciarEncuestaCompose()
+                ;["listaMisAportes", "listaMisClasificados", "listaChatsClasificados"].forEach(function (id) {
+                    const el = document.getElementById(id); if (el) el.innerHTML = ""
+                })
+            } catch (_) {}
+        }
+
+        // Si el cierre de sesión no llega al servidor (sin conexión), igual se borra la sesión de este navegador:
+        // si no, en una compu compartida la próxima persona entraría con tu cuenta.
+        async function cerrarSesionLocal() {
+            try {
+                const r = await supabaseClient.auth.signOut()
+                if (r && r.error) await supabaseClient.auth.signOut({ scope: "local" })
+            } catch (_) {
+                try { await supabaseClient.auth.signOut({ scope: "local" }) } catch (_) {}
+            }
+        }
+
         logoutBtn.addEventListener("click", async function () {
-            await supabaseClient.auth.signOut()
+            await cerrarSesionLocal()
             try { localStorage.removeItem(CLAVE_RECORDAR_SESION); sessionStorage.removeItem(CLAVE_VISITA) } catch (_) {}
             chkRecordarSesion.checked = false
             limpiarDatosDeSesion(true)
@@ -4732,7 +4894,7 @@ async function cargarBootstrap() {
             if (r.ok) {
                 inputPseudonimo.value = r.pseudonimo
                 msgPerfil.innerText = ""
-                mostrarAviso("Pseudónimo actualizado.")
+                mostrarAviso("Seudónimo actualizado.")
                 try {
                     const key = 'medmar:perfil:' + sesion.userId
                     const cached = JSON.parse(localStorage.getItem(key) || 'null') || { data: {} }
@@ -4767,15 +4929,15 @@ async function cargarBootstrap() {
                 return
             }
 
-            msgFoto.innerText = "Preparando imagen..."
+            msgFoto.innerText = "Preparando imagen…"
 
             try {
 
                 const base64 = await recortarYComprimirImagen(archivo, 256)
-                msgFoto.innerText = "Revisando la foto..."
+                msgFoto.innerText = "Revisando la foto…"
                 if (!(await fotoPermitida(base64))) { msgFoto.innerText = MENSAJE_FOTO_NO_PERMITIDA; inputArchivoFoto.value = ""; return }
 
-                msgFoto.innerText = "Subiendo..."
+                msgFoto.innerText = "Subiendo…"
 
                 const r = await llamar("actualizarFoto", { imagen: base64, mimeType: "image/jpeg" })
 
@@ -4786,7 +4948,7 @@ async function cargarBootstrap() {
                     mostrarAviso("Foto actualizada.")
                 } else {
                     msgFoto.innerText = ""
-                    alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : "") )
+                    alertaError(r)
                 }
 
             } catch (err) {
@@ -4906,7 +5068,7 @@ async function cargarBootstrap() {
 
             if (lista.length === 0) {
                 listaIntercambios.innerHTML = "<p class='vacio'>Todavía no se completó ningún intercambio para tu cuenta.</p>"
-                if (chatAbiertoId) cerrarChat()
+                if (chatAbiertoId && chatVista === "intercambios") cerrarChat()
                 renderizarNovedades()
                 return
             }
@@ -4950,6 +5112,8 @@ async function cargarBootstrap() {
         }
 
         function renderizarMensajesChat(mensajes) {
+            // Solo baja al final si ya estabas abajo (o el último mensaje es tuyo): no te saca de lo que estás leyendo.
+            const estabaAbajo = listaMensajesChat.scrollHeight - listaMensajesChat.scrollTop - listaMensajesChat.clientHeight < 80
             listaMensajesChat.innerHTML = ''
             if (!mensajes || !mensajes.length) {
                 listaMensajesChat.innerHTML = "<p class='vacio'>Todavía no hay mensajes. Podés iniciar la conversación.</p>"
@@ -4986,15 +5150,19 @@ async function cargarBootstrap() {
                 fila.appendChild(burbuja)
                 listaMensajesChat.appendChild(fila)
             })
-            listaMensajesChat.scrollTop = listaMensajesChat.scrollHeight
+            const ultimo = mensajes[mensajes.length - 1]
+            if (estabaAbajo || (ultimo && ultimo.esVos)) listaMensajesChat.scrollTop = listaMensajesChat.scrollHeight
         }
 
         async function cargarChatActual(silencioso) {
             if (!chatAbiertoId || chatEnvioEnCurso) return
+            const idPedido = chatAbiertoId
             const r = await llamar('obtenerChat', {
-                conversacionId: chatAbiertoId,
+                conversacionId: idPedido,
                 cantidadMensajes: chatDatosServidorCargados ? Math.max(0, chatCantidadServidor) : -1
             })
+            // Mientras llegaba la respuesta se abrió otro chat (o se cerró): no se mezcla.
+            if (chatAbiertoId !== idPedido) return
             if (!r.ok) {
                 if (!silencioso) msgChat.innerText = mensajeError(r.error)
                 if (r.error === 'chat_expirado' || r.error === 'chat_no_encontrado') {
@@ -5075,6 +5243,9 @@ async function cargarBootstrap() {
             mensajesChatUI = []
             chatCantidadServidor = 0
             chatDatosServidorCargados = false
+            listaMensajesChat.innerHTML = ''
+            chatEnvioEnCurso = false
+            if (btnEnviarChat) btnEnviarChat.disabled = false
             ubicarPanelChat(chatVista)
             panelChat.style.display = 'block'
 
@@ -5095,8 +5266,13 @@ async function cargarBootstrap() {
 
             await cargarChatActual(false)
             iniciarChatPolling()
-            panelChat.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            inputMensajeChat.focus()
+            panelChat.scrollIntoView({ behavior: movimientoReducido() ? 'auto' : 'smooth', block: 'start' })
+            // En el celular, enfocar el campo abre el teclado y tapa los mensajes.
+            if (!window.matchMedia('(pointer: coarse)').matches) inputMensajeChat.focus()
+        }
+
+        function movimientoReducido() {
+            return window.matchMedia('(prefers-reduced-motion: reduce)').matches
         }
 
         function iniciarChatPolling() {
@@ -5167,6 +5343,7 @@ async function cargarBootstrap() {
             chatAbiertoId = null
             mensajesChatUI = []
             chatEnvioEnCurso = false
+            if (btnEnviarChat) btnEnviarChat.disabled = false
             panelChat.style.display = 'none'
             listaIntercambios.style.display = 'block'
             document.getElementById("contenidoClasificados").hidden = false
@@ -5236,6 +5413,10 @@ async function cargarBootstrap() {
                             renderizarMensajesChat(mensajesChatUI)
                             if (btnEnviarChat) btnEnviarChat.disabled = false
                             msgChat.innerText = mensajeError(rr.error)
+                        } else {
+                            // Sigue sin confirmarse: se libera el botón; el próximo refresco del chat dirá si llegó.
+                            if (btnEnviarChat) btnEnviarChat.disabled = false
+                            msgChat.innerText = 'No pudimos confirmar el último mensaje. Si no aparece en un rato, mandalo de nuevo.'
                         }
                     }, 15000)
                     return
@@ -5299,7 +5480,7 @@ async function cargarBootstrap() {
             tituloFormulario.innerText = "Editar solicitud"
             seccionFormulario.classList.add("editando")
 
-            seccionFormulario.scrollIntoView({ behavior: "smooth", block: "start" })
+            seccionFormulario.scrollIntoView({ behavior: movimientoReducido() ? "auto" : "smooth", block: "start" })
 
         }
 
@@ -5334,7 +5515,7 @@ async function cargarBootstrap() {
             }
             solicitudesUI = anterior
             renderizarSolicitudes(solicitudesUI)
-            alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : ""))
+            alertaError(r)
             if (r.error === "no_encontrado") cargarMisSolicitudes()
         }
 
@@ -5403,7 +5584,7 @@ async function cargarBootstrap() {
                         solicitudesUI = anterior
                         renderizarSolicitudes(solicitudesUI)
                         msg.innerText = ""
-                        alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : ""))
+                        alertaError(r)
                     }
                     return
                 }
@@ -5427,7 +5608,7 @@ async function cargarBootstrap() {
                         borrarSesionLocal()
                         mostrarLogin()
                     } else {
-                        alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : ""))
+                        alertaError(r)
                     }
                 }
             } finally {
@@ -5594,7 +5775,7 @@ async function cargarBootstrap() {
             if (Array.isArray(r.busqueda)) {
                 rankingResultados.innerHTML = r.busqueda.length
                     ? "<p class='rankingSubtitulo'>Resultados para “" + escapeHtml(rankingBuscar.value.trim()) + "”</p><ol class='rankingLista'>" + r.busqueda.map(filaRankingHtml).join("") + "</ol>"
-                    : "<p class='rankingSubtitulo'>Nadie con ese pseudónimo jugó " + escapeHtml(etiquetaModoRanking(modo)) + ".</p>"
+                    : "<p class='rankingSubtitulo'>Nadie con ese seudónimo jugó " + escapeHtml(etiquetaModoRanking(modo)) + ".</p>"
             } else {
                 rankingResultados.innerHTML = ""
             }
@@ -5921,19 +6102,30 @@ async function cargarBootstrap() {
                     const yaLoVes = !n.leida && ((n.tipo === "mensaje" && chatAbiertoId && String(chatAbiertoId) === String(n.ref_id)) ||
                         ((n.tipo === "respuesta" || n.tipo === "respuesta_a_respuesta") && hiloAbiertoId && String(hiloAbiertoId) === String(n.ref_id) && seccionActual === "foro"))
                     if (yaLoVes) { marcarNotificacionesLeidas([n.id]); return }
+                    // Un aviso marcado como leído (por vos, acá o en otra pestaña) no necesita pedir la lista de nuevo.
+                    if (payload.eventType === "UPDATE" && n.leida) {
+                        const local = notificacionesUI.find(function (x) { return String(x.id) === String(n.id) })
+                        if (local && !local.leida) { local.leida = true; notificacionesSinLeer = Math.max(0, notificacionesSinLeer - 1); renderizarNotificaciones() }
+                        return
+                    }
+                    if (payload.eventType === "DELETE") return
                     const nuevo = payload.eventType === "INSERT" || (payload.eventType === "UPDATE" && !n.leida)
-                    cargarNotificaciones(true).then(function () {
+                    // Varios avisos seguidos (por ejemplo, una ráfaga de mensajes) se juntan en un solo pedido.
+                    clearTimeout(temporizadorRecargaNotif)
+                    temporizadorRecargaNotif = setTimeout(function () { cargarNotificaciones(true).then(function () {
                         if (nuevo && !n.leida && panelNotificaciones.hidden) {
                             const tmp = document.createElement("div")
                             tmp.innerHTML = textoNotificacion(n)
                             mostrarAviso(tmp.textContent)
                         }
-                    })
+                    }) }, 1500)
                 })
                 .subscribe()
         }
 
+        let temporizadorRecargaNotif = null
         function detenerNotificaciones() {
+            clearTimeout(temporizadorRecargaNotif)
             if (notificacionesCanal) { supabaseClient.removeChannel(notificacionesCanal); notificacionesCanal = null }
             notificacionesUI = []
             notificacionesSinLeer = 0
@@ -6035,7 +6227,7 @@ async function cargarBootstrap() {
         // Moderación (solo admins): publicar una noticia para todas las cuentas.
         const formNoticia = document.getElementById("formNoticia")
         if (formNoticia) {
-            formNoticia.addEventListener("submit", async function (e) {
+            formNoticia.addEventListener("submit", sinDobleEnvio(async function (e) {
                 e.preventDefault()
                 const msgNoticia = document.getElementById("msgNoticia")
                 const datos = {
@@ -6056,7 +6248,7 @@ async function cargarBootstrap() {
                 formNoticia.reset()
                 mostrarAviso("Noticia publicada para " + r.destinatarios + " cuentas.")
                 cargarNotificaciones(true)
-            })
+            }))
         }
 
         // ==================== MODERACIÓN CON LLAVE ====================
@@ -6300,7 +6492,10 @@ async function cargarBootstrap() {
             return r
         }
 
+        let desbloqueoEnCurso = null
         function pedirDesbloqueo(soloArchivo) {
+            // Dos acciones de moderación a la vez comparten la misma ventana de llave.
+            if (desbloqueoEnCurso) return desbloqueoEnCurso
             const modal = document.getElementById("modalLlave")
             document.getElementById("msgDesbloqueo").textContent = ""
             document.getElementById("passLlave").value = ""
@@ -6308,7 +6503,9 @@ async function cargarBootstrap() {
             // Si este dispositivo ya está autorizado no se ofrece autorizarlo de nuevo.
             document.getElementById("campoAutorizarDispositivo").hidden = !!modDispositivo
             abrirModal(modal)
-            return new Promise(function (resolver) { resolverDesbloqueo = resolver })
+            desbloqueoEnCurso = new Promise(function (resolver) { resolverDesbloqueo = resolver })
+            desbloqueoEnCurso.then(function () { desbloqueoEnCurso = null })
+            return desbloqueoEnCurso
         }
 
         function terminarDesbloqueo(exito) {
@@ -6319,7 +6516,7 @@ async function cargarBootstrap() {
 
         document.getElementById("btnCerrarModalLlave").addEventListener("click", function () { terminarDesbloqueo(false) })
 
-        document.getElementById("formDesbloqueo").addEventListener("submit", async function (e) {
+        document.getElementById("formDesbloqueo").addEventListener("submit", sinDobleEnvio(async function (e) {
             e.preventDefault()
             const msg = document.getElementById("msgDesbloqueo")
             const archivo = document.getElementById("archivoLlave").files[0]
@@ -6341,7 +6538,7 @@ async function cargarBootstrap() {
             } catch (err) {
                 msg.textContent = err && err.message ? err.message : "No se pudo desbloquear."
             }
-        })
+        }))
 
         function cerrarSesionModeracion(olvidarDispositivo) {
             modSesion = null
@@ -6418,7 +6615,7 @@ async function cargarBootstrap() {
             const b = e.target.closest("[data-ir-mod]")
             if (!b) return
             elegirPestaniaModeracion(b.dataset.irMod)
-            document.getElementById("vistaModeracion").scrollIntoView({ block: "start", behavior: "smooth" })
+            document.getElementById("vistaModeracion").scrollIntoView({ block: "start", behavior: movimientoReducido() ? "auto" : "smooth" })
         })
         document.getElementById("btnDesbloquearMod").addEventListener("click", async function () {
             if (await asegurarSesionModeracion()) cargarPestaniaModeracion()
@@ -6772,7 +6969,7 @@ async function cargarBootstrap() {
             if (!confirm("¿Aplicar un strike a " + datos.pseudonimo + "? Le llega una notificación y un mail con el motivo.")) return
             const btn = this.querySelector("button[type=submit]")
             btn.disabled = true
-            msg.textContent = "Aplicando..."
+            msg.textContent = "Aplicando…"
             const r = await llamarModeracion("sancionar", datos)
             btn.disabled = false
             if (!r.ok) { msg.textContent = r.error === "moderacion_bloqueada" ? "" : r.error === "no_encontrado" ? "No hay ninguna cuenta con ese seudónimo." : mensajeError(r.error); return }
@@ -6789,7 +6986,7 @@ async function cargarBootstrap() {
                 const det = document.getElementById("detallesSancionar")
                 det.open = true
                 document.getElementById("sancionPseudonimo").value = sancionarA.dataset.sancionarA
-                det.scrollIntoView({ block: "start", behavior: "smooth" })
+                det.scrollIntoView({ block: "start", behavior: movimientoReducido() ? "auto" : "smooth" })
                 document.getElementById("sancionMotivo").focus()
                 return
             }
@@ -7132,7 +7329,7 @@ async function cargarBootstrap() {
                     (sitio && sitio.libre ? "<p class='avisoExterno'>Página externa: MedMar no la controla y puede cambiar. Nunca pongas tu contraseña ahí.</p>" : "") +
                     "<div class='accionesMaterial'>" +
                     (descarga ? "<a class='novedadAccion' href='" + escapeAttr(descarga) + "' target='_blank' rel='noopener noreferrer'>Descargar</a>" : "") +
-                    "<a class='novedadAccion" + (descarga ? " secundaria" : "") + "' href='" + escapeAttr(m.link) + "' target='_blank' rel='noopener noreferrer'>" + (descarga ? "Ver en " : "Abrir en ") + escapeHtml(nombreSitio) + "</a>" +
+                    "<a class='novedadAccion" + (descarga ? " secundaria" : "") + "' href='" + escapeAttr(soloHttps(m.link)) + "' target='_blank' rel='noopener noreferrer'>" + (descarga ? "Ver en " : "Abrir en ") + escapeHtml(nombreSitio) + "</a>" +
                     (puedeModerar() ? "<button type='button' class='novedadAccion secundaria quitarMaterial' data-quitar='" + escapeAttr(m.id) + "'>Quitar</button>" : "") +
                     "<button type='button' class='denunciarMaterial' data-denunciar-material='" + escapeAttr(m.id) + "'>Reportar</button>" +
                     "</div></article>"
@@ -7205,7 +7402,7 @@ async function cargarBootstrap() {
             aporteAbiertoEn = Date.now()
             document.getElementById("msgAporte").textContent = ""
             actualizarFormAporte()
-            panelAporte.scrollIntoView({ behavior: "smooth", block: "start" })
+            panelAporte.scrollIntoView({ behavior: movimientoReducido() ? "auto" : "smooth", block: "start" })
             setTimeout(function () { document.getElementById("aporteTitulo").focus() }, 250)
         }
 
@@ -7229,7 +7426,7 @@ async function cargarBootstrap() {
             out.textContent = problema || ("✓ " + (sitio ? sitio.nombre : "Enlace") + ". Revisá que esté compartido como público.")
         })
 
-        formAporte.addEventListener("submit", async function (e) {
+        formAporte.addEventListener("submit", sinDobleEnvio(async function (e) {
             e.preventDefault()
             const msgAporte = document.getElementById("msgAporte")
             const clase = claseAporteActual()
@@ -7263,7 +7460,7 @@ async function cargarBootstrap() {
                 ? "¡Gracias! Un moderador lo va a revisar y te avisamos cuando esté publicado."
                 : "¡Gracias por la sugerencia! Te avisamos cuando la revisemos.")
             cargarMisAportes()
-        })
+        }))
 
         async function cargarMisAportes() {
             if (!sesion) return
@@ -7314,7 +7511,7 @@ async function cargarBootstrap() {
                           "<label for='apTi-" + idc + "'>Tipo</label><select id='apTi-" + idc + "'>" +
                           Object.keys(TIPOS_MATERIAL).map(function (t) { return "<option value='" + t + "'" + (t === a.tipo ? " selected" : "") + ">" + TIPOS_MATERIAL[t] + "</option>" }).join("") + "</select>" +
                           "<p class='etiquetaLinkAporte'>Enlace" + (a.sitio ? " (" + escapeHtml(a.sitio) + ")" : "") + ":</p>" +
-                          "<a class='linkAporte linkAporteCompleto' href='" + escapeAttr(a.link) + "' target='_blank' rel='noopener noreferrer'>" + escapeHtml(a.link) + " ↗</a>" +
+                          "<a class='linkAporte linkAporteCompleto' href='" + escapeAttr(soloHttps(a.link)) + "' target='_blank' rel='noopener noreferrer'>" + escapeHtml(a.link) + " ↗</a>" +
                           "<p class='dominioAporte'>Dominio: <b>" + escapeHtml(a.dominio || "") + "</b>. Revisá que abra, que sea público y que sea material de estudio legal.</p>" +
                           (a.libre ? "<p class='dominioAporte avisoExterno'>Es una página que cualquiera puede crear y cambiar después de aprobada: aprobala solo si confiás en el contenido y en quien la manda.</p>" : "")
                         : "<h3>" + escapeHtml(a.titulo) + "</h3>" + (a.materia ? "<p class='materiaMaterial'>" + escapeHtml(a.materia) + "</p>" : "")) +
@@ -7362,7 +7559,7 @@ async function cargarBootstrap() {
 
         const formMaterialDirecto = document.getElementById("formMaterialDirecto")
         if (formMaterialDirecto) {
-            formMaterialDirecto.addEventListener("submit", async function (e) {
+            formMaterialDirecto.addEventListener("submit", sinDobleEnvio(async function (e) {
                 e.preventDefault()
                 const msg = document.getElementById("msgMaterialDirecto")
                 const datos = {
@@ -7385,7 +7582,7 @@ async function cargarBootstrap() {
                 formMaterialDirecto.reset()
                 materialesCargadosEn = 0
                 mostrarAviso("Material publicado.")
-            })
+            }))
         }
 
         async function cargarRankingJuego(forzar) {
@@ -7660,7 +7857,7 @@ async function cargarBootstrap() {
             datos.operationId = operacionClasificado
             const boton = formClasificado.querySelector("button[type=submit]")
             boton.disabled = true
-            msgClasificado.textContent = "Publicando..."
+            msgClasificado.textContent = "Publicando…"
             const r = await llamar("publicarClasificado", datos)
             boton.disabled = false
             if (!r.ok) { msgClasificado.textContent = mensajeError(r.error); return }
@@ -7824,7 +8021,7 @@ async function cargarBootstrap() {
             if (!det || !vistaAyuda.contains(det)) return
             if (inputBuscarAyuda.value) { inputBuscarAyuda.value = ""; filtrarAyuda() }
             det.open = true
-            det.scrollIntoView({ behavior: "smooth", block: "start" })
+            det.scrollIntoView({ behavior: movimientoReducido() ? "auto" : "smooth", block: "start" })
             const resumen = det.querySelector("summary")
             if (resumen) resumen.focus({ preventScroll: true })
         }

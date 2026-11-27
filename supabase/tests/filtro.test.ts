@@ -61,7 +61,26 @@ test('datos de pacientes: DNI, CUIL e historia clínica; mails y teléfonos se p
     'cuesta 12.500.000 pesos', 'llevá el DNI al parcial', 'la HC hay que completarla entera', 'aula 3, 14 hs']) permite(t)
 })
 
+test('un NN.NNN.NNN cuenta como DNI solo con un rótulo cerca', () => {
+  for (const t of ['documento 30.123.456', 'Paciente de 45 años: 28.765.432, derivada', 'HC: 34.111.222', 'el número es 33.444.555 (DNI)',
+    'historia clínica del 41.222.333']) retira(t, 'pacientes')
+  for (const t of ['La provincia tiene 46.044.703 habitantes', 'Argentina: 46.044.703 habitantes según el censo',
+    'En 2022 hubo 12.345.678 consultas', 'el presupuesto fue de 10.500.000 y no alcanzó']) permite(t)
+})
+
+test('Compra venta: el contacto también pasa por el filtro (mismo revisarTexto)', () => {
+  // La API concatena título, descripción, precio y contacto: un contacto agresivo se retira, uno normal no.
+  retira('Vendo apuntes\nImpecables\n$5000\nescribime pelotudo, sos un forro', 'acoso')
+  permite('Vendo apuntes\nImpecables\n$5000\nescribime al 223 512-3456')
+})
+
 test('seudónimos', () => {
   for (const s of ['ElPelotudo', 'hijodeputa22', 'La Puta Ama', 'Nazi_88', 'forro.total', 'sorete']) assert.ok(revisarSeudonimo(s), s)
   for (const s of ['Juan Pérez', 'Computadora', 'Anatomista', 'Conchita', 'Dr. House', 'Nazareno', 'Patricio', 'Escucha']) assert.equal(revisarSeudonimo(s), null, s)
+})
+
+test('seudónimos: apellidos y nombres reales que contienen una raíz ofensiva', () => {
+  for (const s of ['Vergara', 'Lucía Vergara', 'Vergani', 'Nazira', 'Nazir', 'Nazim', 'Juan Gil', 'Gilda']) assert.equal(revisarSeudonimo(s), null, s)
+  for (const s of ['Verga', 'VergaLoca', 'la verga 22', 'v3rga', 'Nazi', 'ElNazi', 'nazis_unidos', 'NeoNazi', 'Hitler88', 'Pelotudo99'])
+    assert.ok(revisarSeudonimo(s), s)
 })

@@ -28,7 +28,7 @@
 **Inmune Survivors** es un juego de inmunología y microbiología. Defendé un tejido de bacterias, virus, hongos y parásitos mientras respondés preguntas. Si jugás con tu sesión iniciada, tu mejor puntaje entra al **ranking**.
 
 ## 👤 Tu perfil y la campanita
-- Elegí un **pseudónimo** y una foto o avatar. Es lo único que ven los demás: **tu mail queda privado**.
+- Elegí un **seudónimo** y una foto o avatar. Es lo único que ven los demás: **tu mail queda privado**.
 - En Perfil cambiás el tema (claro u oscuro), la contraseña y si querés **mantener la sesión iniciada**.
 - La campanita 🔔 te avisa de respuestas, mensajes, intercambios y novedades.
 

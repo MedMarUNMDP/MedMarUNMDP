@@ -34,9 +34,9 @@
     .brand { display:flex; align-items:center; gap: 12px; }
     .brand-mark { width: 42px; height: 42px; flex:0 0 auto; border-radius: 50%; background: radial-gradient(circle at 30% 25%, #f2fff8 0 12%, #92f3cd 13% 52%, #49b8a0 53% 100%); box-shadow: inset -5px -7px 0 #267e7d, 0 0 30px #67dfbd30; position:relative; }
     .brand-mark:after { content:""; position:absolute; width:20px; height:12px; border-radius:60%; background:#7864b5; left:11px; top:14px; transform:rotate(-27deg); box-shadow:5px -2px 0 -1px #8c79cf; }
-    .eyebrow { color:var(--mint); font-size:11px; font-weight:800; letter-spacing:.17em; text-transform:uppercase; }
+    .eyebrow { color:var(--mint); font-size:12px; font-weight:800; letter-spacing:.17em; text-transform:uppercase; }
     h1 { font-size: clamp(22px, 4vw, 32px); line-height:1; letter-spacing:-.04em; margin:4px 0 0; }
-    .top-tag { border:1px solid #36516c; background:#0e2033aa; color:#bdd0e5; border-radius:999px; padding:7px 11px; font-size:11px; font-weight:700; white-space:nowrap; }
+    .top-tag { border:1px solid #36516c; background:#0e2033aa; color:#bdd0e5; border-radius:999px; padding:7px 11px; font-size:12px; font-weight:700; white-space:nowrap; }
     .intro { max-width:760px; margin: 0 auto 18px; text-align:center; }
     .intro h2 { margin:0 0 8px; font-size:clamp(22px, 4vw, 34px); letter-spacing:-.04em; }
     .intro p { margin:0 auto; max-width:630px; color:var(--muted); line-height:1.55; font-size:14px; }
@@ -52,15 +52,15 @@
     .choice.selected:after { content:"✓"; position:absolute; top:8px; right:9px; color:var(--mint); font-weight:900; font-size:12px; }
     .choice-icon { display:grid; place-items:center; width:40px; height:40px; margin-bottom:8px; font-size:26px; border-radius:12px; background:#21394e; }
     .choice strong { display:block; font-size:14px; }
-    .choice small { display:block; margin-top:4px; color:#9bb0c7; font-size:11px; line-height:1.35; padding-right:8px; }
+    .choice small { display:block; margin-top:4px; color:#9bb0c7; font-size:12px; line-height:1.35; padding-right:8px; }
     .mode-grid .choice { padding:14px; }
     .nucleo-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(165px,1fr)); gap:8px; }
     .nucleo-choice { text-align:left; padding:10px 11px; border-radius:12px; border:1px solid #29435c; background:#0b1a2b; color:var(--ink); min-width:0; transition:border-color .15s, background .15s; }
     .nucleo-choice:hover { border-color:#5d8da2; }
     .nucleo-choice.selected { border-color:var(--mint2); background:linear-gradient(145deg,#15382f,#10293a); box-shadow:inset 0 0 0 1px #55d7b055; }
-    .nucleo-choice b { display:block; font-size:11px; color:var(--mint); letter-spacing:.06em; text-transform:uppercase; }
+    .nucleo-choice b { display:block; font-size:12px; color:var(--mint); letter-spacing:.06em; text-transform:uppercase; }
     .nucleo-choice span { display:block; margin-top:2px; font-size:12.5px; font-weight:800; line-height:1.25; }
-    .nucleo-choice small { display:block; margin-top:4px; color:#9bb0c7; font-size:10.5px; line-height:1.3; }
+    .nucleo-choice small { display:block; margin-top:4px; color:#9bb0c7; font-size:12px; line-height:1.3; }
     .ranking-status { margin-top:16px; padding:10px 12px; border-radius:12px; border:1px solid #2f4b63; background:#0a1929; color:#b9cbe0; font-size:12px; line-height:1.45; }
     .ranking-status:empty { display:none; }
     .ranking-status a { color:var(--mint); font-weight:800; }
@@ -88,7 +88,7 @@
     .cell-copy strong { font-size:15px; }
     .cell-copy p { color:var(--muted); font-size:12px; line-height:1.45; margin:5px 0 0; }
     .stats { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
-    .stat-pill { font-size:10px; background:#1d3449; border:1px solid #2e4b62; color:#d2e3f4; padding:4px 7px; border-radius:999px; }
+    .stat-pill { font-size:12px; background:#1d3449; border:1px solid #2e4b62; color:#d2e3f4; padding:4px 7px; border-radius:999px; }
     .difficulty-list { display:grid; gap:8px; }
     .diff-choice { display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:11px; border-radius:13px; border:1px solid #29435c; background:#0b1a2b; color:var(--ink); }
     .diff-choice.selected { border-color:var(--mint2); background:#15352f; }
@@ -98,7 +98,7 @@
     .diff-choice[data-infection-difficulty="inmunosuprimido"] .diff-dot, .diff-choice[data-evolution-difficulty="infectologo"] .diff-dot { background:#ff728a; box-shadow:0 0 0 4px #ff728a22; }
     .diff-text { flex:1; }
     .diff-text strong { display:block; font-size:13px; }
-    .diff-text small { display:block; color:var(--muted); margin-top:3px; font-size:11px; }
+    .diff-text small { display:block; color:var(--muted); margin-top:3px; font-size:12px; }
     .multiplier { font-size:12px; font-weight:900; color:var(--mint); }
     .btn-primary { width:100%; border:0; color:#08251f; background:linear-gradient(135deg,#adf7d9,#5bd8b5); padding:15px 18px; border-radius:14px; font-weight:950; letter-spacing:.015em; box-shadow:0 8px 28px #55d7b025; transition:transform .15s, filter .15s; }
     .btn-primary:hover { transform:translateY(-1px); filter:brightness(1.05); }
@@ -106,7 +106,7 @@
     .btn-lab:hover { filter:brightness(1.15); }
     .btn-secondary { border:1px solid #35536b; color:#d9e8f7; background:#14283b; border-radius:11px; padding:10px 13px; font-weight:800; }
     .muted { color:var(--muted); font-size:12px; line-height:1.5; }
-    .small-note { color:#8099b2; font-size:10px; line-height:1.45; margin-top:12px; }
+    .small-note { color:#8099b2; font-size:12px; line-height:1.45; margin-top:12px; }
     .howto { list-style:none; padding:0; margin:0; display:grid; gap:14px; }
     .howto li { display:flex; gap:10px; align-items:flex-start; color:#b9cbe0; font-size:12px; line-height:1.5; }
     .howto-icon { flex:0 0 30px; width:30px; height:30px; border-radius:10px; background:#1b3348; display:grid; place-items:center; font-size:15px; }
@@ -115,10 +115,10 @@
     .game-section { display:none; }
     .game-topline { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px; }
     .game-topline strong { font-size:13px; }
-    .game-topline span { color:var(--muted); font-size:11px; }
+    .game-topline span { color:var(--muted); font-size:12px; }
     #gameFrame { width:min(100%, 520px); aspect-ratio: 480 / 800; margin:0 auto; border:1px solid #38536d; border-radius:19px; overflow:hidden; box-shadow:0 26px 70px #0006; background:#071321; position:relative; }
     .crisis-banner { position:absolute; z-index:100; inset:0 0 auto; padding:20px 12px 17px; text-align:center; color:#fff2ef; font-weight:950; letter-spacing:.12em; font-size:clamp(15px,4vw,23px); text-shadow:0 2px 12px #21040d,0 0 18px #ff4865; background:linear-gradient(180deg,#5b1022ed,#6d1728d6 72%,transparent); border-top:3px solid #ff526a; pointer-events:none; animation:crisisIn .45s cubic-bezier(.2,1.4,.4,1) both; }
-    .crisis-banner small { display:block; margin-top:6px; letter-spacing:.16em; font-size:10px; color:#ffd0bd; }
+    .crisis-banner small { display:block; margin-top:6px; letter-spacing:.16em; font-size:12px; color:#ffd0bd; }
     @keyframes crisisIn { from { opacity:0; transform:translateY(-38px); } to { opacity:1; transform:translateY(0); } }
     #gameContainer, #gameContainer canvas { width:100%; height:100%; display:block; }
     /* PC con mouse y pantalla ancha: marco apaisado que usa el ancho disponible (en celular sigue vertical). */
@@ -150,21 +150,21 @@
     body.game-fullscreen #gameFrame { width:100vw; max-width:none; max-height:none; height:100vh; height:100dvh; aspect-ratio:auto; margin:0; border:0; border-radius:0; box-shadow:none; }
     body.game-fullscreen .game-controls { display:none; }
     body.game-fullscreen .modal-layer { z-index:2100; }
-    #debugPanel { display:none; position:absolute; z-index:90; left:8px; bottom:8px; width:min(255px,58vw); max-height:64%; overflow:auto; padding:9px; border:1px solid #ab91ff99; border-radius:12px; background:#0a1024eF; color:#f2edff; font-size:10px; box-shadow:0 8px 28px #0008; }
+    #debugPanel { display:none; position:absolute; z-index:90; left:8px; bottom:8px; width:min(255px,58vw); max-height:64%; overflow:auto; padding:9px; border:1px solid #ab91ff99; border-radius:12px; background:#0a1024eF; color:#f2edff; font-size:12px; box-shadow:0 8px 28px #0008; }
     #debugPanel.open { display:block; }
     #debugPanel.compact { width:190px; max-height:48px; overflow:hidden; }
     #debugPanel.compact .debug-content { display:none; }
     #debugPanel .debug-toggle { float:right; }
-    #debugPanel select, #debugPanel button { color:#f2edff; background:#1d2441; border:1px solid #505b83; border-radius:7px; padding:5px; font-size:10px; }
+    #debugPanel select, #debugPanel button { color:#f2edff; background:#1d2441; border:1px solid #505b83; border-radius:7px; padding:5px; font-size:12px; }
     .debug-row { display:flex; flex-wrap:wrap; gap:4px; margin:5px 0 8px; }
     .debug-row button { flex:1; }
     .debug-heading { color:#b9a8ff; font-weight:900; margin-top:6px; }
-    .game-controls { display:flex; justify-content:space-between; gap:12px; width:min(100%,520px); margin:10px auto 0; color:var(--muted); font-size:11px; }
+    .game-controls { display:flex; justify-content:space-between; gap:12px; width:min(100%,520px); margin:10px auto 0; color:var(--muted); font-size:12px; }
     .modal-layer { position:fixed; inset:0; z-index:10; display:none; align-items:center; justify-content:center; padding:16px; background:#030914b8; backdrop-filter:blur(8px); }
     .modal-layer.open { display:flex; }
     .modal { width:min(100%, 520px); border:1px solid #37566d; background:linear-gradient(160deg,#152b41,#0a1929); border-radius:22px; padding:22px; box-shadow:0 28px 90px #0009; animation:pop .18s ease-out; max-height:min(90svh,850px); overflow:auto; }
     @keyframes pop { from { opacity:0; transform:translateY(8px) scale(.98); } to { opacity:1; transform:translateY(0) scale(1); } }
-    .modal-kicker { font-size:10px; color:var(--mint); font-weight:900; letter-spacing:.16em; text-transform:uppercase; }
+    .modal-kicker { font-size:12px; color:var(--mint); font-weight:900; letter-spacing:.16em; text-transform:uppercase; }
     .modal h2 { font-size:clamp(22px,4vw,29px); letter-spacing:-.035em; margin:8px 0 7px; }
     .modal p { color:#a9bfd5; font-size:13px; line-height:1.5; }
     #questionText { font-size:18px; line-height:1.38; color:#f4f8ff; font-weight:800; margin:18px 0; }
@@ -190,20 +190,20 @@
     .strategy-icon { display:grid; place-items:center; flex:0 0 48px; width:48px; height:48px; border-radius:15px; color:var(--strategy-color)!important; background:color-mix(in srgb,var(--strategy-color) 18%,#0c1b2b); border:1px solid color-mix(in srgb,var(--strategy-color) 40%,transparent); }
     .strategy-icon svg { display:block; width:31px; height:31px; }
     .strategy-copy { display:grid; gap:3px; min-width:0; flex:1; }
-    .strategy-copy small { color:var(--strategy-color); font-size:9px; font-weight:900; letter-spacing:.14em; }
+    .strategy-copy small { color:var(--strategy-color); font-size:12px; font-weight:900; letter-spacing:.14em; }
     .strategy-copy strong { margin:0; }
     .strategy-copy > span { color:#b8cbe0; }
     .affected-skills { display:grid; gap:6px; margin-top:8px; padding:9px 10px; border:1px solid color-mix(in srgb, var(--strategy-color) 45%, transparent); border-radius:11px; background:#0a1828; }
-    .affected-head { color:#9fb6cc; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+    .affected-head { color:#9fb6cc; font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
     .affected-row { display:grid; grid-template-columns:24px 1fr; gap:8px; align-items:start; text-align:left; }
     .affected-row img { width:24px; height:24px; object-fit:contain; }
     .affected-row b { display:block; color:#e6f2fb; font-size:12px; }
-    .affected-change { display:block; color:#b9f3dc; font-size:11.5px; line-height:1.35; }
+    .affected-change { display:block; color:#b9f3dc; font-size:12px; line-height:1.35; }
     .skill-evolution-card { display:grid; grid-template-columns:42px 1fr; align-items:center; column-gap:10px; }
-    .skill-evolution-card .evolution-impact { color:#b8f5d8; font-size:11px; font-weight:800; line-height:1.4; }
+    .skill-evolution-card .evolution-impact { color:#b8f5d8; font-size:12px; font-weight:800; line-height:1.4; }
     .evolution-sprite { grid-row:span 2; display:grid; place-items:center; width:40px; height:40px; border-radius:12px; background:linear-gradient(145deg,#193a4a,#30264a); border:1px solid #76e9c588; color:#9df2ce; box-shadow:inset 0 0 14px #75e5cf22; }
     .evolution-sprite img { width:36px; height:36px; object-fit:contain; filter:drop-shadow(0 2px 2px #0008); }
-    .strategy-copy em { color:#839bb2; font-size:10px; font-style:normal; }
+    .strategy-copy em { color:#839bb2; font-size:12px; font-style:normal; }
     .gameover-statgrid { display:grid; grid-template-columns:repeat(2,1fr); gap:9px; margin:18px 0; }
     .gameover-stat { border:1px solid #2f4b63; background:#0b1a2b; border-radius:13px; padding:11px; min-width:0; }
     .gameover-stat strong { font-size:clamp(16px,4vw,22px); overflow-wrap:anywhere; }
@@ -217,14 +217,14 @@
     .bestiary-card { border:1px solid #223a50; border-radius:10px; padding:9px 11px; background:#081522; }
     .bestiary-head { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:2px 10px; margin-bottom:4px; }
     .bestiary-name { font-style:italic; color:#e8f3fb; font-size:13px; }
-    .bestiary-meta { font-size:10.5px; font-weight:800; letter-spacing:.04em; }
+    .bestiary-meta { font-size:12px; font-weight:800; letter-spacing:.04em; }
     .fam-bacteria { color:#8cc4ff; } .fam-virus { color:#e2a3f0; } .fam-parasite { color:#f0bd8a; } .fam-fungus { color:#b8e08f; }
     .bestiary-card p { margin:3px 0 0; color:#b9cde0; line-height:1.4; }
     .bestiary-card b { color:#9fdcc6; font-weight:800; }
     .bestiary-empty { margin:6px 0 0; color:#90a9c0; }
-    .gameover-stat span { display:block; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; }
+    .gameover-stat span { display:block; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; }
     .gameover-stat strong { display:block; font-size:24px; margin-top:3px; }
-    footer { color:#728aa3; font-size:10px; line-height:1.5; text-align:center; margin:20px 0 0; }
+    footer { color:#728aa3; font-size:12px; line-height:1.5; text-align:center; margin:20px 0 0; }
     @media (max-width: 760px) {
       .shell { padding:15px 10px 24px; }
       header { margin-bottom:16px; }
@@ -233,7 +233,8 @@
       .intro { margin-bottom:16px; }
       #gameFrame { width:min(100%, 480px); border-radius:14px; }
       .game-controls { padding:0 2px; }
-      .top-tag { font-size:9px; padding:6px 8px; }
+      .top-tag { font-size:12px; padding:6px 8px; white-space:normal; text-align:right; line-height:1.25; }
+      .eyebrow { letter-spacing:.08em; }
     }
     @media (max-width: 380px) {
       .infection-grid { gap:7px; }
@@ -243,6 +244,13 @@
     }
     /* Navegación con teclado (flechas/WASD + Enter/Espacio): la opción con foco se marca bien. */
     .modal-layer button:focus-visible, #menuScreen button:focus-visible, #menuScreen select:focus-visible, #menuScreen a:focus-visible, #menuScreen input:focus-visible { outline: 3px solid #ffd875; outline-offset: 3px; box-shadow: 0 0 0 6px rgba(255,216,117,.22); }
+    .load-error { margin:0 0 16px; padding:14px 16px; border:1px solid #ff728a88; border-radius:14px; background:#3a1220; color:#ffe3e8; font-weight:700; }
+    .load-error button { margin-top:10px; }
+    #errorLayer { z-index:2150; }
+    /* Movimiento reducido: se apagan animaciones y transiciones CSS. */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+    }
   </style>
 </head>
 <body>
@@ -252,10 +260,11 @@
         <div class="brand-mark" aria-hidden="true"></div>
         <div><div class="eyebrow">MedMar · Prototipo jugable</div><h1>INMUNE SURVIVORS</h1></div>
       </div>
-      <div class="top-tag">v3.10 · PREGUNTAS POR NÚCLEO</div>
+      <div class="top-tag">v3.12 · PREGUNTAS POR NÚCLEO</div>
     </header>
 
     <section id="menuScreen">
+      <div class="load-error" id="loadError" role="alert" hidden>No se pudo cargar el juego. Revisá la conexión o el bloqueador de anuncios.<br><button type="button" class="btn-secondary" id="loadErrorRetry">Reintentar</button></div>
       <div class="intro">
         <h2>El tejido está bajo ataque.</h2>
         <p>Sos un progenitor hematopoyético frente a los agentes de ADN. Atacás solo: vos te movés, saneás focos y respondés preguntas para evolucionar.</p>
@@ -265,8 +274,8 @@
           <div class="panel-inner">
             <h3 class="section-title"><span>1</span> Elegí el modo</h3>
             <div class="infection-grid mode-grid" id="modeChoices">
-              <button class="choice selected" data-mode="sandbox"><span class="choice-icon">♾️</span><strong>Sandbox infinito</strong><small>Agentes de todos los núcleos mezclados y los jefes de cada uno. Ranking general.</small></button>
-              <button class="choice" data-mode="nucleo"><span class="choice-icon">🎯</span><strong>Foco por núcleo</strong><small>Solo los agentes de un núcleo, en su tejido y contra su jefe. Ranking por núcleo.</small></button>
+              <button class="choice selected" aria-pressed="true" data-mode="sandbox"><span class="choice-icon" aria-hidden="true">♾️</span><strong>Sandbox infinito</strong><small>Agentes de todos los núcleos mezclados y los jefes de cada uno. Ranking general.</small></button>
+              <button class="choice" aria-pressed="false" data-mode="nucleo"><span class="choice-icon" aria-hidden="true">🎯</span><strong>Foco por núcleo</strong><small>Solo los agentes de un núcleo, en su tejido y contra su jefe. Ranking por núcleo.</small></button>
             </div>
             <div class="nucleo-picker" id="nucleoPicker" hidden>
               <p class="muted" style="margin:12px 0 8px">¿Qué núcleo querés repasar?</p>
@@ -274,21 +283,21 @@
             </div>
             <h3 class="section-title" style="margin-top:20px"><span>2</span> Presión de infección</h3>
             <div class="difficulty-list" id="infectionDifficultyChoices">
-              <button class="diff-choice" data-infection-difficulty="ambulatorio"><span class="diff-dot"></span><span class="diff-text"><strong>Ambulatorio</strong><small>Modo accesible: menos vida y daño enemigos, menor velocidad y oleadas más espaciadas.</small></span><span class="multiplier">×0,75</span></button>
-              <button class="diff-choice selected" data-infection-difficulty="internado"><span class="diff-dot"></span><span class="diff-text"><strong>Internado</strong><small>Presión estándar con escalado durante la partida.</small></span><span class="multiplier">×1,00</span></button>
-              <button class="diff-choice" data-infection-difficulty="inmunosuprimido"><span class="diff-dot"></span><span class="diff-text"><strong>Inmunosuprimido</strong><small>Mayor densidad, velocidad, vida y daño enemigo.</small></span><span class="multiplier">×1,50</span></button>
+              <button class="diff-choice" aria-pressed="false" data-infection-difficulty="ambulatorio"><span class="diff-dot"></span><span class="diff-text"><strong>Ambulatorio</strong><small>Modo accesible: menos vida y daño enemigos, menor velocidad y oleadas más espaciadas.</small></span><span class="multiplier">×0,75</span></button>
+              <button class="diff-choice selected" aria-pressed="true" data-infection-difficulty="internado"><span class="diff-dot"></span><span class="diff-text"><strong>Internado</strong><small>Presión estándar con escalado durante la partida.</small></span><span class="multiplier">×1,00</span></button>
+              <button class="diff-choice" aria-pressed="false" data-infection-difficulty="inmunosuprimido"><span class="diff-dot"></span><span class="diff-text"><strong>Inmunosuprimido</strong><small>Mayor densidad, velocidad, vida y daño enemigo.</small></span><span class="multiplier">×1,50</span></button>
             </div>
             <h3 class="section-title" style="margin-top:18px"><span>3</span> Nivel de las preguntas</h3>
             <div class="difficulty-list" id="evolutionDifficultyChoices">
-              <button class="diff-choice" data-evolution-difficulty="no_curse"><span class="diff-dot"></span><span class="diff-text"><strong>No cursé</strong><small>FÁCIL · en Foco por núcleo, lo central del núcleo (agente, transmisión, prevención); en Sandbox, nivel secundario.</small></span><span class="multiplier">×0,75</span></button>
-              <button class="diff-choice selected" data-evolution-difficulty="estudiante"><span class="diff-dot"></span><span class="diff-text"><strong>Estudiante</strong><small>NORMAL · nivel parcial: patogenia, clínica típica, diagnóstico de laboratorio.</small></span><span class="multiplier">×1,00</span></button>
-              <button class="diff-choice" data-evolution-difficulty="infectologo"><span class="diff-dot"></span><span class="diff-text"><strong>Infectólogo</strong><small>DIFÍCIL · casos clínicos, diagnóstico diferencial e interpretación de laboratorio.</small></span><span class="multiplier">×1,50</span></button>
+              <button class="diff-choice" aria-pressed="false" data-evolution-difficulty="no_curse"><span class="diff-dot"></span><span class="diff-text"><strong>No cursé</strong><small>FÁCIL · en Foco por núcleo, lo central del núcleo (agente, transmisión, prevención); en Sandbox, nivel secundario.</small></span><span class="multiplier">×0,75</span></button>
+              <button class="diff-choice selected" aria-pressed="true" data-evolution-difficulty="estudiante"><span class="diff-dot"></span><span class="diff-text"><strong>Estudiante</strong><small>NORMAL · nivel parcial: patogenia, clínica típica, diagnóstico de laboratorio.</small></span><span class="multiplier">×1,00</span></button>
+              <button class="diff-choice" aria-pressed="false" data-evolution-difficulty="infectologo"><span class="diff-dot"></span><span class="diff-text"><strong>Infectólogo</strong><small>DIFÍCIL · casos clínicos, diagnóstico diferencial e interpretación de laboratorio.</small></span><span class="multiplier">×1,50</span></button>
             </div>
             <div class="ranking-status" id="rankingStatus" aria-live="polite"></div>
-            <button class="btn-primary" id="startButton" style="margin-top:14px">JUGAR ↗</button>
+            <button class="btn-primary" id="startButton" style="margin-top:14px">JUGAR<span aria-hidden="true"> ↗</span></button>
             <div class="menu-links">
-              <a class="btn-secondary" id="rankingLink" href="/?vista=juegos">🏆 Ver ranking</a>
-              <button class="btn-secondary" id="debugStartButton" title="Controles manuales, sin preguntas ni puntaje">🧪 Laboratorio</button>
+              <a class="btn-secondary" id="rankingLink" href="/?vista=juegos"><span aria-hidden="true">🏆</span> Ver ranking</a>
+              <button class="btn-secondary" id="debugStartButton" title="Controles manuales, sin preguntas ni puntaje"><span aria-hidden="true">🧪</span> Laboratorio</button>
             </div>
           </div>
         </main>
@@ -299,11 +308,11 @@
             <details class="howto-box" id="howtoBox">
               <summary class="section-title">Cómo se juega</summary>
               <ul class="howto">
-                <li><span class="howto-icon">🕹️</span><span><strong>Movete y saná focos</strong><br>WASD / flechas, o mantené apretado el mouse hacia donde querés ir (ESC o P pausa, F pantalla completa). En celular, tocá y arrastrá en cualquier parte de la arena. Quedate encima de una colonia para sanarla.</span></li>
-                <li><span class="howto-icon">✦</span><span><strong>Atacás automáticamente</strong><br>La desgranulación es el ataque inicial. Fagocitosis y NETosis se desbloquean al sanar focos. Los pseudópodos buscan a los agentes que podés fagocitar.</span></li>
-                <li><span class="howto-icon">🧬</span><span><strong>Respondé y elegí una estrategia</strong><br>Al subir de nivel aparece una pregunta: si acertás, elegís Homeostasis, Citotoxicidad o Quimiotaxis; si fallás, llega una oleada extra.</span></li>
-                <li><span class="howto-icon">📖</span><span><strong>Bestiario</strong><br>Cada agente nuevo aparece con su nombre. En la pausa y al terminar tenés la ficha de cada uno.</span></li>
-                <li><span class="howto-icon">☠️</span><span><strong>Jefes y multirresistencia</strong><br>Los jefes emergen en el centro de la arena. Al agotarse las preguntas empieza una crisis de oleadas continuas.</span></li>
+                <li><span class="howto-icon" aria-hidden="true">🕹️</span><span><strong>Movete y saná focos</strong><br>WASD / flechas, o mantené apretado el mouse hacia donde querés ir (ESC o P pausa, F pantalla completa). En celular, tocá y arrastrá en cualquier parte de la arena. Quedate encima de una colonia para sanarla.</span></li>
+                <li><span class="howto-icon" aria-hidden="true">✦</span><span><strong>Atacás automáticamente</strong><br>La desgranulación es el ataque inicial. Fagocitosis y NETosis se desbloquean al sanar focos. Los pseudópodos buscan a los agentes que podés fagocitar.</span></li>
+                <li><span class="howto-icon" aria-hidden="true">🧬</span><span><strong>Respondé y elegí una estrategia</strong><br>Al subir de nivel aparece una pregunta: si acertás, elegís Homeostasis, Citotoxicidad o Quimiotaxis; si fallás, llega una oleada extra.</span></li>
+                <li><span class="howto-icon" aria-hidden="true">📖</span><span><strong>Bestiario</strong><br>Cada agente nuevo aparece con su nombre. En la pausa y al terminar tenés la ficha de cada uno.</span></li>
+                <li><span class="howto-icon" aria-hidden="true">☠️</span><span><strong>Jefes y multirresistencia</strong><br>Los jefes emergen en el centro de la arena. Al agotarse las preguntas empieza una crisis de oleadas continuas.</span></li>
               </ul>
             </details>
             <div class="tip-box"><strong>Puntaje</strong><div class="muted">10 por agente eliminado, 2 por segundo y 25 por respuesta correcta, multiplicado por la presión de infección y el nivel de las preguntas.</div></div>
@@ -318,7 +327,7 @@
       <div id="gameFrame"><div id="gameContainer"></div><div id="debugPanel" class="compact"><strong>LABORATORIO</strong><button class="debug-toggle" id="debugToggle">Abrir</button><div class="debug-content"><div id="debugStatus" style="margin-top:5px;color:#b6f5d6">Solo desgranulación · nivel 1</div><div class="debug-heading">Habilidades</div><select id="debugSkillSelect"></select><div class="debug-row"><button data-debug="skill-add">Añadir / +nivel</button><button data-debug="skill-remove">Quitar</button></div><div class="debug-heading">Ajustar estadísticas</div><div id="debugStats"></div><div class="debug-heading">Atributos de habilidad</div><div id="debugSkillStats"></div><div class="debug-heading">Partida</div><div class="debug-row"><button data-debug="granules">Gránulos ON/OFF</button><button data-debug="invincible">Inmortalidad</button></div><div class="debug-row"><select id="debugQuestion"><option value="facil">Pregunta fácil</option><option value="normal">Pregunta normal</option><option value="dificil">Pregunta difícil</option></select><button data-debug="question">Probar</button></div><div class="debug-row"><button data-debug="primary-menu">Vía principal</button><button data-debug="evolution-menu">Evolutiva</button></div><div class="debug-heading">Aparición manual</div><label>Cantidad <input id="debugSpawnCount" type="number" min="1" max="100" value="1" style="width:58px"></label><select id="debugTypeSelect"><option value="bacteria">Bacterias</option><option value="virus">Virus</option><option value="fungus">Hongos</option><option value="parasite">Parásitos</option><option value="mixed">Mixto</option></select><div class="debug-row"><button data-debug="enemy">Enemigo</button><button data-debug="large">Grande</button></div><select id="debugBossSelect" aria-label="Jefe a invocar"></select><div class="debug-row"><button data-debug="boss">Invocar jefe</button></div><div class="debug-row"><button data-debug="focus">Foco</button><button data-debug="heal">Curar</button><button data-debug="clear">Limpiar</button></div></div></div><div class="crisis-banner" id="crisisBanner" style="display:none">MULTIRRESISTENCIA<small>EL TEJIDO HA PERDIDO EL CONTROL</small></div></div>
       <div class="game-controls"><span>PC: WASD / flechas o mantené apretado el mouse · ESC/P pausa</span><span>Móvil: tocá y arrastrá en cualquier parte para moverte · saná colonias al pisar el centro · acercate al ADN/ARN para recoger XP</span></div>
     </section>
-    <footer>INMUNE SURVIVORS · Prototipo v3.10 independiente para MedMar. Vista adaptable, evolución celular y combate optimizado. Banco de preguntas con repetición controlada si se agota antes de completar los cuatro jefes.<br>© 2026 MedMar · Todos los derechos reservados · <a href="/terminos/" style="color:inherit">Términos</a> · <a href="/privacidad/" style="color:inherit">Privacidad</a></footer>
+    <footer>INMUNE SURVIVORS · Prototipo v3.12 independiente para MedMar. Vista adaptable, evolución celular y combate optimizado. Banco de preguntas con repetición controlada si se agota antes de completar los cuatro jefes.<br>© 2026 MedMar · Todos los derechos reservados · <a href="/terminos/" style="color:inherit">Términos</a> · <a href="/privacidad/" style="color:inherit">Privacidad</a></footer>
   </div>
 
   <div class="modal-layer" id="questionLayer" role="dialog" aria-modal="true" aria-labelledby="questionHeading">
@@ -388,6 +397,14 @@
     </div>
   </div>
 
+  <div class="modal-layer" id="errorLayer" role="alertdialog" aria-modal="true" aria-labelledby="errorHeading" aria-describedby="errorText">
+    <div class="modal">
+      <div class="modal-kicker">Error inesperado</div>
+      <h2 id="errorHeading">Algo falló</h2>
+      <p id="errorText">El juego se trabó por un error nuestro y esta partida no puede seguir. Recargá para volver al menú: tus récords y tu configuración quedan guardados. Si te pasa seguido, contanos qué estabas haciendo.</p>
+      <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:18px"><button type="button" id="errorReloadButton" class="btn-primary" style="flex:1">RECARGAR Y VOLVER AL MENÚ</button><button type="button" class="btn-secondary report-open" id="errorReportButton" hidden>Reportar el error</button></div>
+    </div>
+  </div>
   <div class="modal-layer" id="reportLayer" role="dialog" aria-modal="true" aria-labelledby="reportHeading">
     <div class="modal">
       <div class="modal-kicker">Anónimo</div>
@@ -414,14 +431,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js"
           integrity="sha512-/tJYyDCrI7hnHWp45P189aOwPa6lTREosRhlxEIqx8skB4A3a3rD3iz4o335SJd4sORqjVHw5y1S2hq4hciwLw=="
           crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="./src/core/runtime-services.js?build=3.12.0"></script>
-  <script src="./src/config/game-balance.js?build=3.12.0"></script>
-  <script src="./src/core/lab-actions.js?build=3.12.0"></script>
-  <script src="./src/data/agentes.js?build=3.12.0"></script>
-  <script src="./src/data/fichas.js?build=3.12.0"></script>
-  <script src="./src/data/preguntas-nucleos.js?build=3.12.0"></script>
-  <script src="./src/core/modos.js?build=3.12.0"></script>
-  <script src="./game.js?build=3.12.0"></script>
+  <script src="./src/core/runtime-services.js?build=3.12.1"></script>
+  <script src="./src/config/game-balance.js?build=3.12.1"></script>
+  <script src="./src/core/lab-actions.js?build=3.12.1"></script>
+  <script src="./src/data/agentes.js?build=3.12.1"></script>
+  <script src="./src/data/fichas.js?build=3.12.1"></script>
+  <script src="./src/data/preguntas-nucleos.js?build=3.12.1"></script>
+  <script src="./src/core/modos.js?build=3.12.1"></script>
+  <script src="./game.js?build=3.12.1"></script>
 </body>
 </html>
 

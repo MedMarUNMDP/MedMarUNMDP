@@ -47,9 +47,9 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261129d">
+    <link rel="stylesheet" href="/css/styles.css?v=20261130a">
 </head>
 
 <body>
@@ -116,7 +116,7 @@
                     <button type="button" id="btnRestablecerPassword" class="btn-primario">Guardar nueva contraseña</button>
                 </div>
                 <button type="button" id="btnVolverLoginDesdeReset" class="btn-secundario">Volver al inicio de sesión</button>
-                <p id="msgReset"></p>
+                <p id="msgReset" aria-live="polite"></p>
             </div>
 
             <form id="formRegistro" style="display:none">
@@ -144,7 +144,7 @@
                 <button type="submit" class="btn-primario">Crear cuenta</button>
             </form>
 
-            <p id="authMsg"></p>
+            <p id="authMsg" aria-live="polite"></p>
 
             <p class="legalLogin">Al continuar con Google o con tu email aceptás los <a href="/terminos/">Términos</a> y la <a href="/privacidad/">Política de Privacidad</a>.<br>© 2026 MedMar · Proyecto independiente y sin fines de lucro.</p>
 
@@ -329,7 +329,7 @@
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2M12 19v2M4.2 6.2l1.4 1.4M18.4 16.4l1.4 1.4M3 12h2M19 12h2M4.2 17.8l1.4-1.4M18.4 7.6l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
                         </span>
                         <span class="tituloInicio">Perfil</span>
-                        <span class="descInicio">Pseudónimo, foto y más</span>
+                        <span class="descInicio">Seudónimo, foto y más</span>
                     </button>
 
                     <button type="button" class="tarjetaInicio" data-vista="ayuda">
@@ -458,7 +458,7 @@
 
             </form>
 
-            <p id="msg"></p>
+            <p id="msg" aria-live="polite"></p>
 
             </div>
 
@@ -477,15 +477,15 @@
                     </div>
                     <span id="chatEstado" class="chatEstado"></span>
                 </div>
-                <div id="listaMensajesChat" class="listaMensajesChat"></div>
+                <div id="listaMensajesChat" class="listaMensajesChat" aria-label="Mensajes del chat"></div>
                 <form id="formChat" class="formChat">
-                    <textarea id="inputMensajeChat" maxlength="2000" rows="2" placeholder="Escribí un mensaje…" required></textarea>
+                    <textarea id="inputMensajeChat" aria-label="Mensaje" maxlength="2000" rows="2" placeholder="Escribí un mensaje…" required></textarea>
                     <div class="chatPie">
                         <span class="ayudaPerfil">Texto únicamente · el chat se borra tras 14 días sin actividad.</span>
                         <button type="submit" class="btn-primario">Enviar</button>
                     </div>
                 </form>
-                <p id="msgChat"></p>
+                <p id="msgChat" aria-live="polite"></p>
             </div>
 
             </div>
@@ -727,7 +727,7 @@
                         <button type="submit" class="btn-secundario">Dar rol</button>
                     </form>
 
-                    <p id="msgModerador"></p>
+                    <p id="msgModerador" aria-live="polite"></p>
 
                     <div id="listaModeradores"></div>
 
@@ -1011,7 +1011,7 @@
                         </select>
                         <label for="aporteDescripcion" id="etiquetaAporteDescripcion">Descripción (opcional)</label>
                         <textarea id="aporteDescripcion" maxlength="1000" rows="3" placeholder="¿Qué tiene y para qué sirve? ¿De qué año o cátedra es?"></textarea>
-                        <label class="labelCheckbox"><input type="checkbox" id="aporteCredito"> Mostrar mi pseudónimo como autor del aporte</label>
+                        <label class="labelCheckbox"><input type="checkbox" id="aporteCredito"> Mostrar mi seudónimo como autor del aporte</label>
                         <label class="labelCheckbox" id="campoAporteDeclaracion"><input type="checkbox" id="aporteDeclaracion"> Puedo compartir esto: es mío o es de acceso libre, no es un libro o examen con derechos reservados y no tiene datos de pacientes.</label>
                         <!-- Campo trampa para bots: las personas no lo ven -->
                         <input type="text" id="aporteWebsite" name="website" tabindex="-1" autocomplete="off" class="campoTrampa" aria-hidden="true">
@@ -1146,7 +1146,7 @@
                         <h3>Inmune Survivors</h3>
                         <p>Defendé el tejido de los agentes de ADN. Jugá en <b>Sandbox infinito</b>, con todos los núcleos mezclados, o en <b>Foco por núcleo</b>, solo con los agentes del núcleo que estés estudiando. Para evolucionar, tenés que responder preguntas.</p>
                         <a class="btn-primario btn-distincion juegoJugar" id="btnJugarInmune" href="/juegos/inmune-survivors/">Jugar ↗</a>
-                        <p class="juegoNota">Funciona en el celular y en la PC (con pantalla completa). Tus puntajes entran al ranking con tu pseudónimo.</p>
+                        <p class="juegoNota">Funciona en el celular y en la PC (con pantalla completa). Tus puntajes entran al ranking con tu seudónimo.</p>
                     </div>
                 </article>
 
@@ -1173,7 +1173,7 @@
                     <div class="rankingPropio" id="rankingPropio" aria-live="polite"></div>
 
                     <form class="rankingBuscar" id="formRankingBuscar" role="search">
-                        <input type="search" id="rankingBuscar" placeholder="Buscá a alguien por pseudónimo" maxlength="24" autocomplete="off" aria-label="Buscar en el ranking por pseudónimo">
+                        <input type="search" id="rankingBuscar" placeholder="Buscá a alguien por seudónimo" maxlength="24" autocomplete="off" aria-label="Buscar en el ranking por seudónimo">
                         <button type="submit" class="btn-secundario">Buscar</button>
                     </form>
                     <div id="rankingResultados" class="rankingResultados" aria-live="polite"></div>
@@ -1327,7 +1327,7 @@
                 <details class="guiaTema" id="ayudaPerfil" data-palabras="perfil pseudonimo seudonimo nombre foto avatar tema oscuro claro contraseña sesion mantener cerrar notificaciones campanita mail">
                     <summary>👤 Perfil, sesión y notificaciones</summary>
                     <ul>
-                        <li>Tu <b>pseudónimo</b> y tu foto o avatar son lo único que ven los demás. <b>Tu mail queda privado.</b></li>
+                        <li>Tu <b>seudónimo</b> y tu foto o avatar son lo único que ven los demás. <b>Tu mail queda privado.</b></li>
                         <li>En Perfil cambiás el tema (claro, oscuro o según el dispositivo) y la contraseña. Si entrás con Google, también podés definir una contraseña.</li>
                         <li><b>Mantener la sesión iniciada</b>: si no la marcás, la sesión se cierra al cerrar el navegador o tras 12 h sin usar MedMar. Marcala solo en tus dispositivos.</li>
                         <li>La campanita 🔔 te avisa de respuestas, mensajes, intercambios, novedades y avisos de la moderación. Algunos avisos también llegan por mail.</li>
@@ -1370,7 +1370,7 @@
                     <ul>
                         <li>Cada infracción grave suma un <b>strike</b>. Los dos primeros suspenden <b>30 días</b> y el tercero en 12 meses es <b>permanente</b>. Los strikes vencen al año.</li>
                         <li>Mientras dura, ves un aviso con el motivo y cuánto falta. Tocá <b>Ver detalle</b> para leer todo.</li>
-                        <li>Una suspensión común no te deja publicar en el foro ni en Compra venta, cambiar el pseudónimo o la foto, ni aportar material. Los chats y los intercambios siguen funcionando. Una suspensión <b>total</b> además bloquea chats, intercambios, me gusta, votos y ranking.</li>
+                        <li>Una suspensión común no te deja publicar en el foro ni en Compra venta, cambiar el seudónimo o la foto, ni aportar material. Los chats y los intercambios siguen funcionando. Una suspensión <b>total</b> además bloquea chats, intercambios, me gusta, votos y ranking.</li>
                         <li>Si el bloqueo es permanente, a los 30 días podés mandar <b>un único descargo</b> desde ese mismo detalle. Lo revisa el equipo de moderación, que puede levantarlo.</li>
                     </ul>
                 </details>
@@ -1379,7 +1379,7 @@
                     <summary>🚩 Quiero denunciar algo o alguien me molesta</summary>
                     <ul>
                         <li>En cada publicación, respuesta y aviso está la opción <b>Denunciar</b>. En el material es <b>Reportar</b>. Elegí el motivo: lo revisa la moderación y nadie sabe quién denunció.</li>
-                        <li>Si alguien te molesta por chat, no hace falta que respondas. Escribinos con capturas, la fecha y el pseudónimo.</li>
+                        <li>Si alguien te molesta por chat, no hace falta que respondas. Escribinos con capturas, la fecha y el seudónimo.</li>
                         <li>Si ves <b>datos de un paciente</b> (nombre, DNI, historia clínica o fotos que lo identifiquen), denuncialo: se retira siempre.</li>
                     </ul>
                 </details>
@@ -1394,10 +1394,10 @@
                 </details>
 
                 <details class="guiaTema" id="ayudaFotoNombre" data-palabras="foto no se sube pseudonimo no permitido rechazado imagen">
-                    <summary>🖼️ No me deja poner la foto o el pseudónimo</summary>
+                    <summary>🖼️ No me deja poner la foto o el seudónimo</summary>
                     <ul>
                         <li>Las fotos de perfil pasan por una revisión automática en tu dispositivo que rechaza desnudos y contenido sexual. Probá con otra imagen.</li>
-                        <li>Los pseudónimos no pueden tener insultos ni expresiones discriminatorias, y tienen que ser únicos. Si ya existe, probá una variante.</li>
+                        <li>Los seudónimos no pueden tener insultos ni expresiones discriminatorias, y tienen que ser únicos. Si ya existe, probá una variante.</li>
                         <li>Si estás suspendido o suspendida, no podés cambiarlos hasta que termine la suspensión.</li>
                     </ul>
                 </details>
@@ -1421,7 +1421,7 @@
                 <details class="guiaTema" id="ayudaBaja" data-palabras="borrar eliminar cuenta baja darme de baja datos personales descargar">
                     <summary>👋 Quiero borrar mi cuenta o ver mis datos</summary>
                     <ul>
-                        <li>Desde Perfil → <b>Eliminar cuenta</b> la programás para dentro de 30 días. Hasta entonces todo sigue igual y te podés arrepentir con un botón.</li>
+                        <li>Desde Perfil → <b>Eliminar cuenta</b> la programás para dentro de 30 días. Hasta entonces podés seguir usándola y arrepentirte con un botón. Tus solicitudes de intercambio activas se cancelan al pedirla (si te arrepentís, publicalas de nuevo).</li>
                         <li>Para que se borre antes, o para ver, corregir o pedir una copia de tus datos, escribinos desde el mail de la cuenta.</li>
                     </ul>
                     <button type="button" class="guiaIr" data-ayuda-ir="configuracion">Ir a Perfil →</button>
@@ -1495,17 +1495,17 @@
                     </div>
                 </div>
 
-                <p id="msgFoto"></p>
+                <p id="msgFoto" aria-live="polite"></p>
 
-                <h3 class="seccion-titulo" id="tituloPseudonimo">Tu pseudónimo</h3>
+                <h3 class="seccion-titulo" id="tituloPseudonimo">Tu seudónimo</h3>
                 <p class="ayudaPerfil" id="ayudaPseudonimo">Así te van a ver otros estudiantes en el foro y en los juegos.</p>
 
                 <form id="formPerfil">
                     <input type="text" id="inputPseudonimo" maxlength="24" required aria-labelledby="tituloPseudonimo" aria-describedby="ayudaPseudonimo">
-                    <button type="submit" class="btn-secundario">Guardar pseudónimo</button>
+                    <button type="submit" class="btn-secundario">Guardar seudónimo</button>
                 </form>
 
-                <p id="msgPerfil"></p>
+                <p id="msgPerfil" aria-live="polite"></p>
 
                 <div class="soloModeracion" hidden>
                     <h3 class="seccion-titulo">Moderación</h3>
@@ -1531,7 +1531,7 @@
                         <div class="captchaAuth" id="captchaPerfil" data-captcha></div>
                         <button type="submit" class="btn-secundario">Cambiar contraseña</button>
                     </form>
-                    <p id="msgPasswordPerfil"></p>
+                    <p id="msgPasswordPerfil" aria-live="polite"></p>
                 </div>
 
                 <h3 class="seccion-titulo">Sesión</h3>
@@ -1542,7 +1542,7 @@
                 <div id="seccionBajaCuenta" class="seccionBajaCuenta">
                     <h3 class="seccion-titulo">Eliminar cuenta</h3>
                     <div id="bajaSinPedir">
-                        <p class="ayudaPerfil">Se borran tu cuenta y tus datos: perfil y foto, publicaciones y respuestas (con las respuestas que otros hicieron debajo), chats, solicitudes de intercambio, votos, puntajes y clasificados. Tenés <b>30 días para arrepentirte</b>: hasta entonces todo sigue igual y lo podés cancelar con un botón.</p>
+                        <p class="ayudaPerfil">Se borran tu cuenta y tus datos: perfil y foto, publicaciones y respuestas (con las respuestas que otros hicieron debajo), chats, solicitudes de intercambio, votos, puntajes y clasificados. Tenés <b>30 días para arrepentirte</b>: hasta entonces podés seguir usando la cuenta y cancelarlo con un botón. Al pedirlo, tus solicitudes de intercambio activas se cancelan.</p>
                         <details class="detallesBaja">
                             <summary>Quiero eliminar mi cuenta</summary>
                             <label for="confirmarBaja">Para confirmar, escribí <b>BORRAR</b></label>
@@ -1605,10 +1605,10 @@
     <!-- ==================== CONFIGURACIÓN INICIAL DEL PERFIL ==================== -->
     <div id="modalSetupPerfil" class="modalFondo modalSetupPerfil" aria-modal="true" role="dialog" aria-labelledby="tituloSetupPerfil">
         <div class="modalCaja setupPerfilCaja">
-            <div class="modalEncabezado"><h2 id="tituloSetupPerfil">¡Bienvenido a MedMar!</h2></div>
+            <div class="modalEncabezado"><h2 id="tituloSetupPerfil">¡Te damos la bienvenida a MedMar!</h2></div>
             <p class="ayudaPerfil">Antes de continuar, elegí cómo querés aparecer en la comunidad.</p>
             <form id="formSetupPerfil">
-                <label for="setupPseudonimo">Pseudónimo <span aria-hidden="true">*</span></label>
+                <label for="setupPseudonimo">Seudónimo <span aria-hidden="true">*</span></label>
                 <input id="setupPseudonimo" type="text" minlength="3" maxlength="24" autocomplete="nickname" placeholder="Ej. NeuroMed" required>
                 <p class="ayudaPerfil">Entre 3 y 24 caracteres. Será visible para otros estudiantes.</p>
                 <div class="setupAvatarTitulo">Elegí un avatar (opcional)</div>
@@ -1760,9 +1760,9 @@
                     <span id="nombreCompose" class="hiloAutor"></span>
                 </div>
 
-                <input type="text" id="inputTitulo" class="inputTitulo" placeholder="Título" maxlength="140" required>
+                <input type="text" id="inputTitulo" class="inputTitulo" placeholder="Título" aria-label="Título de la publicación" maxlength="140" required>
 
-                <textarea id="inputContenido" class="textareaCompose" placeholder="¿Qué querés compartir?" maxlength="5000" rows="3" required></textarea>
+                <textarea id="inputContenido" class="textareaCompose" aria-label="Texto de la publicación" placeholder="¿Qué querés compartir?" maxlength="5000" rows="3" required></textarea>
 
                 <!-- Encuesta opcional: la arma app.js (sección ENCUESTAS). Con encuesta, el texto es opcional. -->
                 <div class="encuestaCompose">
@@ -1816,7 +1816,7 @@
 
             </form>
 
-            <p id="msgHilo"></p>
+            <p id="msgHilo" aria-live="polite"></p>
 
         </div>
     </div>
@@ -1829,7 +1829,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261129d"></script>
+    <script src="/js/app.js?v=20261130a"></script>
 
     <!-- CAPTCHA anti-bots (Cloudflare Turnstile) para login, registro y recuperación. Sin SRI: Cloudflare lo actualiza
          solo y su documentación pide no fijarlo. Se renderiza recién cuando el formulario se usa. -->

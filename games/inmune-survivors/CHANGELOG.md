@@ -2,6 +2,17 @@
 
 Formato: la versión más nueva arriba. Al publicar una versión, agregá una sección nueva acá y subí `?build=` en index.html (ver CLAUDE.md del juego). El historial previo a v3.1 está en `README.txt`.
 
+## v3.12.1
+
+**Estabilidad y accesibilidad**
+- Si algo falla en plena partida aparece un aviso con «Volver al menú» y «Reportar el error» (antes el juego quedaba congelado).
+- Si el motor del juego no carga (sin conexión o un bloqueador), se avisa en lugar de dejar el menú sin respuesta.
+- El joystick se suelta al pausar o al abrir una pregunta: ya no sigue moviendo la célula al volver.
+- Ranking: el resultado de una partida ya no pisa al de la siguiente si reiniciás rápido, y el mensaje dice el motivo real cuando no se guarda.
+- Celular en horizontal: el lienzo entra entero en pantallas bajas.
+- Textos de al menos 12 px, `aria-pressed` en modos y dificultades, y respeto de «reducir movimiento».
+- Laboratorio: se quitó un bloque duplicado que ocultaba controles.
+
 ## v3.12.0
 
 **Ranking**

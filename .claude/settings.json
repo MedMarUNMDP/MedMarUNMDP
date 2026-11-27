@@ -74,7 +74,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/guard_secrets.py",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard_secrets.py\"",
             "timeout": 10,
             "statusMessage": "Revisando secretos"
           }
@@ -87,7 +87,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/check_js.py",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/check_js.py\"",
             "timeout": 30,
             "statusMessage": "node --check"
           }

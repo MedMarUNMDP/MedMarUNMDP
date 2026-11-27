@@ -119,7 +119,7 @@ async function publicarClasificado(admin: SupabaseClient, user: any, body: any) 
     .eq('autor_id', user.id).eq('activo', true).gt('expira_at', new Date().toISOString())
   if (cErr) throw cErr
   if (Number(count || 0) >= MAX_CLASIFICADOS_ACTIVOS) return json({ ok: false, error: 'clasificados_maximo' })
-  const filtro = revisarTexto(titulo + '\n' + descripcion + '\n' + (precio || ''))
+  const filtro = revisarTexto(titulo + '\n' + descripcion + '\n' + (precio || '') + '\n' + (contacto || ''))
   const { data, error } = await admin.from('clasificados').insert({
     autor_id: user.id, categoria, titulo, descripcion, precio, contacto, operation_id: operationId, ...marcaFiltro(filtro),
   }).select('id').single()
@@ -334,16 +334,23 @@ async function publicarNoticia(admin: SupabaseClient, body: any) {
     return json({ ok: false, error: 'datos_invalidos' })
   }
   const noticiaId = crypto.randomUUID()
-  const { data: perfiles, error: errPerfiles } = await admin.from('profiles').select('id')
-  if (errPerfiles) throw errPerfiles
-  const filas = (perfiles || []).map((p: any) => ({
-    user_id: p.id, tipo: 'noticia', contexto: titulo, cuerpo: cuerpo || null, link: link || null, ref_id: noticiaId,
-  }))
-  for (let i = 0; i < filas.length; i += 500) {
-    const { error } = await admin.from('notificaciones').insert(filas.slice(i, i + 500))
-    if (error) throw error
+  // PostgREST corta cada lectura en 1000 filas: los perfiles se recorren por páginas (orden estable por id).
+  const LOTE = 1000
+  let destinatarios = 0
+  for (let desde = 0; ; desde += LOTE) {
+    const { data: perfiles, error: errPerfiles } = await admin.from('profiles').select('id').order('id', { ascending: true }).range(desde, desde + LOTE - 1)
+    if (errPerfiles) throw errPerfiles
+    const filas = (perfiles || []).map((p: any) => ({
+      user_id: p.id, tipo: 'noticia', contexto: titulo, cuerpo: cuerpo || null, link: link || null, ref_id: noticiaId,
+    }))
+    for (let i = 0; i < filas.length; i += 500) {
+      const { error } = await admin.from('notificaciones').insert(filas.slice(i, i + 500))
+      if (error) throw error
+    }
+    destinatarios += filas.length
+    if ((perfiles || []).length < LOTE) break
   }
-  return json({ ok: true, destinatarios: filas.length })
+  return json({ ok: true, destinatarios })
 }
 
 // ==================== MATERIAL DE ESTUDIO Y APORTES ====================
@@ -720,17 +727,29 @@ async function datosPublicacion(admin: SupabaseClient, tipo: string, id: string)
   }
   return null
 }
+// Aviso suelto en la campana. El índice único parcial notificaciones_agrupar_idx (user_id, tipo, ref_id) where not leida
+// hace fallar el insert si ya hay uno sin leer del mismo destino (p. ej. «te quitaron…» y después «se restauró…»):
+// el anterior se marca como leído (queda en la lista) y el nuevo entra como no leído.
+async function avisoCampana(admin: SupabaseClient, fila: Record<string, unknown>, etiqueta: string) {
+  let previo = admin.from('notificaciones').update({ leida: true }).eq('user_id', fila.user_id).eq('tipo', fila.tipo).eq('leida', false)
+  previo = fila.ref_id ? previo.eq('ref_id', fila.ref_id) : previo.is('ref_id', null)
+  const { error: errPrevio } = await previo
+  if (errPrevio) console.warn(etiqueta, 'marcar_previo', errPrevio.message)
+  const { error } = await admin.from('notificaciones').insert(fila)
+  if (error) console.warn(etiqueta, error.message)
+  return !error
+}
+
 async function avisarAutorModeracion(admin: SupabaseClient, moderadorId: string, tipo: string, id: string,
   datos: { autor: string, titulo: string } | null, motivo: string) {
   if (!datos || datos.autor === moderadorId) return
   const que = NOMBRE_TIPO_PUBLICACION[tipo] || 'publicación'
-  const { error } = await admin.from('notificaciones').insert({
+  await avisoCampana(admin, {
     user_id: datos.autor, tipo: 'moderacion', ref_id: id, contexto: datos.titulo.slice(0, 160),
     cuerpo: ('La moderación quitó tu ' + que + '.' + (motivo ? ' Motivo: ' + motivo : ' No cumplía los Términos y Condiciones.') +
       ' Si creés que es un error, escribinos a MedMarUNMDP@gmail.com.').slice(0, 400),
     link: '/terminos/',
-  })
-  if (error) console.warn('aviso_moderacion_autor', error.message)
+  }, 'aviso_moderacion_autor')
 }
 // ---------- Filtro automático (filtro.ts, ADR 0007) ----------
 // Lo que el filtro detecta se guarda igual, pero directo en la papelera (eliminado_por = null): nadie lo ve, la persona
@@ -757,7 +776,9 @@ function respuestaFiltrada(r: ResultadoFiltro) {
 
 // ---------- Papelera: lo que quita la moderación queda 7 días oculto y se puede restaurar ----------
 const TABLA_PAPELERA: Record<string, string> = { hilo: 'hilos', respuesta: 'respuestas', material: 'materiales', clasificado: 'clasificados' }
-async function moverAPapelera(admin: SupabaseClient, tipo: string, id: string, moderadorId: string, motivo: string) {
+// Devuelve true si la publicación pasó a la papelera ahora; false si no existe o ya estaba (otro moderador, el filtro):
+// en ese caso quien llama no repite auditoría, aviso ni sanción.
+async function moverAPapelera(admin: SupabaseClient, tipo: string, id: string, moderadorId: string, motivo: string): Promise<boolean> {
   const tabla = TABLA_PAPELERA[tipo]
   if (!tabla) throw new Error('tipo_papelera')
   const marca: Record<string, unknown> = { eliminado_at: new Date().toISOString(), eliminado_por: moderadorId, motivo_eliminacion: motivo || null }
@@ -775,11 +796,12 @@ async function moverAPapelera(admin: SupabaseClient, tipo: string, id: string, m
     }
   }
   if (tipo === 'material') marca.activo = false
-  const { error } = await admin.from(tabla).update(marca).in('id', ids).is('eliminado_at', null)
+  const { data: movidas, error } = await admin.from(tabla).update(marca).in('id', ids).is('eliminado_at', null).select('id')
   if (error) throw error
   const { error: dErr } = await admin.from('denuncias').update({ estado: 'eliminada', resuelto_por: moderadorId, fecha_resolucion: new Date().toISOString() })
     .eq('id_publicacion', id).eq('estado', 'pendiente')
   if (dErr) throw dErr
+  return (movidas || []).some((f: any) => String(f.id) === id)
 }
 
 async function listarPapelera(admin: SupabaseClient) {
@@ -825,8 +847,8 @@ async function restaurarPapelera(admin: SupabaseClient, user: User, llaveId: str
   const datos = await datosPublicacion(admin, tipo, id)
   await auditar(admin, user.id, llaveId, 'restaurar', { tipo, id })
   if (datos && datos.autor !== user.id) {
-    await admin.from('notificaciones').insert({ user_id: datos.autor, tipo: 'moderacion', ref_id: id, contexto: datos.titulo.slice(0, 160),
-      cuerpo: 'La moderación revisó de nuevo y restauró tu ' + (NOMBRE_TIPO_PUBLICACION[tipo] || 'publicación') + '. Ya se ve otra vez.' })
+    await avisoCampana(admin, { user_id: datos.autor, tipo: 'moderacion', ref_id: id, contexto: datos.titulo.slice(0, 160),
+      cuerpo: 'La moderación revisó de nuevo y restauró tu ' + (NOMBRE_TIPO_PUBLICACION[tipo] || 'publicación') + '. Ya se ve otra vez.' }, 'aviso_restaurar')
   }
   return json({ ok: true })
 }
@@ -931,6 +953,7 @@ async function resolverAporte(user: User, admin: SupabaseClient, body: any) {
 
   const motivo = textoLimpio(body.motivo, 300) || null
   let publicado = false
+  let m: ReturnType<typeof datosMaterial> = null
   if (decision === 'aprobar' && aporte.clase === 'archivo') {
     // El moderador puede corregir título, materia, tipo y descripción antes de publicar.
     let credito: string | null = null
@@ -938,23 +961,31 @@ async function resolverAporte(user: User, admin: SupabaseClient, body: any) {
       const pmap = await profileMap(admin, [String(aporte.user_id)])
       credito = pmap.get(String(aporte.user_id))?.pseudonimo || null
     }
-    const m = datosMaterial({
+    m = datosMaterial({
       titulo: body.titulo ?? aporte.titulo, descripcion: body.descripcion ?? aporte.descripcion,
       materia: body.materia ?? aporte.materia, tipo: body.tipo ?? aporte.tipo, link: aporte.link, credito,
     })
     if (!m) return json({ ok: false, error: 'datos_material_incompletos' })
+  }
+
+  // Primero se toma el aporte, solo si sigue pendiente: dos moderadores a la vez no lo resuelven (ni avisan) dos veces.
+  const { data: tomado, error: errUpdate } = await admin.from('aportes_material').update({
+    estado: decision === 'aprobar' ? 'aprobado' : 'rechazado', motivo, revisado_por: user.id, revisado_at: new Date().toISOString(),
+  }).eq('id', id).eq('estado', 'pendiente').select('id').maybeSingle()
+  if (errUpdate) throw errUpdate
+  if (!tomado) return json({ ok: false, error: 'ya_resuelto' })
+
+  if (m) {
     const { error } = await admin.from('materiales').insert({ ...m, aporte_id: aporte.id, creado_por: user.id })
     if (error) {
+      // No se publicó: el aporte vuelve a quedar pendiente.
+      const { error: errRevertir } = await admin.from('aportes_material').update({ estado: 'pendiente', motivo: null, revisado_por: null, revisado_at: null }).eq('id', id)
+      if (errRevertir) console.warn('resolverAporte: no se pudo revertir', errRevertir.message)
       if (String((error as any).code) === '23505') return json({ ok: false, error: 'material_duplicado' })
       throw error
     }
     publicado = true
   }
-
-  const { error: errUpdate } = await admin.from('aportes_material').update({
-    estado: decision === 'aprobar' ? 'aprobado' : 'rechazado', motivo, revisado_por: user.id, revisado_at: new Date().toISOString(),
-  }).eq('id', id).eq('estado', 'pendiente')
-  if (errUpdate) throw errUpdate
 
   // Aviso en la campana de quien lo mandó.
   const cuerpo = decision === 'rechazar'
@@ -1494,6 +1525,10 @@ async function votarEncuesta(user: User, admin: SupabaseClient, body: any) {
   const { data: e, error } = await admin.from('encuestas').select('id,hilo_id,opciones,multiple,cierra_at').eq('id', encuestaId).maybeSingle()
   if (error) throw error
   if (!e) return json({ ok: false, error: 'no_encontrado' })
+  // Hilo en la papelera (moderación o filtro): no se vota.
+  const { data: hiloEncuesta, error: errHilo } = await admin.from('hilos').select('eliminado_at').eq('id', e.hilo_id).maybeSingle()
+  if (errHilo) throw errHilo
+  if (!hiloEncuesta || hiloEncuesta.eliminado_at) return json({ ok: false, error: 'no_encontrado' })
   if (e.cierra_at && new Date(e.cierra_at).getTime() <= Date.now()) return json({ ok: false, error: 'encuesta_cerrada' })
   if (unicas.some((n) => n >= (e.opciones || []).length) || (!e.multiple && unicas.length > 1)) return json({ ok: false, error: 'datos_invalidos' })
   // Una fila por persona: votar o cambiar el voto es un upsert atómico (dos votos simultáneos no se suman).
@@ -1621,16 +1656,20 @@ async function getIdempotent(admin: SupabaseClient, userId: string, operationId:
 }
 
 async function findCycle(admin: SupabaseClient, materia: string, userId: string) {
-  const { data, error } = await admin.from('solicitudes')
-    .select('id,user_id,materia,tengo,busco,status,created_at,operation_id')
-    .eq('status', 'activa')
-    .eq('materia', materia)
-    .order('created_at', { ascending: true })
-    .limit(5000)
+  const [{ data, error }, bajas] = await Promise.all([
+    admin.from('solicitudes')
+      .select('id,user_id,materia,tengo,busco,status,created_at,operation_id')
+      .eq('status', 'activa')
+      .eq('materia', materia)
+      .order('created_at', { ascending: true })
+      .limit(5000),
+    // Cuentas con la baja programada: no entran en un intercambio (se borran antes de poder concretarlo).
+    admin.from('profiles').select('id').not('baja_programada_para', 'is', null).limit(10000),
+  ])
   if (error) throw error
-  // Primero las solicitudes de quien acaba de guardar: un ciclo nuevo casi siempre lo incluye.
-  const base = (data || []).map(r => ({ ...r, email: String(r.user_id) }))
-    .sort((a, b) => Number(String(b.user_id) === userId) - Number(String(a.user_id) === userId))
+  if (bajas.error) throw bajas.error
+  const conBaja = new Set((bajas.data || []).map((p: any) => String(p.id)))
+  const base = (data || []).filter(r => !conBaja.has(String(r.user_id))).map(r => ({ ...r, email: String(r.user_id) }))
   const byTengo = new Map<number, any[]>()
   for (const o of base) {
     if (!byTengo.has(Number(o.tengo))) byTengo.set(Number(o.tengo), [])
@@ -1641,13 +1680,16 @@ async function findCycle(admin: SupabaseClient, materia: string, userId: string)
   // en capas, cada guardado podía agotar la CPU de la función y bloquear los emparejamientos de toda la materia.
   let pasos = 0
 
+  // Se queda con el ciclo más corto (menos gente que coordinar) y corta apenas encuentra uno de 2 (el mínimo posible).
   function dfs(start: any, current: any, seen: Set<string>, path: any[]) {
     if (++pasos > MAX_PASOS_CICLO) return
+    if (best && best.length === 2) return
     if (path.length > MAX_CYCLE || best && path.length >= best.length) return
     const candidates = byTengo.get(Number(current.busco)) || []
     for (const next of candidates) {
       if (next.user_id === start.user_id) {
-        if (path.length >= 2 && (!best || path.length > best.length)) best = [...path]
+        if (path.length >= 2 && (!best || path.length < best.length)) best = [...path]
+        if (best && best.length === 2) return
         continue
       }
       if (seen.has(next.user_id)) continue
@@ -1657,12 +1699,20 @@ async function findCycle(admin: SupabaseClient, materia: string, userId: string)
     }
   }
 
-  for (const start of base) {
-    if (pasos > MAX_PASOS_CICLO) {
-      console.warn('find_cycle_tope', materia, base.length)
-      break
+  // Primero las solicitudes de quien acaba de guardar: si hay un ciclo que lo incluye, es ese. Si no, se sigue con
+  // el resto por si quedó un ciclo sin concretar entre otras personas.
+  const propias = base.filter((o) => String(o.user_id) === userId)
+  const resto = base.filter((o) => String(o.user_id) !== userId)
+  for (const grupo of [propias, resto]) {
+    for (const start of grupo) {
+      if (pasos > MAX_PASOS_CICLO) {
+        console.warn('find_cycle_tope', materia, base.length)
+        return best
+      }
+      if (best && best.length === 2) break
+      dfs(start, start, new Set([start.user_id]), [start])
     }
-    dfs(start, start, new Set([start.user_id]), [start])
+    if (best) return best
   }
   return best
 }
@@ -1672,9 +1722,11 @@ async function maybeMatch(admin: SupabaseClient, userId: string, materia: string
     const cycle = await findCycle(admin, materia, userId)
     if (!cycle) return { matched: false }
     const ids = cycle.map(x => x.id)
+    const incluyeUsuario = cycle.some((x: any) => String(x.user_id) === userId)
     const { data, error } = await admin.rpc('finalize_exchange', { p_request_ids: ids, p_materia: materia })
     if (error) throw error
-    if (data?.ok) return { matched: true, intercambioId: data.intercambioId, conversacionId: data.conversacionId }
+    // Si se concretó un ciclo entre otras personas, quien guardó no quedó emparejado.
+    if (data?.ok) return incluyeUsuario ? { matched: true, intercambioId: data.intercambioId, conversacionId: data.conversacionId } : { matched: false }
   }
   const { data } = await admin.from('solicitudes').select('status,exchange_id').eq('user_id', userId).eq('materia', materia).order('updated_at', { ascending: false }).limit(1).maybeSingle()
   if (data?.status === 'completada') return { matched: true, intercambioId: data.exchange_id }
@@ -2190,7 +2242,7 @@ const CATEGORIAS_SANCION: Record<string, string> = {
 // Qué bloquea cada nivel. Lo que no está acá (leer, borrar lo propio, denunciar, reportar, apelar) sigue permitido.
 const RESTRICCION_SANCION: Record<string, 'comun' | 'total'> = {
   crearHilo: 'comun', crearRespuesta: 'comun', publicarClasificado: 'comun', gestionarClasificado: 'comun',
-  actualizarPseudonimo: 'comun', actualizarFoto: 'comun', enviarAporte: 'comun',
+  actualizarPseudonimo: 'comun', actualizarFoto: 'comun', enviarAporte: 'comun', completarPerfil: 'comun',
   enviarMensaje: 'total', contactarClasificado: 'total', guardar: 'total', editar: 'total',
   votarEncuesta: 'total', toggleLike: 'total', guardarPuntaje: 'total',
 }
@@ -2291,8 +2343,8 @@ function plazoSancion(permanente: boolean, fin: string | null) {
 }
 
 async function avisarSancionado(admin: SupabaseClient, userId: string, refId: string, contexto: string, cuerpo: string, asunto: string) {
-  const { error } = await admin.from('notificaciones').insert({ user_id: userId, tipo: 'sancion', ref_id: refId, contexto: contexto.slice(0, 160), cuerpo: cuerpo.slice(0, 400) })
-  if (error) console.warn('aviso_sancion', error.message)
+  // Mismo ref_id que el aviso de la sanción: sin avisoCampana, «se levantó…» chocaba con «te suspendieron…» sin leer.
+  await avisoCampana(admin, { user_id: userId, tipo: 'sancion', ref_id: refId, contexto: contexto.slice(0, 160), cuerpo: cuerpo.slice(0, 400) }, 'aviso_sancion')
   const { error: mErr } = await admin.from('notificacion_queue').insert({ user_id: userId, tipo: 'sancion', asunto: 'MedMar · ' + asunto,
     cuerpo: [contexto + '.', '', cuerpo, '', 'Mirá el detalle en https://medmar.com.ar (tocá la notificación).', '', '—',
       'Las normas de convivencia están en https://medmar.com.ar/terminos/#moderacion'].join('\n') })
@@ -2320,6 +2372,19 @@ async function aplicarSancion(admin: SupabaseClient, moderador: User, llaveId: s
     moderador_id: moderador.id, fin_at: fin,
   }).select('id').single()
   if (error) { if (pgCode(error) === '23505') return { error: 'ya_sancionado' }; throw error }
+  // Dos sanciones simultáneas a la misma cuenta (p. ej. dos moderadores por seudónimo) leen el mismo conteo de strikes y
+  // las dos se numerarían igual. Se re-lee: si antes de esta (por fecha e id) hay más strikes vigentes de los que se
+  // contaron, otra ganó la carrera y esta se descarta antes de avisar o auditar.
+  const desdeStrikes = new Date(Date.now() - DIAS_VIGENCIA_STRIKE * 86400000).toISOString()
+  const { data: vigentesAhora, error: vErr } = await admin.from('sanciones').select('id').eq('user_id', p.userId).eq('anulada', false)
+    .gt('created_at', desdeStrikes).order('created_at', { ascending: true }).order('id', { ascending: true }).limit(MAX_STRIKES + 20)
+  if (vErr) throw vErr
+  const posicion = (vigentesAhora || []).findIndex((s: any) => String(s.id) === String(data.id))
+  if (posicion > previos) {
+    const { error: delErr } = await admin.from('sanciones').delete().eq('id', data.id)
+    if (delErr) throw delErr
+    return { error: 'sancion_simultanea' }
+  }
   let dispositivos = 0
   if (p.dispositivo) {
     const desde = new Date(Date.now() - DIAS_DISPOSITIVOS * 86400000).toISOString()
@@ -2462,13 +2527,25 @@ async function resolverApelacion(admin: SupabaseClient, user: User, llaveId: str
   if (!a) return json({ ok: false, error: 'no_encontrado' })
   if (a.estado !== 'pendiente') return json({ ok: false, error: 'apelacion_resuelta' })
   if (String(a.user_id) === user.id) return json({ ok: false, error: 'sancion_propia' })
+  if (decision === 'aceptar') {
+    // Antes de marcar la apelación: que la sanción todavía se pueda levantar (mismas condiciones que levantarSancionFila).
+    const { data: s, error: sErr } = await admin.from('sanciones').select('id,anulada,levantada_at').eq('id', a.sancion_id).maybeSingle()
+    if (sErr) throw sErr
+    if (!s) return json({ ok: false, error: 'no_encontrado' })
+    if (s.anulada || (s.levantada_at && body.anular !== true)) return json({ ok: false, error: 'sancion_cerrada' })
+  }
   const { data: marcada, error: uErr } = await admin.from('apelaciones').update({ estado: decision === 'aceptar' ? 'aceptada' : 'rechazada',
     respuesta, resuelta_por: user.id, resuelta_at: new Date().toISOString() }).eq('id', a.id).eq('estado', 'pendiente').select('id').maybeSingle()
   if (uErr) throw uErr
   if (!marcada) return json({ ok: false, error: 'apelacion_resuelta' })
   if (decision === 'aceptar') {
     const res = await levantarSancionFila(admin, user, llaveId, String(a.sancion_id), respuesta, body.anular === true, true)
-    if ('error' in res) return json({ ok: false, error: res.error })
+    if ('error' in res) {
+      // No se pudo levantar (cambió en el medio): la apelación vuelve a quedar pendiente.
+      const { error: rErr } = await admin.from('apelaciones').update({ estado: 'pendiente', respuesta: null, resuelta_por: null, resuelta_at: null }).eq('id', a.id)
+      if (rErr) console.warn('revertir_apelacion', rErr.message)
+      return json({ ok: false, error: res.error })
+    }
   } else {
     await auditar(admin, user.id, llaveId, 'rechazar_apelacion', { sancion: a.sancion_id, usuario: a.user_id })
     await avisarSancionado(admin, String(a.user_id), String(a.sancion_id), 'La moderación revisó tu descargo y mantiene la suspensión',
@@ -2664,7 +2741,7 @@ async function handle(req: Request, body: any) {
 
       const { data: hilo, error: hiloError } = await admin
         .from('hilos')
-        .select('id,autor_id')
+        .select('id,autor_id,eliminado_at')
         .eq('id', id)
         .maybeSingle()
       if (hiloError) throw hiloError
@@ -2673,12 +2750,14 @@ async function handle(req: Request, body: any) {
       if (String(hilo.autor_id) !== user.id) {
         const auth = await autorizarModeracion(admin, user, body, 'moderador'); if (auth instanceof Response) return auth
         const datos = await datosPublicacion(admin, 'hilo', id), motivo = motivoModeracion(body)
-        await moverAPapelera(admin, 'hilo', id, user.id, motivo)
+        if (!(await moverAPapelera(admin, 'hilo', id, user.id, motivo))) return json({ ok: true, yaEnPapelera: true })
         await auditar(admin, user.id, auth.llaveId, 'borrar_hilo', { id, motivo })
         await avisarAutorModeracion(admin, user.id, 'hilo', id, datos, motivo)
         return json({ ok: true, ...(await sancionTrasQuitar(admin, user, auth.llaveId, body, 'hilo', id, datos, motivo)) })
       }
 
+      // En la papelera de moderación (o retirado por el filtro): el autor no lo ve y no puede borrar la evidencia.
+      if (hilo.eliminado_at) return json({ ok: false, error: 'no_encontrado' })
       await borrarPublicacion(admin, 'hilo', id)
       return json({ ok: true })
     }
@@ -2689,7 +2768,7 @@ async function handle(req: Request, body: any) {
 
       const { data: respuesta, error: respuestaError } = await admin
         .from('respuestas')
-        .select('id,autor_id')
+        .select('id,autor_id,eliminado_at')
         .eq('id', id)
         .maybeSingle()
       if (respuestaError) throw respuestaError
@@ -2698,12 +2777,13 @@ async function handle(req: Request, body: any) {
       if (String(respuesta.autor_id) !== user.id) {
         const auth = await autorizarModeracion(admin, user, body, 'moderador'); if (auth instanceof Response) return auth
         const datos = await datosPublicacion(admin, 'respuesta', id), motivo = motivoModeracion(body)
-        await moverAPapelera(admin, 'respuesta', id, user.id, motivo)
+        if (!(await moverAPapelera(admin, 'respuesta', id, user.id, motivo))) return json({ ok: true, yaEnPapelera: true })
         await auditar(admin, user.id, auth.llaveId, 'borrar_respuesta', { id, motivo })
         await avisarAutorModeracion(admin, user.id, 'respuesta', id, datos, motivo)
         return json({ ok: true, ...(await sancionTrasQuitar(admin, user, auth.llaveId, body, 'respuesta', id, datos, motivo)) })
       }
 
+      if (respuesta.eliminado_at) return json({ ok: false, error: 'no_encontrado' })
       await borrarPublicacion(admin, 'respuesta', id)
       return json({ ok: true })
     }
@@ -2734,11 +2814,20 @@ async function handle(req: Request, body: any) {
       const presetAllowed = /^https:\/\/medmar\.com\.ar\/assets\/avatars\/[a-z0-9_-]+\.svg$/i.test(foto)
       const existingPhoto = !foto || presetAllowed || fotoPropiaValida(foto, user.id)
       if(!existingPhoto) return json({ok:false,error:'foto_invalida'})
+      // Solo para el primer ingreso: después, seudónimo y foto se cambian con actualizarPseudonimo/actualizarFoto.
+      // Un reintento del mismo pedido ya aplicado (llamarMutacionResiliente) devuelve el perfil guardado.
+      const {data:actual,error:actualError}=await admin.from('profiles').select('pseudonimo,foto_url,profile_completed').eq('id',user.id).maybeSingle()
+      if(actualError) throw actualError
+      if(actual?.profile_completed){
+        if(String(actual.pseudonimo||'').toLowerCase()===pseudonimo.toLowerCase()) return json({ok:true,perfil:{pseudonimo:actual.pseudonimo,foto:actual.foto_url||'',profileCompleted:true}})
+        return json({ok:false,error:'perfil_ya_completo'})
+      }
       const {data:duplicates,error:dupError}=await admin.from('profiles').select('id').ilike('pseudonimo',pseudonimo.replace(/[\\%_]/g,(c)=>'\\'+c)).neq('id',user.id).limit(1)
       if(dupError) throw dupError
       if((duplicates||[]).length) return json({ok:false,error:'pseudonimo_en_uso'})
-      const {data,error}=await admin.from('profiles').update({pseudonimo,foto_url:foto||null,profile_completed:true}).eq('id',user.id).select('pseudonimo,foto_url,profile_completed').single()
+      const {data,error}=await admin.from('profiles').update({pseudonimo,foto_url:foto||null,profile_completed:true}).eq('id',user.id).eq('profile_completed',false).select('pseudonimo,foto_url,profile_completed').maybeSingle()
       if(error){ if((error as any).code==='23505') return json({ok:false,error:'pseudonimo_en_uso'}); throw error }
+      if(!data) return json({ok:false,error:'perfil_ya_completo'})
       const prefijoFotos=`${SUPABASE_URL}/storage/v1/object/public/profile-photos/`
       await borrarFotosAnteriores(admin,user.id,foto.startsWith(prefijoFotos)?foto.slice(prefijoFotos.length).split('?')[0]:'')
       return json({ok:true,perfil:{pseudonimo:data.pseudonimo,foto:data.foto_url||'',profileCompleted:true}})
@@ -2775,6 +2864,9 @@ async function handle(req: Request, body: any) {
       const ahora=new Date(),programada=new Date(ahora.getTime()+DIAS_ARREPENTIMIENTO_BAJA*86400000).toISOString()
       const {error}=await admin.from('profiles').update({baja_solicitada_at:ahora.toISOString(),baja_programada_para:programada}).eq('id',user.id)
       if(error)throw error
+      // Las solicitudes de intercambio activas se cancelan igual que con «borrar»: la cuenta sale del matching.
+      const {error:errSol}=await admin.from('solicitudes').update({status:'cancelada',updated_at:ahora.toISOString()}).eq('user_id',user.id).eq('status','activa')
+      if(errSol)throw errSol
       return json({ok:true,bajaProgramada:programada})
     }
     case 'cancelarBaja': {
@@ -2828,6 +2920,11 @@ async function handle(req: Request, body: any) {
       const rl=await rateLimit(admin,action,user.id);if(rl)return rl
       const tipo=String(body.tipo||'').toLowerCase(),id=uuidOrEmpty(body.id);if(!['hilo','respuesta'].includes(tipo)||!id)return json({ok:false,error:'datos_invalidos'})
       const table=tipo==='hilo'?'likes_hilos':'likes_respuestas';const key=tipo==='hilo'?'hilo_id':'respuesta_id'
+      // Lo que está en la papelera (moderación o filtro), o una respuesta de un hilo en la papelera, no admite likes.
+      const {data:pub,error:pubErr}=await admin.from(tipo==='hilo'?'hilos':'respuestas').select(tipo==='hilo'?'id,eliminado_at':'id,eliminado_at,hilo_id').eq('id',id).maybeSingle()
+      if(pubErr)throw pubErr
+      if(!pub||(pub as any).eliminado_at)return json({ok:false,error:'no_encontrado'})
+      if(tipo==='respuesta'){const {data:hp,error:hpErr}=await admin.from('hilos').select('eliminado_at').eq('id',(pub as any).hilo_id).maybeSingle();if(hpErr)throw hpErr;if(!hp||hp.eliminado_at)return json({ok:false,error:'no_encontrado'})}
       const {data:existing}=await client.from(table).select(key).eq(key,id).eq('user_id',user.id).maybeSingle()
       let liked=false
       if(existing){const {error}=await admin.from(table).delete().eq(key,id).eq('user_id',user.id);if(error)throw error}
@@ -2952,7 +3049,7 @@ async function handle(req: Request, body: any) {
       const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
       const id=uuidOrEmpty(body.id);if(!id)return json({ok:false,error:'datos_invalidos'})
       const datos=await datosPublicacion(admin,'material',id),motivo=motivoModeracion(body)
-      await moverAPapelera(admin,'material',id,user.id,motivo)
+      if(!(await moverAPapelera(admin,'material',id,user.id,motivo)))return json({ok:true,yaEnPapelera:true})
       await auditar(admin,user.id,auth.llaveId,'quitar_material',{id,motivo})
       await avisarAutorModeracion(admin,user.id,'material',id,datos,motivo)
       return json({ok:true,...(await sancionTrasQuitar(admin,user,auth.llaveId,body,'material',id,datos,motivo))})
@@ -2964,7 +3061,7 @@ async function handle(req: Request, body: any) {
       const id=uuidOrEmpty(body.id);if(!id)return json({ok:false,error:'datos_invalidos'})
       const datos=await datosPublicacion(admin,'clasificado',id),motivo=motivoModeracion(body)
       if(!datos)return json({ok:false,error:'no_encontrado'})
-      await moverAPapelera(admin,'clasificado',id,user.id,motivo)
+      if(!(await moverAPapelera(admin,'clasificado',id,user.id,motivo)))return json({ok:true,yaEnPapelera:true})
       await auditar(admin,user.id,auth.llaveId,'quitar_clasificado',{id,motivo,titulo:datos.titulo})
       await avisarAutorModeracion(admin,user.id,'clasificado',id,datos,motivo)
       return json({ok:true,...(await sancionTrasQuitar(admin,user,auth.llaveId,body,'clasificado',id,datos,motivo))})
@@ -3118,9 +3215,10 @@ async function handle(req: Request, body: any) {
       await auditar(admin,user.id,auth.llaveId,'guardar_grupo',{grupo:grupoId,nombre,hasta:corte})
       if(id){
         const {data:mods}=await admin.from('profiles').select('id').eq('grupo_moderacion_id',id).eq('is_moderator',true).eq('is_admin',false)
-        const filas=(mods||[]).map((m:any)=>({user_id:m.id,tipo:'noticia',contexto:'Tu período de moderación se renovó',
-          cuerpo:'Grupo «'+nombre+'»: seguís moderando hasta el '+fechaCorta(corte)+'.',link:'/?vista=moderacion',ref_id:m.id}))
-        if(filas.length)await admin.from('notificaciones').insert(filas)
+        for(const m of mods||[]){
+          await avisoCampana(admin,{user_id:m.id,tipo:'noticia',contexto:'Tu período de moderación se renovó',
+            cuerpo:'Grupo «'+nombre+'»: seguís moderando hasta el '+fechaCorta(corte)+'.',link:'/?vista=moderacion',ref_id:m.id},'aviso_grupo_moderacion')
+        }
       }
       return json({ok:true,id:grupoId})
     }
@@ -3150,8 +3248,8 @@ async function handle(req: Request, body: any) {
       const {error}=await admin.from('profiles').update(cambios).eq('id',u.id);if(error)throw error
       await auditar(admin,user.id,auth.llaveId,'periodo_moderador',{usuario:String(u.id),...cambios})
       if(cambios.moderador_vence_at){
-        await admin.from('notificaciones').insert({user_id:u.id,tipo:'noticia',contexto:'Se actualizó tu período de moderación',
-          cuerpo:'Seguís moderando hasta el '+fechaCorta(String(cambios.moderador_vence_at))+'.',link:'/?vista=moderacion',ref_id:u.id})
+        await avisoCampana(admin,{user_id:u.id,tipo:'noticia',contexto:'Se actualizó tu período de moderación',
+          cuerpo:'Seguís moderando hasta el '+fechaCorta(String(cambios.moderador_vence_at))+'.',link:'/?vista=moderacion',ref_id:u.id},'aviso_periodo_moderador')
       }
       return json({ok:true})
     }
@@ -3269,16 +3367,25 @@ async function handle(req: Request, body: any) {
       const {data:rep,error:repError}=await admin.from('denuncias').select('id,tipo,id_publicacion,estado').eq('id',id).maybeSingle()
       if(repError)throw repError
       if(!rep)return json({ok:false,error:'no_encontrado'})
+      // Otro moderador ya la resolvió (o se quitó la publicación por otra vía): no se repite nada.
+      if(rep.estado!=='pendiente')return json({ok:false,error:'ya_resuelta'})
       const resolucion={resuelto_por:user.id,fecha_resolucion:new Date().toISOString()}
       let extra={}
       if(accion==='eliminar'){
         const datosPub=await datosPublicacion(admin,String(rep.tipo),String(rep.id_publicacion)),motivo=motivoModeracion(body)
         // Va a la papelera (7 días, restaurable) y se resuelven todas las denuncias pendientes de esa publicación.
-        await moverAPapelera(admin,String(rep.tipo),String(rep.id_publicacion),user.id,motivo)
-        await avisarAutorModeracion(admin,user.id,String(rep.tipo),String(rep.id_publicacion),datosPub,motivo)
-        extra=await sancionTrasQuitar(admin,user,auth.llaveId,body,String(rep.tipo),String(rep.id_publicacion),datosPub,motivo)
+        const movida=await moverAPapelera(admin,String(rep.tipo),String(rep.id_publicacion),user.id,motivo)
+        if(movida){
+          await avisarAutorModeracion(admin,user.id,String(rep.tipo),String(rep.id_publicacion),datosPub,motivo)
+          extra=await sancionTrasQuitar(admin,user,auth.llaveId,body,String(rep.tipo),String(rep.id_publicacion),datosPub,motivo)
+        } else {
+          // Ya estaba en la papelera: sin aviso ni sanción nuevos; solo se cierra esta denuncia si seguía abierta.
+          const {error}=await admin.from('denuncias').update({estado:'eliminada',...resolucion}).eq('id',id).eq('estado','pendiente');if(error)throw error
+          extra={yaEnPapelera:true}
+        }
       } else {
-        const {error}=await admin.from('denuncias').update({estado:'descartada',...resolucion}).eq('id',id);if(error)throw error
+        const {data:descartada,error}=await admin.from('denuncias').update({estado:'descartada',...resolucion}).eq('id',id).eq('estado','pendiente').select('id').maybeSingle();if(error)throw error
+        if(!descartada)return json({ok:false,error:'ya_resuelta'})
       }
       await auditar(admin,user.id,auth.llaveId,'resolver_denuncia',{id,accion})
       return json({ok:true,...extra})
@@ -3418,10 +3525,10 @@ async function findUserByEmail(admin: SupabaseClient,email:string){for(let page=
 async function serve(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response('ok')
   if (req.method !== 'POST') return json({ ok: false, error: 'metodo_no_permitido' }, 405)
-  if (Number(req.headers.get('content-length') || 0) > MAX_BODY_BYTES) return json({ ok: false, error: 'imagen_muy_grande' }, 413)
+  if (Number(req.headers.get('content-length') || 0) > MAX_BODY_BYTES) return json({ ok: false, error: 'pedido_muy_grande' }, 413)
   try {
     const bytes = await leerBytesConTope(req as unknown as Response, MAX_BODY_BYTES + 1)
-    if (bytes.length > MAX_BODY_BYTES) return json({ ok: false, error: 'imagen_muy_grande' }, 413)
+    if (bytes.length > MAX_BODY_BYTES) return json({ ok: false, error: 'pedido_muy_grande' }, 413)
     const texto = new TextDecoder().decode(bytes)
     let body: any = {}
     try { body = JSON.parse(texto) } catch { body = {} }

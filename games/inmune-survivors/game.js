@@ -6,6 +6,15 @@
 (function () {
   'use strict';
 
+  // Sin Phaser (CDN caído o bloqueado por un bloqueador de anuncios) no hay juego: se avisa en el menú y no se sigue.
+  if (typeof Phaser === 'undefined') {
+    const aviso = document.getElementById('loadError');
+    if (aviso) aviso.hidden = false;
+    document.getElementById('loadErrorRetry')?.addEventListener('click', () => location.reload());
+    for (const id of ['startButton', 'debugStartButton']) { const b = document.getElementById(id); if (b) b.disabled = true; }
+    return;
+  }
+
   // W y H son el tamaño LÓGICO del área de juego en píxeles CSS (HUD y distancias de spawn se calculan con esto).
   // RENDER_RES es cuántos píxeles reales se dibujan por píxel CSS: el canvas mide W·RENDER_RES × H·RENDER_RES y
   // se muestra con zoom 1/RENDER_RES, así se ve nítido en pantallas HiDPI (Phaser 3.60+ ya no tiene `resolution`).
@@ -328,7 +337,7 @@
   const FICHAS_DATA = globalThis.InmuneFichas || null;
   const MODOS_API = globalThis.InmuneModos || null;
   const PREGUNTAS_DATA = globalThis.InmunePreguntasNucleos || null;
-  const GAME_VERSION = '3.12.0';
+  const GAME_VERSION = '3.12.1';
   // Arte propio de los jefes de núcleo (assets/boss_*.webp, recortados de docs/arte/jefes-nucleo-3x3.png).
   const BOSS_ART = {
     'escherichia-coli':'boss_stec', 'mycobacterium-tuberculosis':'boss_granuloma', 'neisseria-meningitidis':'boss_meningococo',
@@ -367,6 +376,9 @@
     sharpText(x,y,text,style) { return this.add.text(x,y,text,style).setResolution(2); }
 
     preload() {
+      // Un asset que no carga no frena la partida (Phaser usa la textura faltante), pero queda registrado.
+      if(!this.onLoadError){this.onLoadError=file=>console.warn('Inmune Survivors: no se pudo cargar un recurso',file?.key||'',file?.src||file?.url||'');}
+      this.load.off('loaderror',this.onLoadError);this.load.on('loaderror',this.onLoadError);
       // Todos los assets son WebP (sprites calidad 90 con alfa al 100 %, tejidos calidad 95, resolución original):
       // ~2,5 MB en vez de ~15,6 MB en PNG. Para regenerarlos ver assets/README.md.
       for (const key of MICROBE_TEXTURES) this.load.image(key, `assets/${key}.webp`);
@@ -677,6 +689,14 @@
       this.input.on('gameout', () => releaseJoystick());
     }
 
+    // Suelta el joystick táctil y la guía con mouse: al pausar o abrir una pregunta, el pointerup cae sobre la capa
+    // HTML y no sobre el lienzo, así que la célula seguía moviéndose sola al reanudar.
+    resetJoystick() {
+      this.mouseSteer = false; this.joyActive = false; this.joyPointerId = null;
+      if (this.joyVector) { this.joyVector.x = 0; this.joyVector.y = 0; }
+      this.drawJoystick();
+    }
+
     setJoyVector(x, y) {
       let dx = x - this.joyOrigin.x, dy = y - this.joyOrigin.y; const d = Math.hypot(dx, dy), max = 52;
       if (d > max) { dx = dx / d * max; dy = dy / d * max; }
@@ -956,7 +976,7 @@
 
     pauseGame() {
       if(this.gameEnded||this.manualPaused||this.questionPaused)return;
-      this.manualPaused=true;this.time.paused=true;this.tweens.pauseAll();
+      this.manualPaused=true;this.time.paused=true;this.tweens.pauseAll();this.resetJoystick();
       this.emit('is:pause',this.getRunSummary());
     }
 
@@ -2393,7 +2413,7 @@
 
     openQuestion() {
       if(this.debugMode||this.questionPaused||this.gameEnded||this.multiResistance)return;
-      this.questionPaused=true;this.tweens.pauseAll();this.questionCount+=1;this.xp-=this.xpNeed;
+      this.questionPaused=true;this.tweens.pauseAll();this.resetJoystick();this.questionCount+=1;this.xp-=this.xpNeed;
       // The XP cost grows nonlinearly so upgrades become progressively less frequent.
       this.xpNeed=Math.round(260+this.questionCount*65+Math.pow(this.questionCount,1.35)*12);
       let question=this.selectUnusedQuestion();
@@ -2422,7 +2442,8 @@
       const shuffled=this.rng.shuffle(question.a.map((text,index)=>({text,correct:index===question.c})));
       question={...question,a:shuffled.map(v=>v.text),c:shuffled.findIndex(v=>v.correct)};
       this.currentQuestion=question;this.pendingQuestionOutcome=null;
-      this.emit('is:question',{question,number:this.questionCount,difficulty:this.evolutionDiff.label,difficultyCategory:this.evolutionDiff.category,topic:question.topic,bibliographyNote:'Pregunta provisional: verificar contra la bibliografía autorizada.'});
+      // A la UI va solo lo que muestra (sin el índice correcto `c`, que se revela recién en is:answer-result).
+      this.emit('is:question',{question:{id:question.id,q:question.q,a:question.a,topic:question.topic},number:this.questionCount,difficulty:this.evolutionDiff.label,difficultyCategory:this.evolutionDiff.category,topic:question.topic,bibliographyNote:'Pregunta provisional: verificar contra la bibliografía autorizada.'});
       this.updateHud();
     }
 
@@ -2530,12 +2551,14 @@
     b.append(tag,name,meta);$('nucleoChoices').appendChild(b);
   }
   function syncMenu(){
-    document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('selected',b.dataset.mode===selectedMode));
+    const press=(b,on)=>{b.classList.toggle('selected',on);b.setAttribute('aria-pressed',on?'true':'false');};
+    document.querySelectorAll('[data-mode]').forEach(b=>press(b,b.dataset.mode===selectedMode));
     document.querySelectorAll('[data-nucleo]').forEach(b=>{const on=b.dataset.nucleo===selectedNucleo;b.classList.toggle('selected',on);b.setAttribute('aria-checked',on?'true':'false');});
-    document.querySelectorAll('[data-infection-difficulty]').forEach(b=>b.classList.toggle('selected',b.dataset.infectionDifficulty===selectedInfectionDifficulty));
-    document.querySelectorAll('[data-evolution-difficulty]').forEach(b=>b.classList.toggle('selected',b.dataset.evolutionDifficulty===selectedEvolutionDifficulty));
+    document.querySelectorAll('[data-infection-difficulty]').forEach(b=>press(b,b.dataset.infectionDifficulty===selectedInfectionDifficulty));
+    document.querySelectorAll('[data-evolution-difficulty]').forEach(b=>press(b,b.dataset.evolutionDifficulty===selectedEvolutionDifficulty));
     $('nucleoPicker').hidden=selectedMode!=='nucleo';
-    $('startButton').textContent=selectedMode==='nucleo'?`JUGAR NÚCLEO ${selectedNucleo} ↗`:'JUGAR SANDBOX ↗';
+    const flecha=document.createElement('span');flecha.setAttribute('aria-hidden','true');flecha.textContent=' ↗';
+    $('startButton').replaceChildren(selectedMode==='nucleo'?`JUGAR NÚCLEO ${selectedNucleo}`:'JUGAR SANDBOX',flecha);
     $('rankingLink').href=`/?vista=juegos&ranking=${encodeURIComponent(rankingKey())}`;
     renderLocalRecords();saveMenu();
   }
@@ -2567,10 +2590,13 @@
     const lowEnd=cores<=4||(memory>0&&memory<=4),cap=mobileViewport()?(lowEnd?1:1.5):(lowEnd?1.5:2);
     return Math.round(Math.min(cap,Math.max(1,dpr))*4)/4;
   }
+  // Celular apaisado: la pantalla mide ~320-400 px de alto. Con el mínimo de 480 el lienzo quedaba más alto que el
+  // contenedor (se cortaba abajo y la célula no quedaba centrada); el HUD va arriba y entra en 320.
+  const landscapeTouch=()=>!!window.matchMedia?.('(orientation: landscape) and (pointer: coarse)').matches;
   function fitLogicalViewport(){
     const bounds=$('gameContainer').getBoundingClientRect();
     W=Math.max(280,Math.round(bounds.width||window.innerWidth||480));
-    H=Math.max(480,Math.round(bounds.height||window.innerHeight||800));
+    H=Math.max(landscapeTouch()?320:480,Math.round(bounds.height||window.innerHeight||800));
     RENDER_RES=computeRenderResolution();
   }
   // Ajusta el canvas al contenedor. Con el juego oculto (menú) el contenedor mide 0: no se toca nada (ese
@@ -2767,6 +2793,27 @@
     finally{button.disabled=false;}
   });
 
+  // ---- Errores inesperados ----
+  // Un error dentro del loop de Phaser (p. ej. en update) corta el requestAnimationFrame y la partida queda congelada
+  // sin aviso. Si pasa durante una partida y viene del juego, se duerme el loop y se muestra una capa para recargar o
+  // reportarlo, sin el stack (el navegador ya lo deja en la consola; al reporte va solo el mensaje resumido).
+  // Fuera de partida (menú) o si viene de otro script (extensiones, marco de MedMar) no se muestra nada.
+  let falloMostrado=false;
+  const vieneDelJuego=texto=>/game\.js|\/src\/|phaser/i.test(String(texto||''));
+  function mostrarFallo(mensaje,origen){
+    if(falloMostrado||gameScreen.style.display==='none'||!vieneDelJuego(origen))return;
+    falloMostrado=true;
+    try{game?.loop?.sleep();}catch(_){}
+    window.IS_ACTIONS=null;
+    lastRunInfo=`${lastRunInfo} · error: ${String(mensaje||'desconocido').slice(0,90)}`;
+    for(const layer of [questionLayer,upgradeLayer,focusEvolutionLayer,pauseLayer,gameOverLayer])closeLayer(layer);
+    openLayer($('errorLayer'));
+  }
+  window.addEventListener('error',e=>{if(e&&(e.error||e.message))mostrarFallo(e.error?.message||e.message,`${e.filename||''} ${e.error?.stack||''}`);});
+  window.addEventListener('unhandledrejection',e=>{const r=e?.reason;mostrarFallo(r?.message||String(r),r?.stack||'');});
+  $('errorReloadButton').addEventListener('click',()=>location.reload());
+  $('errorReportButton').addEventListener('click',()=>{$('reportType').value='Bug';const m=$('reportMessage');if(!m.value.trim())m.value='El juego mostró «Algo falló» durante una partida. Estaba haciendo: ';});
+
   // ---- Ranking de MedMar ----
   // El juego comparte origen con la web (medmar.com.ar/juegos/…): supabase-js lee la misma sesión del
   // localStorage. Se carga recién al terminar una partida (no pesa en la carga del juego). El puntaje lo
@@ -2793,7 +2840,7 @@
     if(r.error)return {ok:false,error:'conexion'};
     return r.data||{ok:false,error:'servidor'};
   }
-  function setRich(el,parts){el.textContent='';for(const p of parts){if(typeof p==='string'){el.appendChild(document.createTextNode(p));continue;}const n=document.createElement(p.tag);n.textContent=p.text;if(p.href)n.href=p.href;el.appendChild(n);}}
+  function setRich(el,parts){el.textContent='';for(const p of parts){if(typeof p==='string'){el.appendChild(document.createTextNode(p));continue;}const n=document.createElement(p.tag);n.textContent=p.text;if(p.href)n.href=p.href;if(p.ariaHidden)n.setAttribute('aria-hidden','true');el.appendChild(n);}}
   function renderRankingStatus(){
     const box=$('rankingStatus'),session=storedSession();
     box.classList.toggle('ok',!!session);
@@ -2801,33 +2848,51 @@
     else setRich(box,['Sin sesión de MedMar: tus récords quedan solo en este dispositivo. ',{tag:'a',text:'Iniciá sesión',href:'/'},' para entrar al ranking.']);
   }
   // Entrada de partida firmada por el servidor (iniciarPartida): sin ella no se puede guardar el puntaje.
-  let rankingTicket=null;
+  // Cada partida tiene su propio objeto (id + entrada). Si la persona reinicia rápido, el guardado de la partida
+  // anterior usa su propia entrada (no borra la de la nueva) y no escribe en #rankResult durante la partida nueva.
+  let rankingRunSeq=0,currentRankingRun=null;
   function startRankingTicket(settings){
-    rankingTicket=null;
-    if(settings.debugMode||!storedSession())return;
     const modo=settings.modo==='nucleo'?`nucleo-${settings.nucleo}`:'sandbox';
-    rankingTicket=medmarApi('iniciarPartida',{juego:'inmune-survivors',modo}).then(r=>r.ok?{modo,partida:r.partida}:{modo,error:r.error||'servidor'}).catch(()=>null);
+    const run={id:++rankingRunSeq,modo,ticket:null};
+    currentRankingRun=run;
+    if(settings.debugMode)return;
+    if(!storedSession()){run.ticket=Promise.resolve({modo,error:'sin_sesion_inicio'});return;}
+    run.ticket=medmarApi('iniciarPartida',{juego:'inmune-survivors',modo}).then(r=>r.ok?{modo,partida:r.partida}:{modo,error:r.error||'servidor'}).catch(()=>({modo,error:'conexion'}));
   }
-  async function submitRanking(payload){
-    const box=$('rankResult');box.textContent='';
+  // Por qué la partida no tiene entrada (ticket.error).
+  const TICKET_MOTIVOS={
+    sin_sesion_inicio:'Empezaste esta partida sin sesión de MedMar, así que no entra al ranking. La próxima partida ya cuenta.',
+    rate_limit:'Empezaste muchas partidas en poco tiempo y MedMar no registró el inicio de esta, así que no entra al ranking. Probá de nuevo en un rato.',
+    conexion:'No se pudo registrar el inicio de esta partida en MedMar (falló la conexión al empezar), así que no entra al ranking.',
+    modo_invalido:'Este modo todavía no tiene ranking en MedMar. Tu récord local quedó guardado.',
+    suspendido:'Tu cuenta de MedMar está suspendida, así que esta partida no entra al ranking.',
+    accion_invalida:'El ranking de MedMar todavía no está activo. Tu récord local quedó guardado.'
+  };
+  async function submitRanking(payload,run){
+    const box=$('rankResult');
+    // Solo escribe si la partida sigue siendo la que se muestra (no una vieja que terminó de guardarse tarde).
+    const show=parts=>{if(run!==currentRankingRun)return;if(typeof parts==='string')box.textContent=parts;else setRich(box,parts);};
+    const ticketPromise=run?.ticket||null;if(run)run.ticket=null; // cada entrada se usa una sola vez
+    show('');
     if(!payload)return;
     const link={tag:'a',text:'Ver ranking',href:`/?vista=juegos&ranking=${encodeURIComponent(payload.modo)}`};
-    if(!storedSession()){setRich(box,['Para aparecer en el ranking de MedMar, ',{tag:'a',text:'iniciá sesión',href:'/'},' y volvé a jugar.']);return;}
-    box.textContent='Guardando tu puntaje en el ranking…';
+    if(!storedSession()){show(['Para aparecer en el ranking de MedMar, ',{tag:'a',text:'iniciá sesión',href:'/'},' y volvé a jugar.']);return;}
+    show('Guardando tu puntaje en el ranking…');
     try{
-      const ticket=rankingTicket?await rankingTicket:null;rankingTicket=null;
-      if(ticket?.error==='accion_invalida'){box.textContent='El ranking de MedMar todavía no está activo. Tu récord local quedó guardado.';return;}
-      if(ticket?.error==='sesion_invalida'){setRich(box,['Tu sesión de MedMar venció. ',{tag:'a',text:'Volvé a iniciar sesión',href:'/'},' para guardar los próximos puntajes.']);return;}
-      if(!ticket||!ticket.partida||ticket.modo!==payload.modo){box.textContent='No se pudo registrar el inicio de esta partida en MedMar (¿sin conexión?), así que no entra al ranking.';return;}
+      const ticket=ticketPromise?await ticketPromise:null;
+      if(ticket?.error==='sesion_invalida'){show(['Tu sesión de MedMar venció. ',{tag:'a',text:'Volvé a iniciar sesión',href:'/'},' para guardar los próximos puntajes.']);return;}
+      if(ticket?.error){show(TICKET_MOTIVOS[ticket.error]||'MedMar no pudo registrar el inicio de esta partida (error del servidor), así que no entra al ranking.');return;}
+      if(!ticket||!ticket.partida||ticket.modo!==payload.modo){show('No se pudo registrar el inicio de esta partida en MedMar, así que no entra al ranking.');return;}
       const r=await medmarApi('guardarPuntaje',{...payload,partida:ticket.partida});
       if(r.ok){
         const pos=Number(r.posicion)||0,total=Number(r.total)||0,best=Number(r.mejor)||0;
-        setRich(box,[r.record?'🏆 ¡Nuevo récord en el ranking! ':'Puntaje guardado. ','Estás ',{tag:'strong',text:`#${pos}`},` de ${total} en ${modeLabel(payload.modo)} (tu mejor: ${best.toLocaleString('es-AR')}). `,link]);
-      }else if(r.error==='sesion_invalida')setRich(box,['Tu sesión de MedMar venció. ',{tag:'a',text:'Volvé a iniciar sesión',href:'/'},' para guardar los próximos puntajes.']);
-      else if(r.error==='rate_limit')box.textContent='Guardaste muchas partidas seguidas: esta no entró al ranking. Probá de nuevo en un rato.';
-      else if(r.error==='partida_invalida'||r.error==='partida_sin_inicio'){const motivos={eliminaciones:'demasiadas eliminaciones para el tiempo jugado',preguntas:'demasiadas preguntas para el tiempo jugado',jefes:'demasiados jefes para el tiempo jugado',tiempo:'la duración no coincide con el tiempo real desde que empezó',puntaje:'el puntaje no coincide con el cálculo del servidor',duracion:'la partida duró menos de 20 s'};const m=motivos[r.motivo];box.textContent='El servidor no pudo validar esta partida'+(m?' ('+m+')':r.error==='partida_sin_inicio'?' (no se registró su inicio)':'')+', así que no entró al ranking. Si fue una partida real, avisanos desde Reportes.';}
-      else box.textContent='No se pudo guardar en el ranking. Tu récord local quedó guardado.';
-    }catch(_){box.textContent='No se pudo conectar con MedMar. Tu récord local quedó guardado.';}
+        show([...(r.record?[{tag:'span',text:'🏆 ',ariaHidden:true},'¡Nuevo récord en el ranking! ']:['Puntaje guardado. ']),'Estás ',{tag:'strong',text:`#${pos}`},` de ${total} en ${modeLabel(payload.modo)} (tu mejor: ${best.toLocaleString('es-AR')}). `,link]);
+      }else if(r.error==='sesion_invalida')show(['Tu sesión de MedMar venció. ',{tag:'a',text:'Volvé a iniciar sesión',href:'/'},' para guardar los próximos puntajes.']);
+      else if(r.error==='rate_limit')show('Guardaste muchas partidas seguidas: esta no entró al ranking. Probá de nuevo en un rato.');
+      else if(r.error==='partida_invalida'||r.error==='partida_sin_inicio'){const motivos={eliminaciones:'demasiadas eliminaciones para el tiempo jugado',preguntas:'demasiadas preguntas para el tiempo jugado',jefes:'demasiados jefes para el tiempo jugado',tiempo:'la duración no coincide con el tiempo real desde que empezó',puntaje:'el puntaje no coincide con el cálculo del servidor',duracion:'la partida duró menos de 20 s'};const m=motivos[r.motivo];show('El servidor no pudo validar esta partida'+(m?' ('+m+')':r.error==='partida_sin_inicio'?' (no se registró su inicio)':'')+', así que no entró al ranking. Si fue una partida real, avisanos desde Reportes.');}
+      else if(r.error==='suspendido')show(TICKET_MOTIVOS.suspendido);
+      else show('No se pudo guardar en el ranking. Tu récord local quedó guardado.');
+    }catch(_){show('No se pudo conectar con MedMar. Tu récord local quedó guardado.');}
   }
   window.addEventListener('storage',e=>{if(e.key===MEDMAR_SESSION_KEY||String(e.key||'').startsWith('medmar:perfil:'))renderRankingStatus();});
   renderRankingStatus();syncMenu();
@@ -2846,8 +2911,8 @@
   const debugSkillProps={phagocytosis:['phagoRadius','phagoInterval','phagoHeal'],netosis:['netRadius','netCooldown','netDamage','netDuration'],antibodies:['antibodyDamage','antibodyInterval','antibodyCount'],complement:['complementChance'],macrophage_activation:['macrophageCap'],tb_collaboration:['bCellCap'],immunoregulation:['regulationDamage','regulationInterval'],cytokines:['cytokineDamage','cytokineInterval','cytokineCount'],pattern:['patternRadius'],differentiation:['differentiationBonus']};
   function renderSkillProps(){const id=$('debugSkillSelect').value,keys=debugSkillProps[id]||['nivel'];$('debugSkillStats').innerHTML=keys.map(k=>`<div class=\"debug-row\"><span style=\"flex:2\">${k}</span><button data-skillstat=\"${k}\" data-dir=\"down\">−</button><button data-skillstat=\"${k}\" data-dir=\"up\">+</button></div>`).join('');}
   renderSkillProps();$('debugSkillSelect').addEventListener('change',renderSkillProps);$('debugSpawnCount').addEventListener('change',e=>window.IS_ACTIONS?.debug?.(`spawn-count:${e.target.value}`));$('debugQuestion').addEventListener('change',e=>window.debugQuestionCategory=e.target.value);
-  const props={phagocytosis:['phagoRadius','phagoInterval','phagoHeal'],netosis:['netRadius','netCooldown','netDamage'],antibodies:['antibodyDamage','antibodyInterval','antibodyCount'],complement:['complementChance'],macrophage_activation:['macrophageCap'],tb_collaboration:['bCellCap'],immunoregulation:['regulationDamage','regulationInterval'],cytokines:['cytokineDamage','cytokineInterval','cytokineCount']};function renderProps(){const a=$('debugSkillSelect').value;$('debugSkillStats').innerHTML=(props[a]||['nivel']).map(k=>`<div class=\"debug-row\"><span>${k}</span><button data-skillstat=\"${k}\" data-dir=\"down\">−</button><button data-skillstat=\"${k}\" data-dir=\"up\">+</button></div>`).join('');}renderProps();$('debugSkillSelect').addEventListener('change',renderProps);$('debugSpawnCount').addEventListener('change',e=>window.IS_ACTIONS?.debug?.(`spawn-count:${e.target.value}`));$('debugToggle').addEventListener('click',()=>{const panel=$('debugPanel');panel.classList.toggle('compact');$('debugToggle').textContent=panel.classList.contains('compact')?'Abrir':'Cerrar';});
-  $('debugPanel').addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;if(btn.dataset.debug){const selected=$('debugSkillSelect').value,op=btn.dataset.debug;if(op==='skill-add')window.IS_ACTIONS?.debug?.(`skill:${selected}:up`);else if(op==='question')window.IS_ACTIONS?.debug?.(`question:${$('debugQuestion').value}`);else if(op==='skill-remove')window.IS_ACTIONS?.debug?.(`skill:${selected}:remove`);else if(op==='boss'&&$('debugBossSelect').value)window.IS_ACTIONS?.debug?.(`boss:${$('debugBossSelect').value}`);else window.IS_ACTIONS?.debug?.(op);}else if(btn.dataset.stat)window.IS_ACTIONS?.debug?.(`stat:${btn.dataset.stat}:${btn.dataset.dir}`);else if(btn.dataset.skillstat)window.IS_ACTIONS?.debug?.(`skillstat:${btn.dataset.skillstat}:${btn.dataset.dir}`);else if(btn.dataset.debug==='question')window.IS_ACTIONS?.debug?.(`question:${$('debugQuestion').value}`);else if(btn.dataset.skillstat)window.IS_ACTIONS?.debug?.(`skillstat:${btn.dataset.skillstat}:${btn.dataset.dir}`);else if(btn.dataset.debug==='question')window.IS_ACTIONS?.debug?.(`question:${$('debugQuestion').value}`);});
+  $('debugToggle').addEventListener('click',()=>{const panel=$('debugPanel');panel.classList.toggle('compact');$('debugToggle').textContent=panel.classList.contains('compact')?'Abrir':'Cerrar';});
+  $('debugPanel').addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;if(btn.dataset.debug){const selected=$('debugSkillSelect').value,op=btn.dataset.debug;if(op==='skill-add')window.IS_ACTIONS?.debug?.(`skill:${selected}:up`);else if(op==='question')window.IS_ACTIONS?.debug?.(`question:${$('debugQuestion').value}`);else if(op==='skill-remove')window.IS_ACTIONS?.debug?.(`skill:${selected}:remove`);else if(op==='boss'&&$('debugBossSelect').value)window.IS_ACTIONS?.debug?.(`boss:${$('debugBossSelect').value}`);else window.IS_ACTIONS?.debug?.(op);}else if(btn.dataset.stat)window.IS_ACTIONS?.debug?.(`stat:${btn.dataset.stat}:${btn.dataset.dir}`);else if(btn.dataset.skillstat)window.IS_ACTIONS?.debug?.(`skillstat:${btn.dataset.skillstat}:${btn.dataset.dir}`);});
   $('debugTypeSelect').addEventListener('change',e=>window.IS_ACTIONS?.debug?.(`type:${e.target.value}`));
   // Laboratorio: elegir qué jefe aparece (vacío = el siguiente de la secuencia).
   {const sel=$('debugBossSelect'),opt=(value,text)=>{const o=document.createElement('option');o.value=value;o.textContent=text;sel.appendChild(o);};
@@ -2949,6 +3014,6 @@
     renderRunReport('gameover',d);
     $('bestScoreText').textContent=d.isRecord?`¡Nuevo récord en este dispositivo! Tu mejor puntuación con esta configuración es ${d.best.toLocaleString('es-AR')}.`:`Tu mejor puntuación en este dispositivo con esta configuración: ${d.best.toLocaleString('es-AR')}.`;
     openLayer(gameOverLayer);
-    submitRanking(d.ranking);
+    submitRanking(d.ranking,currentRankingRun);
   });
 })();
