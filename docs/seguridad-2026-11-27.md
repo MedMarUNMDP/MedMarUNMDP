@@ -44,8 +44,19 @@ PostgREST con la publishable key que expone la página) y revisión del código 
 4. **Claves repetidas en `mensajeError`** (`no_es_moderador`, `link_invalido`, `servidor_ocupado`): gana la segunda;
    revisar cuál texto corresponde.
 
-## Pendiente: pruebas con sesión iniciada
+## Pruebas con sesión iniciada (2026-11-29)
 
-Para probar como usuario con sesión (cambiar ids, campos y roles en las llamadas desde la consola) hace falta una
-cuenta **común** (no admin) iniciada en el navegador de pruebas. No se usa la contraseña de nadie: la persona inicia
-sesión y las pruebas corren desde la consola.
+Con una cuenta moderadora **sin desbloquear la llave** (equivale a una cuenta común para todo lo que exige llave),
+desde la consola de medmar.com.ar con el cliente de la página. Sin escrituras reales.
+
+| Prueba | Resultado |
+|---|---|
+| Leer directo 19 tablas (sanciones, apelaciones, dispositivos, llaves, registro, reportes, cola de mails, denuncias, perfiles, puntajes…) | Denegado (42501). Solo se leen notificaciones, conversaciones y solicitudes **propias** (RLS) |
+| Insertar una sanción o un hilo, darse , borrar notificaciones | Denegado (42501) |
+| Acciones de moderación nuevas y viejas sin llave o con token de moderación inventado | ;  →  |
+| Apelar una sanción ajena, leer/escribir un chat ajeno, editar/borrar solicitudes y avisos ajenos |  /  |
+| Marcar como leídas notificaciones ajenas | Responde ok pero filtra por la cuenta de la sesión: no toca nada ajeno |
+| RPC internas (, , , , …) | Denegado;  e  no están expuestas por la API REST |
+| Una cuenta sin sanción pasa el control de sanciones y llega a la validación normal | Sí ( vacío → ) |
+
+La recomendación 3 queda acotada: esas funciones no se pueden llamar desde el navegador.
