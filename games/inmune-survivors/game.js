@@ -328,7 +328,7 @@
   const FICHAS_DATA = globalThis.InmuneFichas || null;
   const MODOS_API = globalThis.InmuneModos || null;
   const PREGUNTAS_DATA = globalThis.InmunePreguntasNucleos || null;
-  const GAME_VERSION = '3.11.2';
+  const GAME_VERSION = '3.12.0';
   // Arte propio de los jefes de núcleo (assets/boss_*.webp, recortados de docs/arte/jefes-nucleo-3x3.png).
   const BOSS_ART = {
     'escherichia-coli':'boss_stec', 'mycobacterium-tuberculosis':'boss_granuloma', 'neisseria-meningitidis':'boss_meningococo',
@@ -410,7 +410,7 @@
 
     create() {
       this.gameEnded = false; this.questionPaused = false; this.manualPaused = false; this.time.paused=false; this.pendingQuestionOutcome = null;
-      this.elapsed = 0; this.kills = 0; this.correctAnswers = 0; this.questionCount = 0;
+      this.elapsed = 0; this.kills = 0; this.spawnedTotal = 0; this.correctAnswers = 0; this.questionCount = 0;
       this.damageTotal=0;this.bossKills=0;this.fociHealed=0;this.upgradeHistory=[];this.floatingTexts=[];this.activeEnemyCount=0;
       this.xp = 0; this.xpNeed = 150; this.spawnClock = 0; this.attackClock = 0; this.xpDrops=[]; this.bossClock=240000; this.bossCount=0; this.bossSequenceIndex=0; this.biofilmZones=[]; this.multiResistance=false; this.resistanceBossClock=0; this.evolutionChoiceCount=0; this.defeatedBossIds=new Set();
       this.phagoClock = 0; this.netClock = 8000; this.invulnerable = 0; this.colonyShelter=false; this.waveExtra = 0; this.focusBreaches=0; this.directorPressure=0;
@@ -1125,7 +1125,7 @@
       }
       if(bossSpec)this.initBossMechanic(e,bossSpec);
       if(onScreen){e.fadeIn=SPAWN_FADE_MS;e.spawnGrace=SPAWN_FADE_MS;e.obj.setAlpha(0);if(e.outlineSprite)e.outlineSprite.setAlpha(0);if(e.phagoMarker)e.phagoMarker.setAlpha(0);}
-      this.enemies.push(e);if(e.agente)this.registerSpecies(e);this.activeEnemyCount++;
+      this.enemies.push(e);if(e.agente)this.registerSpecies(e);this.activeEnemyCount++;this.spawnedTotal++;
       return e;
     }
 
@@ -2476,10 +2476,10 @@
     }
 
     // Datos que el juego manda a la API (acción guardarPuntaje). El servidor recalcula el puntaje con la misma
-    // fórmula y valida que sea plausible. El Laboratorio y el modo clásico de los tests no envían nada.
+    // fórmula y valida que sea plausible (eliminaciones ≤ aparecidos ≤ InmuneModos.maxApariciones). El Laboratorio y el modo clásico de los tests no envían nada.
     getRankingPayload(score){
       if(this.settings.debugMode||!this.modo)return null;
-      return {juego:'inmune-survivors',modo:this.modo.rankingModo,puntaje:score,kills:this.kills,segundos:Math.floor(this.elapsed),correctas:this.correctAnswers,preguntas:this.questionCount,jefes:this.bossKills,dificultadInfeccion:this.settings.infectionDifficulty,dificultadEvolucion:this.evolutionDiff.id,version:GAME_VERSION};
+      return {juego:'inmune-survivors',modo:this.modo.rankingModo,puntaje:score,kills:this.kills,segundos:Math.floor(this.elapsed),correctas:this.correctAnswers,preguntas:this.questionCount,jefes:this.bossKills,aparecidos:this.spawnedTotal,multirresistencia:this.multiResistance?Math.floor(this.multiResistanceAt):null,dificultadInfeccion:this.settings.infectionDifficulty,dificultadEvolucion:this.evolutionDiff.id,version:GAME_VERSION};
     }
 
     destroyTransientObjects() {

@@ -72,20 +72,85 @@
     return Math.floor((kills * 10 + segundos * 2 + correctas * 25) * mi * me);
   }
 
+  // ---------- Tope de apariciones ----------
+  // Cuántos patógenos pueden haber aparecido como máximo en los primeros `segundos` de una partida: no se puede
+  // eliminar más de lo que apareció, así que las eliminaciones por segundo siguen al ritmo de aparición, que cambia
+  // con el tiempo (sube con los minutos y se dispara en la multirresistencia).
+  // Recorre el peor caso de cada fuente de la escena Arena (game.js): goteo continuo (spawnClock), brotes
+  // (waveClock), focos desatendidos, oleadas por respuesta incorrecta, jefes y sus súbditos, y la multirresistencia
+  // desde `multirresistencia` (segundo en que empezó, o null). Usa la presión máxima del director (1,45), el primer
+  // jefe a los 120 s, todos los jefes vivos hasta el final soltando súbditos al ritmo del más rápido (VIH) y no
+  // descuenta el tope de enemigos vivos: nunca da menos que una partida real.
+  // **Duplicada en supabase/functions/api (guardarPuntaje)**: si cambian los ritmos de aparición en game.js,
+  // cambiá las dos y corré tests/modos.test.cjs (compara el tope con partidas simuladas).
+  const APARICION_DIFICULTAD = Object.freeze({
+    ambulatorio: Object.freeze({ spawn: 1.38, waves: 0.70 }),
+    internado: Object.freeze({ spawn: 1.22, waves: 0.82 }),
+    inmunosuprimido: Object.freeze({ spawn: 0.82, waves: 1.22 })
+  });
+  const PRESION_MAXIMA = 1.45;
+  function maxApariciones(p) {
+    const T = Math.max(0, Math.floor(Number(p && p.segundos) || 0));
+    const d = APARICION_DIFICULTAD[p && p.dificultadInfeccion] || APARICION_DIFICULTAD.inmunosuprimido;
+    // La multirresistencia llega después de vencer a los jefes del modo (el primero aparece a los 120 s como pronto):
+    // si se declara antes o sin jefes vencidos, no cuenta.
+    const md = p && p.multirresistencia;
+    const tm = Number.isInteger(md) && md >= 120 && md <= T && Number(p.jefes) >= 1 ? md : Infinity;
+    const P = PRESION_MAXIMA, DT = 0.1;
+    let total = 0, subditos = 0, jefesVivos = 0, multiIniciada = false;
+    let goteo = 0, brote = 65, foco = 38, jefe = 120, resistencia = Infinity;
+    const brotesFoco = [];
+    const sumarJefes = (n) => { jefesVivos += n; total += n * 5; }; // el jefe + hasta 4 súbditos de una vez (toxoplasma)
+    for (let i = 0, pasos = Math.round(T / DT); i < pasos; i++) {
+      const t = i * DT, multi = t >= tm;
+      if (multi && !multiIniciada) { multiIniciada = true; sumarJefes(3); resistencia = 26; }
+      const intervalo = Math.max(multi ? 0.18 : 0.47, (1.38 - t * 0.00275) / (1 + P * 0.2) * (multi ? 0.47 : 1) * d.spawn);
+      goteo += DT;
+      while (goteo >= intervalo) {
+        goteo -= intervalo;
+        total += multi ? Math.min(10, 5 + Math.floor((t - tm) / 70)) : Math.min(4, (t < 55 ? 1 : t < 145 ? 2 : 3) + Math.floor(P * 0.72));
+      }
+      brote -= DT;
+      if (brote <= 0) {
+        const base = multi ? Math.min(34, 12 + Math.floor((t - tm) / 18)) : Math.min(12, 3 + Math.floor(t / 90) + Math.floor(P * 1.2));
+        total += Math.max(2, Math.round(base * d.waves));
+        brote = (multi ? Math.max(9.5, 19 - (t - tm) * 0.008) : Math.max(44, 68 - t * 0.012)) * d.spawn;
+      }
+      foco -= DT;
+      if (foco <= 0) { brotesFoco.push(t + 65); foco = 52; }
+      while (brotesFoco.length && brotesFoco[0] <= t) {
+        brotesFoco.shift();
+        total += Math.floor(Math.min(13, 5 + Math.floor(t / 85) + Math.floor(P * 2)) * d.waves);
+      }
+      jefe -= DT;
+      if (jefe <= 0) { sumarJefes(1); jefe = multi ? 28 : 120; }
+      if (multi) { resistencia -= DT; if (resistencia <= 0) { sumarJefes(2); resistencia = 34; } }
+      const ritmo = Math.pow(Math.min(3.2, 1 + t / 600), 0.6);
+      subditos += jefesVivos * (multi ? 5 / (4.9 / ritmo) : 3 / (7 / ritmo)) * DT;
+    }
+    const incorrectas = Math.max(0, Math.floor(Number(p && p.preguntas) || 0) - Math.floor(Number(p && p.correctas) || 0));
+    total += incorrectas * Math.min(12, 6 + Math.floor(T / 80));
+    // Margen por el redondeo de los cuadros (el juego avanza de a ~16 ms y este cálculo de a 100 ms).
+    return Math.ceil((total + subditos) * 1.05) + 10;
+  }
+
   // Mismos topes que valida el servidor (guardarPuntaje): una partida que no los cumple no entra al ranking.
-  // No hay tope de eliminaciones por segundo (un jugador muy fuerte elimina muchísimo): las trampas se detectan con
-  // las estadísticas del ranking que ven los moderadores.
+  // Las eliminaciones no pueden superar a los patógenos aparecidos ni el máximo que pudo aparecer en ese tiempo
+  // (maxApariciones).
   function esPartidaPlausible(p) {
     const n = (v) => (Number.isInteger(v) && v >= 0 ? v : -1);
     const segundos = n(p.segundos), kills = n(p.kills), correctas = n(p.correctas), preguntas = n(p.preguntas), jefes = n(p.jefes);
     if ([segundos, kills, correctas, preguntas, jefes].some((v) => v < 0)) return false;
     if (segundos < 20 || segundos > 4 * 3600) return false;
     if (preguntas > Math.floor(segundos / 10) + 5 || correctas > preguntas) return false;
-    return jefes <= Math.floor(segundos / 25) + 3;
+    if (jefes > Math.floor(segundos / 25) + 3) return false;
+    const tope = maxApariciones(p);
+    if (p.aparecidos !== undefined && (!Number.isInteger(p.aparecidos) || kills > p.aparecidos || p.aparecidos > tope)) return false;
+    return kills <= tope;
   }
 
   return Object.freeze({
-    esPartidaPlausible,
+    esPartidaPlausible, maxApariciones,
     FAMILIAS, MULTIPLICADOR_INFECCION, MULTIPLICADOR_EVOLUCION, MAPA_NUCLEO, MAPAS_SANDBOX,
     pesosFamilias, claveRanking, esModoRankingValido, crearModo, calcularPuntaje
   });

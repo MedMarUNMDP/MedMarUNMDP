@@ -1854,6 +1854,57 @@ async function verificarEntradaPartida(token: unknown, userId: string, juego: st
   return { id: m[1], inicio }
 }
 
+// Tope de apariciones: cuántos patógenos pueden haber aparecido como máximo en los primeros `segundos`. No se
+// puede eliminar más de lo que apareció, así que las eliminaciones por segundo siguen al ritmo de aparición del juego
+// (que sube con el tiempo y se dispara en la multirresistencia). Peor caso de cada fuente de la escena: goteo, brotes,
+// focos, oleadas por respuesta incorrecta, jefes y súbditos. **Copia exacta de InmuneModos.maxApariciones**
+// (games/inmune-survivors/src/core/modos.js, con tests que la comparan con partidas simuladas): cambiá las dos.
+const APARICION_DIFICULTAD: Record<string, { spawn: number, waves: number }> = {
+  ambulatorio: { spawn: 1.38, waves: 0.70 }, internado: { spawn: 1.22, waves: 0.82 }, inmunosuprimido: { spawn: 0.82, waves: 1.22 },
+}
+const PRESION_MAXIMA = 1.45
+function maxApariciones(p: any) {
+  const T = Math.max(0, Math.floor(Number(p && p.segundos) || 0))
+  const d = APARICION_DIFICULTAD[p && p.dificultadInfeccion] || APARICION_DIFICULTAD.inmunosuprimido
+  const md = p && p.multirresistencia
+  const tm = Number.isInteger(md) && md >= 120 && md <= T && Number(p.jefes) >= 1 ? md : Infinity
+  const P = PRESION_MAXIMA, DT = 0.1
+  let total = 0, subditos = 0, jefesVivos = 0, multiIniciada = false
+  let goteo = 0, brote = 65, foco = 38, jefe = 120, resistencia = Infinity
+  const brotesFoco: number[] = []
+  const sumarJefes = (n: number) => { jefesVivos += n; total += n * 5 }
+  for (let i = 0, pasos = Math.round(T / DT); i < pasos; i++) {
+    const t = i * DT, multi = t >= tm
+    if (multi && !multiIniciada) { multiIniciada = true; sumarJefes(3); resistencia = 26 }
+    const intervalo = Math.max(multi ? 0.18 : 0.47, (1.38 - t * 0.00275) / (1 + P * 0.2) * (multi ? 0.47 : 1) * d.spawn)
+    goteo += DT
+    while (goteo >= intervalo) {
+      goteo -= intervalo
+      total += multi ? Math.min(10, 5 + Math.floor((t - tm) / 70)) : Math.min(4, (t < 55 ? 1 : t < 145 ? 2 : 3) + Math.floor(P * 0.72))
+    }
+    brote -= DT
+    if (brote <= 0) {
+      const base = multi ? Math.min(34, 12 + Math.floor((t - tm) / 18)) : Math.min(12, 3 + Math.floor(t / 90) + Math.floor(P * 1.2))
+      total += Math.max(2, Math.round(base * d.waves))
+      brote = (multi ? Math.max(9.5, 19 - (t - tm) * 0.008) : Math.max(44, 68 - t * 0.012)) * d.spawn
+    }
+    foco -= DT
+    if (foco <= 0) { brotesFoco.push(t + 65); foco = 52 }
+    while (brotesFoco.length && brotesFoco[0] <= t) {
+      brotesFoco.shift()
+      total += Math.floor(Math.min(13, 5 + Math.floor(t / 85) + Math.floor(P * 2)) * d.waves)
+    }
+    jefe -= DT
+    if (jefe <= 0) { sumarJefes(1); jefe = multi ? 28 : 120 }
+    if (multi) { resistencia -= DT; if (resistencia <= 0) { sumarJefes(2); resistencia = 34 } }
+    const ritmo = Math.pow(Math.min(3.2, 1 + t / 600), 0.6)
+    subditos += jefesVivos * (multi ? 5 / (4.9 / ritmo) : 3 / (7 / ritmo)) * DT
+  }
+  const incorrectas = Math.max(0, Math.floor(Number(p && p.preguntas) || 0) - Math.floor(Number(p && p.correctas) || 0))
+  total += incorrectas * Math.min(12, 6 + Math.floor(T / 80))
+  return Math.ceil((total + subditos) * 1.05) + 10
+}
+
 function enteroNoNegativo(value: unknown) {
   const n = Number(value)
   return Number.isInteger(n) && n >= 0 && n <= 10_000_000 ? n : null
@@ -1873,18 +1924,23 @@ function validarPartida(body: any): any {
   const preguntas = enteroNoNegativo(body?.preguntas)
   const jefes = enteroNoNegativo(body?.jefes)
   if (segundos === null || kills === null || correctas === null || preguntas === null || jefes === null) return { motivo: 'datos' }
-  // Plausibilidad. Sin tope de eliminaciones por segundo: un jugador muy fuerte puede eliminar muchísimo y el tope
-  // rechazaba partidas reales. Las sospechosas se detectan con estadísticas (partidas_juegos, estadisticasRanking) y
-  // las esconde o anula un moderador. Sí se controla: no hay partidas de menos de 20 s, ni más preguntas que una
-  // cada ~10 s, ni más de un jefe cada ~25 s, y el puntaje tiene que coincidir con la fórmula.
+  // Plausibilidad: no hay partidas de menos de 20 s, ni más preguntas que una cada ~10 s, ni más de un jefe cada
+  // ~25 s; las eliminaciones no superan a los aparecidos ni lo que pudo aparecer en ese tiempo (maxApariciones), y el
+  // puntaje tiene que coincidir con la fórmula. Lo que pase igual y parezca raro se ve en estadisticasRanking.
   if (segundos < PARTIDA_MIN_SEGUNDOS || segundos > PARTIDA_MAX_SEGUNDOS) return { motivo: 'duracion' }
   if (preguntas > Math.floor(segundos / 10) + 5 || correctas > preguntas) return { motivo: 'preguntas' }
   if (jefes > Math.floor(segundos / 25) + 3) return { motivo: 'jefes' }
+  // Versiones del juego anteriores a la 3.12 no mandan aparecidos ni multirresistencia: igual rige el tope.
+  const aparecidos = body?.aparecidos === undefined ? null : enteroNoNegativo(body.aparecidos)
+  if (body?.aparecidos !== undefined && aparecidos === null) return { motivo: 'datos' }
+  const multirresistencia = body?.multirresistencia === undefined || body.multirresistencia === null ? null : enteroNoNegativo(body.multirresistencia)
+  const tope = maxApariciones({ segundos, dificultadInfeccion, preguntas, correctas, jefes, multirresistencia })
+  if (kills > tope || (aparecidos !== null && (kills > aparecidos || aparecidos > tope))) return { motivo: 'eliminaciones' }
   const puntaje = Math.floor((kills * 10 + segundos * 2 + correctas * 25) * MULT_INFECCION[dificultadInfeccion] * MULT_EVOLUCION[dificultadEvolucion])
   // Si el cliente dice otro puntaje, la partida no se corresponde con lo que se jugó (o se modificó).
   if (body?.puntaje !== undefined && Number(body.puntaje) !== puntaje) return { motivo: 'puntaje' }
   const version = String(body?.version || '').slice(0, 20)
-  return { juego, modo, segundos, puntaje, kills, detalle: { kills, correctas, preguntas, jefes, dificultadInfeccion, dificultadEvolucion, version } }
+  return { juego, modo, segundos, puntaje, kills, detalle: { kills, aparecidos, multirresistencia, correctas, preguntas, jefes, dificultadInfeccion, dificultadEvolucion, version } }
 }
 
 async function posicionEnRanking(client: SupabaseClient, userId: string, juego: string, modo: string) {

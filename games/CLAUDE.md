@@ -5,7 +5,7 @@ Cada juego es una carpeta **autocontenida y estática** (`games/<slug>/`) que se
 
 | Slug | Estado | Motor |
 |---|---|---|
-| `inmune-survivors` | en desarrollo (v3.11) | Phaser 3.90 por CDN |
+| `inmune-survivors` | en desarrollo (v3.12) | Phaser 3.90 por CDN |
 
 ## Contrato común de un juego
 

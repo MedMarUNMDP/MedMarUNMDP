@@ -32,6 +32,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - name: Armar sitio
         run: |
           set -euo pipefail
@@ -45,6 +48,9 @@ jobs:
               "$game" "_site/juegos/$slug/"
           done
           find _site -maxdepth 3 -type d | sort
+      # Lo publicado va sin comentarios (el código fuente los conserva): ver scripts/limpiar-publicacion.mjs.
+      - name: Sacar comentarios de lo publicado
+        run: node scripts/limpiar-publicacion.mjs _site
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

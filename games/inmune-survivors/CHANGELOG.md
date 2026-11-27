@@ -2,6 +2,15 @@
 
 Formato: la versión más nueva arriba. Al publicar una versión, agregá una sección nueva acá y subí `?build=` en index.html (ver CLAUDE.md del juego). El historial previo a v3.1 está en `README.txt`.
 
+## v3.12.0
+
+**Ranking**
+- Tope de eliminaciones: no se puede eliminar más de lo que pudo aparecer. El servidor calcula, para la duración y
+  la dificultad de la partida, el máximo de patógenos que pueden aparecer sumando el peor caso de cada fuente (goteo,
+  brotes, focos, oleadas por error, jefes y súbditos, multirresistencia). El ritmo permitido sigue al de aparición:
+  sube con los minutos y se dispara en la multirresistencia. El juego también manda cuántos aparecieron y desde cuándo
+  hubo multirresistencia. En partidas simuladas con un jugador muy fuerte el uso máximo del tope fue de ~90 %.
+
 ## v3.11.2
 
 **Reportes**
