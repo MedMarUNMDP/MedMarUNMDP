@@ -49,7 +49,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/styles.css?v=20261127a">
+    <link rel="stylesheet" href="/css/styles.css?v=20261129a">
 </head>
 
 <body>
@@ -234,6 +234,11 @@
             <div id="avisoBaja" class="avisoBaja" role="status" hidden>
                 <span id="textoAvisoBaja"></span>
                 <button type="button" class="btn-primario" data-cancelar-baja>Me arrepentí: conservar mi cuenta</button>
+            </div>
+
+            <div id="avisoSancion" class="avisoSancion" role="status" hidden>
+                <span id="textoAvisoSancion"></span>
+                <button type="button" class="btn-secundario" data-ver-sancion>Ver detalle</button>
             </div>
 
             <!-- ==================== INICIO ==================== -->
@@ -565,6 +570,7 @@
                     <button type="button" role="tab" class="modPestania" data-panel="denuncias" aria-selected="true">Denuncias</button>
                     <button type="button" role="tab" class="modPestania" data-panel="aportes" aria-selected="false">Aportes</button>
                     <button type="button" role="tab" class="modPestania" data-panel="reportes" aria-selected="false">Reportes</button>
+                    <button type="button" role="tab" class="modPestania" data-panel="sanciones" aria-selected="false">Sanciones</button>
                     <button type="button" role="tab" class="modPestania" data-panel="material" aria-selected="false">Material</button>
                     <button type="button" role="tab" class="modPestania soloAdmin" data-panel="equipo" aria-selected="false" hidden>Equipo</button>
                     <button type="button" role="tab" class="modPestania" data-panel="papelera" aria-selected="false">Papelera</button>
@@ -601,6 +607,39 @@
                         <option value="todos">Todos</option>
                     </select>
                     <div id="listaReportes"></div>
+                </section>
+
+                <section id="panelSanciones" class="modPanel" role="tabpanel" data-panel="sanciones" aria-label="Sanciones" hidden>
+                    <p class="ayudaPerfil">Cada strike suspende 30 días; el tercero en 12 meses es permanente. Cada cuenta ve el motivo, cuánto le falta y, si es permanente, a los 30 días puede mandar <b>un</b> descargo que llega acá.</p>
+                    <label for="filtroSanciones">Mostrar</label>
+                    <select id="filtroSanciones">
+                        <option value="vigentes">Suspendidos ahora</option>
+                        <option value="apelaciones">Descargos por revisar</option>
+                        <option value="historial">Historial</option>
+                    </select>
+                    <form id="formBuscarSancionado" class="formEquipo">
+                        <label for="buscarSancionado">Infracciones de una cuenta</label>
+                        <input type="text" id="buscarSancionado" maxlength="24" placeholder="Seudónimo exacto">
+                        <button type="submit" class="btn-secundario">Buscar</button>
+                    </form>
+                    <details id="detallesSancionar" class="detallesSancionar">
+                        <summary>Sancionar una cuenta</summary>
+                        <p class="ayudaPerfil">Para una publicación concreta, mejor usá «Quitar (moderación)» en ella: ahí también podés aplicar el strike y queda vinculado.</p>
+                        <form id="formSancionar" novalidate>
+                            <label for="sancionPseudonimo">Seudónimo</label>
+                            <input type="text" id="sancionPseudonimo" maxlength="24" required>
+                            <label for="sancionCategoria">Infracción</label>
+                            <select id="sancionCategoria" class="selectCategoriaSancion"></select>
+                            <label for="sancionMotivo">Motivo (lo ve la persona)</label>
+                            <textarea id="sancionMotivo" maxlength="400" rows="3" required></textarea>
+                            <label class="checkSancion"><input type="checkbox" id="sancionTotal"> Suspensión total (tampoco chats, comisiones, likes ni ranking)</label>
+                            <label class="checkSancion"><input type="checkbox" id="sancionDispositivo"> Incluir sus dispositivos (alcanza a otras cuentas en esos navegadores)</label>
+                            <button type="submit" class="btn-primario btnPeligroLleno">Aplicar strike</button>
+                        </form>
+                        <p id="msgSancionar" aria-live="polite"></p>
+                    </details>
+                    <div id="resumenSancionado"></div>
+                    <div id="listaSanciones"></div>
                 </section>
 
                 <section class="modPanel" role="tabpanel" data-panel="material" aria-label="Agregar material" hidden>
@@ -771,7 +810,24 @@
                     </details>
 
                     <details class="guiaTema">
-                        <summary><span class="guiaNum">7</span>¿Qué se quita y qué no?</summary>
+                        <summary><span class="guiaNum">7</span>Sanciones: strikes, suspensiones y descargos</summary>
+                        <p>Quitar contenido no siempre alcanza. Ante una infracción clara o repetida podés aplicar un <b>strike</b>:</p>
+                        <ul>
+                            <li><b>Strike 1 y 2</b>: 30 días de suspensión cada uno.</li>
+                            <li><b>Strike 3</b> (contando los de los últimos 12 meses): suspensión <b>permanente</b>.</li>
+                            <li><b>Parcial</b> (lo normal): no publica en el foro ni en Compra venta, ni cambia seudónimo o foto, ni manda aportes. Sigue usando chats e intercambio de comisiones.</li>
+                            <li><b>Total</b> (opción): tampoco chats, comisiones, likes, votos ni ranking. Para acoso por chat o casos graves.</li>
+                            <li><b>Con dispositivos</b> (opción): la sanción alcanza a los navegadores que usó esa cuenta, aunque entre con otra. Usalo si sospechás cuentas nuevas para evadir una sanción.</li>
+                        </ul>
+                        <p><b>Cómo:</b> al tocar «Quitar (moderación)» marcá <b>Aplicar un strike a quien lo publicó</b>, elegí la infracción y escribí el motivo (es lo que va a ver). También desde <b>Sanciones → Sancionar una cuenta</b>, por seudónimo.</p>
+                        <p>La persona recibe una notificación y un mail, y ve un aviso con el motivo y cuánto le falta. Con un baneo permanente, a los 30 días puede mandar <b>un único descargo</b>, que te llega a la pestaña Sanciones (y por mail).</p>
+                        <p><b>Levantar</b> termina la suspensión pero el strike sigue contando. <b>Anular</b> es para errores: la levanta y deja de contar. Todo queda en el registro.</p>
+                        <p class="guiaNota">Un primer error leve se resuelve quitando y explicando el motivo. El strike es para lo que rompe las normas a sabiendas o se repite. No se puede sancionar a moderadores ni administradores.</p>
+                        <button type="button" class="guiaIr" data-ir-mod="sanciones">Ir a Sanciones →</button>
+                    </details>
+
+                    <details class="guiaTema">
+                        <summary><span class="guiaNum">8</span>¿Qué se quita y qué no?</summary>
                         <div class="guiaCriterios">
                             <div class="guiaSi">
                                 <b>Se quita</b>
@@ -800,7 +856,7 @@
                     </details>
 
                     <details class="guiaTema">
-                        <summary><span class="guiaNum">8</span>Seguridad de tu cuenta de moderación</summary>
+                        <summary><span class="guiaNum">9</span>Seguridad de tu cuenta de moderación</summary>
                         <ul>
                             <li>No compartas tu archivo de llave ni su contraseña con nadie, tampoco con otros moderadores.</li>
                             <li>No autorices computadoras compartidas (biblioteca, sala de informática).</li>
@@ -812,7 +868,7 @@
                     </details>
 
                     <details class="guiaTema">
-                        <summary><span class="guiaNum">9</span>Tu período y cómo dejar de moderar</summary>
+                        <summary><span class="guiaNum">10</span>Tu período y cómo dejar de moderar</summary>
                         <p>La moderación dura un período (por ejemplo, hasta las elecciones del centro de estudiantes). Te avisamos <b>14 días antes</b> de que venza; para seguir, un administrador te tiene que renovar. Si vence, perdés el rol solo.</p>
                         <p>Si querés dejarlo antes, en <b>Mi llave</b> está <b>Dejar de moderar</b>: es inmediato y no hace falta esperar a nadie.</p>
                         <button type="button" class="guiaIr" data-ir-mod="llave">Ir a Mi llave →</button>
@@ -1375,6 +1431,26 @@
         </div>
     </div>
 
+    <!-- ==================== SANCIÓN VIGENTE (motivo, cuenta regresiva y descargo) ==================== -->
+    <div id="modalSancion" class="modalFondo" role="dialog" aria-modal="true" aria-labelledby="tituloModalSancion">
+        <div class="modalCaja modalSancionCaja">
+            <div class="modalEncabezado">
+                <h2 id="tituloModalSancion">Tu cuenta está suspendida</h2>
+                <button type="button" class="modalCerrar" data-cerrar-sancion aria-label="Cerrar">×</button>
+            </div>
+            <div id="cuerpoModalSancion" aria-live="polite"></div>
+            <form id="formApelacion" hidden novalidate>
+                <label for="textoApelacion">Tu descargo</label>
+                <textarea id="textoApelacion" rows="6" maxlength="2000" placeholder="Contá qué pasó y por qué creés que el equipo debería revisar la sanción."></textarea>
+                <p id="errorApelacion" class="error" aria-live="polite" hidden></p>
+                <button type="submit" class="btn-primario">Enviar descargo</button>
+            </form>
+            <div class="modalTextoAcciones">
+                <button type="button" class="btn-secundario" data-cerrar-sancion>Entendido</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== PEDIR TEXTO (reemplaza a prompt(), que en Android dejaba el teclado abierto) ==================== -->
     <div id="modalTexto" class="modalFondo" role="dialog" aria-modal="true" aria-labelledby="tituloModalTexto">
         <div class="modalCaja modalTextoCaja">
@@ -1386,6 +1462,16 @@
                 <p id="descModalTexto" class="ayudaPerfil"></p>
                 <label for="inputModalTexto" id="etiquetaModalTexto"></label>
                 <textarea id="inputModalTexto" rows="3"></textarea>
+                <div id="sancionModalTexto" class="sancionModalTexto" hidden>
+                    <label class="checkSancion"><input type="checkbox" id="chkSancionTexto"> Aplicar un strike a quien lo publicó</label>
+                    <div id="opcionesSancionTexto" hidden>
+                        <label for="categoriaSancionTexto">Infracción</label>
+                        <select id="categoriaSancionTexto" class="selectCategoriaSancion"></select>
+                        <label class="checkSancion"><input type="checkbox" id="chkSancionTotal"> Suspensión total (tampoco chats, comisiones, likes ni ranking)</label>
+                        <label class="checkSancion"><input type="checkbox" id="chkSancionDispositivo"> Incluir sus dispositivos (alcanza a otras cuentas en esos navegadores)</label>
+                        <p class="ayudaPerfil">Cada strike suspende 30 días; el tercero en 12 meses es permanente. El motivo de arriba es lo que va a ver la persona.</p>
+                    </div>
+                </div>
                 <p id="errorModalTexto" class="error" aria-live="polite" hidden></p>
                 <div class="modalTextoAcciones">
                     <button type="button" class="btn-secundario" data-texto-cancelar>Cancelar</button>
@@ -1469,7 +1555,7 @@
             integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
             crossorigin="anonymous"></script>
 
-    <script src="/js/app.js?v=20261127a"></script>
+    <script src="/js/app.js?v=20261129a"></script>
 
     <!-- CAPTCHA anti-bots (Cloudflare Turnstile) para login, registro y recuperación. Sin SRI: Cloudflare lo actualiza
          solo y su documentación pide no fijarlo. Se renderiza recién cuando el formulario se usa. -->

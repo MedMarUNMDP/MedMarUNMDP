@@ -129,7 +129,7 @@ async function publicarClasificado(admin: SupabaseClient, user: any, body: any) 
 }
 
 async function gestionarClasificado(admin: SupabaseClient, user: any, body: any) {
-  const id = uuidOrEmpty(body.id), accion = String(body.accion || '')
+  const id = uuidOrEmpty(body.id), accion = String(body.operacion || '')
   if (!id || !['pausar', 'activar', 'renovar', 'borrar'].includes(accion)) return json({ ok: false, error: 'datos_invalidos' })
   const { data: c, error } = await admin.from('clasificados').select('id,autor_id,activo,expira_at,eliminado_at').eq('id', id).maybeSingle()
   if (error) throw error
@@ -167,6 +167,12 @@ const RATE_LIMITS: Record<string, [number, number]> = {
   listarReportes: [60, 600],
   gestionarReporte: [120, 600],
   preferenciaMailsModeracion: [20, 3600],
+  miSancion: [60, 600],
+  apelarSancion: [5, 3600],
+  sancionar: [60, 3600],
+  listarSanciones: [120, 600],
+  levantarSancion: [60, 3600],
+  resolverApelacion: [60, 3600],
   restaurarPapelera: [60, 600],
   crearEmparejamiento: [10, 600],
   completarEmparejamiento: [10, 3600],
@@ -547,6 +553,7 @@ function sitiosMaterialPublicos() {
 const REF_AVISO_APORTES = '00000000-0000-4000-8000-00000a9047e5'
 const REF_AVISO_DENUNCIAS = '00000000-0000-4000-8000-0000000de0c1'
 const REF_AVISO_REPORTES = '00000000-0000-4000-8000-00000e9047e5'
+const REF_AVISO_APELACIONES = '00000000-0000-4000-8000-0000a9e1ac10'
 
 // Mails al equipo (cola notificacion_queue → función maintenance → Gmail). Como mucho uno por tema cada
 // HORAS_ENTRE_MAILS_EQUIPO por persona, así una ola de denuncias no llena la casilla (ni el cupo diario de Gmail).
@@ -555,6 +562,7 @@ const MAIL_EQUIPO: Record<string, { asunto: string, pestania: string }> = {
   [REF_AVISO_APORTES]: { asunto: 'Hay aportes de material para revisar', pestania: 'aportes' },
   [REF_AVISO_DENUNCIAS]: { asunto: 'Hay denuncias para revisar', pestania: 'denuncias' },
   [REF_AVISO_REPORTES]: { asunto: 'Llegaron reportes o sugerencias', pestania: 'reportes' },
+  [REF_AVISO_APELACIONES]: { asunto: 'Hay descargos de cuentas suspendidas', pestania: 'sanciones' },
 }
 async function encolarMailEquipo(admin: SupabaseClient, userId: string, ref: string, resumen: string, ultimo: string) {
   const conf = MAIL_EQUIPO[ref]
@@ -1641,7 +1649,7 @@ async function maybeMatch(admin: SupabaseClient, userId: string, materia: string
   return { matched: false }
 }
 
-async function bootstrap(user: User, client: SupabaseClient, admin: SupabaseClient) {
+async function bootstrap(user: User, client: SupabaseClient, admin: SupabaseClient, dispositivo: unknown) {
   const rl = await rateLimit(admin, 'bootstrap', user.id)
   if (rl) return rl
 
@@ -1653,6 +1661,10 @@ async function bootstrap(user: User, client: SupabaseClient, admin: SupabaseClie
   if (profileError) throw profileError
   if (reqError) throw reqError
   if (exError) throw exError
+  const [sancion] = await Promise.all([
+    sancionActual(admin, user.id, dispositivo).then((s) => sancionPublica(admin, user.id, s)),
+    anotarDispositivo(admin, user.id, dispositivo),
+  ])
 
   const exchangeIds = [...new Set((exchanges || []).map((x: any) => String(x.intercambio_id)))]
   const { data: parts } = exchangeIds.length
@@ -1701,6 +1713,7 @@ async function bootstrap(user: User, client: SupabaseClient, admin: SupabaseClie
       moderadorVence: profile.is_moderator && !profile.is_admin ? profile.moderador_vence_at || null : null,
       moderadorVencido: !!profile.is_moderator && !profile.is_admin && !moderadorVigente(profile.moderador_vence_at),
       mailsModeracion: profile.mails_moderacion !== false },
+    sancion,
   }})
 }
 
@@ -2115,6 +2128,333 @@ async function rankingJuego(user: User, client: SupabaseClient, body: any) {
   })
 }
 
+// ==================== SANCIONES ====================
+// Strikes: cada uno suspende 30 días; el tercero de los últimos 12 meses (sin contar los anulados) es permanente.
+// Suspensión común: bloquea las acciones 'comun'. Total (opción del moderador): además las 'total'.
+// Por dispositivo (opción del moderador): alcanza a los navegadores que usó la cuenta, con cualquier cuenta.
+// Baneo permanente: a los 30 días se puede mandar UN descargo (apelaciones). Migración 20261129120000_sanciones.sql.
+const DIAS_SUSPENSION = 30
+const DIAS_VIGENCIA_STRIKE = 365
+const DIAS_PARA_APELAR = 30
+const DIAS_DISPOSITIVOS = 90  // navegadores usados en este plazo entran en una sanción por dispositivo
+const MAX_STRIKES = 3
+const CATEGORIAS_SANCION: Record<string, string> = {
+  acoso: 'Insultos, acoso o amenazas',
+  discriminacion: 'Discriminación',
+  pacientes: 'Datos de pacientes',
+  datos_personales: 'Datos personales de otras personas',
+  contenido_inapropiado: 'Contenido sexual o dañino',
+  spam: 'Spam o publicidad',
+  compraventa: 'Compra venta no permitida',
+  derechos: 'Derechos de autor o exámenes',
+  evasion: 'Evadir una sanción',
+  otro: 'Otra infracción a los Términos',
+}
+// Qué bloquea cada nivel. Lo que no está acá (leer, borrar lo propio, denunciar, reportar, apelar) sigue permitido.
+const RESTRICCION_SANCION: Record<string, 'comun' | 'total'> = {
+  crearHilo: 'comun', crearRespuesta: 'comun', publicarClasificado: 'comun', gestionarClasificado: 'comun',
+  actualizarPseudonimo: 'comun', actualizarFoto: 'comun', enviarAporte: 'comun',
+  enviarMensaje: 'total', contactarClasificado: 'total', guardar: 'total', editar: 'total',
+  votarEncuesta: 'total', toggleLike: 'total', guardarPuntaje: 'total',
+}
+
+const SELECT_SANCION = 'id,user_id,strike,permanente,total,por_dispositivo,categoria,motivo,ref_tipo,ref_id,ref_titulo,moderador_id,inicio_at,fin_at,levantada_at,levantada_por,motivo_levantamiento,anulada,created_at'
+
+function textoSancion(valor: unknown, max: number) {
+  return String(valor || '').replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, ' ').replace(/[ \t]+/g, ' ').trim().slice(0, max)
+}
+
+// Huella del navegador: SHA-256 del id al azar que guarda la web (localStorage). Nunca se guarda el id crudo.
+async function huellaDispositivo(valor: unknown) {
+  const id = String(valor || '')
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) return null
+  return hashHex('medmar-dispositivo:' + id.toLowerCase())
+}
+
+function sancionVigenteFila(s: any, ahora = Date.now()) {
+  return !s.levantada_at && !s.anulada && (s.permanente || new Date(s.fin_at).getTime() > ahora)
+}
+
+async function strikesVigentes(admin: SupabaseClient, userId: string) {
+  const desde = new Date(Date.now() - DIAS_VIGENCIA_STRIKE * 86400000).toISOString()
+  const { count, error } = await admin.from('sanciones').select('id', { count: 'exact', head: true })
+    .eq('user_id', userId).eq('anulada', false).gt('created_at', desde)
+  if (error) throw error
+  return count || 0
+}
+
+// La sanción que rige ahora para esta cuenta o este navegador (la más severa). null = ninguna.
+async function sancionActual(admin: SupabaseClient, userId: string, dispositivo: unknown) {
+  const ahora = new Date().toISOString()
+  const huella = await huellaDispositivo(dispositivo)
+  const [propias, delDispositivo] = await Promise.all([
+    admin.from('sanciones').select(SELECT_SANCION).eq('user_id', userId).is('levantada_at', null).eq('anulada', false)
+      .or('permanente.eq.true,fin_at.gt.' + ahora).order('created_at', { ascending: false }).limit(5),
+    huella
+      ? admin.from('dispositivos_sancionados').select('sancion_id,permanente,total,motivo,fin_at,created_at').eq('huella', huella)
+        .is('levantada_at', null).or('permanente.eq.true,fin_at.gt.' + ahora).limit(5)
+      : Promise.resolve({ data: [], error: null }),
+  ])
+  if (propias.error) throw propias.error
+  if (delDispositivo.error) throw delDispositivo.error
+  const lista = (propias.data || []).filter((s: any) => sancionVigenteFila(s))
+  const dispositivo_ = (delDispositivo.data || []).filter((d: any) => !lista.some((s: any) => String(s.id) === String(d.sancion_id)))
+  if (!lista.length && !dispositivo_.length) return null
+  // Más severa: permanente > fin más lejano; «total» si cualquiera lo es.
+  const fin = (x: any) => x.permanente ? Infinity : new Date(x.fin_at).getTime()
+  const propia = lista.sort((a: any, b: any) => fin(b) - fin(a))[0] || null
+  const ajena = dispositivo_.sort((a: any, b: any) => fin(b) - fin(a))[0] || null
+  const total = lista.some((s: any) => s.total) || dispositivo_.some((d: any) => d.total)
+  if (propia && (!ajena || fin(propia) >= fin(ajena))) return { fila: propia, porDispositivo: false, total }
+  return { fila: { ...ajena, id: ajena.sancion_id, strike: null, categoria: null, inicio_at: ajena.created_at }, porDispositivo: true, total }
+}
+
+// Lo que ve la persona sancionada (bootstrap, miSancion y el error 'suspendido').
+async function sancionPublica(admin: SupabaseClient, userId: string, actual: Awaited<ReturnType<typeof sancionActual>>) {
+  if (!actual) return null
+  const s = actual.fila
+  let apelacion = null, puedeApelar = false, apelableDesde = null
+  if (!actual.porDispositivo && s.permanente) {
+    apelableDesde = new Date(new Date(s.inicio_at).getTime() + DIAS_PARA_APELAR * 86400000).toISOString()
+    const { data, error } = await admin.from('apelaciones').select('estado,respuesta,created_at,resuelta_at').eq('sancion_id', s.id).maybeSingle()
+    if (error) throw error
+    apelacion = data ? { estado: data.estado, respuesta: data.respuesta || '', fecha: data.created_at, resuelta: data.resuelta_at } : null
+    puedeApelar = !data && Date.now() >= new Date(apelableDesde).getTime()
+  }
+  return {
+    id: actual.porDispositivo ? null : String(s.id), porDispositivo: actual.porDispositivo,
+    strike: s.strike ?? null, maxStrikes: MAX_STRIKES, permanente: !!s.permanente, total: actual.total,
+    categoria: s.categoria ? (CATEGORIAS_SANCION[s.categoria] || '') : '', motivo: s.motivo || '',
+    publicacion: s.ref_titulo || '', inicio: s.inicio_at, fin: s.fin_at || null,
+    strikesVigentes: actual.porDispositivo ? null : await strikesVigentes(admin, userId),
+    apelableDesde, puedeApelar, apelacion,
+  }
+}
+
+async function exigirSinSancion(admin: SupabaseClient, user: User, action: string, body: any) {
+  const nivel = RESTRICCION_SANCION[action]
+  if (!nivel) return null
+  // Pausar o borrar un aviso propio sigue permitido; activarlo o renovarlo es publicar.
+  if (action === 'gestionarClasificado' && !['activar', 'renovar'].includes(String(body?.operacion || ''))) return null
+  const actual = await sancionActual(admin, user.id, body?.dispositivoId)
+  if (!actual || (nivel === 'total' && !actual.total)) return null
+  return json({ ok: false, error: 'suspendido', sancion: await sancionPublica(admin, user.id, actual) })
+}
+
+// Anota el navegador de la cuenta (desde bootstrap): sirve para una sanción por dispositivo.
+async function anotarDispositivo(admin: SupabaseClient, userId: string, dispositivo: unknown) {
+  const huella = await huellaDispositivo(dispositivo)
+  if (!huella) return
+  const { error } = await admin.from('dispositivos_cuenta').upsert({ user_id: userId, huella, ultimo_uso: new Date().toISOString() }, { onConflict: 'user_id,huella' })
+  if (error) console.warn('anotar_dispositivo', error.message)
+}
+
+function plazoSancion(permanente: boolean, fin: string | null) {
+  return permanente ? 'Suspensión permanente' : 'Suspensión de ' + DIAS_SUSPENSION + ' días (hasta el ' + fechaCorta(String(fin)) + ')'
+}
+
+async function avisarSancionado(admin: SupabaseClient, userId: string, refId: string, contexto: string, cuerpo: string, asunto: string) {
+  const { error } = await admin.from('notificaciones').insert({ user_id: userId, tipo: 'sancion', ref_id: refId, contexto: contexto.slice(0, 160), cuerpo: cuerpo.slice(0, 400) })
+  if (error) console.warn('aviso_sancion', error.message)
+  const { error: mErr } = await admin.from('notificacion_queue').insert({ user_id: userId, tipo: 'sancion', asunto: 'MedMar · ' + asunto,
+    cuerpo: [contexto + '.', '', cuerpo, '', 'Mirá el detalle en https://medmar.com.ar (tocá la notificación).', '', '—',
+      'Las normas de convivencia están en https://medmar.com.ar/terminos/#moderacion'].join('\n') })
+  if (mErr) console.warn('mail_sancion', mErr.message)
+}
+
+type PedidoSancion = { userId: string, categoria: string, motivo: string, total: boolean, dispositivo: boolean,
+  ref?: { tipo: string, id: string, titulo: string } }
+
+// Aplica el próximo strike. Devuelve { strike, permanente, fin, dispositivos } o { error }.
+async function aplicarSancion(admin: SupabaseClient, moderador: User, llaveId: string, p: PedidoSancion) {
+  if (!CATEGORIAS_SANCION[p.categoria]) return { error: 'datos_invalidos' }
+  if (p.motivo.length < 3) return { error: 'motivo_sancion' }
+  if (p.userId === moderador.id) return { error: 'sancion_propia' }
+  if (await tieneRol(admin, p.userId, 'moderador')) return { error: 'sancion_moderador' }
+  const vigente = await sancionActual(admin, p.userId, null)
+  if (vigente?.fila.permanente) return { error: 'ya_baneado' }
+  const previos = await strikesVigentes(admin, p.userId)
+  const strike = Math.min(MAX_STRIKES, previos + 1)
+  const permanente = strike >= MAX_STRIKES
+  const fin = permanente ? null : new Date(Date.now() + DIAS_SUSPENSION * 86400000).toISOString()
+  const { data, error } = await admin.from('sanciones').insert({
+    user_id: p.userId, strike, permanente, total: p.total, por_dispositivo: p.dispositivo, categoria: p.categoria, motivo: p.motivo,
+    ref_tipo: p.ref?.tipo || null, ref_id: p.ref?.id || null, ref_titulo: p.ref?.titulo?.slice(0, 160) || null,
+    moderador_id: moderador.id, fin_at: fin,
+  }).select('id').single()
+  if (error) { if (pgCode(error) === '23505') return { error: 'ya_sancionado' }; throw error }
+  let dispositivos = 0
+  if (p.dispositivo) {
+    const desde = new Date(Date.now() - DIAS_DISPOSITIVOS * 86400000).toISOString()
+    const { data: huellas, error: hErr } = await admin.from('dispositivos_cuenta').select('huella').eq('user_id', p.userId).gt('ultimo_uso', desde).limit(20)
+    if (hErr) throw hErr
+    if ((huellas || []).length) {
+      const { error: dErr } = await admin.from('dispositivos_sancionados').insert((huellas || []).map((h: any) => ({
+        huella: h.huella, sancion_id: data.id, permanente, total: p.total, motivo: p.motivo, fin_at: fin })))
+      if (dErr) throw dErr
+      dispositivos = (huellas || []).length
+    }
+  }
+  await auditar(admin, moderador.id, llaveId, 'sancionar', { usuario: p.userId, sancion: data.id, strike, permanente, total: p.total, dispositivos, categoria: p.categoria })
+  const alcance = p.total ? 'No podés publicar ni escribir en ninguna sección.' : 'No podés publicar en el foro ni en Compra venta (los chats y el intercambio de comisiones siguen funcionando).'
+  await avisarSancionado(admin, p.userId, String(data.id),
+    plazoSancion(permanente, fin) + ' · strike ' + strike + ' de ' + MAX_STRIKES,
+    'Motivo: ' + p.motivo + (p.ref?.titulo ? ' («' + p.ref.titulo.slice(0, 80) + '»)' : '') + '. ' + alcance +
+      (permanente ? ' Pasados ' + DIAS_PARA_APELAR + ' días vas a poder escribir un descargo, una sola vez.' : ''),
+    permanente ? 'Tu cuenta fue suspendida de forma permanente' : 'Tu cuenta fue suspendida por ' + DIAS_SUSPENSION + ' días')
+  return { strike, permanente, fin, dispositivos }
+}
+
+// Opción «sancionar al autor» al quitar contenido. body.sancion = { categoria, total, dispositivo }.
+async function sancionTrasQuitar(admin: SupabaseClient, moderador: User, llaveId: string, body: any,
+  tipo: string, id: string, datos: { autor: string, titulo: string } | null, motivo: string) {
+  const pedido = body?.sancion
+  if (!pedido || typeof pedido !== 'object') return {}
+  if (!datos) return { sancionError: 'sin_autor' }
+  const res = await aplicarSancion(admin, moderador, llaveId, {
+    userId: datos.autor, categoria: String(pedido.categoria || ''), motivo: motivo || CATEGORIAS_SANCION[String(pedido.categoria)] || '',
+    total: pedido.total === true, dispositivo: pedido.dispositivo === true, ref: { tipo, id, titulo: datos.titulo } })
+  return 'error' in res ? { sancionError: res.error } : { sancion: res }
+}
+
+async function sancionarPorSeudonimo(admin: SupabaseClient, user: User, llaveId: string, body: any) {
+  const perfil = await perfilPorPseudonimo(admin, body.pseudonimo)
+  if (perfil === undefined) return json({ ok: false, error: 'datos_invalidos' })
+  if (!perfil) return json({ ok: false, error: 'no_encontrado' })
+  const res = await aplicarSancion(admin, user, llaveId, { userId: String(perfil.id), categoria: String(body.categoria || ''),
+    motivo: textoSancion(body.motivo, 400), total: body.total === true, dispositivo: body.dispositivo === true })
+  return json('error' in res ? { ok: false, error: res.error } : { ok: true, sancion: res })
+}
+
+async function listarSanciones(admin: SupabaseClient, body: any) {
+  const filtro = String(body.filtro || 'vigentes')
+  let filas: any[] = []
+  let usuario: any = null
+  if (body.pseudonimo !== undefined) {
+    const perfil = await perfilPorPseudonimo(admin, body.pseudonimo)
+    if (perfil === undefined) return json({ ok: false, error: 'datos_invalidos' })
+    if (!perfil) return json({ ok: false, error: 'no_encontrado' })
+    const { data, error } = await admin.from('sanciones').select(SELECT_SANCION).eq('user_id', perfil.id).order('created_at', { ascending: false }).limit(50)
+    if (error) throw error
+    filas = data || []
+    const [{ count: disp }, strikes] = await Promise.all([
+      admin.from('dispositivos_cuenta').select('huella', { count: 'exact', head: true }).eq('user_id', perfil.id),
+      strikesVigentes(admin, String(perfil.id)),
+    ])
+    usuario = { pseudonimo: String(body.pseudonimo).trim(), strikesVigentes: strikes, dispositivos: disp || 0 }
+  } else if (filtro === 'apelaciones') {
+    const { data: ap, error } = await admin.from('apelaciones').select('sancion_id').eq('estado', 'pendiente').order('created_at').limit(100)
+    if (error) throw error
+    const ids = (ap || []).map((a: any) => a.sancion_id)
+    if (ids.length) {
+      const { data, error: e2 } = await admin.from('sanciones').select(SELECT_SANCION).in('id', ids)
+      if (e2) throw e2
+      filas = data || []
+    }
+  } else {
+    let q = admin.from('sanciones').select(SELECT_SANCION).order('created_at', { ascending: false }).limit(filtro === 'historial' ? 150 : 300)
+    if (filtro !== 'historial') q = q.is('levantada_at', null).eq('anulada', false).or('permanente.eq.true,fin_at.gt.' + new Date().toISOString())
+    const { data, error } = await q
+    if (error) throw error
+    filas = data || []
+  }
+  const ids = filas.map((s) => String(s.id))
+  const { data: apelaciones, error: aErr } = ids.length
+    ? await admin.from('apelaciones').select('sancion_id,texto,estado,respuesta,resuelta_por,created_at,resuelta_at').in('sancion_id', ids)
+    : { data: [], error: null }
+  if (aErr) throw aErr
+  const porSancion = new Map((apelaciones || []).map((a: any) => [String(a.sancion_id), a]))
+  const perfiles = await profileMap(admin, filas.flatMap((s) => [s.user_id, s.moderador_id, s.levantada_por]).concat((apelaciones || []).map((a: any) => a.resuelta_por)).filter(Boolean).map(String))
+  const nombre = (id: any) => id ? (perfiles.get(String(id))?.pseudonimo || 'Cuenta borrada') : ''
+  return json({ ok: true, usuario, sanciones: filas.map((s) => {
+    const a: any = porSancion.get(String(s.id))
+    return {
+      id: s.id, usuario: nombre(s.user_id), strike: s.strike, permanente: s.permanente, total: s.total, porDispositivo: s.por_dispositivo,
+      categoria: CATEGORIAS_SANCION[s.categoria] || s.categoria, motivo: s.motivo, publicacion: s.ref_titulo || '', tipoPublicacion: s.ref_tipo || '',
+      moderador: nombre(s.moderador_id), inicio: s.inicio_at, fin: s.fin_at, vigente: sancionVigenteFila(s),
+      levantada: s.levantada_at, levantadaPor: nombre(s.levantada_por), motivoLevantamiento: s.motivo_levantamiento || '', anulada: s.anulada,
+      apelacion: a ? { texto: a.texto, estado: a.estado, respuesta: a.respuesta || '', fecha: a.created_at, resueltaPor: nombre(a.resuelta_por) } : null,
+    }
+  }) })
+}
+
+// Levanta una sanción (anular = además deja de contar como strike: fue un error).
+async function levantarSancionFila(admin: SupabaseClient, user: User, llaveId: string, id: string, motivo: string, anular: boolean, desdeApelacion = false) {
+  const { data: s, error } = await admin.from('sanciones').select(SELECT_SANCION).eq('id', id).maybeSingle()
+  if (error) throw error
+  if (!s) return { error: 'no_encontrado' }
+  if (s.anulada || (s.levantada_at && !anular)) return { error: 'sancion_cerrada' }
+  if (String(s.user_id) === user.id) return { error: 'sancion_propia' }
+  const ahora = new Date().toISOString()
+  const cambios: Record<string, unknown> = { anulada: anular }
+  if (!s.levantada_at) Object.assign(cambios, { levantada_at: ahora, levantada_por: user.id, motivo_levantamiento: motivo || null })
+  const { error: uErr } = await admin.from('sanciones').update(cambios).eq('id', id)
+  if (uErr) throw uErr
+  const { error: dErr } = await admin.from('dispositivos_sancionados').update({ levantada_at: ahora }).eq('sancion_id', id).is('levantada_at', null)
+  if (dErr) throw dErr
+  if (!desdeApelacion) {
+    await admin.from('apelaciones').update({ estado: 'aceptada', resuelta_por: user.id, resuelta_at: ahora, respuesta: motivo || null })
+      .eq('sancion_id', id).eq('estado', 'pendiente')
+  }
+  await auditar(admin, user.id, llaveId, anular ? 'anular_sancion' : 'levantar_sancion', { sancion: id, usuario: s.user_id, motivo })
+  if (sancionVigenteFila(s) || anular) {
+    await avisarSancionado(admin, String(s.user_id), id,
+      anular ? 'Se anuló una sanción de tu cuenta' : 'Se levantó la suspensión de tu cuenta',
+      (anular ? 'La moderación revisó la sanción y la anuló: no cuenta como strike.' : 'Ya podés volver a publicar.') + (motivo ? ' Comentario: ' + motivo : ''),
+      anular ? 'Se anuló una sanción de tu cuenta' : 'Se levantó la suspensión de tu cuenta')
+  }
+  return { ok: true }
+}
+
+async function levantarSancion(admin: SupabaseClient, user: User, llaveId: string, body: any) {
+  const id = uuidOrEmpty(body.id)
+  if (!id) return json({ ok: false, error: 'datos_invalidos' })
+  const motivo = textoSancion(body.motivo, 400)
+  if (motivo.length < 3) return json({ ok: false, error: 'motivo_sancion' })
+  const res = await levantarSancionFila(admin, user, llaveId, id, motivo, body.anular === true)
+  return json('error' in res ? { ok: false, error: res.error } : { ok: true })
+}
+
+async function resolverApelacion(admin: SupabaseClient, user: User, llaveId: string, body: any) {
+  const id = uuidOrEmpty(body.id), decision = String(body.decision || '')
+  const respuesta = textoSancion(body.respuesta, 400)
+  if (!id || !['aceptar', 'rechazar'].includes(decision)) return json({ ok: false, error: 'datos_invalidos' })
+  if (respuesta.length < 3) return json({ ok: false, error: 'motivo_sancion' })
+  const { data: a, error } = await admin.from('apelaciones').select('id,sancion_id,user_id,estado').eq('sancion_id', id).maybeSingle()
+  if (error) throw error
+  if (!a) return json({ ok: false, error: 'no_encontrado' })
+  if (a.estado !== 'pendiente') return json({ ok: false, error: 'apelacion_resuelta' })
+  if (String(a.user_id) === user.id) return json({ ok: false, error: 'sancion_propia' })
+  const { data: marcada, error: uErr } = await admin.from('apelaciones').update({ estado: decision === 'aceptar' ? 'aceptada' : 'rechazada',
+    respuesta, resuelta_por: user.id, resuelta_at: new Date().toISOString() }).eq('id', a.id).eq('estado', 'pendiente').select('id').maybeSingle()
+  if (uErr) throw uErr
+  if (!marcada) return json({ ok: false, error: 'apelacion_resuelta' })
+  if (decision === 'aceptar') {
+    const res = await levantarSancionFila(admin, user, llaveId, String(a.sancion_id), respuesta, body.anular === true, true)
+    if ('error' in res) return json({ ok: false, error: res.error })
+  } else {
+    await auditar(admin, user.id, llaveId, 'rechazar_apelacion', { sancion: a.sancion_id, usuario: a.user_id })
+    await avisarSancionado(admin, String(a.user_id), String(a.sancion_id), 'La moderación revisó tu descargo y mantiene la suspensión',
+      'Respuesta: ' + respuesta, 'Respuesta a tu descargo')
+  }
+  return json({ ok: true })
+}
+
+async function apelarSancion(admin: SupabaseClient, user: User, body: any) {
+  const id = uuidOrEmpty(body.id), texto = textoSancion(body.texto, 2000)
+  if (!id) return json({ ok: false, error: 'datos_invalidos' })
+  if (texto.length < 20) return json({ ok: false, error: 'descargo_corto' })
+  const { data: s, error } = await admin.from('sanciones').select(SELECT_SANCION).eq('id', id).eq('user_id', user.id).maybeSingle()
+  if (error) throw error
+  if (!s || !s.permanente || !sancionVigenteFila(s)) return json({ ok: false, error: 'no_encontrado' })
+  if (Date.now() < new Date(s.inicio_at).getTime() + DIAS_PARA_APELAR * 86400000) return json({ ok: false, error: 'apelacion_temprana' })
+  const { error: iErr } = await admin.from('apelaciones').insert({ sancion_id: id, user_id: user.id, texto })
+  if (iErr) { if (pgCode(iErr) === '23505') return json({ ok: false, error: 'ya_apelaste' }); throw iErr }
+  await avisarModeradores(admin, 'denuncia', REF_AVISO_APELACIONES,
+    (n) => n === 1 ? 'Llegó un descargo de una cuenta suspendida' : 'Llegaron ' + n + ' descargos de cuentas suspendidas', texto.slice(0, 200), user.id)
+  return json({ ok: true })
+}
+
 async function handle(req: Request, body: any) {
   const action = String(body?.accion || '')
   const authRequired = action !== 'health'
@@ -2136,8 +2476,11 @@ async function handle(req: Request, body: any) {
   }
   if (!user) return json({ ok: false, error: 'sesion_invalida' })
 
+  const bloqueo = await exigirSinSancion(admin, user, action, body)
+  if (bloqueo) return bloqueo
+
   switch (action) {
-    case 'bootstrap': return bootstrap(user, client, admin)
+    case 'bootstrap': return bootstrap(user, client, admin, body.dispositivoId)
     case 'foroBootstrap': return foroBootstrap(user, client, admin, String(body.etiqueta || '').trim().toLowerCase().slice(0, MAX_TAG_LENGTH))
     case 'listarEtiquetas': {
       const rl = await rateLimit(admin, action, user.id); if (rl) return rl
@@ -2293,7 +2636,7 @@ async function handle(req: Request, body: any) {
         await moverAPapelera(admin, 'hilo', id, user.id, motivo)
         await auditar(admin, user.id, auth.llaveId, 'borrar_hilo', { id, motivo })
         await avisarAutorModeracion(admin, user.id, 'hilo', id, datos, motivo)
-        return json({ ok: true })
+        return json({ ok: true, ...(await sancionTrasQuitar(admin, user, auth.llaveId, body, 'hilo', id, datos, motivo)) })
       }
 
       await borrarPublicacion(admin, 'hilo', id)
@@ -2318,7 +2661,7 @@ async function handle(req: Request, body: any) {
         await moverAPapelera(admin, 'respuesta', id, user.id, motivo)
         await auditar(admin, user.id, auth.llaveId, 'borrar_respuesta', { id, motivo })
         await avisarAutorModeracion(admin, user.id, 'respuesta', id, datos, motivo)
-        return json({ ok: true })
+        return json({ ok: true, ...(await sancionTrasQuitar(admin, user, auth.llaveId, body, 'respuesta', id, datos, motivo)) })
       }
 
       await borrarPublicacion(admin, 'respuesta', id)
@@ -2562,7 +2905,7 @@ async function handle(req: Request, body: any) {
       await moverAPapelera(admin,'material',id,user.id,motivo)
       await auditar(admin,user.id,auth.llaveId,'quitar_material',{id,motivo})
       await avisarAutorModeracion(admin,user.id,'material',id,datos,motivo)
-      return json({ok:true})
+      return json({ok:true,...(await sancionTrasQuitar(admin,user,auth.llaveId,body,'material',id,datos,motivo))})
     }
     case 'quitarClasificado': {
       // Moderación: borra un aviso de Compra venta (sin esperar una denuncia) y le avisa a quien lo publicó.
@@ -2574,7 +2917,7 @@ async function handle(req: Request, body: any) {
       await moverAPapelera(admin,'clasificado',id,user.id,motivo)
       await auditar(admin,user.id,auth.llaveId,'quitar_clasificado',{id,motivo,titulo:datos.titulo})
       await avisarAutorModeracion(admin,user.id,'clasificado',id,datos,motivo)
-      return json({ok:true})
+      return json({ok:true,...(await sancionTrasQuitar(admin,user,auth.llaveId,body,'clasificado',id,datos,motivo))})
     }
     case 'quitarPuntaje': {
       // Antitrampa del ranking: el juego corre en el navegador, así que un puntaje inventado dentro de lo plausible
@@ -2877,16 +3220,46 @@ async function handle(req: Request, body: any) {
       if(repError)throw repError
       if(!rep)return json({ok:false,error:'no_encontrado'})
       const resolucion={resuelto_por:user.id,fecha_resolucion:new Date().toISOString()}
+      let extra={}
       if(accion==='eliminar'){
         const datosPub=await datosPublicacion(admin,String(rep.tipo),String(rep.id_publicacion)),motivo=motivoModeracion(body)
         // Va a la papelera (7 días, restaurable) y se resuelven todas las denuncias pendientes de esa publicación.
         await moverAPapelera(admin,String(rep.tipo),String(rep.id_publicacion),user.id,motivo)
         await avisarAutorModeracion(admin,user.id,String(rep.tipo),String(rep.id_publicacion),datosPub,motivo)
+        extra=await sancionTrasQuitar(admin,user,auth.llaveId,body,String(rep.tipo),String(rep.id_publicacion),datosPub,motivo)
       } else {
         const {error}=await admin.from('denuncias').update({estado:'descartada',...resolucion}).eq('id',id);if(error)throw error
       }
       await auditar(admin,user.id,auth.llaveId,'resolver_denuncia',{id,accion})
-      return json({ok:true})
+      return json({ok:true,...extra})
+    }
+    case 'miSancion': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return json({ok:true,sancion:await sancionPublica(admin,user.id,await sancionActual(admin,user.id,body.dispositivoId))})
+    }
+    case 'apelarSancion': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      return apelarSancion(admin,user,body)
+    }
+    case 'sancionar': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      return sancionarPorSeudonimo(admin,user,auth.llaveId,body)
+    }
+    case 'listarSanciones': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      return listarSanciones(admin,body)
+    }
+    case 'levantarSancion': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      return levantarSancion(admin,user,auth.llaveId,body)
+    }
+    case 'resolverApelacion': {
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const auth=await autorizarModeracion(admin,user,body,'moderador');if(auth instanceof Response)return auth
+      return resolverApelacion(admin,user,auth.llaveId,body)
     }
     default: return json({ok:false,error:'accion_invalida'})
   }

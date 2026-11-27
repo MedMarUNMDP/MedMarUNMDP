@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-27-sin-comentarios"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-29-sanciones"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -651,6 +651,8 @@ const hilosPendientesConfirmacion = new Map()
             // Ventana de texto (pedirTexto): el «Atrás» propio se ignora y el del celular la cancela.
             if (ignorarPopTexto) { ignorarPopTexto = false; return }
             if (resolverTexto) { terminarTexto(null, true); return }
+            if (ignorarPopSancion) { ignorarPopSancion = false; return }
+            if (sancionConHistorial && modalSancion.classList.contains("abierto")) { cerrarModalSancion(true); return }
 
             // Si el navegador salió hacia una entrada externa, dejamos que
             // el navegador continúe su navegación normal.
@@ -721,6 +723,7 @@ const hilosPendientesConfirmacion = new Map()
             if (e.key === "Escape") {
                 document.querySelectorAll(".modalFondo.abierto").forEach(function (modal) {
                     if (modal === modalTexto) terminarTexto(null)
+                    else if (modal === modalSancion) cerrarModalSancion()
                     else if (modal !== modalSetupPerfil) cerrarModal(modal)
                 })
             }
@@ -728,7 +731,7 @@ const hilosPendientesConfirmacion = new Map()
 
         document.querySelectorAll(".modalFondo").forEach(function (fondo) {
             fondo.addEventListener("click", function (e) {
-                if (e.target !== fondo || fondo === modalSetupPerfil || fondo.id === "modalTexto") return
+                if (e.target !== fondo || fondo === modalSetupPerfil || fondo.id === "modalTexto" || fondo.id === "modalSancion") return
                 if (fondo === modalCompose) {
                     volverHistorialOverlay("compose", function () { cerrarModal(fondo) })
                 } else {
@@ -746,6 +749,7 @@ const hilosPendientesConfirmacion = new Map()
         let textoConHistorial = false
         let ignorarPopTexto = false
         let opcionesTexto = null
+        let sancionPedidaTexto = null
 
         function pedirTexto(op) {
             if (resolverTexto) terminarTexto(null, true)
@@ -763,6 +767,12 @@ const hilosPendientesConfirmacion = new Map()
             inputModalTexto.maxLength = op.max || 400
             inputModalTexto.rows = op.filas || 3
             inputModalTexto.classList.toggle("textoMono", !!op.mono)
+            document.getElementById("sancionModalTexto").hidden = !op.sancion
+            document.getElementById("chkSancionTexto").checked = false
+            document.getElementById("chkSancionTotal").checked = false
+            document.getElementById("chkSancionDispositivo").checked = false
+            document.getElementById("opcionesSancionTexto").hidden = true
+            sancionPedidaTexto = null
             inputModalTexto.autocapitalize = op.mono ? "characters" : "sentences"
             document.getElementById("errorModalTexto").hidden = true
             abrirModal(modalTexto)
@@ -798,28 +808,61 @@ const hilosPendientesConfirmacion = new Map()
                 err.hidden = false
                 return
             }
+            sancionPedidaTexto = null
+            if (opcionesTexto && opcionesTexto.sancion && document.getElementById("chkSancionTexto").checked) {
+                if (valor.length < 3) {
+                    const err = document.getElementById("errorModalTexto")
+                    err.textContent = "Para sancionar, escribí el motivo: es lo que va a ver la persona."
+                    err.hidden = false
+                    return
+                }
+                sancionPedidaTexto = {
+                    categoria: document.getElementById("categoriaSancionTexto").value,
+                    total: document.getElementById("chkSancionTotal").checked,
+                    dispositivo: document.getElementById("chkSancionDispositivo").checked
+                }
+            }
             terminarTexto(valor)
         })
         modalTexto.addEventListener("click", function (e) {
             if (e.target === modalTexto || e.target.closest("[data-texto-cancelar]")) terminarTexto(null)
         })
 
-        function pedirMotivoModeracion(que) {
-            return pedirTexto({
+        document.getElementById("chkSancionTexto").addEventListener("change", function () {
+            document.getElementById("opcionesSancionTexto").hidden = !this.checked
+        })
+
+        // Devuelve { motivo, sancion } (sancion = null si no se eligió sancionar) o null si se canceló.
+        async function pedirMotivoModeracion(que) {
+            const motivo = await pedirTexto({
                 titulo: "Quitar contenido",
                 texto: "Vas a quitar " + que + ". Queda 7 días en la papelera y se puede restaurar.",
                 etiqueta: "Motivo para quien lo publicó (opcional, le llega como notificación)",
                 placeholder: "Ej.: tenía datos que permitían identificar a un paciente",
                 boton: "Quitar",
                 peligro: true,
-                max: 200
+                max: 200,
+                sancion: true
             })
+            return motivo === null ? null : { motivo: motivo, sancion: sancionPedidaTexto }
         }
 
         function mensajeError(codigo) {
 
             const mensajes = {
                 email_invalido: "El email no es válido.",
+                suspendido: "Tu cuenta está suspendida y no podés hacer esto por ahora. Tocá «Ver detalle» en el aviso de arriba.",
+                motivo_sancion: "Escribí un motivo (al menos 3 caracteres).",
+                sancion_propia: "No podés sancionarte ni revisar tus propias sanciones.",
+                sancion_moderador: "Esa cuenta es del equipo de moderación: primero hay que quitarle el rol.",
+                ya_baneado: "Esa cuenta ya tiene una suspensión permanente.",
+                ya_sancionado: "Esa publicación ya tiene una sanción.",
+                sin_autor: "No se encontró a quién lo publicó.",
+                sancion_cerrada: "Esa sanción ya se había levantado o anulado.",
+                apelacion_resuelta: "Ese descargo ya lo revisó alguien del equipo.",
+                descargo_corto: "Escribí al menos 20 caracteres.",
+                apelacion_temprana: "Todavía no podés mandar el descargo.",
+                ya_apelaste: "Ya mandaste tu descargo: se puede una sola vez.",
                 confirmacion_baja: "Escribí BORRAR para confirmar.",
                 confirmacion_renuncia: "Escribí RENUNCIO para confirmar.",
                 grupo_nombre: "El nombre del grupo tiene que tener entre 2 y 60 caracteres.",
@@ -915,6 +958,183 @@ const hilosPendientesConfirmacion = new Map()
             return null
         }
 
+        // ==================== SANCIONES (SUSPENSIONES Y BANEOS) ====================
+        // La API manda la sanción vigente en bootstrap, en miSancion y en el error «suspendido». Acá se muestra el aviso
+        // fijo con la cuenta regresiva, la ventana con el detalle y, en un baneo permanente, el descargo (una sola vez).
+        // Cada navegador guarda un id al azar (medmar:dispositivo) que viaja con cada pedido: la moderación puede
+        // extender una sanción a los navegadores de la cuenta. La API solo guarda su hash.
+        const CLAVE_DISPOSITIVO = "medmar:dispositivo"
+        const DISPOSITIVO_ID = (function () {
+            try {
+                const guardado = localStorage.getItem(CLAVE_DISPOSITIVO)
+                if (guardado && /^[0-9a-f-]{36}$/i.test(guardado)) return guardado
+                const nuevo = crypto.randomUUID()
+                localStorage.setItem(CLAVE_DISPOSITIVO, nuevo)
+                return nuevo
+            } catch (_) { return "" }
+        })()
+        let sancionVigente = null
+        let relojSancion = null
+        let sancionConHistorial = false
+        let ignorarPopSancion = false
+        const avisoSancion = document.getElementById("avisoSancion")
+        const modalSancion = document.getElementById("modalSancion")
+
+        function tiempoRestante(iso) {
+            const ms = new Date(iso).getTime() - Date.now()
+            if (ms <= 0) return "unos segundos"
+            const dias = Math.floor(ms / 86400000), horas = Math.floor(ms % 86400000 / 3600000), min = Math.max(1, Math.ceil(ms % 3600000 / 60000))
+            if (dias > 0) return dias + (dias === 1 ? " día" : " días") + (horas ? " y " + horas + " h" : "")
+            if (horas > 0) return horas + " h y " + min + " min"
+            return min + " min"
+        }
+        function fechaHoraSancion(iso) {
+            return new Date(iso).toLocaleString("es-AR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }) + " h"
+        }
+        function sancionSigue(s) {
+            return !!s && (s.permanente || !s.fin || new Date(s.fin).getTime() > Date.now())
+        }
+
+        function actualizarSancion(s) {
+            sancionVigente = sancionSigue(s) ? s : null
+            renderizarAvisoSancion()
+            if (modalSancion.classList.contains("abierto")) renderizarModalSancion()
+            clearInterval(relojSancion)
+            relojSancion = sancionVigente && !sancionVigente.permanente ? setInterval(function () {
+                if (!sancionSigue(sancionVigente)) { actualizarSancion(null); mostrarAviso("Terminó tu suspensión. Ya podés volver a publicar."); return }
+                renderizarAvisoSancion()
+                if (modalSancion.classList.contains("abierto")) renderizarModalSancion()
+            }, 30000) : null
+        }
+
+        function renderizarAvisoSancion() {
+            const s = sancionVigente
+            avisoSancion.hidden = !s
+            if (!s) return
+            const quien = s.porDispositivo ? "Este dispositivo está suspendido" : "Tu cuenta está suspendida"
+            document.getElementById("textoAvisoSancion").innerHTML = "<b>" + quien + (s.permanente ? " de forma permanente" : "") + "</b>" +
+                (s.permanente ? "" : " · faltan " + escapeHtml(tiempoRestante(s.fin))) +
+                (s.total ? " · no podés publicar ni escribir" : " · no podés publicar en el foro ni en Compra venta")
+        }
+
+        function renderizarModalSancion() {
+            const s = sancionVigente
+            const cuerpo = document.getElementById("cuerpoModalSancion")
+            const form = document.getElementById("formApelacion")
+            form.hidden = true
+            if (!s) {
+                document.getElementById("tituloModalSancion").textContent = "Sin sanciones vigentes"
+                cuerpo.innerHTML = "<p>No tenés ninguna suspensión vigente. Podés usar MedMar con normalidad.</p>"
+                return
+            }
+            document.getElementById("tituloModalSancion").textContent = s.porDispositivo
+                ? "Este dispositivo está suspendido"
+                : s.permanente ? "Tu cuenta está suspendida de forma permanente" : "Tu cuenta está suspendida"
+            const chips = [
+                s.strike ? "<span class='chipSancion'>Strike " + Number(s.strike) + " de " + Number(s.maxStrikes || 3) + "</span>" : "",
+                "<span class='chipSancion " + (s.total ? "chipSancionTotal" : "") + "'>" + (s.total ? "Suspensión total" : "Suspensión parcial") + "</span>",
+                s.porDispositivo ? "<span class='chipSancion'>Por dispositivo</span>" : "",
+            ].join("")
+            const plazo = s.permanente
+                ? "<p class='plazoSancion'><b>Sin fecha de fin.</b> Empezó el " + escapeHtml(fechaHoraSancion(s.inicio)) + ".</p>"
+                : "<p class='plazoSancion'><b>Faltan " + escapeHtml(tiempoRestante(s.fin)) + "</b> · termina el " + escapeHtml(fechaHoraSancion(s.fin)) + ".</p>"
+            const puede = s.total
+                ? "<li>Leer el foro, el material, Compra venta y los chats.</li><li>Borrar lo que publicaste.</li><li>Denunciar y mandar reportes.</li>"
+                : "<li>Leer todo MedMar.</li><li>Usar los chats y el intercambio de comisiones.</li><li>Dar like, votar encuestas y jugar.</li><li>Borrar lo que publicaste.</li>"
+            const noPuede = s.total
+                ? "<li>Publicar o responder en el foro y en Compra venta.</li><li>Escribir en chats, publicar solicitudes de comisión ni contactar avisos.</li><li>Likes, votos, cambios de perfil, aportes ni ranking.</li>"
+                : "<li>Publicar o responder en el foro.</li><li>Publicar o renovar avisos de Compra venta.</li><li>Cambiar tu seudónimo o tu foto, ni mandar aportes de material.</li>"
+            let apelacion = ""
+            if (s.porDispositivo) {
+                apelacion = "<p class='ayudaPerfil'>La sanción es de otra cuenta que se usó en este navegador. Si creés que es un error, escribinos a MedMarUNMDP@gmail.com.</p>"
+            } else if (s.permanente) {
+                if (s.apelacion) {
+                    const estados = { pendiente: "El equipo todavía no lo revisó.", aceptada: "El equipo aceptó tu descargo.", rechazada: "El equipo revisó tu descargo y mantuvo la sanción." }
+                    apelacion = "<div class='apelacionEstado'><b>Tu descargo</b> (enviado el " + escapeHtml(fechaLargaBaja(s.apelacion.fecha)) + ")<p>" + escapeHtml(estados[s.apelacion.estado] || "") + "</p>" +
+                        (s.apelacion.respuesta ? "<p><b>Respuesta:</b> " + escapeHtml(s.apelacion.respuesta) + "</p>" : "") + "</div>"
+                } else if (s.puedeApelar) {
+                    apelacion = "<p class='ayudaPerfil'>Ya podés escribir tu descargo. Se manda <b>una sola vez</b> y lo revisa el equipo de moderación, que puede levantar la sanción.</p>"
+                    form.hidden = false
+                } else if (s.apelableDesde) {
+                    apelacion = "<p class='ayudaPerfil'>A partir del <b>" + escapeHtml(fechaLargaBaja(s.apelableDesde)) + "</b> (faltan " + escapeHtml(tiempoRestante(s.apelableDesde)) +
+                        ") vas a poder escribir un descargo, una sola vez, para que el equipo revise la sanción.</p>"
+                }
+            } else {
+                apelacion = "<p class='ayudaPerfil'>" + (s.strikesVigentes >= 2 ? "<b>Ojo:</b> con un strike más la suspensión es permanente. " : "") +
+                    "Los strikes dejan de contar a los 12 meses. Si creés que es un error, escribinos a MedMarUNMDP@gmail.com.</p>"
+            }
+            cuerpo.innerHTML = "<div class='chipsSancion'>" + chips + "</div>" + plazo +
+                (s.motivo ? "<div class='motivoSancion'><b>Motivo" + (s.categoria ? " · " + escapeHtml(s.categoria) : "") + "</b><p>" + escapeHtml(s.motivo) + "</p>" +
+                    (s.publicacion ? "<p class='ayudaPerfil'>Publicación: «" + escapeHtml(s.publicacion) + "»</p>" : "") + "</div>" : "") +
+                "<div class='alcanceSancion'><div><b>Mientras tanto podés</b><ul>" + puede + "</ul></div><div><b>No podés</b><ul>" + noPuede + "</ul></div></div>" +
+                apelacion +
+                "<p class='ayudaPerfil'>Normas de convivencia: <a href='/terminos/#moderacion' target='_blank' rel='noopener'>Términos, sección 10</a>.</p>"
+        }
+
+        function abrirModalSancion() {
+            renderizarModalSancion()
+            if (modalSancion.classList.contains("abierto")) return
+            abrirModal(modalSancion)
+            // «Atrás» del celular cierra la ventana (y el teclado del descargo) en vez de cambiar de página.
+            sancionConHistorial = false
+            const actual = estadoActualSeguro()
+            if (historialMedmarInicializado && !aplicandoEstadoHistorial && actual) {
+                const copia = Object.assign({}, actual, { verSancion: true })
+                delete copia.guard
+                history.pushState(copia, "", location.href)
+                sancionConHistorial = true
+            }
+        }
+        function cerrarModalSancion(desdeHistorial) {
+            if (!modalSancion.classList.contains("abierto")) return
+            if (modalSancion.contains(document.activeElement)) document.activeElement.blur()
+            cerrarModal(modalSancion)
+            if (sancionConHistorial && !desdeHistorial) { ignorarPopSancion = true; history.back() }
+            sancionConHistorial = false
+        }
+        modalSancion.addEventListener("click", function (e) {
+            if (e.target === modalSancion || e.target.closest("[data-cerrar-sancion]")) cerrarModalSancion()
+        })
+        avisoSancion.addEventListener("click", function (e) {
+            if (e.target.closest("[data-ver-sancion]")) abrirModalSancion()
+        })
+
+        // Desde la notificación: se pide el estado actual (pudo haberse levantado o vencido).
+        async function verSancionActual() {
+            const r = await llamar("miSancion", {})
+            if (r.ok) actualizarSancion(r.sancion)
+            abrirModalSancion()
+        }
+
+        // Antes de abrir un formulario de publicación: si la sanción lo bloquea, se muestra el detalle.
+        function bloqueadoPorSancion(nivel) {
+            if (!sancionSigue(sancionVigente)) return false
+            if (nivel === "total" && !sancionVigente.total) return false
+            abrirModalSancion()
+            return true
+        }
+
+        document.getElementById("formApelacion").addEventListener("submit", async function (e) {
+            e.preventDefault()
+            const s = sancionVigente
+            const texto = document.getElementById("textoApelacion").value.trim()
+            const err = document.getElementById("errorApelacion")
+            err.hidden = true
+            if (!s || !s.id) return
+            if (texto.length < 20) { err.textContent = "Escribí al menos 20 caracteres."; err.hidden = false; return }
+            if (!confirm("El descargo se puede mandar una sola vez. ¿Enviarlo?")) return
+            const btn = this.querySelector("button[type=submit]")
+            btn.disabled = true
+            const r = await llamar("apelarSancion", { id: s.id, texto: texto })
+            btn.disabled = false
+            if (!r.ok) { err.textContent = mensajeError(r.error); err.hidden = false; return }
+            document.getElementById("textoApelacion").value = ""
+            s.puedeApelar = false
+            s.apelacion = { estado: "pendiente", respuesta: "", fecha: new Date().toISOString() }
+            renderizarModalSancion()
+            mostrarAviso("Descargo enviado. Te avisamos cuando el equipo lo revise.")
+        })
+
         // ==================== LLAMADAS AL SERVIDOR ====================
 
         const llamadasEnCurso = new Map()
@@ -928,7 +1148,7 @@ const hilosPendientesConfirmacion = new Map()
 
             const tarea = (async function () {
                 const inicioRequest = performance.now()
-                const body = Object.assign({ accion: accion }, params || {})
+                const body = Object.assign({ accion: accion }, params || {}, DISPOSITIVO_ID ? { dispositivoId: DISPOSITIVO_ID } : {})
 
                 try {
                     const resultado = await supabaseClient.functions.invoke(SUPABASE_FUNCTION_NAME, { body: body })
@@ -937,6 +1157,7 @@ const hilosPendientesConfirmacion = new Map()
                         return { ok: false, error: "conexion", ambiguo: true, detalle: resultado.error.message || String(resultado.error) }
                     }
                     const data = resultado.data || { ok: false, error: "servidor", ambiguo: true }
+                    if (data.error === "suspendido" && data.sancion) actualizarSancion(data.sancion)
                     console.debug("[MedMarUNMDP]", accion, Math.round(performance.now() - inicioRequest) + "ms")
                     return data
                 } catch (err) {
@@ -1151,6 +1372,7 @@ async function cargarBootstrap() {
             esModeradorActual = !!(data.rol && data.rol.esModerador)
             esAdminActual = !!(data.rol && data.rol.esAdmin)
             rolPropio = data.rol || null
+            if ("sancion" in data) actualizarSancion(data.sancion)
             document.getElementById("chkMailsModeracion").checked = !(data.rol && data.rol.mailsModeracion === false)
             const conPassword = cuentaTienePassword()
             ayudaSeguridadCuenta.textContent = conPassword
@@ -1707,9 +1929,10 @@ async function cargarBootstrap() {
             let r = await llamar(accion, { id })
             // Contenido de otra persona: el servidor pide la llave de moderación.
             if (!r.ok && r.error === "llave_requerida") {
-                const motivo = await pedirMotivoModeracion(tipo === "hilo" ? "esta publicación" : "esta respuesta")
-                if (motivo === null) return
-                r = await llamarModeracion(accion, { id, motivo })
+                const pedido = await pedirMotivoModeracion(tipo === "hilo" ? "esta publicación" : "esta respuesta")
+                if (!pedido) return
+                r = await llamarModeracion(accion, { id, motivo: pedido.motivo, sancion: pedido.sancion || undefined })
+                if (r.ok) avisarResultadoSancion(r)
             }
             if (!r.ok && r.error === "moderacion_bloqueada") return
 
@@ -2345,6 +2568,7 @@ async function cargarBootstrap() {
         window.addEventListener("resize", ajustarComposerTeclado)
 
         btnAbrirCompose.addEventListener("click", function () {
+            if (bloqueadoPorSancion("comun")) return
 
             navegarHistorial(crearEstadoNavegacion("foro", "compose"), false)
             abrirModal(modalCompose)
@@ -3382,16 +3606,17 @@ async function cargarBootstrap() {
 
         async function resolverDenunciaClick(id, accion) {
 
-            let motivo = ""
+            let pedido = { motivo: "", sancion: null }
             if (accion === "eliminar") {
-                motivo = await pedirMotivoModeracion("lo denunciado")
-                if (motivo === null) return
+                pedido = await pedirMotivoModeracion("lo denunciado")
+                if (!pedido) return
             }
 
-            const r = await llamarModeracion("resolverDenuncia", { id, decision: accion, motivo })
+            const r = await llamarModeracion("resolverDenuncia", { id, decision: accion, motivo: pedido.motivo, sancion: pedido.sancion || undefined })
 
             if (r.ok) {
                 cargarDenuncias()
+                avisarResultadoSancion(r)
             } else {
                 alert(mensajeError(r.error) + (r.detalle ? "\n\nDetalle técnico: " + r.detalle : "") )
             }
@@ -3578,12 +3803,13 @@ async function cargarBootstrap() {
         // borrarAlmacenamiento también borra la caché de perfil de localStorage (solicitudes e
         // intercambios), para no dejarla en una compu compartida. El tema se conserva.
         // Preferencias del dispositivo (no de la cuenta): sobreviven al cierre de sesión.
-        const CLAVES_LOCALES_DEL_DISPOSITIVO = ["medmar:tema", "medmar:rankingModo", "medmar:reportes"]
+        const CLAVES_LOCALES_DEL_DISPOSITIVO = ["medmar:tema", "medmar:rankingModo", "medmar:reportes", "medmar:dispositivo"]
         // Lo visto en el foro (para avisar «respuestas nuevas» en Inicio) se conserva: va por id de usuario, sin email.
         // Las claves viejas que tenían el email sí se borran.
         const RE_CLAVE_FORO_POR_ID = /^medmar:(foroResumen|foroVistos):[0-9a-f-]{36}$/
 
         function limpiarDatosDeSesion(borrarAlmacenamiento) {
+            actualizarSancion(null)
             foroCacheCliente.clear()
             rankingCache.clear()
             hiloCacheCliente.clear()
@@ -5232,6 +5458,9 @@ async function cargarBootstrap() {
                 case "moderacion":
                     return "<b>Moderación · «" + escapeHtml(n.contexto || "") + "»</b>" +
                         (n.cuerpo ? "<span class='notifCuerpo'>" + escapeHtml(n.cuerpo) + "</span>" : "")
+                case "sancion":
+                    return "<b>" + escapeHtml(n.contexto || "Moderación") + "</b>" +
+                        (n.cuerpo ? "<span class='notifCuerpo'>" + escapeHtml(n.cuerpo) + "</span>" : "")
                 case "denuncia":
                 case "recordatorio":
                     return "<b>" + escapeHtml(n.contexto || "") + "</b>" +
@@ -5377,7 +5606,9 @@ async function cargarBootstrap() {
                 mostrarSeccion("material", "up")
             } else if (n.tipo === "denuncia") {
                 mostrarSeccion("moderacion", "up")
-                elegirPestaniaModeracion(n.ref_id === REF_AVISO_REPORTES ? "reportes" : "denuncias")
+                elegirPestaniaModeracion(n.ref_id === REF_AVISO_REPORTES ? "reportes" : n.ref_id === REF_AVISO_APELACIONES ? "sanciones" : "denuncias")
+            } else if (n.tipo === "sancion") {
+                verSancionActual()
             } else if ((n.tipo === "noticia" || n.tipo === "recordatorio") && n.link) {
                 const vistaInterna = /^\/\?vista=(juegos|material|moderacion|foro|intercambios|clasificados|configuracion)$/.exec(n.link)
                 if (vistaInterna) mostrarSeccion(vistaInterna[1], "up")
@@ -5784,6 +6015,7 @@ async function cargarBootstrap() {
             else if (modPestania === "registro") cargarRegistro()
             else if (modPestania === "papelera") cargarPapelera()
             else if (modPestania === "reportes") cargarReportes()
+            else if (modPestania === "sanciones") cargarSanciones()
         }
 
         async function entrarAModeracion() {
@@ -6054,6 +6286,152 @@ async function cargarBootstrap() {
             cargarReportes()
         })
 
+        // ---- Sanciones (strikes, suspensiones y descargos) ----
+        const CATEGORIAS_SANCION_WEB = [
+            ["acoso", "Insultos, acoso o amenazas"], ["discriminacion", "Discriminación"], ["pacientes", "Datos de pacientes"],
+            ["datos_personales", "Datos personales de otras personas"], ["contenido_inapropiado", "Contenido sexual o dañino"],
+            ["spam", "Spam o publicidad"], ["compraventa", "Compra venta no permitida"], ["derechos", "Derechos de autor o exámenes"],
+            ["evasion", "Evadir una sanción"], ["otro", "Otra infracción a los Términos"]
+        ]
+        document.querySelectorAll(".selectCategoriaSancion").forEach(function (sel) {
+            sel.innerHTML = CATEGORIAS_SANCION_WEB.map(function (c) { return "<option value='" + c[0] + "'>" + escapeHtml(c[1]) + "</option>" }).join("")
+        })
+
+        function avisarResultadoSancion(r) {
+            if (r.sancion) {
+                mostrarAviso("Se aplicó el strike " + r.sancion.strike + " de 3: " + (r.sancion.permanente ? "suspensión permanente" : "30 días de suspensión") +
+                    (r.sancion.dispositivos ? " (también en " + r.sancion.dispositivos + (r.sancion.dispositivos === 1 ? " dispositivo)" : " dispositivos)") : "") + ".")
+            } else if (r.sancionError) {
+                alert("Se quitó el contenido, pero no se aplicó la sanción: " + mensajeError(r.sancionError))
+            }
+        }
+
+        function estadoSancionModeracion(s) {
+            if (s.anulada) return ["Anulada", "descartado"]
+            if (s.levantada) return ["Levantada", "resuelto"]
+            if (s.vigente) return [s.permanente ? "Permanente" : "Vigente", "nuevo"]
+            return ["Cumplida", "resuelto"]
+        }
+
+        function htmlSancionModeracion(s) {
+            const estado = estadoSancionModeracion(s)
+            const boton = function (accion, texto, sec) {
+                return "<button type='button' class='novedadAccion" + (sec ? " secundaria" : "") + "' data-accion-sancion='" + accion + "'>" + texto + "</button>"
+            }
+            const ap = s.apelacion
+            const estadosAp = { pendiente: "Sin revisar", aceptada: "Aceptado", rechazada: "Rechazado" }
+            return "<article class='aporteItem sancionItem' data-id='" + escapeAttr(s.id) + "'>" +
+                "<div class='tarjetaMaterialMeta'>" +
+                "<button type='button' class='linkEnTexto' data-ver-sancionado='" + escapeAttr(s.usuario) + "'><b>" + escapeHtml(s.usuario) + "</b></button>" +
+                "<span class='chipTipo'>Strike " + Number(s.strike) + " de 3</span>" +
+                "<span class='chipEstadoReporte estado-" + estado[1] + "'>" + estado[0] + "</span>" +
+                (s.total ? "<span class='chipTipo'>Total</span>" : "") + (s.porDispositivo ? "<span class='chipTipo'>Con dispositivos</span>" : "") +
+                "<span class='materiaMaterial'>" + escapeHtml(tiempoRelativo(s.inicio)) + "</span></div>" +
+                "<p class='mensajeReporte'><b>" + escapeHtml(s.categoria) + ":</b> " + escapeHtml(s.motivo) + "</p>" +
+                (s.publicacion ? "<p class='dominioAporte'>Publicación: «" + escapeHtml(s.publicacion) + "»</p>" : "") +
+                "<p class='dominioAporte'>Aplicó " + escapeHtml(s.moderador || "—") + " el " + escapeHtml(fechaHoraSancion(s.inicio)) + " · " +
+                (s.permanente ? "sin fecha de fin" : (s.vigente ? "termina en " + escapeHtml(tiempoRestante(s.fin)) : "hasta el " + escapeHtml(fechaHoraSancion(s.fin)))) + "</p>" +
+                (s.levantada ? "<p class='dominioAporte'>" + (s.anulada ? "Anulada" : "Levantada") + " por " + escapeHtml(s.levantadaPor || "—") +
+                    (s.motivoLevantamiento ? ": " + escapeHtml(s.motivoLevantamiento) : "") + "</p>" : s.anulada ? "<p class='dominioAporte'>Anulada: no cuenta como strike.</p>" : "") +
+                (ap ? "<div class='apelacionEstado'><b>Descargo</b> · " + escapeHtml(estadosAp[ap.estado] || ap.estado) + " · " + escapeHtml(tiempoRelativo(ap.fecha)) +
+                    "<p class='mensajeReporte'>" + escapeHtml(ap.texto) + "</p>" +
+                    (ap.respuesta ? "<p class='dominioAporte'>Respuesta de " + escapeHtml(ap.resueltaPor || "—") + ": " + escapeHtml(ap.respuesta) + "</p>" : "") + "</div>" : "") +
+                "<div class='accionesMaterial'>" +
+                (ap && ap.estado === "pendiente" ? boton("aceptar", "Aceptar descargo y levantar") + boton("rechazar", "Rechazar descargo", true) : "") +
+                (s.vigente && !(ap && ap.estado === "pendiente") ? boton("levantar", "Levantar suspensión", true) : "") +
+                (!s.anulada ? boton("anular", "Anular (fue un error)", true) : "") +
+                "</div></article>"
+        }
+
+        async function cargarSanciones() {
+            const cont = document.getElementById("listaSanciones")
+            document.getElementById("resumenSancionado").innerHTML = ""
+            cont.innerHTML = esqueletoTarjetas(1)
+            const filtro = document.getElementById("filtroSanciones").value
+            const r = await llamarModeracion("listarSanciones", { filtro: filtro })
+            if (!r.ok) { cont.innerHTML = "<p class='vacio'>" + escapeHtml(mensajeError(r.error)) + "</p>"; return }
+            const items = r.sanciones || []
+            cont.innerHTML = items.length ? items.map(htmlSancionModeracion).join("")
+                : "<p class='vacio'>" + (filtro === "vigentes" ? "No hay cuentas suspendidas." : filtro === "apelaciones" ? "No hay descargos para revisar." : "Todavía no hay sanciones.") + "</p>"
+        }
+
+        async function verSancionado(pseudonimo) {
+            const cont = document.getElementById("listaSanciones")
+            const resumen = document.getElementById("resumenSancionado")
+            cont.innerHTML = esqueletoTarjetas(1)
+            const r = await llamarModeracion("listarSanciones", { pseudonimo: pseudonimo })
+            if (!r.ok) { resumen.innerHTML = ""; cont.innerHTML = "<p class='vacio'>" + escapeHtml(r.error === "no_encontrado" ? "No hay ninguna cuenta con ese seudónimo." : mensajeError(r.error)) + "</p>"; return }
+            const u = r.usuario
+            resumen.innerHTML = "<div class='resumenSancionado'><b>" + escapeHtml(u.pseudonimo) + "</b> · " + Number(u.strikesVigentes) + " de 3 strikes vigentes (últimos 12 meses) · " +
+                Number(u.dispositivos) + (u.dispositivos === 1 ? " dispositivo registrado" : " dispositivos registrados") +
+                " <button type='button' class='novedadAccion' data-sancionar-a='" + escapeAttr(u.pseudonimo) + "'>Sancionar a esta cuenta</button></div>"
+            cont.innerHTML = (r.sanciones || []).length ? r.sanciones.map(htmlSancionModeracion).join("") : "<p class='vacio'>Esta cuenta no tiene infracciones.</p>"
+        }
+
+        document.getElementById("filtroSanciones").addEventListener("change", cargarSanciones)
+        document.getElementById("formBuscarSancionado").addEventListener("submit", function (e) {
+            e.preventDefault()
+            const p = document.getElementById("buscarSancionado").value.trim()
+            if (p.length >= 3) verSancionado(p)
+        })
+        document.getElementById("formSancionar").addEventListener("submit", async function (e) {
+            e.preventDefault()
+            const msg = document.getElementById("msgSancionar")
+            const datos = {
+                pseudonimo: document.getElementById("sancionPseudonimo").value.trim(),
+                categoria: document.getElementById("sancionCategoria").value,
+                motivo: document.getElementById("sancionMotivo").value.trim(),
+                total: document.getElementById("sancionTotal").checked,
+                dispositivo: document.getElementById("sancionDispositivo").checked
+            }
+            if (datos.pseudonimo.length < 3 || datos.motivo.length < 3) { msg.textContent = "Completá el seudónimo y el motivo."; return }
+            if (!confirm("¿Aplicar un strike a " + datos.pseudonimo + "? Le llega una notificación y un mail con el motivo.")) return
+            const btn = this.querySelector("button[type=submit]")
+            btn.disabled = true
+            msg.textContent = "Aplicando..."
+            const r = await llamarModeracion("sancionar", datos)
+            btn.disabled = false
+            if (!r.ok) { msg.textContent = r.error === "moderacion_bloqueada" ? "" : r.error === "no_encontrado" ? "No hay ninguna cuenta con ese seudónimo." : mensajeError(r.error); return }
+            msg.textContent = ""
+            this.reset()
+            avisarResultadoSancion(r)
+            verSancionado(datos.pseudonimo)
+        })
+        document.getElementById("panelSanciones").addEventListener("click", async function (e) {
+            const ver = e.target.closest("[data-ver-sancionado]")
+            if (ver) { document.getElementById("buscarSancionado").value = ver.dataset.verSancionado; verSancionado(ver.dataset.verSancionado); return }
+            const sancionarA = e.target.closest("[data-sancionar-a]")
+            if (sancionarA) {
+                const det = document.getElementById("detallesSancionar")
+                det.open = true
+                document.getElementById("sancionPseudonimo").value = sancionarA.dataset.sancionarA
+                det.scrollIntoView({ block: "start", behavior: "smooth" })
+                document.getElementById("sancionMotivo").focus()
+                return
+            }
+            const btn = e.target.closest("[data-accion-sancion]")
+            if (!btn) return
+            const id = btn.closest(".sancionItem").dataset.id
+            const accion = btn.dataset.accionSancion
+            const textos = {
+                levantar: ["Levantar suspensión", "La persona vuelve a publicar ya. El strike sigue contando (para que no cuente, usá «Anular»).", "Motivo (lo ve la persona)", "Levantar"],
+                anular: ["Anular sanción", "Se levanta y deja de contar como strike: usalo si fue un error.", "Motivo (lo ve la persona)", "Anular"],
+                aceptar: ["Aceptar descargo", "Se levanta la suspensión. El strike sigue contando.", "Respuesta (la ve la persona)", "Aceptar y levantar"],
+                rechazar: ["Rechazar descargo", "La suspensión sigue. La persona no puede mandar otro descargo.", "Respuesta (la ve la persona)", "Rechazar"]
+            }[accion]
+            const texto = await pedirTexto({ titulo: textos[0], texto: textos[1], etiqueta: textos[2], boton: textos[3], peligro: accion === "rechazar", max: 400, obligatorio: true })
+            if (texto === null) return
+            btn.disabled = true
+            const r = accion === "aceptar" || accion === "rechazar"
+                ? await llamarModeracion("resolverApelacion", { id: id, decision: accion, respuesta: texto })
+                : await llamarModeracion("levantarSancion", { id: id, motivo: texto, anular: accion === "anular" })
+            btn.disabled = false
+            if (!r.ok) { if (r.error !== "moderacion_bloqueada") alert(mensajeError(r.error)); return }
+            mostrarAviso({ levantar: "Suspensión levantada.", anular: "Sanción anulada.", aceptar: "Descargo aceptado: suspensión levantada.", rechazar: "Descargo rechazado." }[accion] + " Se le avisó a la persona.")
+            const buscado = document.getElementById("resumenSancionado").innerHTML ? document.getElementById("buscarSancionado").value.trim() : ""
+            if (buscado) verSancionado(buscado); else cargarSanciones()
+        })
+
         // Mails del equipo: preferencia propia (no pide la llave).
         document.getElementById("chkMailsModeracion").addEventListener("change", async function () {
             const chk = this
@@ -6228,6 +6606,7 @@ async function cargarBootstrap() {
         // Mismo ref_id que usa la API para el aviso agrupado de aportes a moderadores.
         const REF_AVISO_APORTES = "00000000-0000-4000-8000-00000a9047e5"
         const REF_AVISO_REPORTES = "00000000-0000-4000-8000-00000e9047e5"
+        const REF_AVISO_APELACIONES = "00000000-0000-4000-8000-0000a9e1ac10"
         let sitiosMaterial = []
 
         // Sitio admitido de un enlace (el dominio más largo que coincide), o null.
@@ -6409,13 +6788,14 @@ async function cargarBootstrap() {
             }
             const quitar = e.target.closest("[data-quitar]")
             if (quitar) {
-                const motivo = await pedirMotivoModeracion("este material del catálogo (deja de verse para todos)")
-                if (motivo === null) return
-                const r = await llamarModeracion("quitarMaterial", { id: quitar.dataset.quitar, motivo })
+                const pedido = await pedirMotivoModeracion("este material del catálogo (deja de verse para todos)")
+                if (!pedido) return
+                const r = await llamarModeracion("quitarMaterial", { id: quitar.dataset.quitar, motivo: pedido.motivo, sancion: pedido.sancion || undefined })
                 if (!r.ok) { alert(mensajeError(r.error)); return }
                 materialesUI = materialesUI.filter(function (m) { return m.id !== quitar.dataset.quitar })
                 renderizarMateriales()
                 mostrarAviso("Material quitado del catálogo.")
+                avisarResultadoSancion(r)
             }
         })
 
@@ -6771,7 +7151,7 @@ async function cargarBootstrap() {
         // Enlaces de los mails al equipo: /?vista=moderacion&pestania=<denuncias|aportes|reportes>. Se abre después del
         // bootstrap (hace falta saber el rol); si no sos del equipo, no pasa nada.
         let moderacionPedida = parametrosIniciales.get("vista") === "moderacion"
-            ? (["denuncias", "aportes", "reportes", "papelera"].indexOf(parametrosIniciales.get("pestania")) >= 0 ? parametrosIniciales.get("pestania") : "denuncias")
+            ? (["denuncias", "aportes", "reportes", "sanciones", "papelera"].indexOf(parametrosIniciales.get("pestania")) >= 0 ? parametrosIniciales.get("pestania") : "denuncias")
             : null
         if (moderacionPedida) { try { history.replaceState(history.state, "", location.pathname + location.hash) } catch (_) {} }
         let vistaInicialPedida = parametrosIniciales.get("vista") === "juegos" ? "juegos" : null
@@ -6924,11 +7304,12 @@ async function cargarBootstrap() {
             }
             const quitarCV = e.target.closest("[data-quitar-clasificado]")
             if (quitarCV) {
-                const motivo = await pedirMotivoModeracion("este aviso de Compra venta")
-                if (motivo === null) return
-                const r = await llamarModeracion("quitarClasificado", { id: quitarCV.dataset.quitarClasificado, motivo })
+                const pedido = await pedirMotivoModeracion("este aviso de Compra venta")
+                if (!pedido) return
+                const r = await llamarModeracion("quitarClasificado", { id: quitarCV.dataset.quitarClasificado, motivo: pedido.motivo, sancion: pedido.sancion || undefined })
                 if (!r.ok) { if (r.error !== "moderacion_bloqueada") alert(mensajeError(r.error)); return }
                 mostrarAviso("Aviso quitado. Se le avisó a quien lo publicó.")
+                avisarResultadoSancion(r)
                 cargarClasificados(true)
                 return
             }
@@ -6953,7 +7334,7 @@ async function cargarBootstrap() {
                 const accion = gestionar.dataset.gestionarClasificado
                 if (accion === "borrar" && !confirm("¿Borrar este aviso? No se puede deshacer.")) return
                 gestionar.disabled = true
-                const r = await llamar("gestionarClasificado", { id: gestionar.dataset.id, accion: accion })
+                const r = await llamar("gestionarClasificado", { id: gestionar.dataset.id, operacion: accion })
                 gestionar.disabled = false
                 if (!r.ok) { mostrarAviso(mensajeError(r.error)); return }
                 mostrarAviso(accion === "borrar" ? "Aviso borrado." : accion === "pausar" ? "Aviso pausado." : accion === "renovar" ? "Aviso renovado por 60 días." : "Aviso publicado de nuevo.")

@@ -1828,6 +1828,28 @@
         .avisoBaja { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin:10px 0 14px; padding:12px 16px; border:1px solid var(--red-600); border-left-width:4px; border-radius:var(--r-md); background:var(--surface); font-size:.92rem; }
         .avisoBaja[hidden] { display:none; }
         .avisoBaja button { width:auto; margin:0; }
+        /* ---------- SANCIONES ---------- */
+        .avisoSancion { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin:10px 0 14px; padding:12px 16px; border:1px solid var(--red-600); border-left-width:4px; border-radius:var(--r-md); background:var(--red-soft); color:var(--ink); font-size:.92rem; }
+        .avisoSancion[hidden] { display:none; }
+        .avisoSancion button { width:auto; margin:0; }
+        .modalSancionCaja { max-width: 520px; }
+        .modalSancionCaja textarea { width: 100%; resize: vertical; }
+        .chipsSancion { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 10px; }
+        .chipSancion { font-size:.76rem; font-weight:600; padding:3px 10px; border-radius:var(--r-pill); background:var(--surface-sunken); color:var(--ink-soft); }
+        .chipSancionTotal { background:var(--red-soft); color:var(--red-700); }
+        .plazoSancion { margin:0 0 12px; font-size:.95rem; }
+        .motivoSancion, .apelacionEstado, .resumenSancionado { margin:0 0 12px; padding:10px 14px; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); }
+        .motivoSancion p, .apelacionEstado p { margin:6px 0 0; overflow-wrap:anywhere; }
+        .alcanceSancion { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin:0 0 12px; font-size:.88rem; }
+        .alcanceSancion ul { margin:6px 0 0; padding-left:18px; color:var(--ink-soft); }
+        .resumenSancionado { display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:.9rem; }
+        .resumenSancionado button { margin-left:auto; }
+        .sancionModalTexto { margin:12px 0 0; padding:10px 12px; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface-sunken); }
+        .checkSancion { display:flex !important; align-items:flex-start; gap:8px; margin:8px 0; font-weight:500; cursor:pointer; }
+        .checkSancion input { width:auto; margin:3px 0 0; flex:none; }
+        .detallesSancionar { margin:12px 0; padding:10px 14px; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); }
+        .detallesSancionar summary { cursor:pointer; font-weight:600; color:var(--red-600); }
+        #errorApelacion { color: var(--red-600); font-size: .88rem; margin: 6px 0; }
         .seccionBajaCuenta { margin-top:28px; padding-top:8px; border-top:1px solid var(--line); }
         .detallesBaja summary { cursor:pointer; color:var(--red-600); font-weight:600; margin:6px 0; }
         .detallesBaja input { max-width:220px; }

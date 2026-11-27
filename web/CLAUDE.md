@@ -52,6 +52,7 @@ Para ubicarte: `Grep "// ====" web/js/app.js` y leé solo el rango que necesitá
   piden un motivo opcional (`pedirMotivoModeracion`) que le llega al autor como notificación `moderacion`.
 - **Guía de moderación**: pestaña «Guía» del panel (`.guiaMod` en `index.html`, texto estático). Se ve aunque la moderación esté
   bloqueada; la parte `.guiaAdmin` solo para admins; botones `[data-ir-mod]` llevan a cada pestaña. Si cambia cómo se modera, actualizala.
+- **Sanciones** (sección SANCIONES, ADR 0006): `#avisoSancion` con cuenta regresiva y `#modalSancion` (motivo, alcance, descargo único). La sanción llega en bootstrap, `miSancion` y el error `suspendido`. `pedirMotivoModeracion` devuelve `{ motivo, sancion }` (opción «Aplicar un strike»). Pestaña Moderación → Sanciones. Cada pedido lleva `dispositivoId` (`medmar:dispositivo`, se conserva al cerrar sesión).
 - **Encuestas del foro** (sección ENCUESTAS DEL FORO): `crearHilo` con `encuesta`, `verHilo` devuelve `hilo.encuesta`, `votarEncuesta`.
 - `index.html` tiene una **Content Security Policy** en `<meta>`: un CDN, embed o dominio nuevo hay que sumarlo ahí o no carga.
 - **Cloudflare** está delante de GitHub Pages (proxy): agrega HSTS, `X-Frame-Options`, `frame-ancestors`, `nosniff` y
