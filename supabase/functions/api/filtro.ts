@@ -25,8 +25,14 @@ const MOTIVOS: Record<string, [string, string]> = {
 
 const LEET: Record<string, string> = { '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '@': 'a', '$': 's' }
 
+// Letras cirílicas y griegas que se ven iguales a las latinas («ѕоѕ» → «sos»): un truco común para esquivar filtros.
+const HOMOGLIFOS: Record<string, string> = { 'а': 'a', 'е': 'e', 'о': 'o', 'р': 'p', 'с': 'c', 'у': 'y', 'х': 'x', 'і': 'i', 'ѕ': 's', 'ј': 'j', 'к': 'k', 'м': 'm', 'т': 't', 'в': 'b', 'н': 'h', 'ο': 'o', 'α': 'a', 'ε': 'e', 'ι': 'i', 'κ': 'k', 'ν': 'v', 'ρ': 'p', 'τ': 't', 'υ': 'u' }
+
 export function normalizar(texto: string) {
-  let t = String(texto || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+  // Caracteres invisibles (espacio de ancho cero, guion blando) se borran: «pelo[espacio invisible]tudo» → «pelotudo».
+  let t = String(texto || '').replace(/[\u00ad\u200b-\u200f\u2060\ufeff]/g, '')
+  t = t.replace(/[\u0370-\u03ff\u0400-\u04ff]/g, (ch) => HOMOGLIFOS[ch.toLowerCase()] ?? ch)
+  t = t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
   t = t.replace(/[013457@$]/g, (c) => LEET[c] || c)
   t = t.replace(/[^a-z]+/g, ' ')
   // «p u t o» → «puto» (tres o más letras sueltas seguidas).
@@ -43,12 +49,14 @@ function estirar(palabra: string) {
 const alt = (lista: string[]) => '(?:' + lista.map((w) => w.split(' ').map(estirar).join(' ')).join('|') + ')'
 const formas = (raiz: string, finales: string[]) => finales.map((f) => raiz + f)
 const OA = ['o', 'a', 'os', 'as']
+// Insultos: también con lenguaje inclusivo («pelotudx», «forre») para que no sirva de atajo.
+const OAX = [...OA, 'x', 'xs', 'e', 'es']
 
 // Insultos fuertes: cuentan solo cuando van dirigidos a alguien (ver MARCOS).
 const INSULTOS = [
-  ...formas('pelotud', OA), ...formas('forr', OA), ...formas('estupid', OA), ...formas('mogolic', OA), ...formas('mongolic', OA),
-  ...formas('malparid', OA), ...formas('conchud', OA), ...formas('pajer', OA), ...formas('cornud', OA), ...formas('put', OA),
-  ...formas('trol', OA), ...formas('retrasad', OA), ...formas('subnormal', ['', 'es']),
+  ...formas('pelotud', OAX), ...formas('forr', OAX), ...formas('estupid', OAX), ...formas('mogolic', OAX), ...formas('mongolic', OAX),
+  ...formas('malparid', OAX), ...formas('conchud', OAX), ...formas('pajer', OAX), ...formas('cornud', OAX), ...formas('put', OAX),
+  ...formas('trol', OAX), ...formas('retrasad', OAX), ...formas('subnormal', ['', 'es']),
   'imbecil', 'imbeciles', 'idiota', 'idiotas', 'sorete', 'soretes', 'lacra', 'lacras', 'maricon', 'maricones', 'chupapija', 'chupapijas',
   'hijo de puta', 'hija de puta', 'hijos de puta', 'hijas de puta', 'mierda', 'basura', 'escoria', 'cancer',
 ]
@@ -60,7 +68,7 @@ const GRUPOS = [
   ...formas('discapacitad', OA), ...formas('autist', ['a', 'as']), ...formas('mogolic', OA),
   'bolita', 'bolitas', 'paragua', 'paraguas', 'trava', 'travas', 'travesti', 'travestis', 'gay', 'gays', 'lesbiana', 'lesbianas', 'zurdo', 'zurdos',
 ]
-const INTENS = '(?:(?:re|muy|flor de|tremend[oa]|terrible|alt[oa]|grandisim[oa]|pedazo de) )*'
+const INTENS = '(?:(?:re|recontra|contra|muy|flor de|tremend[oa]|terrible|alt[oa]|grandisim[oa]|pedazo de) )*'
 
 type Regla = { id: string, tipo: keyof typeof MOTIVOS, re: RegExp }
 const r = (id: string, tipo: keyof typeof MOTIVOS, fuente: string): Regla => ({ id, tipo, re: new RegExp(fuente) })
@@ -76,6 +84,8 @@ const REGLAS: Regla[] = [
   r('pedazo_de', 'agresion', ' pedazo de ' + INS_TODOS + ' '),
   r('insulto_de_mierda', 'agresion', ' ' + INS_TERCERA + ' de mierda '),
   r('callate_insulto', 'agresion', ' (?:callate|calla|cerra el orto|cerra la boca) ' + INS_TODOS + ' '),
+  // «sos un boludo de mierda»: palabras suaves solas se permiten, pero con «sos … de mierda» van dirigidas.
+  r('sos_algo_de_mierda', 'agresion', ' (?:sos|eres|vos sos) (?:un |una |unos |unas )?' + INTENS + '[a-z]+ de mierda '),
   r('cerra_el_orto', 'agresion', ' cerra (?:el|tu) ' + alt(['orto', 'culo', 'ojete']) + ' '),
   r('hdp', 'agresion', ' ' + alt(['hijo de puta', 'hija de puta', 'hijos de puta', 'hijas de puta', 'hijo de re puta', 'hdp', 'hijodeputa']) + ' '),
   r('hijo_de_mil_puta', 'agresion', ' hij+[oa]+s? de (?:re )?(?:mil )?put+a+s? '),
@@ -89,7 +99,9 @@ const REGLAS: Regla[] = [
   r('insulto_discriminatorio', 'discriminacion', ' ' + alt(['maricon', 'maricones', 'sudaca', 'sudacas', 'negrata', 'negratas', 'sidoso', 'sidosos', 'retrasado mental', 'retrasados mentales']) + ' '),
   r('mueran_grupo', 'discriminacion', ' (?:mueran|maten a|exterminen a) (?:los |las |todos los |todas las )' + alt(GRUPOS) + ' '),
   // ---- Amenazas e incitación a hacerse daño ----
-  r('te_voy_a', 'amenaza', ' te (?:voy|vamos) a (?:' + alt(['matar', 'cagar a palos', 'cagar a trompadas', 'cagar a pinas', 'cagar a tiros', 'romper la cara', 'romper el orto', 'reventar', 'apunalar', 'pegar un tiro', 'prender fuego']) + ') '),
+  r('te_voy_a', 'amenaza', ' te (?:re )?(?:voy|vamos) a (?:re )?(?:' + alt(['matar', 'cagar a palos', 'cagar a trompadas', 'cagar a pinas', 'cagar a tiros', 'romper la cara', 'romper el orto', 'reventar', 'apunalar', 'pegar un tiro', 'prender fuego']) + ') '),
+  r('te_busco', 'amenaza', ' te (?:re )?(?:voy|vamos) a (?:ir a )?(?:buscar|esperar) (?:a la salida|a tu casa|afuera) '),
+  r('se_donde_vivis', 'amenaza', ' (?:se|sabemos|ya se|ya sabemos) (?:donde|adonde) (?:vivis|vives|vive tu familia|cursas|estudias) '),
   r('te_cago_a', 'amenaza', ' te (?:cago|cagamos) a ' + alt(['palos', 'trompadas', 'pinas', 'tiros', 'patadas']) + ' '),
   r('ojala_te', 'amenaza', ' ojala (?:te|que te) ' + alt(['mueras', 'muras', 'maten', 'violen', 'agarre cancer', 'de cancer', 'pise un tren', 'pise un auto', 'pise un colectivo']) + ' '),
   r('autolesion', 'amenaza', ' ' + alt(['matate', 'suicidate', 'ahorcate', 'cortate las venas', 'tirate de un puente', 'tirate de un edificio', 'tirate abajo de un tren', 'andate a matar', 'deberias matarte', 'deberias suicidarte', 'mejor matate']) + ' '),

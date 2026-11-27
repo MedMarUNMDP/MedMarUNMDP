@@ -116,7 +116,7 @@ async function publicarClasificado(admin: SupabaseClient, user: any, body: any) 
   const operationId = uuidOrEmpty(body.operationId)
   if (!operationId) return json({ ok: false, error: 'datos_invalidos' })
   const { count, error: cErr } = await admin.from('clasificados').select('id', { count: 'exact', head: true })
-    .eq('autor_id', user.id).eq('activo', true).gt('expira_at', new Date().toISOString())
+    .eq('autor_id', user.id).eq('activo', true).is('eliminado_at', null).gt('expira_at', new Date().toISOString())
   if (cErr) throw cErr
   if (Number(count || 0) >= MAX_CLASIFICADOS_ACTIVOS) return json({ ok: false, error: 'clasificados_maximo' })
   const filtro = revisarTexto(titulo + '\n' + descripcion + '\n' + (precio || '') + '\n' + (contacto || ''))
@@ -149,7 +149,7 @@ async function gestionarClasificado(admin: SupabaseClient, user: any, body: any)
   const vigente = new Date(c.expira_at) > ahora
   if (accion === 'activar' || accion === 'renovar') {
     const { count, error: cErr } = await admin.from('clasificados').select('id', { count: 'exact', head: true })
-      .eq('autor_id', user.id).eq('activo', true).gt('expira_at', ahora.toISOString()).neq('id', id)
+      .eq('autor_id', user.id).eq('activo', true).is('eliminado_at', null).gt('expira_at', ahora.toISOString()).neq('id', id)
     if (cErr) throw cErr
     if (Number(count || 0) >= MAX_CLASIFICADOS_ACTIVOS) return json({ ok: false, error: 'clasificados_maximo' })
   }
@@ -2943,11 +2943,13 @@ async function handle(req: Request, body: any) {
       const tipo=String(body.tipo||''),id=uuidOrEmpty(body.id),motivo=String(body.motivo||'').trim().slice(0,300)
       if(!['hilo','respuesta','material','clasificado'].includes(tipo)||!id)return json({ok:false,error:'datos_invalidos'})
       const tabla=tipo==='hilo'?'hilos':tipo==='respuesta'?'respuestas':tipo==='material'?'materiales':'clasificados'
-      let consultaPub=admin.from(tabla).select('id').eq('id',id).is('eliminado_at',null)
+      let consultaPub=admin.from(tabla).select(tipo==='material'?'id':'id,autor_id').eq('id',id).is('eliminado_at',null)
       if(tipo==='material'||tipo==='clasificado')consultaPub=consultaPub.eq('activo',true)
       const {data:pub,error:pubError}=await consultaPub.maybeSingle()
       if(pubError)throw pubError
       if(!pub)return json({ok:false,error:'no_encontrado'})
+      // Lo propio se borra, no se denuncia (no llena la cola de moderación con autodenuncias).
+      if((pub as any).autor_id&&String((pub as any).autor_id)===String(user.id))return json({ok:false,error:'denuncia_propia'})
       // Una sola denuncia pendiente por persona y publicación: evita inflar la cola de moderación.
       const {data:previa}=await admin.from('denuncias').select('id').eq('id_publicacion',id).eq('denunciante_id',user.id).eq('estado','pendiente').limit(1)
       if((previa||[]).length)return json({ok:true,repetida:true})

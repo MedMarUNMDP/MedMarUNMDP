@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-30-revision"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-30-pruebas"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -997,6 +997,7 @@ const hilosPendientesConfirmacion = new Map()
                 material_duplicado: "Ese enlace ya está publicado en Material.",
                 datos_material_incompletos: "Para publicarlo falta la materia o el tipo de material.",
                 ya_resuelto: "Ese aporte ya fue revisado.",
+                denuncia_propia: "No podés denunciar algo tuyo. Si querés sacarlo, borralo.",
                 ya_resuelta: "Esa denuncia ya fue resuelta por otra persona del equipo. Actualizá la lista.",
                 sancion_simultanea: "Otra persona del equipo acaba de sancionar a esta cuenta. Revisá sus sanciones antes de aplicar otra.",
                 perfil_ya_completo: "Tu perfil ya estaba completo. Para cambiar tu seudónimo o tu foto, entrá a Perfil.",
@@ -1870,9 +1871,10 @@ async function cargarBootstrap() {
         function soloHttps(url) { return String(url || "").toLowerCase().indexOf("https://") === 0 ? String(url) : "#" }
 
         // Error de la API para la persona: el mensaje claro; el detalle técnico solo en la consola.
+        // Aviso propio (no alert del navegador: bloquea la página y en Android deja el teclado abierto).
         function alertaError(r) {
             if (r && r.detalle) console.warn("[MedMar]", r.error, r.detalle)
-            alert(mensajeError(r && r.error))
+            mostrarAviso(mensajeError(r && r.error))
         }
 
         // Aviso fijo mientras el dispositivo no tiene conexión (los pedidos fallarían igual).
@@ -3590,7 +3592,8 @@ async function cargarBootstrap() {
                 return "<span class='etiquetaChip'>" + escapeHtml(t) + "</span>"
             }).join("")
 
-            let acciones = "<button type='button' class='accionDenunciar' data-tipo='hilo' data-id='" + escapeAttr(h.id) + "'>Denunciar</button>"
+            // Lo propio no se denuncia (se borra): el botón solo aparece en publicaciones de otras personas.
+            let acciones = h.esPropio ? "" : "<button type='button' class='accionDenunciar' data-tipo='hilo' data-id='" + escapeAttr(h.id) + "'>Denunciar</button>"
 
             if (h.esPropio || puedeModerar()) {
                 acciones += "<button type='button' class='accionBorrar' data-tipo='hilo' data-id='" + escapeAttr(h.id) + "'>" + (h.esPropio ? "Borrar" : "Quitar (moderación)") + "</button>"
@@ -3698,7 +3701,7 @@ async function cargarBootstrap() {
 
             const padre = esAnidada ? respuestasUI.find(function (x) { return String(x.id) === String(r.parentId) }) : null
 
-            let acciones = r._optimista ? "" : "<button type='button' class='accionDenunciar' data-tipo='respuesta' data-id='" + escapeAttr(r.id) + "'>Denunciar</button>"
+            let acciones = (r._optimista || r.esPropio) ? "" : "<button type='button' class='accionDenunciar' data-tipo='respuesta' data-id='" + escapeAttr(r.id) + "'>Denunciar</button>"
             if (!r._optimista && (r.esPropio || puedeModerar())) {
                 acciones += "<button type='button' class='accionBorrar' data-tipo='respuesta' data-id='" + escapeAttr(r.id) + "'>" + (r.esPropio ? "Borrar" : "Quitar (moderación)") + "</button>"
             }
@@ -3794,6 +3797,7 @@ async function cargarBootstrap() {
             inputRespuesta.value = ""
             inputRespuesta.style.height = ""
             msgRespuesta.innerText = ""
+            msgRespuesta.classList.remove("msgError")
 
             const r = await llamarMutacionResiliente("crearRespuesta", {
                 hiloId: hiloIdEnviado,
@@ -3886,11 +3890,15 @@ async function cargarBootstrap() {
                 borrarSesionLocal()
                 mostrarLogin()
             } else if (r.error === "no_encontrado") {
-                alert("Ese hilo ya no existe.")
+                mostrarAviso("Ese hilo ya no existe.")
                 mostrarListaHilos()
                 cargarHilos(true)
             } else {
-                alertaError(r)
+                // El error queda junto al campo (con el texto devuelto para corregirlo), sin ventana del navegador.
+                if (r.detalle) console.warn("[MedMar] crearRespuesta:", r.detalle)
+                msgRespuesta.innerText = mensajeError(r.error)
+                msgRespuesta.classList.add("msgError")
+                inputRespuesta.focus()
             }
 
         })

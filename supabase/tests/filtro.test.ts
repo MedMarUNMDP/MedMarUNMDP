@@ -84,3 +84,10 @@ test('seudónimos: apellidos y nombres reales que contienen una raíz ofensiva',
   for (const s of ['Verga', 'VergaLoca', 'la verga 22', 'v3rga', 'Nazi', 'ElNazi', 'nazis_unidos', 'NeoNazi', 'Hitler88', 'Pelotudo99'])
     assert.ok(revisarSeudonimo(s), s)
 })
+
+test('trucos para esquivar el filtro: invisibles, cirílicas, inclusivo e intensificadores', () => {
+  for (const t of ['sos un pelo​tudo', 'sos un pelo­tudo', 'ѕоѕ un pelotudo', 'sos un pelotudx', 'sos un forre',
+    'sos re contra pelotudo', 'sos recontra forro', 'sos un boludo de mierda']) retira(t, 'acoso')
+  for (const t of ['te re voy a matar', 'te voy a re matar', 'te voy a buscar a la salida', 'sé dónde vivís', 'ya sabemos dónde cursás']) retira(t, 'acoso')
+  for (const t of ['me voy a matar estudiando', 'te voy a pasar el resumen', 'sé dónde queda el aula', 'sos un capo', 'la cursada es una mierda']) permite(t)
+})
