@@ -52,11 +52,11 @@ desde la consola de medmar.com.ar con el cliente de la página. Sin escrituras r
 | Prueba | Resultado |
 |---|---|
 | Leer directo 19 tablas (sanciones, apelaciones, dispositivos, llaves, registro, reportes, cola de mails, denuncias, perfiles, puntajes…) | Denegado (42501). Solo se leen notificaciones, conversaciones y solicitudes **propias** (RLS) |
-| Insertar una sanción o un hilo, darse , borrar notificaciones | Denegado (42501) |
-| Acciones de moderación nuevas y viejas sin llave o con token de moderación inventado | ;  →  |
-| Apelar una sanción ajena, leer/escribir un chat ajeno, editar/borrar solicitudes y avisos ajenos |  /  |
+| Insertar una sanción o un hilo, darse `is_admin`, borrar notificaciones | Denegado (42501) |
+| Acciones de moderación nuevas y viejas sin llave o con token de moderación inventado | `llave_requerida`; `asignarModerador` → `no_autorizado` |
+| Apelar una sanción ajena, leer/escribir un chat ajeno, editar/borrar solicitudes y avisos ajenos | `no_encontrado` / `chat_no_encontrado` |
 | Marcar como leídas notificaciones ajenas | Responde ok pero filtra por la cuenta de la sesión: no toca nada ajeno |
-| RPC internas (, , , , …) | Denegado;  e  no están expuestas por la API REST |
-| Una cuenta sin sanción pasa el control de sanciones y llega a la validación normal | Sí ( vacío → ) |
+| RPC internas (`purgar_papelera`, `claim_notification_batch`, `cleanup_expired_data`, `recordatorios_diarios`, …) | Denegado; `finalize_exchange` e `is_conversation_participant` no están expuestas por la API REST |
+| Una cuenta sin sanción pasa el control de sanciones y llega a la validación normal | Sí (`crearHilo` vacío → `datos_invalidos`) |
 
 La recomendación 3 queda acotada: esas funciones no se pueden llamar desde el navegador.
