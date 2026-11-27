@@ -164,6 +164,7 @@ async function gestionarClasificado(admin: SupabaseClient, user: any, body: any)
 
 const RATE_LIMITS: Record<string, [number, number]> = {
   aceptarTerminos: [10, 600],
+  marcarBienvenida: [10, 600],
   autorizarDispositivo: [10, 3600],
   guardarGrupoModeracion: [30, 3600],
   borrarGrupoModeracion: [30, 3600],
@@ -1685,7 +1686,7 @@ async function bootstrap(user: User, client: SupabaseClient, admin: SupabaseClie
   if (rl) return rl
 
   const [{ data: profile, error: profileError }, { data: solicitudes, error: reqError }, { data: exchanges, error: exError }] = await Promise.all([
-    admin.from('profiles').select('id,pseudonimo,foto_url,is_moderator,is_admin,profile_completed,terminos_version,baja_programada_para,moderador_vence_at,mails_moderacion').eq('id', user.id).single(),
+    admin.from('profiles').select('id,pseudonimo,foto_url,is_moderator,is_admin,profile_completed,terminos_version,bienvenida_version,baja_programada_para,moderador_vence_at,mails_moderacion').eq('id', user.id).single(),
     client.from('solicitudes').select('id,materia,tengo,busco,status,created_at,updated_at,completed_at,exchange_id').eq('user_id', user.id).eq('status', 'activa').order('created_at', { ascending: false }),
     client.from('intercambio_participantes').select('intercambio_id,solicitud_id,user_id,tengo,busco,intercambios!inner(id,materia,created_at,completed_at)').eq('user_id', user.id),
   ])
@@ -1737,7 +1738,7 @@ async function bootstrap(user: User, client: SupabaseClient, admin: SupabaseClie
 
   return json({ ok: true, data: {
     perfil: { pseudonimo: profile.pseudonimo, foto: profile.foto_url || '', profileCompleted: profile.profile_completed !== false,
-      terminosVersion: profile.terminos_version || '', terminosVigente: TERMINOS_VERSION, bajaProgramada: profile.baja_programada_para || null },
+      terminosVersion: profile.terminos_version || '', terminosVigente: TERMINOS_VERSION, bienvenidaVersion: profile.bienvenida_version || '', bajaProgramada: profile.baja_programada_para || null },
     solicitudes: solicitudes || [],
     intercambios: [...exchangeMap.values()],
     rol: { esModerador: !!profile.is_moderator && moderadorVigente(profile.moderador_vence_at), esAdmin: !!profile.is_admin,
@@ -2756,6 +2757,15 @@ async function handle(req: Request, body: any) {
       const {error}=await admin.from('profiles').update({terminos_version:TERMINOS_VERSION,terminos_aceptados_at:new Date().toISOString()}).eq('id',user.id)
       if(error)throw error
       return json({ok:true,version:TERMINOS_VERSION})
+    }
+    case 'marcarBienvenida': {
+      // La bienvenida (web/ayuda/bienvenida.md) ya se vio: no se vuelve a mostrar hasta que cambie BIENVENIDA_VERSION en la web.
+      const rl=await rateLimit(admin,action,user.id);if(rl)return rl
+      const version=String(body.version||'')
+      if(!/^d{4}-d{2}-d{2}(.d{1,3})?$/.test(version))return json({ok:false,error:'version_invalida'})
+      const {error}=await admin.from('profiles').update({bienvenida_version:version}).eq('id',user.id)
+      if(error)throw error
+      return json({ok:true})
     }
     case 'solicitarBaja': {
       // Baja con arrepentimiento: la cuenta sigue funcionando y se borra sola a los 30 días (maintenance), salvo que se cancele.

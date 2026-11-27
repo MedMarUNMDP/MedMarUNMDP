@@ -1,5 +1,5 @@
 
-        const FRONTEND_VERSION = "MedMar-frontend-2026-11-29-etiquetas"
+        const FRONTEND_VERSION = "MedMar-frontend-2026-11-29-ayuda"
         // Configurá estos dos valores desde Supabase Dashboard > Project Settings > API.
         // La publishable key SÍ puede ir en el frontend. La secret key NUNCA debe aparecer acá.
         // La seguridad de las tablas descansa en RLS + las políticas del schema.sql.
@@ -187,6 +187,7 @@ const hilosPendientesConfirmacion = new Map()
         const vistaClasificados = document.getElementById("vistaClasificados")
         const vistaConfiguracion = document.getElementById("vistaConfiguracion")
         const vistaReportes = document.getElementById("vistaReportes")
+        const vistaAyuda = document.getElementById("vistaAyuda")
         const vistaModeracion = document.getElementById("vistaModeracion")
         const btnIrModeracion = document.getElementById("btnIrModeracion")
         const btnVolverForoDesdeModeracion = document.getElementById("btnVolverForoDesdeModeracion")
@@ -1313,7 +1314,7 @@ async function cargarBootstrap() {
                 if (local && local.data) {
                     aplicarBootstrap(local.data)
                     if (local.data.perfil && local.data.perfil.profileCompleted === false) mostrarSetupPerfil(local.data.perfil)
-                    if (local.ts && Date.now() - Number(local.ts) < FRESCURA_USUARIO_CLIENTE_MS) return
+                    if (local.ts && Date.now() - Number(local.ts) < FRESCURA_USUARIO_CLIENTE_MS) { verificarBienvenida(local.data.perfil); return }
                 }
             } catch (_) {}
 
@@ -1330,6 +1331,7 @@ async function cargarBootstrap() {
             try { localStorage.setItem(cacheKey, JSON.stringify({ data: r.data, ts: Date.now() })) } catch (_) {}
             if (r.data && r.data.perfil && r.data.perfil.profileCompleted === false) mostrarSetupPerfil(r.data.perfil)
             if (r.data && r.data.perfil) verificarTerminos(r.data.perfil)
+            if (r.data && r.data.perfil) verificarBienvenida(r.data.perfil)
         }
 
         // ==================== TÉRMINOS Y PRIVACIDAD ====================
@@ -3876,6 +3878,7 @@ async function cargarBootstrap() {
             vistaClasificados.style.display = nombre === "clasificados" ? "block" : "none"
             vistaConfiguracion.style.display = nombre === "configuracion" ? "block" : "none"
             vistaReportes.style.display = nombre === "reportes" ? "block" : "none"
+            vistaAyuda.style.display = nombre === "ayuda" ? "block" : "none"
             vistaModeracion.style.display = nombre === "moderacion" ? "block" : "none"
 
             btnIrInicio.style.display = nombre === "inicio" ? "none" : "flex"
@@ -3909,6 +3912,7 @@ async function cargarBootstrap() {
                     nombre === "clasificados" ? vistaClasificados :
                     nombre === "configuracion" ? vistaConfiguracion :
                     nombre === "reportes" ? vistaReportes :
+                    nombre === "ayuda" ? vistaAyuda :
                     vistaModeracion
 
                 if (destino) destino.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -7535,10 +7539,11 @@ async function cargarBootstrap() {
             ? (["denuncias", "aportes", "reportes", "sanciones", "papelera"].indexOf(parametrosIniciales.get("pestania")) >= 0 ? parametrosIniciales.get("pestania") : "denuncias")
             : null
         if (moderacionPedida) { try { history.replaceState(history.state, "", location.pathname + location.hash) } catch (_) {} }
-        let vistaInicialPedida = parametrosIniciales.get("vista") === "juegos" ? "juegos" : null
+        // /?vista=ayuda: enlace del pie y de los mails.
+        let vistaInicialPedida = ["juegos", "ayuda"].indexOf(parametrosIniciales.get("vista")) >= 0 ? parametrosIniciales.get("vista") : null
         if (vistaInicialPedida) {
             const modoPedido = parametrosIniciales.get("ranking")
-            if (rankingModo && modoPedido && Array.from(rankingModo.options).some(function (o) { return o.value === modoPedido })) rankingModo.value = modoPedido
+            if (vistaInicialPedida === "juegos" && rankingModo && modoPedido && Array.from(rankingModo.options).some(function (o) { return o.value === modoPedido })) rankingModo.value = modoPedido
             try { history.replaceState(history.state, "", location.pathname + location.hash) } catch (_) {}
         }
 
@@ -7722,6 +7727,128 @@ async function cargarBootstrap() {
                 cargarClasificados(true)
             }
         })
+
+        // ==================== BIENVENIDA Y AYUDA ====================
+        // Bienvenida: el texto vive en /ayuda/bienvenida.md, que también es la publicación de bienvenida del foro
+        // (cómo mantenerlas al día: docs/contenido-ayuda.md). Se muestra como novedad una vez por cuenta, después del
+        // perfil y los términos, y de nuevo cuando sube BIENVENIDA_VERSION. La API guarda la versión vista (marcarBienvenida).
+        // Ayuda: vista estática #vistaAyuda (index.html) con buscador; [data-ayuda-ir] lleva a una vista y
+        // [data-ayuda-tema] abre un tema.
+        const BIENVENIDA_VERSION = "2026-11-29"
+        const modalBienvenida = document.getElementById("modalBienvenida")
+        let textoBienvenida = null
+        let bienvenidaPendiente = false
+        let bienvenidaMostradaA = null
+        let reintentosBienvenida = 0
+
+        function claveBienvenidaLocal() { return "medmar:bienvenidaVista:" + (sesion ? sesion.userId : "") }
+
+        async function cargarTextoBienvenida() {
+            if (textoBienvenida) return textoBienvenida
+            const r = await fetch("/ayuda/bienvenida.md?v=" + BIENVENIDA_VERSION, { cache: "no-cache" })
+            if (!r.ok) throw new Error("bienvenida " + r.status)
+            const md = (await r.text()).replace(/\r\n?/g, "\n")
+            const m = md.match(/^#\s+(.+)\n/)
+            let cuerpo = m ? md.slice(m[0].length) : md
+            // Lo que va después del último separador («comentala acá abajo») es solo para la publicación del foro.
+            const corte = cuerpo.lastIndexOf("\n---\n")
+            if (corte > 0) cuerpo = cuerpo.slice(0, corte)
+            textoBienvenida = { titulo: m ? m[1].trim() : "Bienvenida a MedMar", cuerpo: cuerpo.trim() }
+            return textoBienvenida
+        }
+
+        async function abrirBienvenida(comoNovedad) {
+            let b
+            try { b = await cargarTextoBienvenida() } catch (_) {
+                if (!comoNovedad) mostrarAviso("No se pudo cargar la bienvenida. Probá de nuevo en un rato.")
+                return false
+            }
+            document.getElementById("tituloModalBienvenida").textContent = b.titulo
+            // renderizarFormato escapa el texto antes de insertar sus propias etiquetas.
+            document.getElementById("cuerpoModalBienvenida").innerHTML = renderizarFormato(b.cuerpo)
+            modalBienvenida.querySelector(".etiquetaNovedad").hidden = !comoNovedad
+            abrirModal(modalBienvenida)
+            // abrirModal enfoca el primer botón, que está al final: se vuelve arriba para leer desde el principio.
+            requestAnimationFrame(function () { requestAnimationFrame(function () {
+                document.getElementById("cuerpoModalBienvenida").focus({ preventScroll: true })
+                modalBienvenida.querySelector(".modalCaja").scrollTop = 0
+            }) })
+            return true
+        }
+
+        // Llamada con el perfil del bootstrap (de la caché o de la API).
+        function verificarBienvenida(perfil) {
+            // Sin bienvenidaVersion la respuesta es de una API anterior (o de la caché vieja): no se muestra nada.
+            if (!sesion || !perfil || !("bienvenidaVersion" in perfil)) return
+            if (perfil.bienvenidaVersion === BIENVENIDA_VERSION || bienvenidaMostradaA === sesion.userId) return
+            try { if (localStorage.getItem(claveBienvenidaLocal()) === BIENVENIDA_VERSION) return } catch (_) {}
+            bienvenidaPendiente = true
+            reintentosBienvenida = 0
+            intentarMostrarBienvenida()
+        }
+
+        // Espera a que no haya otra ventana abierta (completar el perfil, términos, sanción…).
+        async function intentarMostrarBienvenida() {
+            if (!bienvenidaPendiente || !sesion) return
+            if (document.querySelector(".modalFondo.abierto") || app.style.display === "none") {
+                if (++reintentosBienvenida < 120) setTimeout(intentarMostrarBienvenida, 1500)
+                return
+            }
+            bienvenidaPendiente = false
+            const usuario = sesion.userId
+            if (!(await abrirBienvenida(true))) return
+            bienvenidaMostradaA = usuario
+            // Se da por vista al mostrarla: así no vuelve a aparecer aunque se cierre con Escape o tocando afuera.
+            try { localStorage.setItem(claveBienvenidaLocal(), BIENVENIDA_VERSION) } catch (_) {}
+            const r = await llamar("marcarBienvenida", { version: BIENVENIDA_VERSION })
+            if (r.ok) actualizarPerfilEnCache({ bienvenidaVersion: BIENVENIDA_VERSION })
+        }
+
+        document.addEventListener("click", function (e) {
+            if (e.target.closest("[data-cerrar-bienvenida]")) { cerrarModal(modalBienvenida); return }
+            if (e.target.closest("[data-bienvenida-ayuda]")) { cerrarModal(modalBienvenida); mostrarSeccion("ayuda", "up"); return }
+            if (e.target.closest("[data-abrir-bienvenida]")) { abrirBienvenida(false); return }
+            const ir = e.target.closest("[data-ayuda-ir]")
+            if (ir) { mostrarSeccion(ir.dataset.ayudaIr, "up"); return }
+            const tema = e.target.closest("[data-ayuda-tema]")
+            if (tema) abrirTemaAyuda(tema.dataset.ayudaTema)
+        })
+
+        const inputBuscarAyuda = document.getElementById("inputBuscarAyuda")
+        const sinResultadosAyuda = document.getElementById("sinResultadosAyuda")
+
+        function textoSinTildes(s) { return String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "") }
+
+        function abrirTemaAyuda(id) {
+            const det = document.getElementById(id)
+            if (!det || !vistaAyuda.contains(det)) return
+            if (inputBuscarAyuda.value) { inputBuscarAyuda.value = ""; filtrarAyuda() }
+            det.open = true
+            det.scrollIntoView({ behavior: "smooth", block: "start" })
+            const resumen = det.querySelector("summary")
+            if (resumen) resumen.focus({ preventScroll: true })
+        }
+
+        // Muestra los temas que contienen todas las palabras buscadas (en el título, el texto o data-palabras).
+        function filtrarAyuda() {
+            const palabras = textoSinTildes(inputBuscarAyuda.value).split(/\s+/).filter(Boolean)
+            let visibles = 0
+            vistaAyuda.querySelectorAll("details.guiaTema").forEach(function (det) {
+                if (!det.dataset.texto) det.dataset.texto = textoSinTildes(det.textContent + " " + (det.dataset.palabras || ""))
+                const coincide = palabras.every(function (p) { return det.dataset.texto.indexOf(p) >= 0 })
+                det.hidden = !coincide
+                if (palabras.length) det.open = coincide && palabras.join("").length >= 3
+                if (coincide) visibles++
+            })
+            // Un título de grupo se oculta si no le queda ningún tema visible.
+            vistaAyuda.querySelectorAll(".grupoAyuda").forEach(function (h) {
+                let n = h.nextElementSibling, alguno = false
+                while (n && !n.classList.contains("grupoAyuda")) { if (n.matches("details.guiaTema") && !n.hidden) alguno = true; n = n.nextElementSibling }
+                h.hidden = !alguno
+            })
+            sinResultadosAyuda.hidden = visibles > 0
+        }
+        inputBuscarAyuda.addEventListener("input", filtrarAyuda)
 
         // ==================== INICIO ====================
 

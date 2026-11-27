@@ -51,6 +51,9 @@ No hay `npm install`: el repo no tiene dependencias. Phaser y supabase-js se car
   sin que el usuario lo pida explícitamente. El MCP de Supabase está en modo solo lectura.
 - **No pushear** sin pedido explícito: un push a `main` publica el sitio.
 - Antes de dar algo por terminado: `npm run check` y `npm test`; si tocaste UI, probala en el navegador.
+- **Bienvenida y Ayuda al día**: si un cambio modifica algo que ven o hacen las personas (herramienta nueva, plazos, botones,
+  sanciones, contacto), actualizá en el mismo commit la Ayuda (`#vistaAyuda`) y, si corresponde, la bienvenida
+  (`web/ayuda/bienvenida.md` + publicación del foro). Cómo: [docs/contenido-ayuda.md](docs/contenido-ayuda.md).
 
 ## Flujo de trabajo recomendado
 

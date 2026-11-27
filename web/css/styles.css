@@ -1828,6 +1828,25 @@
         .avisoBaja { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin:10px 0 14px; padding:12px 16px; border:1px solid var(--red-600); border-left-width:4px; border-radius:var(--r-md); background:var(--surface); font-size:.92rem; }
         .avisoBaja[hidden] { display:none; }
         .avisoBaja button { width:auto; margin:0; }
+        /* ---------- AYUDA Y BIENVENIDA ---------- */
+        .buscadorAyuda { display:flex; align-items:center; gap:8px; margin:12px 0 10px; padding:0 12px; border:1px solid var(--line); border-radius:var(--r-pill); background:var(--surface); }
+        .buscadorAyuda:focus-within { border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-soft); }
+        .buscadorAyuda svg { width:18px; height:18px; flex:none; fill:none; stroke:var(--ink-soft); stroke-width:2; stroke-linecap:round; }
+        .buscadorAyuda input { flex:1; min-width:0; margin:0 !important; padding:10px 0 !important; border:0 !important; box-shadow:none !important; outline:none; background:transparent; font-size:.95rem; }
+        .accesosAyuda { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin:6px 0 4px; }
+        @media (min-width: 720px) { .accesosAyuda { grid-template-columns:repeat(4, minmax(0, 1fr)); } }
+        .accesoAyuda { width:auto; margin:0; display:flex; align-items:center; gap:8px; padding:12px; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); color:var(--ink); font-size:.88rem; font-weight:600; text-align:left; cursor:pointer; }
+        .accesoAyuda:hover { border-color:var(--brand); background:var(--brand-soft); }
+        #vistaAyuda .grupoAyuda { margin-top:22px; }
+        #vistaAyuda .guiaTema { scroll-margin-top:80px; }
+        #vistaAyuda .guiaTema > summary { font-size:.95rem; }
+        #vistaAyuda .guiaTema a { color:var(--link); }
+        #sinResultadosAyuda .guiaIr { padding:0; font-size:inherit; }
+        .tarjetaAyudaPerfil { margin:0 0 18px; width:100%; }
+        .modalBienvenidaCaja { max-width:620px; }
+        .etiquetaNovedad { display:inline-block; margin:0 0 8px; padding:2px 10px; border-radius:var(--r-pill); background:var(--gold-soft); color:var(--ink); font-size:.75rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+        .etiquetaNovedad[hidden] { display:none; }
+
         /* ---------- ETIQUETAS: SELECTOR Y BUSCADOR ---------- */
         .selectorEtiquetas, .buscadorEtiqueta { position: relative; }
         .selectorEtiquetas > label { display:block; font-weight:600; font-size:.9rem; margin:0 0 6px; }
